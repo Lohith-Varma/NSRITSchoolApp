@@ -1,11 +1,12 @@
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Button, Card, List, Text} from 'react-native-paper';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
   SectionHeader,
   StatusBadge,
 } from '../../components';
@@ -29,22 +30,36 @@ const BranchDetailsScreen = ({navigation, route}) => {
 
   const classes = useMemo(() => data?.sections || [], [data]);
 
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
+  );
+
   if (loading && !data) {
     return <LoadingScreen message="Loading branch details" />;
   }
 
   if (!data?.branch) {
     return (
-      <ScreenContainer>
+      <ERPLayout
+        navigation={navigation}
+        activeRoute="Branches"
+        title="Branch Details"
+        breadcrumbs={['Dashboard', 'Branch Management', 'Details']}>
         <EmptyState title="Branch unavailable" message={error || 'Unable to load this branch.'} />
-      </ScreenContainer>
+      </ERPLayout>
     );
   }
 
   const {branch, summary} = data;
 
   return (
-    <ScreenContainer>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Branches"
+      title="Branch Details"
+      breadcrumbs={['Dashboard', 'Branch Management', 'Details']}>
       <Header
         title={branch.name}
         subtitle={`${branch.branchCode} - ${branch.city || 'City not set'}`}
@@ -141,7 +156,7 @@ const BranchDetailsScreen = ({navigation, route}) => {
         onDismiss={() => setShowPrincipalModal(false)}
         onAssigned={refresh}
       />
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

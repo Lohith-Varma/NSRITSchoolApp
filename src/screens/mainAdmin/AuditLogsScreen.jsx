@@ -1,13 +1,17 @@
 import React from 'react';
-import {EmptyState, ScreenContainer} from '../../components';
+import {EmptyState, ERPLayout} from '../../components';
 
-const AuditLogsScreen = () => (
-  <ScreenContainer>
+const AuditLogsScreen = ({navigation}) => (
+  <ERPLayout
+    navigation={navigation}
+    activeRoute="Profile"
+    title="Audit Logs"
+    breadcrumbs={['Dashboard', 'System', 'Audit Logs']}>
     <EmptyState
       title="Audit logs are out of scope"
       message="This phase intentionally avoids audit systems."
     />
-  </ScreenContainer>
+  </ERPLayout>
 );
 
 export default AuditLogsScreen;

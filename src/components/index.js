@@ -23,3 +23,4 @@ export {default as CustomInput} from './forms/CustomInput';
 export {default as SkeletonLoader} from './feedback/SkeletonLoader';
 export {default as StudentListItem} from './lists/StudentListItem';
 export {default as LoadingScreen} from './loaders/LoadingScreen';
+export {default as ERPLayout} from './erp/ERPLayout';

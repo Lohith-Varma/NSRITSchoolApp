@@ -5,7 +5,6 @@ import {
   signOut,
   PhoneAuthProvider,
   getIdToken,
-  connectAuthEmulator,
 } from '@react-native-firebase/auth';
 import {STORAGE_KEYS} from '../../config/constants';
 import {authConfig} from '../../config/env';
@@ -85,14 +84,6 @@ export const authService = {
       const fullPhoneNumber = buildFullPhoneNumber({countryCode, phoneNumber});
       const authInstance = getAuth();
 
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        try {
-          connectAuthEmulator(authInstance, 'http://10.0.2.2:9099', {disableWarnings: true});
-        } catch (e) {
-          // Already connected
-        }
-      }
-
       authInstance.settings.appVerificationDisabledForTesting =
         authConfig.disablePhoneAuthAppVerificationForTesting;
       
@@ -116,14 +107,6 @@ export const authService = {
       console.log('authService: verifyOtp called with payload:', {verificationId, otp, countryCode, phoneNumber});
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       const authInstance = getAuth();
-
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        try {
-          connectAuthEmulator(authInstance, 'http://10.0.2.2:9099', {disableWarnings: true});
-        } catch (e) {
-          // Already connected
-        }
-      }
 
       console.log('authService: signing in with credential...');
       const result = await signInWithCredential(authInstance, credential);

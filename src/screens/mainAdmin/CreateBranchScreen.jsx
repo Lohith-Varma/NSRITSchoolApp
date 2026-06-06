@@ -5,7 +5,7 @@ import {
   CustomButton,
   CustomInput,
   Header,
-  ScreenContainer,
+  ERPLayout,
 } from '../../components';
 import {createBranch} from '../../store/slices/branchSlice';
 
@@ -35,7 +35,11 @@ const CreateBranchScreen = ({navigation}) => {
   };
 
   return (
-    <ScreenContainer>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Branches"
+      title="Create Branch"
+      breadcrumbs={['Dashboard', 'Branch Management', 'Create']}>
       <Header
         title="Create Branch"
         subtitle="Add a campus and make it available for branch admins"
@@ -93,7 +97,7 @@ const CreateBranchScreen = ({navigation}) => {
         onPress={handleSubmit}>
         Save Branch
       </CustomButton>
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

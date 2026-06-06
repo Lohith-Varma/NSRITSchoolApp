@@ -1,11 +1,12 @@
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
 import {Card, Text} from 'react-native-paper';
+import {useFocusEffect} from '@react-navigation/native';
 import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
   SearchBar,
   StatusBadge,
 } from '../../components';
@@ -18,6 +19,12 @@ const BranchListScreen = ({navigation}) => {
   const {data, loading, refreshing, error, refresh} = useAsyncResource(
     options => mainAdminService.getAllBranches(options),
     [],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh]),
   );
 
   const branches = useMemo(() => {
@@ -37,7 +44,11 @@ const BranchListScreen = ({navigation}) => {
   }
 
   return (
-    <ScreenContainer scroll={false}>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Branches"
+      title="Branch List"
+      breadcrumbs={['Dashboard', 'Branch Management', 'Branches']}>
       <View style={styles.content}>
         <Header
           title="Branches"
@@ -89,7 +100,7 @@ const BranchListScreen = ({navigation}) => {
           </Card>
         )}
       />
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

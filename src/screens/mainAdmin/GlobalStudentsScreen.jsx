@@ -5,7 +5,7 @@ import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
   SearchBar,
   StatusBadge,
 } from '../../components';
@@ -47,12 +47,30 @@ const GlobalStudentsScreen = ({navigation}) => {
   );
 
   useEffect(() => {
-    setPage(1);
-  }, [filters, searchText]);
+    load();
+  }, [load]);
+
+  const onNext = () => {
+    if (result?.hasNextPage) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      load({nextPage});
+    }
+  };
+
+  const onPrevious = () => {
+    if (page > 1) {
+      const nextPage = page - 1;
+      setPage(nextPage);
+      load({nextPage});
+    }
+  };
+
+  const refresh = () => load({forceRefresh: true});
 
   useEffect(() => {
-    load({nextPage: page});
-  }, [load, page]);
+    setPage(1);
+  }, [filters, searchText]);
 
   const branches = useMemo(
     () => [...new Map((result?.items || []).map(item => [item.branchId, item.branchName])).entries()],
@@ -64,7 +82,11 @@ const GlobalStudentsScreen = ({navigation}) => {
   }
 
   return (
-    <ScreenContainer scroll={false}>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Users"
+      title="Global Students"
+      breadcrumbs={['Dashboard', 'Users & Students', 'Global Students']}>
       <View style={styles.content}>
         <Header title="Global Students" subtitle="Students across every branch" />
         <SearchBar
@@ -175,7 +197,7 @@ const GlobalStudentsScreen = ({navigation}) => {
           </Card>
         )}
       />
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

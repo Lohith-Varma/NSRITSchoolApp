@@ -495,11 +495,18 @@ const mainAdminService = {
       totalClasses: asArray(data.academicClasses).filter(item => item.isActive !== false).length,
       totalTeachers: teachers.length,
       totalStudents: asArray(data.students).length,
+      totalUsers: asArray(data.users).length,
+      revenue: asArray(data.studentFees).reduce(
+        (sum, item) => sum + Number(item.paidAmount || 0),
+        0,
+      ),
       todayAttendance: attendancePercent(todayAttendance),
       pendingFees: asArray(data.studentFees).reduce(
         (sum, item) => sum + Number(item.remainingAmount || 0),
         0,
       ),
+      rawBranches: asArray(data.branches),
+      rawUsers: asArray(data.users),
     };
   },
 };

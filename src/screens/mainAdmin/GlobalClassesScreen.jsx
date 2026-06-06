@@ -5,7 +5,7 @@ import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
   SearchBar,
 } from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
@@ -47,7 +47,11 @@ const GlobalClassesScreen = ({navigation}) => {
   }
 
   return (
-    <ScreenContainer scroll={false}>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Dashboard"
+      title="Global Classes"
+      breadcrumbs={['Dashboard', 'Academics', 'Global Classes']}>
       <View style={styles.content}>
         <Header title="Global Classes" subtitle="Classes across all active branches" />
         <SearchBar value={searchText} onChangeText={setSearchText} placeholder="Search classes" />
@@ -94,7 +98,7 @@ const GlobalClassesScreen = ({navigation}) => {
           </Card>
         )}
       />
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

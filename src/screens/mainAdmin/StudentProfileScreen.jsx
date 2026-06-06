@@ -5,7 +5,7 @@ import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
   SectionHeader,
   StatusBadge,
 } from '../../components';
@@ -59,16 +59,22 @@ const StudentProfileScreen = ({route}) => {
 
   if (!data?.student) {
     return (
-      <ScreenContainer>
+      <ERPLayout
+        activeRoute="Users"
+        title="Student Profile"
+        breadcrumbs={['Dashboard', 'Users & Students', 'Profile']}>
         <EmptyState title="Student unavailable" message={error || 'Unable to load profile.'} />
-      </ScreenContainer>
+      </ERPLayout>
     );
   }
 
   const {student, summary, payments, fees} = data;
 
   return (
-    <ScreenContainer>
+    <ERPLayout
+      activeRoute="Users"
+      title="Student Profile"
+      breadcrumbs={['Dashboard', 'Users & Students', 'Profile']}>
       <Header title={student.fullName} subtitle={student.studentId} />
 
       <Card mode="outlined" style={styles.card}>
@@ -171,7 +177,7 @@ const StudentProfileScreen = ({route}) => {
         <DocumentLink label="Transfer Certificate" url={student.transferCertificateUrl} />
         <DocumentLink label="Birth Certificate" url={student.birthCertificateUrl} />
       </ProfileCard>
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

@@ -5,7 +5,7 @@ import {
   EmptyState,
   Header,
   LoadingScreen,
-  ScreenContainer,
+  ERPLayout,
 } from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
@@ -31,16 +31,24 @@ const ClassDetailsScreen = ({navigation, route}) => {
 
   if (!data?.section) {
     return (
-      <ScreenContainer>
+      <ERPLayout
+        navigation={navigation}
+        activeRoute="Dashboard"
+        title="Class Details"
+        breadcrumbs={['Dashboard', 'Academics', 'Details']}>
         <EmptyState title="Class unavailable" message={error || 'Unable to load class details.'} />
-      </ScreenContainer>
+      </ERPLayout>
     );
   }
 
   const classInfo = data.classInfo;
 
   return (
-    <ScreenContainer scroll={false}>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Dashboard"
+      title="Class Details"
+      breadcrumbs={['Dashboard', 'Academics', 'Details']}>
       <View style={styles.content}>
         <Header
           title={`${classInfo?.className || 'Class'} ${classInfo?.section || ''}`}
@@ -105,7 +113,7 @@ const ClassDetailsScreen = ({navigation, route}) => {
           );
         }}
       />
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

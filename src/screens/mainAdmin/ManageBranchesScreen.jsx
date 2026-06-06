@@ -4,7 +4,7 @@ import {
   DashboardCard,
   EmptyState,
   Header,
-  ScreenContainer,
+  ERPLayout,
 } from '../../components';
 import {fetchBranches} from '../../store/slices/branchSlice';
 
@@ -17,7 +17,11 @@ const ManageBranchesScreen = ({navigation}) => {
   }, [dispatch]);
 
   return (
-    <ScreenContainer>
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Branches"
+      title="Manage Branches"
+      breadcrumbs={['Dashboard', 'Branch Management', 'Manage']}>
       <Header
         title="Branches"
         subtitle="All registered school branches"
@@ -39,7 +43,7 @@ const ManageBranchesScreen = ({navigation}) => {
           message="Create the first branch to start onboarding users."
         />
       )}
-    </ScreenContainer>
+    </ERPLayout>
   );
 };
 

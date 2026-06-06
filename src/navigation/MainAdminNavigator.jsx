@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import DashboardScreen from '../screens/mainAdmin/DashboardScreen';
 import BranchDetailsScreen from '../screens/mainAdmin/BranchDetailsScreen';
 import BranchListScreen from '../screens/mainAdmin/BranchListScreen';
+import ManageBranchesScreen from '../screens/mainAdmin/ManageBranchesScreen';
 import ClassDetailsScreen from '../screens/mainAdmin/ClassDetailsScreen';
 import CreateBranchScreen from '../screens/mainAdmin/CreateBranchScreen';
 import EditBranchScreen from '../screens/mainAdmin/EditBranchScreen';
@@ -12,12 +13,15 @@ import GlobalStudentsScreen from '../screens/mainAdmin/GlobalStudentsScreen';
 import ManageUsersScreen from '../screens/mainAdmin/ManageUsersScreen';
 import SettingsScreen from '../screens/mainAdmin/SettingsScreen';
 import StudentProfileScreen from '../screens/mainAdmin/StudentProfileScreen';
+import RevenueOverviewScreen from '../screens/mainAdmin/RevenueOverviewScreen';
+import AuditLogsScreen from '../screens/mainAdmin/AuditLogsScreen';
+import ProfileScreen from '../screens/mainAdmin/ProfileScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
 
 const MainAdminNavigator = () => (
-  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen
       name="MainAdminDashboard"
       component={DashboardScreen}
@@ -70,7 +74,7 @@ const MainAdminNavigator = () => (
     />
     <Stack.Screen
       name="ManageBranches"
-      component={BranchListScreen}
+      component={ManageBranchesScreen}
       options={{title: 'Branches'}}
     />
     <Stack.Screen
@@ -82,6 +86,21 @@ const MainAdminNavigator = () => (
       name="Settings"
       component={SettingsScreen}
       options={{title: 'Settings'}}
+    />
+    <Stack.Screen
+      name="RevenueOverview"
+      component={RevenueOverviewScreen}
+      options={{title: 'Revenue'}}
+    />
+    <Stack.Screen
+      name="AuditLogs"
+      component={AuditLogsScreen}
+      options={{title: 'Audit Logs'}}
+    />
+    <Stack.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{title: 'Profile'}}
     />
     {renderFeeStackScreens(Stack, {reports: true})}
   </Stack.Navigator>
