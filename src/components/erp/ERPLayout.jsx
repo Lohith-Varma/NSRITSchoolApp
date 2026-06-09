@@ -25,7 +25,7 @@ const getSidebarSectionsForRole = (role) => {
       {
         title: 'Dashboard',
         icon: 'view-dashboard',
-        items: [{label: 'Overview', route: 'MainAdminDashboard', icon: 'view-dashboard'}],
+        items: [{label: 'Overview', route: 'MainAdminTabs', icon: 'view-dashboard'}],
       },
       {
         title: 'Branch Management',
@@ -74,7 +74,7 @@ const getSidebarSectionsForRole = (role) => {
         {
           title: 'Dashboard',
           icon: 'view-dashboard',
-          items: [{label: 'Overview', route: 'BranchAdminDashboard', icon: 'view-dashboard'}],
+          items: [{label: 'Overview', route: 'BranchAdminTabs', icon: 'view-dashboard'}],
         },
         {
           title: 'Students & Faculty',
@@ -119,7 +119,7 @@ const getSidebarSectionsForRole = (role) => {
         {
           title: 'Dashboard',
           icon: 'view-dashboard',
-          items: [{label: 'Overview', route: 'CoordinatorDashboard', icon: 'view-dashboard'}],
+          items: [{label: 'Overview', route: 'CoordinatorTabs', icon: 'view-dashboard'}],
         },
         {
           title: 'Roster & Allocation',
@@ -174,7 +174,7 @@ const getSidebarSectionsForRole = (role) => {
         {
           title: 'Dashboard',
           icon: 'view-dashboard',
-          items: [{label: 'Overview', route: 'AccountantDashboard', icon: 'view-dashboard'}],
+          items: [{label: 'Overview', route: 'AccountantTabs', icon: 'view-dashboard'}],
         },
         {
           title: 'Finance Desk',
@@ -193,13 +193,13 @@ const getSidebarSectionsForRole = (role) => {
 
 const getDashboardRouteForRole = (role) => {
   switch (role) {
-    case USER_ROLES.MAIN_ADMIN: return 'MainAdminDashboard';
-    case USER_ROLES.BRANCH_ADMIN: return 'BranchAdminDashboard';
+    case USER_ROLES.MAIN_ADMIN: return 'MainAdminTabs';
+    case USER_ROLES.BRANCH_ADMIN: return 'BranchAdminTabs';
     case USER_ROLES.PRINCIPAL: return 'PrincipalDashboard';
-    case USER_ROLES.COORDINATOR: return 'CoordinatorDashboard';
+    case USER_ROLES.COORDINATOR: return 'CoordinatorTabs';
     case USER_ROLES.TEACHER: return 'TeacherDashboard';
     case USER_ROLES.PARENT: return 'ParentDashboard';
-    case USER_ROLES.ACCOUNTANT: return 'AccountantDashboard';
+    case USER_ROLES.ACCOUNTANT: return 'AccountantTabs';
     default: return 'Login';
   }
 };
@@ -404,80 +404,7 @@ export const ERPLayout = ({
           {/* Inner Content */}
           <View style={styles.innerContent}>{children}</View>
 
-          {/* Mobile Bottom Navigation Bar (Dashboard, Branches, Users, Analytics, Profile) */}
-          {!isLargeScreen && (
-            <View style={styles.bottomTabBar}>
-              <Pressable
-                onPress={() => handleNavigate(getDashboardRouteForRole(role))}
-                style={styles.tabBtn}>
-                {activeRoute === 'Dashboard' && <View style={styles.tabActiveIndicator} />}
-                <MaterialCommunityIcons
-                  name="view-dashboard"
-                  size={28}
-                  color={activeRoute === 'Dashboard' ? colors.primary : colors.textSoft}
-                />
-                <Text style={[styles.tabLabel, activeRoute === 'Dashboard' && styles.tabLabelActive]}>
-                  Dashboard
-                </Text>
-              </Pressable>
 
-              <Pressable
-                onPress={() => handleNavigate('BranchList')}
-                style={styles.tabBtn}>
-                {activeRoute === 'Branches' && <View style={styles.tabActiveIndicator} />}
-                <MaterialCommunityIcons
-                  name="office-building"
-                  size={28}
-                  color={activeRoute === 'Branches' ? colors.primary : colors.textSoft}
-                />
-                <Text style={[styles.tabLabel, activeRoute === 'Branches' && styles.tabLabelActive]}>
-                  Branches
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => handleNavigate('ManageUsers')}
-                style={styles.tabBtn}>
-                {activeRoute === 'Users' && <View style={styles.tabActiveIndicator} />}
-                <MaterialCommunityIcons
-                  name="account-group"
-                  size={28}
-                  color={activeRoute === 'Users' ? colors.primary : colors.textSoft}
-                />
-                <Text style={[styles.tabLabel, activeRoute === 'Users' && styles.tabLabelActive]}>
-                  Users
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => handleNavigate('GlobalAnalytics')}
-                style={styles.tabBtn}>
-                {activeRoute === 'Reports' && <View style={styles.tabActiveIndicator} />}
-                <MaterialCommunityIcons
-                  name="chart-line"
-                  size={28}
-                  color={activeRoute === 'Reports' ? colors.primary : colors.textSoft}
-                />
-                <Text style={[styles.tabLabel, activeRoute === 'Reports' && styles.tabLabelActive]}>
-                  Analytics
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => handleNavigate('Profile')}
-                style={styles.tabBtn}>
-                {activeRoute === 'Profile' && <View style={styles.tabActiveIndicator} />}
-                <MaterialCommunityIcons
-                  name="account-circle"
-                  size={28}
-                  color={activeRoute === 'Profile' ? colors.primary : colors.textSoft}
-                />
-                <Text style={[styles.tabLabel, activeRoute === 'Profile' && styles.tabLabelActive]}>
-                  Profile
-                </Text>
-              </Pressable>
-            </View>
-          )}
         </View>
       </View>
     </SafeAreaView>
@@ -721,43 +648,7 @@ const styles = StyleSheet.create({
   innerContent: {
     flex: 1,
   },
-  bottomTabBar: {
-    height: 48,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingBottom: Platform.OS === 'ios' ? 8 : 0,
-    ...shadows.medium,
-  },
-  tabBtn: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xs,
-    position: 'relative',
-  },
-  tabActiveIndicator: {
-    position: 'absolute',
-    top: 0,
-    width: '40%',
-    height: 3,
-    backgroundColor: colors.primary,
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 3,
-  },
-  tabLabel: {
-    fontSize: 10,
-    color: colors.textSoft,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  tabLabelActive: {
-    color: colors.primary,
-    fontWeight: '800',
-  },
+
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',

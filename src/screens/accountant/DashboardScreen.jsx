@@ -8,13 +8,11 @@ import {
   Pressable,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {colors, spacing, radius, shadows} from '../../theme';
+import {colors, spacing, radius, shadows, typography} from '../../theme';
 import {fetchFees} from '../../store/slices/feeSlice';
 import useFeeAccess from '../../hooks/useFeeAccess';
 
-// Components
-import DashboardHeader from './components/DashboardHeader';
-import SideDrawer from './components/SideDrawer';
+import {ERPLayout} from '../../components';
 import SummaryCard from './components/SummaryCard';
 import QuickActionGrid from './components/QuickActionGrid';
 import RecentTransactionList from './components/RecentTransactionList';
@@ -54,7 +52,6 @@ const DashboardScreen = ({navigation}) => {
   const {user} = useSelector(state => state.auth);
   const {records, payments, summary, loading} = useSelector(state => state.fees);
 
-  const [drawerVisible, setDrawerVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -117,19 +114,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
-      <DashboardHeader
-        title="NSRIT Connect"
-        subtitle="Accounting & Finance Portal"
-        userName={user?.fullName || 'Jane Doe, CPA'}
-        userAvatar={user?.avatar || undefined}
-        onMenuPress={() => {
-          console.log('onMenuPress clicked! Setting drawerVisible to true');
-          setDrawerVisible(true);
-        }}
-        onNotificationPress={() => navigation.navigate('CreateNotification')}
-      />
-
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Dashboard"
+      title="Finance Desk"
+      breadcrumbs={['Dashboard', 'Finance Desk']}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -223,19 +212,7 @@ const DashboardScreen = ({navigation}) => {
           />
         </View>
       </ScrollView>
-
-      {/* Side Drawer Navigation Menu */}
-      <SideDrawer
-        visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
-        navigation={navigation}
-        activeRoute="AccountantDashboard"
-        userName={user?.fullName || 'Jane Doe, CPA'}
-        userRole={user?.role === 'ACCOUNTANT' ? 'Lead Finance Officer' : 'CPA / Auditor'}
-        userId={`ACC-${user?.id?.substring(0, 6) || '88412'}`}
-        userAvatar={user?.avatar || undefined}
-      />
-    </View>
+    </ERPLayout>
   );
 };
 
@@ -268,14 +245,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.text,
+    ...typography.sectionTitle,
+    color: colors.primary,
   },
   viewAllText: {
-    fontSize: 13,
+    ...typography.bodyBold,
     color: colors.secondary,
-    fontWeight: '700',
   },
   tasksContainer: {
     paddingHorizontal: spacing.lg,
@@ -311,15 +286,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   taskName: {
-    fontSize: 14,
-    fontWeight: '700',
+    ...typography.bodyBold,
     color: colors.text,
   },
   taskMeta: {
-    fontSize: 11,
-    color: colors.textMuted,
+    ...typography.caption,
+    color: colors.textSoft,
     marginTop: 2,
-    fontWeight: '500',
   },
   taskRight: {
     flexDirection: 'row',

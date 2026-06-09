@@ -5,6 +5,7 @@ import {
   Text,
   FlatList,
   Pressable,
+  ScrollView,
 } from 'react-native';
 import {IconButton, Searchbar} from 'react-native-paper';
 import {colors, spacing, radius, shadows} from '../../theme';

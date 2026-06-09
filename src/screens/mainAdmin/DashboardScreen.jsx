@@ -1,12 +1,12 @@
 import React, {useCallback, useMemo} from 'react';
-import {StyleSheet, View, Pressable, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, ScrollView, Pressable, TouchableOpacity} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {Text, Card} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ERPLayout, LoadingScreen} from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
-import {colors, radius, shadows, spacing} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 const DashboardScreen = ({navigation}) => {
@@ -116,10 +116,16 @@ const DashboardScreen = ({navigation}) => {
       activeRoute="Dashboard"
       title="Admin Console"
       breadcrumbs={['Dashboard', 'Console']}>
-      <View style={styles.container}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         
+        {/* Welcome Banner */}
+        <View style={styles.welcomeBanner}>
+          <Text style={styles.welcomeTitle}>Welcome back, Admin</Text>
+          <Text style={styles.welcomeSubtitle}>Here's what's happening across your schools today.</Text>
+        </View>
+
         {/* Section 1: Today's Overview (KPIs) */}
-        <Text style={styles.sectionHeader}>Today's Overview</Text>
+        <Text style={styles.sectionHeader}>Overview</Text>
         <View style={styles.kpiGrid}>
           {kpiData.map(kpi => (
             <Card key={kpi.title} mode="outlined" style={styles.kpiCard}>
@@ -193,24 +199,34 @@ const DashboardScreen = ({navigation}) => {
             <Text style={styles.quickTitle}>Settings</Text>
           </Pressable>
         </View>
-
-      </View>
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
     </ERPLayout>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: spacing.md,
     flex: 1,
+    padding: spacing.md,
+  },
+  welcomeBanner: {
+    marginBottom: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  welcomeTitle: {
+    ...typography.title,
+    color: colors.primary,
+    marginBottom: spacing.xxs,
+  },
+  welcomeSubtitle: {
+    ...typography.body,
+    color: colors.textSoft,
   },
   sectionHeader: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
+    ...typography.sectionTitle,
+    color: colors.primary,
+    marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
   sectionHeaderRow: {
@@ -218,134 +234,141 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.md,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   viewAllText: {
-    fontSize: 11,
-    color: colors.primary,
-    fontWeight: '700',
+    ...typography.bodyBold,
+    color: colors.secondary,
   },
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.md,
     justifyContent: 'space-between',
   },
   kpiCard: {
     backgroundColor: colors.white,
     borderColor: colors.border,
-    borderWidth: 0,
-    borderRadius: radius.md,
-    flexBasis: '48%',
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    flexBasis: '47%',
     flexGrow: 1,
-    ...shadows.card,
+    ...shadows.medium,
   },
   kpiContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.sm,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: spacing.md,
     gap: spacing.sm,
   },
   kpiIconWrapper: {
-    width: 64,
-    height: 64,
+    width: 48,
+    height: 48,
     borderRadius: radius.md,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: spacing.xs,
   },
   kpiMeta: {
     flex: 1,
     justifyContent: 'center',
   },
   kpiValue: {
-    fontSize: 16,
-    fontWeight: '800',
+    ...typography.metric,
     color: colors.text,
+    marginBottom: 4,
   },
   kpiTitle: {
-    fontSize: 10,
-    fontWeight: '600',
+    ...typography.caption,
     color: colors.textMuted,
-    marginTop: 1,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 
   panelCard: {
     backgroundColor: colors.white,
     borderColor: colors.border,
-    borderWidth: 0,
-    borderRadius: radius.md,
-    ...shadows.soft,
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    ...shadows.medium,
   },
   activityList: {
-    paddingVertical: spacing.xxs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    minHeight: 56,
+    minHeight: 64,
   },
   lastActivityItem: {
     borderBottomWidth: 0,
+    minHeight: 48,
   },
   timelineLineContainer: {
     alignItems: 'center',
-    width: 32,
+    width: 40,
   },
   timelineLine: {
     width: 2,
     flex: 1,
     backgroundColor: colors.border,
     marginVertical: 4,
-    minHeight: 16,
+    minHeight: 24,
   },
   activityIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
   activityTextWrapper: {
     flex: 1,
+    paddingTop: 8,
   },
   activityTextTitle: {
-    fontSize: 11,
-    fontWeight: '700',
+    ...typography.bodyBold,
     color: colors.text,
+    marginBottom: 4,
   },
   activityTextTime: {
-    fontSize: 9,
-    color: colors.textMuted,
-    marginTop: 2,
-    fontWeight: '500',
+    ...typography.caption,
+    color: colors.textSoft,
   },
   quickGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   quickCard: {
     backgroundColor: colors.white,
-    borderRadius: radius.md,
-    flexBasis: '48%',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexBasis: '47%',
     flexGrow: 1,
-    padding: spacing.md,
+    padding: spacing.lg,
     alignItems: 'center',
-    ...shadows.soft,
+    justifyContent: 'center',
+    ...shadows.medium,
   },
   quickIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   quickTitle: {
-    fontSize: 11,
-    fontWeight: '700',
+    ...typography.bodyBold,
     color: colors.text,
+    textAlign: 'center',
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });
 

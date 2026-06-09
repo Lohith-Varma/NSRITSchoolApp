@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {ATTENDANCE_STATUS, ROLE_LABELS} from '../../config/constants';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -8,10 +8,9 @@ import {fetchAttendance} from '../../store/slices/attendanceSlice';
 import {fetchFees} from '../../store/slices/feeSlice';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
-import ScreenContainer from '../common/ScreenContainer';
+import {ERPLayout} from '../index';
 import SectionHeader from '../common/SectionHeader';
 import AttendanceCard from './AttendanceCard';
-import DashboardHeader from './DashboardHeader';
 import StatCard from './StatCard';
 import SummaryCard from './SummaryCard';
 
@@ -43,14 +42,12 @@ const RoleDashboard = ({
     0;
 
   return (
-    <ScreenContainer>
-      <DashboardHeader
-        name={user?.name}
-        role={role}
-        subtitle={subtitle || ROLE_LABELS[role]}
-        onLogout={() => dispatch(logoutUser())}
-      />
-
+    <ERPLayout
+      navigation={navigation}
+      activeRoute="Dashboard"
+      title={`${ROLE_LABELS[role]} Console`}
+      breadcrumbs={['Dashboard', ROLE_LABELS[role]]}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100, padding: spacing.md}}>
       <View style={styles.grid}>
         <StatCard
           title="Attendance"
@@ -111,7 +108,8 @@ const RoleDashboard = ({
         progress={feeSummary.collectionRate}
         tone={colors.primary}
       />
-    </ScreenContainer>
+      </ScrollView>
+    </ERPLayout>
   );
 };
 

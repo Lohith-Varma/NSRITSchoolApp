@@ -10,11 +10,14 @@ import UploadOfflinePaymentScreen from '../screens/fees/UploadOfflinePaymentScre
 
 export const renderFeeStackScreens = (Stack, options = {}) => (
   <>
-    <Stack.Screen
-      name="FeeDashboard"
-      component={FeeDashboardScreen}
-      options={{title: 'Fees'}}
-    />
+    {/* FeeDashboard: include unless the caller already registers it (set skipDashboard: true) */}
+    {!options.skipDashboard ? (
+      <Stack.Screen
+        name="FeeDashboard"
+        component={FeeDashboardScreen}
+        options={{title: 'Fees'}}
+      />
+    ) : null}
     <Stack.Screen
       name="StudentFeeDetails"
       component={StudentFeeDetailsScreen}
