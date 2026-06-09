@@ -26,10 +26,12 @@ const SideDrawer = ({
   userId = 'ACC-99234',
   userAvatar = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLykNU2rFq-M0MVDO7FY7J9EPOl30m1xB1z22bQGg_l2WEJsqucLiJ_2kAPao6b-q6H43z8FBOabx5X74dJ-4D6NrrWisJe9VqXUIVd9WKGSyBDbvVJo0ES_7b5OlzMRTqbHjp7i6y8YHl1uS3Lz0bB7EF5NNGIecHQC0H98f2yQdJiSiRGJalxzwbJKc-ZL_pv1l2BGN_LC4esyg7hDUGxdnggWzdqYuegHXPi79dA84mcJbjwyj1WJHc2dHxso3XlLn6ue1lU-Bk',
 }) => {
+  console.log('SideDrawer rendering! visible =', visible);
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    console.log('SideDrawer useEffect visible =', visible);
     if (visible) {
       Animated.parallel([
         Animated.timing(slideAnim, {
@@ -42,7 +44,9 @@ const SideDrawer = ({
           duration: 250,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        console.log('SideDrawer open animation complete');
+      });
     } else {
       Animated.parallel([
         Animated.timing(slideAnim, {
@@ -55,7 +59,9 @@ const SideDrawer = ({
           duration: 200,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        console.log('SideDrawer close animation complete');
+      });
     }
   }, [visible, slideAnim, fadeAnim]);
 

@@ -123,7 +123,10 @@ const DashboardScreen = ({navigation}) => {
         subtitle="Accounting & Finance Portal"
         userName={user?.fullName || 'Jane Doe, CPA'}
         userAvatar={user?.avatar || undefined}
-        onMenuPress={() => setDrawerVisible(true)}
+        onMenuPress={() => {
+          console.log('onMenuPress clicked! Setting drawerVisible to true');
+          setDrawerVisible(true);
+        }}
         onNotificationPress={() => navigation.navigate('CreateNotification')}
       />
 
