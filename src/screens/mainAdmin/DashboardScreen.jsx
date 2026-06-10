@@ -19,10 +19,10 @@ const DashboardScreen = ({navigation}) => {
       subtitle="Global branches, users, fees, and operations"
       primaryActions={[
         {
-          title: 'Manage Branches',
-          value: 'Open',
+          title: 'Branch Context',
+          value: 'Enter',
           icon: 'office-building-cog',
-          route: 'BranchList',
+          route: 'BranchContext',
         },
         {
           title: 'Classes',
@@ -42,8 +42,15 @@ const DashboardScreen = ({navigation}) => {
           title: 'Reports',
           value: 'View',
           icon: 'chart-box-outline',
-          route: 'GlobalAnalytics',
+          route: 'GlobalReports',
           tone: colors.accent,
+        },
+        {
+          title: 'Audit Logs',
+          value: 'Trace',
+          icon: 'clipboard-text-clock-outline',
+          route: 'AuditLogs',
+          tone: colors.warning,
         },
       ]}
       stats={[

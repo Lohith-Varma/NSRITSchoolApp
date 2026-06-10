@@ -23,6 +23,7 @@ export const ROLE_LABELS = {
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth.token',
   AUTH_USER: 'auth.user',
+  MAIN_ADMIN_BRANCH_CONTEXT: 'mainAdmin.branchContext',
   OTP_VERIFICATION_ID: 'auth.otpVerificationId',
 };
 
@@ -49,4 +50,14 @@ export const FEE_STATUS = {
   PARTIAL: 'PARTIAL',
   DUE: 'DUE',
   OVERDUE: 'OVERDUE',
+};
+
+export const USER_ROLE_ALIASES = {
+  MAIN_ADMIN: ['MAIN_ADMIN', 'main_admin'],
+  BRANCH_ADMIN: ['BRANCH_ADMIN', 'branch_admin'],
+  PRINCIPAL: ['PRINCIPAL', 'principal'],
+  COORDINATOR: ['COORDINATOR', 'coordinator'],
+  TEACHER: ['TEACHER', 'teacher'],
+  PARENT: ['PARENT', 'parent'],
+  ACCOUNTANT: ['ACCOUNTANT', 'accountant'],
 };

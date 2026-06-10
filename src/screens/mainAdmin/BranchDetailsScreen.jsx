@@ -54,6 +54,12 @@ const BranchDetailsScreen = ({navigation, route}) => {
 
       <View style={styles.actions}>
         <Button
+          icon="view-dashboard-outline"
+          mode="contained"
+          onPress={() => navigation.navigate('BranchOperationsDashboard', {branchId: branch.id})}>
+          Enter Operations
+        </Button>
+        <Button
           icon="account-tie"
           mode="outlined"
           onPress={() => setShowAdminModal(true)}>

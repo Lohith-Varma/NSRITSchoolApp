@@ -1,1 +1,1 @@
-{"schema":["dataconnect\\.dataconnect\\**\\*.gql","dataconnect\\schema\\**\\*.gql"],"documents":["dataconnect\\connectors\\nsrit\\**\\*.gql"]}
+{"schema":["dataconnect\\.dataconnect\\**\\*.gql","dataconnect\\schema\\**\\*.gql"],"document":["dataconnect\\connectors\\nsrit\\**\\*.gql"]}

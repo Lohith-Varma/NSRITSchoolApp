@@ -7,11 +7,14 @@ export const useFeeAccess = () => {
 
   return useMemo(
     () => ({
-      role,
+      role: role || user?.role,
       branchId: user?.branchId,
+      branchCode: user?.branchCode,
+      userId: user?.id,
+      accountantId: user?.accountantId,
       parentId: user?.parentId || user?.id,
       wingId: user?.wingId,
-      wing: user?.wing || 'Primary',
+      wing: user?.wing,
       sectionId: user?.sectionId,
       sectionName: user?.sectionName || 'A',
     }),

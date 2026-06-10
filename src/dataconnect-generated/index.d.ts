@@ -16,6 +16,19 @@ export interface AcademicClass_Key {
   __typename?: 'AcademicClass_Key';
 }
 
+export interface Accountant_Key {
+  id: UUIDString;
+  __typename?: 'Accountant_Key';
+}
+
+export interface ActivateClassData {
+  academicClass_update?: AcademicClass_Key | null;
+}
+
+export interface ActivateClassVariables {
+  classId: UUIDString;
+}
+
 export interface AssignBranchAdminData {
   branch_update?: Branch_Key | null;
 }
@@ -23,6 +36,15 @@ export interface AssignBranchAdminData {
 export interface AssignBranchAdminVariables {
   branchId: UUIDString;
   branchAdminId: UUIDString;
+}
+
+export interface AssignClassTeacherData {
+  section_update?: Section_Key | null;
+}
+
+export interface AssignClassTeacherVariables {
+  sectionId: UUIDString;
+  teacherId: UUIDString;
 }
 
 export interface AssignPrincipalData {
@@ -34,8 +56,30 @@ export interface AssignPrincipalVariables {
   principalId: UUIDString;
 }
 
+export interface AssignTeacherClassTeacherData {
+  teacherSectionAssignment_insert: TeacherSectionAssignment_Key;
+  section_update?: Section_Key | null;
+}
+
+export interface AssignTeacherClassTeacherVariables {
+  sectionId: UUIDString;
+  teacherId: UUIDString;
+  teacherUserId: UUIDString;
+  branchId: UUIDString;
+}
+
 export interface AssignTeacherData {
   teacherAssignment_insert: TeacherAssignment_Key;
+}
+
+export interface AssignTeacherSubjectData {
+  teacherSubject_insert: TeacherSubject_Key;
+}
+
+export interface AssignTeacherSubjectVariables {
+  teacherId: UUIDString;
+  subjectId: UUIDString;
+  branchId: UUIDString;
 }
 
 export interface AssignTeacherVariables {
@@ -53,6 +97,11 @@ export interface Attendance_Key {
   __typename?: 'Attendance_Key';
 }
 
+export interface AuditLog_Key {
+  id: UUIDString;
+  __typename?: 'AuditLog_Key';
+}
+
 export interface Branch_Key {
   id: UUIDString;
   __typename?: 'Branch_Key';
@@ -64,6 +113,60 @@ export interface ClaimUserFirebaseUidData {
 
 export interface ClaimUserFirebaseUidVariables {
   id: UUIDString;
+}
+
+export interface ClearFeePlanItemsData {
+  studentFeeItem_deleteMany: number;
+}
+
+export interface ClearFeePlanItemsVariables {
+  feePlanId: UUIDString;
+  branchId: UUIDString;
+}
+
+export interface ClearTeacherSubjectsData {
+  teacherSubject_deleteMany: number;
+}
+
+export interface ClearTeacherSubjectsVariables {
+  teacherId: UUIDString;
+  branchId: UUIDString;
+}
+
+export interface Coordinator_Key {
+  id: UUIDString;
+  __typename?: 'Coordinator_Key';
+}
+
+export interface CreateAccountantData {
+  employeeSequence_upsert: EmployeeSequence_Key;
+  staffIdSequence_upsert: StaffIdSequence_Key;
+  user_insert: User_Key;
+  accountant_insert: Accountant_Key;
+}
+
+export interface CreateAccountantVariables {
+  firebaseUID: string;
+  fullName: string;
+  countryCode: string;
+  phoneNumber: string;
+  email?: string | null;
+  gender: string;
+  joiningDate: DateString;
+  designation: string;
+  qualification?: string | null;
+  experience?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  bloodGroup?: string | null;
+  employeeId: string;
+  joiningYear: number;
+  branchCode: string;
+  serialNumber: number;
+  branchId: UUIDString;
 }
 
 export interface CreateAttendanceData {
@@ -107,6 +210,64 @@ export interface CreateClassVariables {
   displayOrder?: number | null;
 }
 
+export interface CreateCoordinatorData {
+  employeeSequence_upsert: EmployeeSequence_Key;
+  staffIdSequence_upsert: StaffIdSequence_Key;
+  user_insert: User_Key;
+  coordinator_insert: Coordinator_Key;
+}
+
+export interface CreateCoordinatorVariables {
+  firebaseUID: string;
+  fullName: string;
+  countryCode: string;
+  phoneNumber: string;
+  email?: string | null;
+  gender?: string | null;
+  employeeId: string;
+  joiningYear: number;
+  branchCode: string;
+  serialNumber: number;
+  branchId: UUIDString;
+  wing: string;
+}
+
+export interface CreateFeeCategoryData {
+  feeCategory_insert: FeeCategory_Key;
+}
+
+export interface CreateFeeCategoryVariables {
+  name: string;
+  status?: string;
+}
+
+export interface CreateFeePlanData {
+  studentFeePlan_insert: StudentFeePlan_Key;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+
+export interface CreateFeePlanItemData {
+  studentFeeItem_insert: StudentFeeItem_Key;
+}
+
+export interface CreateFeePlanItemVariables {
+  feePlanId: UUIDString;
+  categoryId: UUIDString;
+  amount: number;
+  branchId: UUIDString;
+}
+
+export interface CreateFeePlanVariables {
+  studentId: UUIDString;
+  academicYear: number;
+  totalAmount: number;
+  createdById: UUIDString;
+  branchId: UUIDString;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+
 export interface CreateParentData {
   parent_insert: Parent_Key;
 }
@@ -115,18 +276,24 @@ export interface CreateParentVariables {
   userId?: UUIDString | null;
   branchId: UUIDString;
   fullName: string;
+  fatherName?: string | null;
+  motherName?: string | null;
   countryCode: string;
   phoneNumber: string;
   address?: string | null;
 }
 
 export interface CreateParentWithoutUserData {
+  user_insert: User_Key;
   parent_insert: Parent_Key;
 }
 
 export interface CreateParentWithoutUserVariables {
+  firebaseUID?: string | null;
   branchId: UUIDString;
   fullName: string;
+  fatherName?: string | null;
+  motherName?: string | null;
   countryCode: string;
   phoneNumber: string;
   address?: string | null;
@@ -141,10 +308,12 @@ export interface CreateSectionVariables {
   wingId: UUIDString;
   academicClassId: UUIDString;
   name: string;
+  academicYear?: number;
 }
 
 export interface CreateStudentData {
   studentIdSequence_upsert: StudentIdSequence_Key;
+  studentSequence_upsert: StudentSequence_Key;
   student_insert: Student_Key;
 }
 
@@ -156,15 +325,68 @@ export interface CreateStudentVariables {
   fullName: string;
   gender?: string | null;
   dateOfBirth?: DateString | null;
+  photoUrl?: string | null;
+  aadhaarNumber?: string | null;
+  bloodGroup?: string | null;
   branchId: UUIDString;
   wingId?: UUIDString | null;
+  wingCode?: string | null;
   academicClassId: UUIDString;
   sectionId: UUIDString;
   parentId: UUIDString;
   countryCode?: string | null;
   phoneNumber?: string | null;
   address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  transportRequired?: boolean | null;
   admissionDate: DateString;
+}
+
+export interface CreateSubjectData {
+  subject_insert: Subject_Key;
+}
+
+export interface CreateSubjectVariables {
+  name: string;
+  code: string;
+  status?: string;
+}
+
+export interface CreateTeacherData {
+  employeeSequence_upsert: EmployeeSequence_Key;
+  staffIdSequence_upsert: StaffIdSequence_Key;
+  user_insert: User_Key;
+  teacher_insert: Teacher_Key;
+}
+
+export interface CreateTeacherVariables {
+  firebaseUID: string;
+  fullName: string;
+  countryCode: string;
+  phoneNumber: string;
+  alternateMobileNumber?: string | null;
+  email?: string | null;
+  dateOfBirth?: DateString | null;
+  gender?: string;
+  joiningDate?: DateString;
+  designation?: string;
+  qualification?: string | null;
+  experience?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  bloodGroup?: string | null;
+  employeeId: string;
+  joiningYear: number;
+  branchCode: string;
+  serialNumber: number;
+  branchId: UUIDString;
+  wing?: string;
 }
 
 export interface CreateUserData {
@@ -181,14 +403,205 @@ export interface CreateUserVariables {
   wingId?: UUIDString | null;
 }
 
+export interface CreateWingData {
+  wing_insert: Wing_Key;
+}
+
+export interface CreateWingVariables {
+  branchId: UUIDString;
+  name: string;
+  code: string;
+}
+
+export interface DeactivateClassData {
+  academicClass_update?: AcademicClass_Key | null;
+}
+
+export interface DeactivateClassVariables {
+  classId: UUIDString;
+}
+
 export interface DueTracking_Key {
   id: UUIDString;
   __typename?: 'DueTracking_Key';
 }
 
+export interface EmployeeSequence_Key {
+  year: number;
+  branchCode: string;
+  __typename?: 'EmployeeSequence_Key';
+}
+
+export interface FeeAuditLog_Key {
+  id: UUIDString;
+  __typename?: 'FeeAuditLog_Key';
+}
+
+export interface FeeCategory_Key {
+  id: UUIDString;
+  __typename?: 'FeeCategory_Key';
+}
+
+export interface FeePayment_Key {
+  id: UUIDString;
+  __typename?: 'FeePayment_Key';
+}
+
 export interface FeeStructure_Key {
   id: UUIDString;
   __typename?: 'FeeStructure_Key';
+}
+
+export interface GenerateAdmissionNumberData {
+  studentSequences: ({
+    year: number;
+    branchCode: string;
+    lastSerial: number;
+  } & StudentSequence_Key)[];
+}
+
+export interface GenerateAdmissionNumberVariables {
+  year: number;
+  branchCode: string;
+}
+
+export interface GetAcademicClassesData {
+  academicClasses: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    name: string;
+    classCode?: string | null;
+    wingId: UUIDString;
+    wing: {
+      id: UUIDString;
+      name: string;
+      code: string;
+    } & Wing_Key;
+      sortOrder: number;
+      displayOrder?: number | null;
+      isActive: boolean;
+      activatedById?: UUIDString | null;
+      activatedAt?: TimestampString | null;
+  } & AcademicClass_Key)[];
+}
+
+export interface GetAcademicClassesVariables {
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetAccountantByUserData {
+  accountants: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    isActive: boolean;
+  } & Accountant_Key)[];
+}
+
+export interface GetAccountantByUserVariables {
+  userId: UUIDString;
+}
+
+export interface GetAccountantProfileData {
+  accountant?: {
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    email?: string | null;
+    qualification?: string | null;
+    experience?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    emergencyContact?: string | null;
+    bloodGroup?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      countryCode: string;
+      phoneNumber: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      branch: {
+        id: UUIDString;
+        name: string;
+        branchCode: string;
+      } & Branch_Key;
+  } & Accountant_Key;
+}
+
+export interface GetAccountantProfileVariables {
+  accountantId: UUIDString;
+}
+
+export interface GetAccountantsData {
+  accountants: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    email?: string | null;
+    qualification?: string | null;
+    experience?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      countryCode: string;
+      phoneNumber: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      branch: {
+        id: UUIDString;
+        name: string;
+        branchCode: string;
+      } & Branch_Key;
+  } & Accountant_Key)[];
+}
+
+export interface GetAccountantsVariables {
+  branchId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetActiveAcademicClassesData {
+  academicClasses: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    name: string;
+    classCode?: string | null;
+    wingId: UUIDString;
+    wing: {
+      id: UUIDString;
+      name: string;
+      code: string;
+    } & Wing_Key;
+      sortOrder: number;
+      displayOrder?: number | null;
+      isActive: boolean;
+  } & AcademicClass_Key)[];
+}
+
+export interface GetActiveAcademicClassesVariables {
+  limit?: number | null;
+  offset?: number | null;
 }
 
 export interface GetAllFeeRecordsData {
@@ -237,6 +650,53 @@ export interface GetAssignmentConflictsVariables {
   userId: UUIDString;
 }
 
+export interface GetAttendanceByBranchData {
+  attendances: ({
+    id: UUIDString;
+    studentId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    attendanceDate: DateString;
+    status: string;
+    markedById: UUIDString;
+    editedById?: UUIDString | null;
+    remarks?: string | null;
+    student: {
+      id: UUIDString;
+      studentId: string;
+      fullName: string;
+      parentId: UUIDString;
+    } & Student_Key;
+      academicClass: {
+        id: UUIDString;
+        name: string;
+        wing: {
+          id: UUIDString;
+          code: string;
+          name: string;
+        } & Wing_Key;
+      } & AcademicClass_Key;
+        section: {
+          id: UUIDString;
+          name: string;
+          academicYear: number;
+        } & Section_Key;
+          markedBy: {
+            id: UUIDString;
+            fullName: string;
+            role: string;
+          } & User_Key;
+  } & Attendance_Key)[];
+}
+
+export interface GetAttendanceByBranchVariables {
+  branchId: UUIDString;
+  fromDate?: DateString | null;
+  toDate?: DateString | null;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetAttendanceByMonthData {
   attendances: ({
     id: UUIDString;
@@ -275,6 +735,28 @@ export interface GetAttendanceBySectionData {
 export interface GetAttendanceBySectionVariables {
   sectionId: UUIDString;
   attendanceDate: DateString;
+}
+
+export interface GetAuditLogsData {
+  auditLogs: ({
+    id: UUIDString;
+    performedBy: string;
+    performedRole: string;
+    actingAs?: string | null;
+    branchId?: UUIDString | null;
+    action: string;
+    entityType?: string | null;
+    entityId?: string | null;
+    oldData?: string | null;
+    newData?: string | null;
+    createdAt: TimestampString;
+  } & AuditLog_Key)[];
+}
+
+export interface GetAuditLogsVariables {
+  branchId?: UUIDString | null;
+  limit?: number | null;
+  offset?: number | null;
 }
 
 export interface GetBranchAnalyticsData {
@@ -510,6 +992,30 @@ export interface GetClassDetailsVariables {
   sectionId: UUIDString;
 }
 
+export interface GetClassesByWingCodeData {
+  academicClasses: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    name: string;
+    classCode?: string | null;
+    wingId: UUIDString;
+    wing: {
+      id: UUIDString;
+      name: string;
+      code: string;
+    } & Wing_Key;
+      sortOrder: number;
+      displayOrder?: number | null;
+      isActive: boolean;
+  } & AcademicClass_Key)[];
+}
+
+export interface GetClassesByWingCodeVariables {
+  wingCode: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetClassesByWingData {
   academicClasses: ({
     id: UUIDString;
@@ -525,6 +1031,175 @@ export interface GetClassesByWingVariables {
   wingId: UUIDString;
 }
 
+export interface GetCoordinatorByUserData {
+  coordinators: ({
+    id: UUIDString;
+    userId: UUIDString;
+    branchId: UUIDString;
+    wing: string;
+    employeeId?: string | null;
+    gender?: string | null;
+    email?: string | null;
+    isActive: boolean;
+  } & Coordinator_Key)[];
+}
+
+export interface GetCoordinatorByUserVariables {
+  userId: UUIDString;
+}
+
+export interface GetCoordinatorDetailsData {
+  coordinator?: {
+    id: UUIDString;
+    userId: UUIDString;
+    branchId: UUIDString;
+    wing: string;
+    employeeId?: string | null;
+    gender?: string | null;
+    email?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      countryCode: string;
+      phoneNumber: string;
+      role: string;
+      branchId?: UUIDString | null;
+      isActive: boolean;
+    } & User_Key;
+  } & Coordinator_Key;
+}
+
+export interface GetCoordinatorDetailsVariables {
+  coordinatorId: UUIDString;
+}
+
+export interface GetCoordinatorStudentsByWingData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    gender?: string | null;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    phoneNumber?: string | null;
+    status: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        code: string;
+        name: string;
+      };
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fatherName?: string | null;
+          motherName?: string | null;
+          phoneNumber: string;
+        } & Parent_Key;
+  } & Student_Key)[];
+}
+
+export interface GetCoordinatorStudentsByWingVariables {
+  branchId: UUIDString;
+  wing: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetCoordinatorTeachersByWingData {
+  teachers: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    wing: string;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    email?: string | null;
+    qualification?: string | null;
+    experience?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      countryCode: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      teacherSubjects_on_teacher: ({
+        id: UUIDString;
+        subject: {
+          id: UUIDString;
+          name: string;
+          code: string;
+          status: string;
+        } & Subject_Key;
+      } & TeacherSubject_Key)[];
+        teacherSectionAssignments_on_teacher: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicYear: number;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+  } & Teacher_Key)[];
+}
+
+export interface GetCoordinatorTeachersByWingVariables {
+  branchId: UUIDString;
+  wing: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetCoordinatorsData {
+  coordinators: ({
+    id: UUIDString;
+    userId: UUIDString;
+    branchId: UUIDString;
+    wing: string;
+    employeeId?: string | null;
+    gender?: string | null;
+    email?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      countryCode: string;
+      phoneNumber: string;
+      role: string;
+      branchId?: UUIDString | null;
+      isActive: boolean;
+    } & User_Key;
+  } & Coordinator_Key)[];
+}
+
+export interface GetCoordinatorsVariables {
+  branchId: UUIDString;
+}
+
 export interface GetCurrentUserData {
   users: ({
     id: UUIDString;
@@ -533,9 +1208,15 @@ export interface GetCurrentUserData {
     countryCode: string;
     phoneNumber: string;
     role: string;
+    employeeId?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
-    isActive: boolean;
+    branch?: {
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key;
+      isActive: boolean;
   } & User_Key)[];
 }
 
@@ -598,6 +1279,33 @@ export interface GetDueStudentsVariables {
   branchId: UUIDString;
 }
 
+export interface GetEmployeeSequenceData {
+  employeeSequences: ({
+    year: number;
+    branchCode: string;
+    lastSequence: number;
+  } & EmployeeSequence_Key)[];
+}
+
+export interface GetEmployeeSequenceVariables {
+  year: number;
+  branchCode: string;
+}
+
+export interface GetFeeCategoriesData {
+  feeCategories: ({
+    id: UUIDString;
+    name: string;
+    status: string;
+    createdAt: TimestampString;
+  } & FeeCategory_Key)[];
+}
+
+export interface GetFeeCategoriesVariables {
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetFeeDetailsData {
   studentFees: ({
     id: UUIDString;
@@ -653,6 +1361,55 @@ export interface GetFeeRecordsByBranchData {
 
 export interface GetFeeRecordsByBranchVariables {
   branchId: UUIDString;
+}
+
+export interface GetFeeReportsData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+      } & Section_Key;
+        reportFeePlans: ({
+          id: UUIDString;
+          academicYear: number;
+          totalAmount: number;
+          isActive: boolean;
+          reportFeePayments: ({
+            id: UUIDString;
+            amount: number;
+            paymentDate: DateString;
+            paymentMode: string;
+            receiptNumber: string;
+            status: string;
+          } & FeePayment_Key)[];
+            reportFeeItems: ({
+              id: UUIDString;
+              amount: number;
+              category: {
+                id: UUIDString;
+                name: string;
+              } & FeeCategory_Key;
+            } & StudentFeeItem_Key)[];
+        } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+
+export interface GetFeeReportsVariables {
+  branchId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
 }
 
 export interface GetGlobalClassesData {
@@ -715,6 +1472,122 @@ export interface GetGlobalClassesVariables {
   offset?: number | null;
 }
 
+export interface GetGlobalReportsData {
+  branches: ({
+    id: UUIDString;
+    name: string;
+    branchCode: string;
+    status: string;
+    isActive: boolean;
+  } & Branch_Key)[];
+    users: ({
+      id: UUIDString;
+      branchId?: UUIDString | null;
+      role: string;
+      isActive: boolean;
+    } & User_Key)[];
+      students: ({
+        id: UUIDString;
+        branchId: UUIDString;
+        status: string;
+        isActive: boolean;
+        admissionDate: DateString;
+      } & Student_Key)[];
+        attendances: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          status: string;
+          attendanceDate: DateString;
+          section: {
+            id: UUIDString;
+            branchId: UUIDString;
+          } & Section_Key;
+        } & Attendance_Key)[];
+          studentFeePlans: ({
+            id: UUIDString;
+            studentId: UUIDString;
+            totalAmount: number;
+            isActive: boolean;
+            student: {
+              id: UUIDString;
+              branchId: UUIDString;
+            } & Student_Key;
+              reportPayments: ({
+                id: UUIDString;
+                amount: number;
+                status: string;
+                paymentDate: DateString;
+              } & FeePayment_Key)[];
+          } & StudentFeePlan_Key)[];
+}
+
+export interface GetGlobalStudentExplorerData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    gender?: string | null;
+    branchId: UUIDString;
+    wingId?: UUIDString | null;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    phoneNumber?: string | null;
+    admissionDate: DateString;
+    status: string;
+    isActive: boolean;
+    branch: {
+      id: UUIDString;
+      name: string;
+      branchCode: string;
+    } & Branch_Key;
+      academicClass: {
+        id: UUIDString;
+        name: string;
+        wing: {
+          id: UUIDString;
+          code: string;
+          name: string;
+        } & Wing_Key;
+      } & AcademicClass_Key;
+        section: {
+          id: UUIDString;
+          name: string;
+        } & Section_Key;
+          parent: {
+            id: UUIDString;
+            fullName: string;
+            fatherName?: string | null;
+            motherName?: string | null;
+            phoneNumber: string;
+            email?: string | null;
+          } & Parent_Key;
+            explorerAttendance: ({
+              id: UUIDString;
+              status: string;
+            } & Attendance_Key)[];
+              explorerFeePlans: ({
+                id: UUIDString;
+                totalAmount: number;
+                explorerFeePayments: ({
+                  id: UUIDString;
+                  amount: number;
+                  status: string;
+                } & FeePayment_Key)[];
+              } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+
+export interface GetGlobalStudentExplorerVariables {
+  branchId?: UUIDString | null;
+  academicClassId?: UUIDString | null;
+  sectionId?: UUIDString | null;
+  status?: string | null;
+  searchText?: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetGlobalStudentsData {
   students: ({
     id: UUIDString;
@@ -772,6 +1645,19 @@ export interface GetGlobalStudentsVariables {
   offset?: number | null;
 }
 
+export interface GetLastStudentSerialData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    serialNumber: number;
+  } & Student_Key)[];
+}
+
+export interface GetLastStudentSerialVariables {
+  admissionYear: number;
+  branchCode: string;
+}
+
 export interface GetPaidStudentsData {
   studentFees: ({
     id: UUIDString;
@@ -796,12 +1682,34 @@ export interface GetPaidStudentsVariables {
   branchId: UUIDString;
 }
 
+export interface GetParentByPhoneData {
+  parents: ({
+    id: UUIDString;
+    userId?: UUIDString | null;
+    branchId: UUIDString;
+    fullName: string;
+    fatherName?: string | null;
+    motherName?: string | null;
+    countryCode: string;
+    phoneNumber: string;
+    address?: string | null;
+    isActive: boolean;
+  } & Parent_Key)[];
+}
+
+export interface GetParentByPhoneVariables {
+  branchId: UUIDString;
+  phoneNumber: string;
+}
+
 export interface GetParentByUserData {
   parents: ({
     id: UUIDString;
     userId?: UUIDString | null;
     branchId: UUIDString;
     fullName: string;
+    fatherName?: string | null;
+    motherName?: string | null;
     countryCode: string;
     phoneNumber: string;
     address?: string | null;
@@ -818,16 +1726,258 @@ export interface GetParentChildrenData {
     id: UUIDString;
     studentId: string;
     fullName: string;
+    gender?: string | null;
+    dateOfBirth?: DateString | null;
+    branchId: UUIDString;
     academicClassId: UUIDString;
     sectionId: UUIDString;
+    parentId: UUIDString;
+    phoneNumber?: string | null;
     admissionYear: number;
     branchCode: string;
     admissionDate: DateString;
+    status: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+        classTeacher?: {
+          id: UUIDString;
+          fullName: string;
+          phoneNumber: string;
+        } & User_Key;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fullName: string;
+          fatherName?: string | null;
+          motherName?: string | null;
+          countryCode: string;
+          phoneNumber: string;
+          address?: string | null;
+        } & Parent_Key;
+          recentAttendance: ({
+            id: UUIDString;
+            attendanceDate: DateString;
+            status: string;
+            remarks?: string | null;
+          } & Attendance_Key)[];
+            attendance: ({
+              id: UUIDString;
+              attendanceDate: DateString;
+              status: string;
+            } & Attendance_Key)[];
+              fees: ({
+                id: UUIDString;
+                totalFee: number;
+                paidAmount: number;
+                remainingAmount: number;
+                status: string;
+                dueDate: DateString;
+              } & StudentFee_Key)[];
+                parentFeePlans: ({
+                  id: UUIDString;
+                  academicYear: number;
+                  totalAmount: number;
+                  isActive: boolean;
+                  parentFeeItems: ({
+                    id: UUIDString;
+                    amount: number;
+                    category: {
+                      id: UUIDString;
+                      name: string;
+                    } & FeeCategory_Key;
+                  } & StudentFeeItem_Key)[];
+                    parentFeePayments: ({
+                      id: UUIDString;
+                      amount: number;
+                      paymentDate: DateString;
+                      paymentMode: string;
+                      referenceNumber?: string | null;
+                      receiptNumber: string;
+                      remarks?: string | null;
+                      collectedBy: {
+                        id: UUIDString;
+                        fullName: string;
+                      } & User_Key;
+                    } & FeePayment_Key)[];
+                } & StudentFeePlan_Key)[];
   } & Student_Key)[];
 }
 
 export interface GetParentChildrenVariables {
   parentId: UUIDString;
+}
+
+export interface GetPaymentHistoryData {
+  feePayments: ({
+    id: UUIDString;
+    studentId: UUIDString;
+    feePlanId: UUIDString;
+    amount: number;
+    paymentDate: DateString;
+    paymentMode: string;
+    referenceNumber?: string | null;
+    receiptNumber: string;
+    status: string;
+    reversedAt?: TimestampString | null;
+    reverseReason?: string | null;
+    remarks?: string | null;
+    student: {
+      id: UUIDString;
+      studentId: string;
+      fullName: string;
+      academicClass: {
+        id: UUIDString;
+        name: string;
+        wing: {
+          id: UUIDString;
+          code: string;
+          name: string;
+        } & Wing_Key;
+      } & AcademicClass_Key;
+        section: {
+          id: UUIDString;
+          name: string;
+        } & Section_Key;
+          branch: {
+            id: UUIDString;
+            name: string;
+            branchCode: string;
+          } & Branch_Key;
+    } & Student_Key;
+      collectedBy: {
+        id: UUIDString;
+        fullName: string;
+      } & User_Key;
+        reversedBy?: {
+          id: UUIDString;
+          fullName: string;
+        } & User_Key;
+  } & FeePayment_Key)[];
+}
+
+export interface GetPaymentHistoryVariables {
+  branchId: UUIDString;
+  studentId?: UUIDString | null;
+  fromDate?: DateString | null;
+  toDate?: DateString | null;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetPrincipalDashboardData {
+  students: ({
+    id: UUIDString;
+  } & Student_Key)[];
+    teachers: ({
+      id: UUIDString;
+    } & User_Key)[];
+      coordinators: ({
+        id: UUIDString;
+      } & Coordinator_Key)[];
+        sections: ({
+          id: UUIDString;
+        } & Section_Key)[];
+          pendingPromotions: ({
+            id: UUIDString;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                id: UUIDString;
+                code: string;
+                name: string;
+              } & Wing_Key;
+            } & AcademicClass_Key;
+          } & Student_Key)[];
+}
+
+export interface GetPrincipalDashboardVariables {
+  branchId: UUIDString;
+}
+
+export interface GetPromotionHistoryData {
+  studentPromotionHistories: ({
+    id: UUIDString;
+    studentId: UUIDString;
+    fromClassId: UUIDString;
+    toClassId: UUIDString;
+    fromSectionId: UUIDString;
+    toSectionId: UUIDString;
+    promotedById: UUIDString;
+    promotedAt: TimestampString;
+    student: {
+      id: UUIDString;
+      studentId: string;
+      fullName: string;
+    } & Student_Key;
+      fromClass: {
+        id: UUIDString;
+        name: string;
+      } & AcademicClass_Key;
+        toClass: {
+          id: UUIDString;
+          name: string;
+        } & AcademicClass_Key;
+          fromSection: {
+            id: UUIDString;
+            name: string;
+          } & Section_Key;
+            toSection: {
+              id: UUIDString;
+              name: string;
+            } & Section_Key;
+              promotedBy: {
+                id: UUIDString;
+                fullName: string;
+              } & User_Key;
+  } & StudentPromotionHistory_Key)[];
+}
+
+export interface GetPromotionHistoryVariables {
+  studentId?: UUIDString | null;
+}
+
+export interface GetReceiptSequenceData {
+  receiptSequences: ({
+    year: number;
+    branchCode: string;
+    lastSequence: number;
+  } & ReceiptSequence_Key)[];
+}
+
+export interface GetReceiptSequenceVariables {
+  year: number;
+  branchCode: string;
+}
+
+export interface GetSectionsByClassAndYearData {
+  sections: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    wingId: UUIDString;
+    academicClassId: UUIDString;
+    name: string;
+    academicYear: number;
+    classTeacherId?: UUIDString | null;
+    isActive: boolean;
+  } & Section_Key)[];
+}
+
+export interface GetSectionsByClassAndYearVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  academicYear: number;
 }
 
 export interface GetSectionsByClassData {
@@ -845,6 +1995,97 @@ export interface GetSectionsByClassVariables {
   academicClassId: UUIDString;
 }
 
+export interface GetSectionsData {
+  sections: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    wingId: UUIDString;
+    academicClassId: UUIDString;
+    name: string;
+    academicYear: number;
+    classTeacherId?: UUIDString | null;
+    isActive: boolean;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      sortOrder: number;
+      wingId: UUIDString;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      classTeacher?: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+        role: string;
+      } & User_Key;
+  } & Section_Key)[];
+    students: ({
+      id: UUIDString;
+      sectionId: UUIDString;
+    } & Student_Key)[];
+      attendances: ({
+        id: UUIDString;
+        sectionId: UUIDString;
+        status: string;
+      } & Attendance_Key)[];
+}
+
+export interface GetSectionsForTeacherAssignmentData {
+  sections: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    wingId: UUIDString;
+    academicClassId: UUIDString;
+    name: string;
+    academicYear: number;
+    classTeacherId?: UUIDString | null;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      classTeacher?: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+      } & User_Key;
+  } & Section_Key)[];
+}
+
+export interface GetSectionsForTeacherAssignmentVariables {
+  branchId: UUIDString;
+  wing?: string | null;
+  academicYear: number;
+}
+
+export interface GetSectionsVariables {
+  branchId: UUIDString;
+  academicYear: number;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetStaffIdSequenceData {
+  staffIdSequences: ({
+    joiningYear: number;
+    branchCode: string;
+    lastSerialNumber: number;
+  } & StaffIdSequence_Key)[];
+}
+
+export interface GetStaffIdSequenceVariables {
+  joiningYear: number;
+  branchCode: string;
+}
+
 export interface GetStudentAttendanceData {
   attendances: ({
     id: UUIDString;
@@ -855,6 +2096,169 @@ export interface GetStudentAttendanceData {
 }
 
 export interface GetStudentAttendanceVariables {
+  studentId: UUIDString;
+}
+
+export interface GetStudentDetailsData {
+  student?: {
+    id: UUIDString;
+    studentId: string;
+    admissionYear: number;
+    branchCode: string;
+    serialNumber: number;
+    fullName: string;
+    gender?: string | null;
+    dateOfBirth?: DateString | null;
+    photoUrl?: string | null;
+    aadhaarNumber?: string | null;
+    bloodGroup?: string | null;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    countryCode?: string | null;
+    phoneNumber?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    emergencyContact?: string | null;
+    transportRequired?: boolean | null;
+    aadhaarDocumentUrl?: string | null;
+    transferCertificateUrl?: string | null;
+    birthCertificateUrl?: string | null;
+    admissionDate: DateString;
+    status: string;
+    isActive: boolean;
+    branch: {
+      id: UUIDString;
+      name: string;
+      branchCode: string;
+    } & Branch_Key;
+      academicClass: {
+        id: UUIDString;
+        name: string;
+        wing: {
+          id: UUIDString;
+          code: string;
+          name: string;
+        } & Wing_Key;
+      } & AcademicClass_Key;
+        section: {
+          id: UUIDString;
+          name: string;
+          academicYear: number;
+          classTeacher?: {
+            id: UUIDString;
+            fullName: string;
+            phoneNumber: string;
+          } & User_Key;
+        } & Section_Key;
+          parent: {
+            id: UUIDString;
+            fullName: string;
+            fatherName?: string | null;
+            motherName?: string | null;
+            countryCode: string;
+            phoneNumber: string;
+            email?: string | null;
+            address?: string | null;
+          } & Parent_Key;
+  } & Student_Key;
+    attendances: ({
+      id: UUIDString;
+      attendanceDate: DateString;
+      status: string;
+      remarks?: string | null;
+      markedBy: {
+        id: UUIDString;
+        fullName: string;
+      } & User_Key;
+        editedBy?: {
+          id: UUIDString;
+          fullName: string;
+        } & User_Key;
+    } & Attendance_Key)[];
+      studentFees: ({
+        id: UUIDString;
+        totalFee: number;
+        paidAmount: number;
+        remainingAmount: number;
+        status: string;
+        dueDate: DateString;
+      } & StudentFee_Key)[];
+        studentDetailFeePlans: ({
+          id: UUIDString;
+          academicYear: number;
+          totalAmount: number;
+          isActive: boolean;
+          detailFeeItems: ({
+            id: UUIDString;
+            amount: number;
+            category: {
+              id: UUIDString;
+              name: string;
+            } & FeeCategory_Key;
+          } & StudentFeeItem_Key)[];
+            detailFeePayments: ({
+              id: UUIDString;
+              amount: number;
+              paymentDate: DateString;
+              paymentMode: string;
+              receiptNumber: string;
+            } & FeePayment_Key)[];
+        } & StudentFeePlan_Key)[];
+          studentSectionHistories: ({
+            id: UUIDString;
+            changedAt: TimestampString;
+            oldSection: {
+              id: UUIDString;
+              name: string;
+              academicClass: {
+                id: UUIDString;
+                name: string;
+              } & AcademicClass_Key;
+            } & Section_Key;
+              newSection: {
+                id: UUIDString;
+                name: string;
+                academicClass: {
+                  id: UUIDString;
+                  name: string;
+                } & AcademicClass_Key;
+              } & Section_Key;
+                changedBy: {
+                  id: UUIDString;
+                  fullName: string;
+                } & User_Key;
+          } & StudentSectionHistory_Key)[];
+            studentPromotionHistories: ({
+              id: UUIDString;
+              promotedAt: TimestampString;
+              fromClass: {
+                id: UUIDString;
+                name: string;
+              } & AcademicClass_Key;
+                toClass: {
+                  id: UUIDString;
+                  name: string;
+                } & AcademicClass_Key;
+                  fromSection: {
+                    id: UUIDString;
+                    name: string;
+                  } & Section_Key;
+                    toSection: {
+                      id: UUIDString;
+                      name: string;
+                    } & Section_Key;
+                      promotedBy: {
+                        id: UUIDString;
+                        fullName: string;
+                      } & User_Key;
+            } & StudentPromotionHistory_Key)[];
+}
+
+export interface GetStudentDetailsVariables {
   studentId: UUIDString;
 }
 
@@ -879,6 +2283,84 @@ export interface GetStudentFeeHistoryData {
 }
 
 export interface GetStudentFeeHistoryVariables {
+  studentId: UUIDString;
+}
+
+export interface GetStudentFeeProfileData {
+  student?: {
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    branchId: UUIDString;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fullName: string;
+          fatherName?: string | null;
+          motherName?: string | null;
+          phoneNumber: string;
+        } & Parent_Key;
+          branch: {
+            id: UUIDString;
+            name: string;
+            branchCode: string;
+          } & Branch_Key;
+            profileFeePlans: ({
+              id: UUIDString;
+              academicYear: number;
+              totalAmount: number;
+              isActive: boolean;
+              createdAt: TimestampString;
+              createdBy: {
+                id: UUIDString;
+                fullName: string;
+              } & User_Key;
+                profileFeeItems: ({
+                  id: UUIDString;
+                  amount: number;
+                  category: {
+                    id: UUIDString;
+                    name: string;
+                    status: string;
+                  } & FeeCategory_Key;
+                } & StudentFeeItem_Key)[];
+                  profileFeePayments: ({
+                    id: UUIDString;
+                    amount: number;
+                    paymentDate: DateString;
+                    paymentMode: string;
+                    referenceNumber?: string | null;
+                    receiptNumber: string;
+                    status: string;
+                    reversedAt?: TimestampString | null;
+                    reverseReason?: string | null;
+                    remarks?: string | null;
+                    collectedBy: {
+                      id: UUIDString;
+                      fullName: string;
+                    } & User_Key;
+                      reversedBy?: {
+                        id: UUIDString;
+                        fullName: string;
+                      } & User_Key;
+                  } & FeePayment_Key)[];
+            } & StudentFeePlan_Key)[];
+  } & Student_Key;
+}
+
+export interface GetStudentFeeProfileVariables {
   studentId: UUIDString;
 }
 
@@ -970,6 +2452,19 @@ export interface GetStudentProfileVariables {
   studentId: UUIDString;
 }
 
+export interface GetStudentSequenceData {
+  studentSequences: ({
+    year: number;
+    branchCode: string;
+    lastSerial: number;
+  } & StudentSequence_Key)[];
+}
+
+export interface GetStudentSequenceVariables {
+  year: number;
+  branchCode: string;
+}
+
 export interface GetStudentsByBranchData {
   students: ({
     id: UUIDString;
@@ -988,6 +2483,7 @@ export interface GetStudentsByBranchData {
     phoneNumber?: string | null;
     address?: string | null;
     admissionDate: DateString;
+    status: string;
     isActive: boolean;
   } & Student_Key)[];
 }
@@ -1003,17 +2499,154 @@ export interface GetStudentsBySectionData {
     id: UUIDString;
     studentId: string;
     fullName: string;
+    gender?: string | null;
+    dateOfBirth?: DateString | null;
+    branchId: UUIDString;
     academicClassId: UUIDString;
     sectionId: UUIDString;
     parentId: UUIDString;
     phoneNumber?: string | null;
     admissionDate: DateString;
+    status: string;
     isActive: boolean;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+        classTeacher?: {
+          id: UUIDString;
+          fullName: string;
+          phoneNumber: string;
+        } & User_Key;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fullName: string;
+          fatherName?: string | null;
+          motherName?: string | null;
+          phoneNumber: string;
+        } & Parent_Key;
   } & Student_Key)[];
 }
 
 export interface GetStudentsBySectionVariables {
   sectionId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetStudentsByWingData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    gender?: string | null;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    phoneNumber?: string | null;
+    status: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        code: string;
+        name: string;
+      };
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+      } & Section_Key;
+  } & Student_Key)[];
+}
+
+export interface GetStudentsByWingVariables {
+  branchId: UUIDString;
+  wing: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetStudentsData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    admissionYear: number;
+    branchCode: string;
+    serialNumber: number;
+    fullName: string;
+    gender?: string | null;
+    dateOfBirth?: DateString | null;
+    photoUrl?: string | null;
+    aadhaarNumber?: string | null;
+    bloodGroup?: string | null;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    countryCode?: string | null;
+    phoneNumber?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    emergencyContact?: string | null;
+    transportRequired?: boolean | null;
+    admissionDate: DateString;
+    status: string;
+    isActive: boolean;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fullName: string;
+          fatherName?: string | null;
+          motherName?: string | null;
+          phoneNumber: string;
+        } & Parent_Key;
+  } & Student_Key)[];
+}
+
+export interface GetStudentsVariables {
+  branchId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetSubjectsData {
+  subjects: ({
+    id: UUIDString;
+    name: string;
+    code: string;
+    status: string;
+  } & Subject_Key)[];
+}
+
+export interface GetSubjectsVariables {
   limit?: number | null;
   offset?: number | null;
 }
@@ -1035,6 +2668,340 @@ export interface GetTeacherAssignmentsVariables {
   teacherId: UUIDString;
 }
 
+export interface GetTeacherDashboardData {
+  teacher?: {
+    id: UUIDString;
+    userId: UUIDString;
+    branchId: UUIDString;
+    wing: string;
+    employeeId: string;
+    designation: string;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      dashboardMarkedAttendance: ({
+        id: UUIDString;
+        attendanceDate: DateString;
+        status: string;
+        sectionId: UUIDString;
+      } & Attendance_Key)[];
+    } & User_Key;
+      teacherSubjects_on_teacher: ({
+        id: UUIDString;
+        subject: {
+          id: UUIDString;
+          name: string;
+          code: string;
+        } & Subject_Key;
+      } & TeacherSubject_Key)[];
+        teacherSectionAssignments_on_teacher: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          isActive: boolean;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicYear: number;
+            classTeacherId?: UUIDString | null;
+            students_on_section: ({
+              id: UUIDString;
+            } & Student_Key)[];
+              dashboardActiveStudents: ({
+                id: UUIDString;
+                studentId: string;
+                fullName: string;
+                status: string;
+              } & Student_Key)[];
+                dashboardSectionAttendance: ({
+                  id: UUIDString;
+                  studentId: UUIDString;
+                  attendanceDate: DateString;
+                  status: string;
+                  markedById: UUIDString;
+                } & Attendance_Key)[];
+                  classTeacher?: {
+                    id: UUIDString;
+                    fullName: string;
+                  } & User_Key;
+                    academicClass: {
+                      id: UUIDString;
+                      name: string;
+                      wing: {
+                        code: string;
+                        name: string;
+                      };
+                    } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+  } & Teacher_Key;
+}
+
+export interface GetTeacherDashboardVariables {
+  teacherId: UUIDString;
+}
+
+export interface GetTeacherProfileByUserData {
+  teachers: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    wing: string;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    isActive: boolean;
+  } & Teacher_Key)[];
+}
+
+export interface GetTeacherProfileByUserVariables {
+  userId: UUIDString;
+}
+
+export interface GetTeacherProfileData {
+  teacher?: {
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    wing: string;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    alternateMobileNumber?: string | null;
+    email?: string | null;
+    dateOfBirth?: DateString | null;
+    qualification?: string | null;
+    experience?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+    emergencyContact?: string | null;
+    bloodGroup?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      countryCode: string;
+      phoneNumber: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      branch: {
+        id: UUIDString;
+        name: string;
+        branchCode: string;
+      } & Branch_Key;
+        subjects: ({
+          id: UUIDString;
+          subject: {
+            id: UUIDString;
+            name: string;
+            code: string;
+            status: string;
+          } & Subject_Key;
+        } & TeacherSubject_Key)[];
+          assignments: ({
+            id: UUIDString;
+            sectionId: UUIDString;
+            isClassTeacher: boolean;
+            isActive: boolean;
+            section: {
+              id: UUIDString;
+              name: string;
+              academicYear: number;
+              classTeacherId?: UUIDString | null;
+              students_on_section: ({
+                id: UUIDString;
+              } & Student_Key)[];
+                profileActiveStudents: ({
+                  id: UUIDString;
+                  studentId: string;
+                  fullName: string;
+                  status: string;
+                } & Student_Key)[];
+                  profileSectionAttendance: ({
+                    id: UUIDString;
+                    studentId: UUIDString;
+                    attendanceDate: DateString;
+                    status: string;
+                    markedById: UUIDString;
+                  } & Attendance_Key)[];
+                    classTeacher?: {
+                      id: UUIDString;
+                      fullName: string;
+                      phoneNumber: string;
+                    } & User_Key;
+                      academicClass: {
+                        id: UUIDString;
+                        name: string;
+                        wing: {
+                          code: string;
+                          name: string;
+                        };
+                      } & AcademicClass_Key;
+            } & Section_Key;
+          } & TeacherSectionAssignment_Key)[];
+            transferHistories: ({
+              id: UUIDString;
+              oldWing: string;
+              newWing: string;
+              changedAt: TimestampString;
+              changedBy: {
+                id: UUIDString;
+                fullName: string;
+              } & User_Key;
+            } & TeacherTransferHistory_Key)[];
+              attendanceMarked: {
+                profileMarkedAttendance: ({
+                  id: UUIDString;
+                  attendanceDate: DateString;
+                  status: string;
+                  sectionId: UUIDString;
+                } & Attendance_Key)[];
+              };
+  } & Teacher_Key;
+}
+
+export interface GetTeacherProfileVariables {
+  teacherId: UUIDString;
+}
+
+export interface GetTeachersByBranchData {
+  users: ({
+    id: UUIDString;
+    fullName: string;
+    phoneNumber: string;
+    role: string;
+    employeeId?: string | null;
+    branchId?: UUIDString | null;
+  } & User_Key)[];
+}
+
+export interface GetTeachersByBranchVariables {
+  branchId: UUIDString;
+}
+
+export interface GetTeachersByWingData {
+  teachers: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    wing: string;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    email?: string | null;
+    qualification?: string | null;
+    experience?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      countryCode: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      teacherSubjects_on_teacher: ({
+        id: UUIDString;
+        subject: {
+          id: UUIDString;
+          name: string;
+          code: string;
+          status: string;
+        } & Subject_Key;
+      } & TeacherSubject_Key)[];
+        teacherSectionAssignments_on_teacher: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicYear: number;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+  } & Teacher_Key)[];
+}
+
+export interface GetTeachersByWingVariables {
+  branchId: UUIDString;
+  wing: string;
+  limit?: number | null;
+  offset?: number | null;
+}
+
+export interface GetTeachersData {
+  teachers: ({
+    id: UUIDString;
+    userId: UUIDString;
+    employeeId: string;
+    branchId: UUIDString;
+    wing: string;
+    joiningDate: DateString;
+    designation: string;
+    gender: string;
+    email?: string | null;
+    qualification?: string | null;
+    experience?: string | null;
+    isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      countryCode: string;
+      role: string;
+      isActive: boolean;
+    } & User_Key;
+      teacherSubjects_on_teacher: ({
+        id: UUIDString;
+        subject: {
+          id: UUIDString;
+          name: string;
+          code: string;
+          status: string;
+        } & Subject_Key;
+      } & TeacherSubject_Key)[];
+        teacherSectionAssignments_on_teacher: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicYear: number;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+  } & Teacher_Key)[];
+}
+
+export interface GetTeachersVariables {
+  branchId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetUserByPhoneData {
   users: ({
     id: UUIDString;
@@ -1043,9 +3010,15 @@ export interface GetUserByPhoneData {
     countryCode: string;
     phoneNumber: string;
     role: string;
+    employeeId?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
-    isActive: boolean;
+    branch?: {
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key;
+      isActive: boolean;
   } & User_Key)[];
 }
 
@@ -1076,7 +3049,7 @@ export interface GetWingsByBranchData {
     id: UUIDString;
     branchId: UUIDString;
     name: string;
-    code?: string | null;
+    code: string;
     isActive: boolean;
   } & Wing_Key)[];
 }
@@ -1100,12 +3073,75 @@ export interface Payment_Key {
   __typename?: 'Payment_Key';
 }
 
+export interface ReceiptSequence_Key {
+  year: number;
+  branchCode: string;
+  __typename?: 'ReceiptSequence_Key';
+}
+
+export interface RecordAuditLogData {
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface RecordAuditLogVariables {
+  performedBy: string;
+  performedRole: string;
+  actingAs?: string | null;
+  branchId?: UUIDString | null;
+  action: string;
+  entityType?: string | null;
+  entityId?: string | null;
+  oldData?: string | null;
+  newData?: string | null;
+}
+
+export interface RecordPaymentData {
+  receiptSequence_upsert: ReceiptSequence_Key;
+  feePayment_insert: FeePayment_Key;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+
+export interface RecordPaymentVariables {
+  studentId: UUIDString;
+  feePlanId: UUIDString;
+  amount: number;
+  paymentDate: DateString;
+  paymentMode: string;
+  referenceNumber?: string | null;
+  receiptNumber: string;
+  remarks?: string | null;
+  collectedById: UUIDString;
+  branchId: UUIDString;
+  receiptYear: number;
+  branchCode: string;
+  receiptSequence: number;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+
 export interface RemoveSectionData {
   section_update?: Section_Key | null;
 }
 
 export interface RemoveSectionVariables {
   id: UUIDString;
+}
+
+export interface ReversePaymentData {
+  feePayment_update?: FeePayment_Key | null;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+
+export interface ReversePaymentVariables {
+  paymentId: UUIDString;
+  studentId: UUIDString;
+  branchId: UUIDString;
+  reversedById: UUIDString;
+  reason?: string | null;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
 }
 
 export interface SearchStudentsData {
@@ -1120,6 +3156,31 @@ export interface SearchStudentsData {
     parentId: UUIDString;
     phoneNumber?: string | null;
     admissionDate: DateString;
+    status: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        code: string;
+        name: string;
+      };
+    } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+        classTeacher?: {
+          id: UUIDString;
+          fullName: string;
+          phoneNumber: string;
+        } & User_Key;
+      } & Section_Key;
+        parent: {
+          id: UUIDString;
+          fatherName?: string | null;
+          motherName?: string | null;
+          phoneNumber: string;
+        } & Parent_Key;
   } & Student_Key)[];
 }
 
@@ -1134,6 +3195,35 @@ export interface Section_Key {
   __typename?: 'Section_Key';
 }
 
+export interface SeedAcademicClassData {
+  academicClass_insert: AcademicClass_Key;
+}
+
+export interface SeedAcademicClassVariables {
+  branchId: UUIDString;
+  wingId: UUIDString;
+  name: string;
+  classCode: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface StaffIdSequence_Key {
+  joiningYear: number;
+  branchCode: string;
+  __typename?: 'StaffIdSequence_Key';
+}
+
+export interface StudentFeeItem_Key {
+  id: UUIDString;
+  __typename?: 'StudentFeeItem_Key';
+}
+
+export interface StudentFeePlan_Key {
+  id: UUIDString;
+  __typename?: 'StudentFeePlan_Key';
+}
+
 export interface StudentFee_Key {
   id: UUIDString;
   __typename?: 'StudentFee_Key';
@@ -1145,9 +3235,30 @@ export interface StudentIdSequence_Key {
   __typename?: 'StudentIdSequence_Key';
 }
 
+export interface StudentPromotionHistory_Key {
+  id: UUIDString;
+  __typename?: 'StudentPromotionHistory_Key';
+}
+
+export interface StudentSectionHistory_Key {
+  id: UUIDString;
+  __typename?: 'StudentSectionHistory_Key';
+}
+
+export interface StudentSequence_Key {
+  year: number;
+  branchCode: string;
+  __typename?: 'StudentSequence_Key';
+}
+
 export interface Student_Key {
   id: UUIDString;
   __typename?: 'Student_Key';
+}
+
+export interface Subject_Key {
+  id: UUIDString;
+  __typename?: 'Subject_Key';
 }
 
 export interface Suggestion_Key {
@@ -1158,6 +3269,53 @@ export interface Suggestion_Key {
 export interface TeacherAssignment_Key {
   id: UUIDString;
   __typename?: 'TeacherAssignment_Key';
+}
+
+export interface TeacherSectionAssignment_Key {
+  id: UUIDString;
+  __typename?: 'TeacherSectionAssignment_Key';
+}
+
+export interface TeacherSubject_Key {
+  id: UUIDString;
+  __typename?: 'TeacherSubject_Key';
+}
+
+export interface TeacherTransferHistory_Key {
+  id: UUIDString;
+  __typename?: 'TeacherTransferHistory_Key';
+}
+
+export interface Teacher_Key {
+  id: UUIDString;
+  __typename?: 'Teacher_Key';
+}
+
+export interface UpdateAccountantData {
+  user_update?: User_Key | null;
+  accountant_update?: Accountant_Key | null;
+}
+
+export interface UpdateAccountantVariables {
+  accountantId: UUIDString;
+  userId: UUIDString;
+  branchId: UUIDString;
+  fullName: string;
+  countryCode: string;
+  phoneNumber: string;
+  email?: string | null;
+  gender: string;
+  joiningDate: DateString;
+  designation: string;
+  qualification?: string | null;
+  experience?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  bloodGroup?: string | null;
+  isActive: boolean;
 }
 
 export interface UpdateAttendanceData {
@@ -1185,6 +3343,63 @@ export interface UpdateBranchVariables {
   phone?: string | null;
   email?: string | null;
   status: string;
+  isActive: boolean;
+}
+
+export interface UpdateFeeCategoryData {
+  feeCategory_update?: FeeCategory_Key | null;
+}
+
+export interface UpdateFeeCategoryVariables {
+  categoryId: UUIDString;
+  name: string;
+  status: string;
+}
+
+export interface UpdateFeePlanData {
+  studentFeePlan_update?: StudentFeePlan_Key | null;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+
+export interface UpdateFeePlanVariables {
+  feePlanId: UUIDString;
+  studentId: UUIDString;
+  totalAmount: number;
+  isActive: boolean;
+  branchId: UUIDString;
+  updatedById: UUIDString;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+
+export interface UpdateTeacherData {
+  user_update?: User_Key | null;
+  teacher_update?: Teacher_Key | null;
+}
+
+export interface UpdateTeacherVariables {
+  teacherId: UUIDString;
+  userId: UUIDString;
+  fullName: string;
+  countryCode: string;
+  phoneNumber: string;
+  alternateMobileNumber?: string | null;
+  email?: string | null;
+  dateOfBirth?: DateString | null;
+  gender: string;
+  joiningDate: DateString;
+  designation: string;
+  qualification?: string | null;
+  experience?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  bloodGroup?: string | null;
+  branchId: UUIDString;
+  wing: string;
   isActive: boolean;
 }
 
@@ -1271,6 +3486,54 @@ export const createClassRef: CreateClassRef;
 
 export function createClass(vars: CreateClassVariables): MutationPromise<CreateClassData, CreateClassVariables>;
 export function createClass(dc: DataConnect, vars: CreateClassVariables): MutationPromise<CreateClassData, CreateClassVariables>;
+
+interface ActivateClassRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ActivateClassVariables): MutationRef<ActivateClassData, ActivateClassVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ActivateClassVariables): MutationRef<ActivateClassData, ActivateClassVariables>;
+  operationName: string;
+}
+export const activateClassRef: ActivateClassRef;
+
+export function activateClass(vars: ActivateClassVariables): MutationPromise<ActivateClassData, ActivateClassVariables>;
+export function activateClass(dc: DataConnect, vars: ActivateClassVariables): MutationPromise<ActivateClassData, ActivateClassVariables>;
+
+interface DeactivateClassRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: DeactivateClassVariables): MutationRef<DeactivateClassData, DeactivateClassVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: DeactivateClassVariables): MutationRef<DeactivateClassData, DeactivateClassVariables>;
+  operationName: string;
+}
+export const deactivateClassRef: DeactivateClassRef;
+
+export function deactivateClass(vars: DeactivateClassVariables): MutationPromise<DeactivateClassData, DeactivateClassVariables>;
+export function deactivateClass(dc: DataConnect, vars: DeactivateClassVariables): MutationPromise<DeactivateClassData, DeactivateClassVariables>;
+
+interface SeedAcademicClassRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SeedAcademicClassVariables): MutationRef<SeedAcademicClassData, SeedAcademicClassVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: SeedAcademicClassVariables): MutationRef<SeedAcademicClassData, SeedAcademicClassVariables>;
+  operationName: string;
+}
+export const seedAcademicClassRef: SeedAcademicClassRef;
+
+export function seedAcademicClass(vars: SeedAcademicClassVariables): MutationPromise<SeedAcademicClassData, SeedAcademicClassVariables>;
+export function seedAcademicClass(dc: DataConnect, vars: SeedAcademicClassVariables): MutationPromise<SeedAcademicClassData, SeedAcademicClassVariables>;
+
+interface CreateWingRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateWingVariables): MutationRef<CreateWingData, CreateWingVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateWingVariables): MutationRef<CreateWingData, CreateWingVariables>;
+  operationName: string;
+}
+export const createWingRef: CreateWingRef;
+
+export function createWing(vars: CreateWingVariables): MutationPromise<CreateWingData, CreateWingVariables>;
+export function createWing(dc: DataConnect, vars: CreateWingVariables): MutationPromise<CreateWingData, CreateWingVariables>;
 
 interface CreateSectionRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1404,6 +3667,234 @@ export const assignTeacherRef: AssignTeacherRef;
 export function assignTeacher(vars: AssignTeacherVariables): MutationPromise<AssignTeacherData, AssignTeacherVariables>;
 export function assignTeacher(dc: DataConnect, vars: AssignTeacherVariables): MutationPromise<AssignTeacherData, AssignTeacherVariables>;
 
+interface CreateCoordinatorRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateCoordinatorVariables): MutationRef<CreateCoordinatorData, CreateCoordinatorVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateCoordinatorVariables): MutationRef<CreateCoordinatorData, CreateCoordinatorVariables>;
+  operationName: string;
+}
+export const createCoordinatorRef: CreateCoordinatorRef;
+
+export function createCoordinator(vars: CreateCoordinatorVariables): MutationPromise<CreateCoordinatorData, CreateCoordinatorVariables>;
+export function createCoordinator(dc: DataConnect, vars: CreateCoordinatorVariables): MutationPromise<CreateCoordinatorData, CreateCoordinatorVariables>;
+
+interface CreateTeacherRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateTeacherVariables): MutationRef<CreateTeacherData, CreateTeacherVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateTeacherVariables): MutationRef<CreateTeacherData, CreateTeacherVariables>;
+  operationName: string;
+}
+export const createTeacherRef: CreateTeacherRef;
+
+export function createTeacher(vars: CreateTeacherVariables): MutationPromise<CreateTeacherData, CreateTeacherVariables>;
+export function createTeacher(dc: DataConnect, vars: CreateTeacherVariables): MutationPromise<CreateTeacherData, CreateTeacherVariables>;
+
+interface AssignTeacherClassTeacherRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: AssignTeacherClassTeacherVariables): MutationRef<AssignTeacherClassTeacherData, AssignTeacherClassTeacherVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: AssignTeacherClassTeacherVariables): MutationRef<AssignTeacherClassTeacherData, AssignTeacherClassTeacherVariables>;
+  operationName: string;
+}
+export const assignTeacherClassTeacherRef: AssignTeacherClassTeacherRef;
+
+export function assignTeacherClassTeacher(vars: AssignTeacherClassTeacherVariables): MutationPromise<AssignTeacherClassTeacherData, AssignTeacherClassTeacherVariables>;
+export function assignTeacherClassTeacher(dc: DataConnect, vars: AssignTeacherClassTeacherVariables): MutationPromise<AssignTeacherClassTeacherData, AssignTeacherClassTeacherVariables>;
+
+interface UpdateTeacherRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateTeacherVariables): MutationRef<UpdateTeacherData, UpdateTeacherVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateTeacherVariables): MutationRef<UpdateTeacherData, UpdateTeacherVariables>;
+  operationName: string;
+}
+export const updateTeacherRef: UpdateTeacherRef;
+
+export function updateTeacher(vars: UpdateTeacherVariables): MutationPromise<UpdateTeacherData, UpdateTeacherVariables>;
+export function updateTeacher(dc: DataConnect, vars: UpdateTeacherVariables): MutationPromise<UpdateTeacherData, UpdateTeacherVariables>;
+
+interface AssignClassTeacherRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: AssignClassTeacherVariables): MutationRef<AssignClassTeacherData, AssignClassTeacherVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: AssignClassTeacherVariables): MutationRef<AssignClassTeacherData, AssignClassTeacherVariables>;
+  operationName: string;
+}
+export const assignClassTeacherRef: AssignClassTeacherRef;
+
+export function assignClassTeacher(vars: AssignClassTeacherVariables): MutationPromise<AssignClassTeacherData, AssignClassTeacherVariables>;
+export function assignClassTeacher(dc: DataConnect, vars: AssignClassTeacherVariables): MutationPromise<AssignClassTeacherData, AssignClassTeacherVariables>;
+
+interface CreateSubjectRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateSubjectVariables): MutationRef<CreateSubjectData, CreateSubjectVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateSubjectVariables): MutationRef<CreateSubjectData, CreateSubjectVariables>;
+  operationName: string;
+}
+export const createSubjectRef: CreateSubjectRef;
+
+export function createSubject(vars: CreateSubjectVariables): MutationPromise<CreateSubjectData, CreateSubjectVariables>;
+export function createSubject(dc: DataConnect, vars: CreateSubjectVariables): MutationPromise<CreateSubjectData, CreateSubjectVariables>;
+
+interface AssignTeacherSubjectRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: AssignTeacherSubjectVariables): MutationRef<AssignTeacherSubjectData, AssignTeacherSubjectVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: AssignTeacherSubjectVariables): MutationRef<AssignTeacherSubjectData, AssignTeacherSubjectVariables>;
+  operationName: string;
+}
+export const assignTeacherSubjectRef: AssignTeacherSubjectRef;
+
+export function assignTeacherSubject(vars: AssignTeacherSubjectVariables): MutationPromise<AssignTeacherSubjectData, AssignTeacherSubjectVariables>;
+export function assignTeacherSubject(dc: DataConnect, vars: AssignTeacherSubjectVariables): MutationPromise<AssignTeacherSubjectData, AssignTeacherSubjectVariables>;
+
+interface ClearTeacherSubjectsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ClearTeacherSubjectsVariables): MutationRef<ClearTeacherSubjectsData, ClearTeacherSubjectsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ClearTeacherSubjectsVariables): MutationRef<ClearTeacherSubjectsData, ClearTeacherSubjectsVariables>;
+  operationName: string;
+}
+export const clearTeacherSubjectsRef: ClearTeacherSubjectsRef;
+
+export function clearTeacherSubjects(vars: ClearTeacherSubjectsVariables): MutationPromise<ClearTeacherSubjectsData, ClearTeacherSubjectsVariables>;
+export function clearTeacherSubjects(dc: DataConnect, vars: ClearTeacherSubjectsVariables): MutationPromise<ClearTeacherSubjectsData, ClearTeacherSubjectsVariables>;
+
+interface CreateAccountantRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateAccountantVariables): MutationRef<CreateAccountantData, CreateAccountantVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateAccountantVariables): MutationRef<CreateAccountantData, CreateAccountantVariables>;
+  operationName: string;
+}
+export const createAccountantRef: CreateAccountantRef;
+
+export function createAccountant(vars: CreateAccountantVariables): MutationPromise<CreateAccountantData, CreateAccountantVariables>;
+export function createAccountant(dc: DataConnect, vars: CreateAccountantVariables): MutationPromise<CreateAccountantData, CreateAccountantVariables>;
+
+interface UpdateAccountantRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateAccountantVariables): MutationRef<UpdateAccountantData, UpdateAccountantVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateAccountantVariables): MutationRef<UpdateAccountantData, UpdateAccountantVariables>;
+  operationName: string;
+}
+export const updateAccountantRef: UpdateAccountantRef;
+
+export function updateAccountant(vars: UpdateAccountantVariables): MutationPromise<UpdateAccountantData, UpdateAccountantVariables>;
+export function updateAccountant(dc: DataConnect, vars: UpdateAccountantVariables): MutationPromise<UpdateAccountantData, UpdateAccountantVariables>;
+
+interface CreateFeeCategoryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateFeeCategoryVariables): MutationRef<CreateFeeCategoryData, CreateFeeCategoryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateFeeCategoryVariables): MutationRef<CreateFeeCategoryData, CreateFeeCategoryVariables>;
+  operationName: string;
+}
+export const createFeeCategoryRef: CreateFeeCategoryRef;
+
+export function createFeeCategory(vars: CreateFeeCategoryVariables): MutationPromise<CreateFeeCategoryData, CreateFeeCategoryVariables>;
+export function createFeeCategory(dc: DataConnect, vars: CreateFeeCategoryVariables): MutationPromise<CreateFeeCategoryData, CreateFeeCategoryVariables>;
+
+interface UpdateFeeCategoryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateFeeCategoryVariables): MutationRef<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateFeeCategoryVariables): MutationRef<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
+  operationName: string;
+}
+export const updateFeeCategoryRef: UpdateFeeCategoryRef;
+
+export function updateFeeCategory(vars: UpdateFeeCategoryVariables): MutationPromise<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
+export function updateFeeCategory(dc: DataConnect, vars: UpdateFeeCategoryVariables): MutationPromise<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
+
+interface CreateFeePlanRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateFeePlanVariables): MutationRef<CreateFeePlanData, CreateFeePlanVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateFeePlanVariables): MutationRef<CreateFeePlanData, CreateFeePlanVariables>;
+  operationName: string;
+}
+export const createFeePlanRef: CreateFeePlanRef;
+
+export function createFeePlan(vars: CreateFeePlanVariables): MutationPromise<CreateFeePlanData, CreateFeePlanVariables>;
+export function createFeePlan(dc: DataConnect, vars: CreateFeePlanVariables): MutationPromise<CreateFeePlanData, CreateFeePlanVariables>;
+
+interface UpdateFeePlanRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateFeePlanVariables): MutationRef<UpdateFeePlanData, UpdateFeePlanVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateFeePlanVariables): MutationRef<UpdateFeePlanData, UpdateFeePlanVariables>;
+  operationName: string;
+}
+export const updateFeePlanRef: UpdateFeePlanRef;
+
+export function updateFeePlan(vars: UpdateFeePlanVariables): MutationPromise<UpdateFeePlanData, UpdateFeePlanVariables>;
+export function updateFeePlan(dc: DataConnect, vars: UpdateFeePlanVariables): MutationPromise<UpdateFeePlanData, UpdateFeePlanVariables>;
+
+interface ClearFeePlanItemsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ClearFeePlanItemsVariables): MutationRef<ClearFeePlanItemsData, ClearFeePlanItemsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ClearFeePlanItemsVariables): MutationRef<ClearFeePlanItemsData, ClearFeePlanItemsVariables>;
+  operationName: string;
+}
+export const clearFeePlanItemsRef: ClearFeePlanItemsRef;
+
+export function clearFeePlanItems(vars: ClearFeePlanItemsVariables): MutationPromise<ClearFeePlanItemsData, ClearFeePlanItemsVariables>;
+export function clearFeePlanItems(dc: DataConnect, vars: ClearFeePlanItemsVariables): MutationPromise<ClearFeePlanItemsData, ClearFeePlanItemsVariables>;
+
+interface CreateFeePlanItemRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateFeePlanItemVariables): MutationRef<CreateFeePlanItemData, CreateFeePlanItemVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateFeePlanItemVariables): MutationRef<CreateFeePlanItemData, CreateFeePlanItemVariables>;
+  operationName: string;
+}
+export const createFeePlanItemRef: CreateFeePlanItemRef;
+
+export function createFeePlanItem(vars: CreateFeePlanItemVariables): MutationPromise<CreateFeePlanItemData, CreateFeePlanItemVariables>;
+export function createFeePlanItem(dc: DataConnect, vars: CreateFeePlanItemVariables): MutationPromise<CreateFeePlanItemData, CreateFeePlanItemVariables>;
+
+interface RecordPaymentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: RecordPaymentVariables): MutationRef<RecordPaymentData, RecordPaymentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: RecordPaymentVariables): MutationRef<RecordPaymentData, RecordPaymentVariables>;
+  operationName: string;
+}
+export const recordPaymentRef: RecordPaymentRef;
+
+export function recordPayment(vars: RecordPaymentVariables): MutationPromise<RecordPaymentData, RecordPaymentVariables>;
+export function recordPayment(dc: DataConnect, vars: RecordPaymentVariables): MutationPromise<RecordPaymentData, RecordPaymentVariables>;
+
+interface ReversePaymentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: ReversePaymentVariables): MutationRef<ReversePaymentData, ReversePaymentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: ReversePaymentVariables): MutationRef<ReversePaymentData, ReversePaymentVariables>;
+  operationName: string;
+}
+export const reversePaymentRef: ReversePaymentRef;
+
+export function reversePayment(vars: ReversePaymentVariables): MutationPromise<ReversePaymentData, ReversePaymentVariables>;
+export function reversePayment(dc: DataConnect, vars: ReversePaymentVariables): MutationPromise<ReversePaymentData, ReversePaymentVariables>;
+
+interface RecordAuditLogRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: RecordAuditLogVariables): MutationRef<RecordAuditLogData, RecordAuditLogVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: RecordAuditLogVariables): MutationRef<RecordAuditLogData, RecordAuditLogVariables>;
+  operationName: string;
+}
+export const recordAuditLogRef: RecordAuditLogRef;
+
+export function recordAuditLog(vars: RecordAuditLogVariables): MutationPromise<RecordAuditLogData, RecordAuditLogVariables>;
+export function recordAuditLog(dc: DataConnect, vars: RecordAuditLogVariables): MutationPromise<RecordAuditLogData, RecordAuditLogVariables>;
+
 interface GetCurrentUserRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetCurrentUserVariables): QueryRef<GetCurrentUserData, GetCurrentUserVariables>;
@@ -1475,6 +3966,18 @@ export const getParentByUserRef: GetParentByUserRef;
 
 export function getParentByUser(vars: GetParentByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentByUserData, GetParentByUserVariables>;
 export function getParentByUser(dc: DataConnect, vars: GetParentByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentByUserData, GetParentByUserVariables>;
+
+interface GetParentByPhoneRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetParentByPhoneVariables): QueryRef<GetParentByPhoneData, GetParentByPhoneVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetParentByPhoneVariables): QueryRef<GetParentByPhoneData, GetParentByPhoneVariables>;
+  operationName: string;
+}
+export const getParentByPhoneRef: GetParentByPhoneRef;
+
+export function getParentByPhone(vars: GetParentByPhoneVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentByPhoneData, GetParentByPhoneVariables>;
+export function getParentByPhone(dc: DataConnect, vars: GetParentByPhoneVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentByPhoneData, GetParentByPhoneVariables>;
 
 interface GetBranchesRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1680,6 +4183,54 @@ export const getStudentIdSequenceRef: GetStudentIdSequenceRef;
 export function getStudentIdSequence(vars: GetStudentIdSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentIdSequenceData, GetStudentIdSequenceVariables>;
 export function getStudentIdSequence(dc: DataConnect, vars: GetStudentIdSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentIdSequenceData, GetStudentIdSequenceVariables>;
 
+interface GetStudentDetailsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentDetailsVariables): QueryRef<GetStudentDetailsData, GetStudentDetailsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStudentDetailsVariables): QueryRef<GetStudentDetailsData, GetStudentDetailsVariables>;
+  operationName: string;
+}
+export const getStudentDetailsRef: GetStudentDetailsRef;
+
+export function getStudentDetails(vars: GetStudentDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentDetailsData, GetStudentDetailsVariables>;
+export function getStudentDetails(dc: DataConnect, vars: GetStudentDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentDetailsData, GetStudentDetailsVariables>;
+
+interface GetStudentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentsVariables): QueryRef<GetStudentsData, GetStudentsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStudentsVariables): QueryRef<GetStudentsData, GetStudentsVariables>;
+  operationName: string;
+}
+export const getStudentsRef: GetStudentsRef;
+
+export function getStudents(vars: GetStudentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentsData, GetStudentsVariables>;
+export function getStudents(dc: DataConnect, vars: GetStudentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentsData, GetStudentsVariables>;
+
+interface GetStaffIdSequenceRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStaffIdSequenceVariables): QueryRef<GetStaffIdSequenceData, GetStaffIdSequenceVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStaffIdSequenceVariables): QueryRef<GetStaffIdSequenceData, GetStaffIdSequenceVariables>;
+  operationName: string;
+}
+export const getStaffIdSequenceRef: GetStaffIdSequenceRef;
+
+export function getStaffIdSequence(vars: GetStaffIdSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStaffIdSequenceData, GetStaffIdSequenceVariables>;
+export function getStaffIdSequence(dc: DataConnect, vars: GetStaffIdSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStaffIdSequenceData, GetStaffIdSequenceVariables>;
+
+interface GetEmployeeSequenceRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetEmployeeSequenceVariables): QueryRef<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetEmployeeSequenceVariables): QueryRef<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
+  operationName: string;
+}
+export const getEmployeeSequenceRef: GetEmployeeSequenceRef;
+
+export function getEmployeeSequence(vars: GetEmployeeSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
+export function getEmployeeSequence(dc: DataConnect, vars: GetEmployeeSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
+
 interface GetAttendanceByMonthRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetAttendanceByMonthVariables): QueryRef<GetAttendanceByMonthData, GetAttendanceByMonthVariables>;
@@ -1703,6 +4254,18 @@ export const getAttendanceBySectionRef: GetAttendanceBySectionRef;
 
 export function getAttendanceBySection(vars: GetAttendanceBySectionVariables, options?: ExecuteQueryOptions): QueryPromise<GetAttendanceBySectionData, GetAttendanceBySectionVariables>;
 export function getAttendanceBySection(dc: DataConnect, vars: GetAttendanceBySectionVariables, options?: ExecuteQueryOptions): QueryPromise<GetAttendanceBySectionData, GetAttendanceBySectionVariables>;
+
+interface GetAttendanceByBranchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAttendanceByBranchVariables): QueryRef<GetAttendanceByBranchData, GetAttendanceByBranchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetAttendanceByBranchVariables): QueryRef<GetAttendanceByBranchData, GetAttendanceByBranchVariables>;
+  operationName: string;
+}
+export const getAttendanceByBranchRef: GetAttendanceByBranchRef;
+
+export function getAttendanceByBranch(vars: GetAttendanceByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetAttendanceByBranchData, GetAttendanceByBranchVariables>;
+export function getAttendanceByBranch(dc: DataConnect, vars: GetAttendanceByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetAttendanceByBranchData, GetAttendanceByBranchVariables>;
 
 interface GetFeeDetailsRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1787,4 +4350,424 @@ export const getClassAnalyticsRef: GetClassAnalyticsRef;
 
 export function getClassAnalytics(vars: GetClassAnalyticsVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassAnalyticsData, GetClassAnalyticsVariables>;
 export function getClassAnalytics(dc: DataConnect, vars: GetClassAnalyticsVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassAnalyticsData, GetClassAnalyticsVariables>;
+
+interface GetAcademicClassesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetAcademicClassesVariables): QueryRef<GetAcademicClassesData, GetAcademicClassesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetAcademicClassesVariables): QueryRef<GetAcademicClassesData, GetAcademicClassesVariables>;
+  operationName: string;
+}
+export const getAcademicClassesRef: GetAcademicClassesRef;
+
+export function getAcademicClasses(vars?: GetAcademicClassesVariables, options?: ExecuteQueryOptions): QueryPromise<GetAcademicClassesData, GetAcademicClassesVariables>;
+export function getAcademicClasses(dc: DataConnect, vars?: GetAcademicClassesVariables, options?: ExecuteQueryOptions): QueryPromise<GetAcademicClassesData, GetAcademicClassesVariables>;
+
+interface GetActiveAcademicClassesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetActiveAcademicClassesVariables): QueryRef<GetActiveAcademicClassesData, GetActiveAcademicClassesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetActiveAcademicClassesVariables): QueryRef<GetActiveAcademicClassesData, GetActiveAcademicClassesVariables>;
+  operationName: string;
+}
+export const getActiveAcademicClassesRef: GetActiveAcademicClassesRef;
+
+export function getActiveAcademicClasses(vars?: GetActiveAcademicClassesVariables, options?: ExecuteQueryOptions): QueryPromise<GetActiveAcademicClassesData, GetActiveAcademicClassesVariables>;
+export function getActiveAcademicClasses(dc: DataConnect, vars?: GetActiveAcademicClassesVariables, options?: ExecuteQueryOptions): QueryPromise<GetActiveAcademicClassesData, GetActiveAcademicClassesVariables>;
+
+interface GetClassesByWingCodeRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassesByWingCodeVariables): QueryRef<GetClassesByWingCodeData, GetClassesByWingCodeVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetClassesByWingCodeVariables): QueryRef<GetClassesByWingCodeData, GetClassesByWingCodeVariables>;
+  operationName: string;
+}
+export const getClassesByWingCodeRef: GetClassesByWingCodeRef;
+
+export function getClassesByWingCode(vars: GetClassesByWingCodeVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassesByWingCodeData, GetClassesByWingCodeVariables>;
+export function getClassesByWingCode(dc: DataConnect, vars: GetClassesByWingCodeVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassesByWingCodeData, GetClassesByWingCodeVariables>;
+
+interface GetCoordinatorsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCoordinatorsVariables): QueryRef<GetCoordinatorsData, GetCoordinatorsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCoordinatorsVariables): QueryRef<GetCoordinatorsData, GetCoordinatorsVariables>;
+  operationName: string;
+}
+export const getCoordinatorsRef: GetCoordinatorsRef;
+
+export function getCoordinators(vars: GetCoordinatorsVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorsData, GetCoordinatorsVariables>;
+export function getCoordinators(dc: DataConnect, vars: GetCoordinatorsVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorsData, GetCoordinatorsVariables>;
+
+interface GetCoordinatorDetailsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCoordinatorDetailsVariables): QueryRef<GetCoordinatorDetailsData, GetCoordinatorDetailsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCoordinatorDetailsVariables): QueryRef<GetCoordinatorDetailsData, GetCoordinatorDetailsVariables>;
+  operationName: string;
+}
+export const getCoordinatorDetailsRef: GetCoordinatorDetailsRef;
+
+export function getCoordinatorDetails(vars: GetCoordinatorDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorDetailsData, GetCoordinatorDetailsVariables>;
+export function getCoordinatorDetails(dc: DataConnect, vars: GetCoordinatorDetailsVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorDetailsData, GetCoordinatorDetailsVariables>;
+
+interface GetCoordinatorByUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCoordinatorByUserVariables): QueryRef<GetCoordinatorByUserData, GetCoordinatorByUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCoordinatorByUserVariables): QueryRef<GetCoordinatorByUserData, GetCoordinatorByUserVariables>;
+  operationName: string;
+}
+export const getCoordinatorByUserRef: GetCoordinatorByUserRef;
+
+export function getCoordinatorByUser(vars: GetCoordinatorByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorByUserData, GetCoordinatorByUserVariables>;
+export function getCoordinatorByUser(dc: DataConnect, vars: GetCoordinatorByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorByUserData, GetCoordinatorByUserVariables>;
+
+interface GetSectionsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetSectionsVariables): QueryRef<GetSectionsData, GetSectionsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetSectionsVariables): QueryRef<GetSectionsData, GetSectionsVariables>;
+  operationName: string;
+}
+export const getSectionsRef: GetSectionsRef;
+
+export function getSections(vars: GetSectionsVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsData, GetSectionsVariables>;
+export function getSections(dc: DataConnect, vars: GetSectionsVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsData, GetSectionsVariables>;
+
+interface GetSectionsByClassAndYearRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetSectionsByClassAndYearVariables): QueryRef<GetSectionsByClassAndYearData, GetSectionsByClassAndYearVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetSectionsByClassAndYearVariables): QueryRef<GetSectionsByClassAndYearData, GetSectionsByClassAndYearVariables>;
+  operationName: string;
+}
+export const getSectionsByClassAndYearRef: GetSectionsByClassAndYearRef;
+
+export function getSectionsByClassAndYear(vars: GetSectionsByClassAndYearVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsByClassAndYearData, GetSectionsByClassAndYearVariables>;
+export function getSectionsByClassAndYear(dc: DataConnect, vars: GetSectionsByClassAndYearVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsByClassAndYearData, GetSectionsByClassAndYearVariables>;
+
+interface GetPrincipalDashboardRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPrincipalDashboardVariables): QueryRef<GetPrincipalDashboardData, GetPrincipalDashboardVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPrincipalDashboardVariables): QueryRef<GetPrincipalDashboardData, GetPrincipalDashboardVariables>;
+  operationName: string;
+}
+export const getPrincipalDashboardRef: GetPrincipalDashboardRef;
+
+export function getPrincipalDashboard(vars: GetPrincipalDashboardVariables, options?: ExecuteQueryOptions): QueryPromise<GetPrincipalDashboardData, GetPrincipalDashboardVariables>;
+export function getPrincipalDashboard(dc: DataConnect, vars: GetPrincipalDashboardVariables, options?: ExecuteQueryOptions): QueryPromise<GetPrincipalDashboardData, GetPrincipalDashboardVariables>;
+
+interface GetStudentsByWingRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentsByWingVariables): QueryRef<GetStudentsByWingData, GetStudentsByWingVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStudentsByWingVariables): QueryRef<GetStudentsByWingData, GetStudentsByWingVariables>;
+  operationName: string;
+}
+export const getStudentsByWingRef: GetStudentsByWingRef;
+
+export function getStudentsByWing(vars: GetStudentsByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentsByWingData, GetStudentsByWingVariables>;
+export function getStudentsByWing(dc: DataConnect, vars: GetStudentsByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentsByWingData, GetStudentsByWingVariables>;
+
+interface GetCoordinatorStudentsByWingRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCoordinatorStudentsByWingVariables): QueryRef<GetCoordinatorStudentsByWingData, GetCoordinatorStudentsByWingVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCoordinatorStudentsByWingVariables): QueryRef<GetCoordinatorStudentsByWingData, GetCoordinatorStudentsByWingVariables>;
+  operationName: string;
+}
+export const getCoordinatorStudentsByWingRef: GetCoordinatorStudentsByWingRef;
+
+export function getCoordinatorStudentsByWing(vars: GetCoordinatorStudentsByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorStudentsByWingData, GetCoordinatorStudentsByWingVariables>;
+export function getCoordinatorStudentsByWing(dc: DataConnect, vars: GetCoordinatorStudentsByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorStudentsByWingData, GetCoordinatorStudentsByWingVariables>;
+
+interface GetPromotionHistoryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetPromotionHistoryVariables): QueryRef<GetPromotionHistoryData, GetPromotionHistoryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetPromotionHistoryVariables): QueryRef<GetPromotionHistoryData, GetPromotionHistoryVariables>;
+  operationName: string;
+}
+export const getPromotionHistoryRef: GetPromotionHistoryRef;
+
+export function getPromotionHistory(vars?: GetPromotionHistoryVariables, options?: ExecuteQueryOptions): QueryPromise<GetPromotionHistoryData, GetPromotionHistoryVariables>;
+export function getPromotionHistory(dc: DataConnect, vars?: GetPromotionHistoryVariables, options?: ExecuteQueryOptions): QueryPromise<GetPromotionHistoryData, GetPromotionHistoryVariables>;
+
+interface GetStudentSequenceRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentSequenceVariables): QueryRef<GetStudentSequenceData, GetStudentSequenceVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStudentSequenceVariables): QueryRef<GetStudentSequenceData, GetStudentSequenceVariables>;
+  operationName: string;
+}
+export const getStudentSequenceRef: GetStudentSequenceRef;
+
+export function getStudentSequence(vars: GetStudentSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentSequenceData, GetStudentSequenceVariables>;
+export function getStudentSequence(dc: DataConnect, vars: GetStudentSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentSequenceData, GetStudentSequenceVariables>;
+
+interface GenerateAdmissionNumberRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GenerateAdmissionNumberVariables): QueryRef<GenerateAdmissionNumberData, GenerateAdmissionNumberVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GenerateAdmissionNumberVariables): QueryRef<GenerateAdmissionNumberData, GenerateAdmissionNumberVariables>;
+  operationName: string;
+}
+export const generateAdmissionNumberRef: GenerateAdmissionNumberRef;
+
+export function generateAdmissionNumber(vars: GenerateAdmissionNumberVariables, options?: ExecuteQueryOptions): QueryPromise<GenerateAdmissionNumberData, GenerateAdmissionNumberVariables>;
+export function generateAdmissionNumber(dc: DataConnect, vars: GenerateAdmissionNumberVariables, options?: ExecuteQueryOptions): QueryPromise<GenerateAdmissionNumberData, GenerateAdmissionNumberVariables>;
+
+interface GetLastStudentSerialRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLastStudentSerialVariables): QueryRef<GetLastStudentSerialData, GetLastStudentSerialVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLastStudentSerialVariables): QueryRef<GetLastStudentSerialData, GetLastStudentSerialVariables>;
+  operationName: string;
+}
+export const getLastStudentSerialRef: GetLastStudentSerialRef;
+
+export function getLastStudentSerial(vars: GetLastStudentSerialVariables, options?: ExecuteQueryOptions): QueryPromise<GetLastStudentSerialData, GetLastStudentSerialVariables>;
+export function getLastStudentSerial(dc: DataConnect, vars: GetLastStudentSerialVariables, options?: ExecuteQueryOptions): QueryPromise<GetLastStudentSerialData, GetLastStudentSerialVariables>;
+
+interface GetTeachersRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeachersVariables): QueryRef<GetTeachersData, GetTeachersVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeachersVariables): QueryRef<GetTeachersData, GetTeachersVariables>;
+  operationName: string;
+}
+export const getTeachersRef: GetTeachersRef;
+
+export function getTeachers(vars: GetTeachersVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersData, GetTeachersVariables>;
+export function getTeachers(dc: DataConnect, vars: GetTeachersVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersData, GetTeachersVariables>;
+
+interface GetTeachersByBranchRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeachersByBranchVariables): QueryRef<GetTeachersByBranchData, GetTeachersByBranchVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeachersByBranchVariables): QueryRef<GetTeachersByBranchData, GetTeachersByBranchVariables>;
+  operationName: string;
+}
+export const getTeachersByBranchRef: GetTeachersByBranchRef;
+
+export function getTeachersByBranch(vars: GetTeachersByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersByBranchData, GetTeachersByBranchVariables>;
+export function getTeachersByBranch(dc: DataConnect, vars: GetTeachersByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersByBranchData, GetTeachersByBranchVariables>;
+
+interface GetTeachersByWingRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeachersByWingVariables): QueryRef<GetTeachersByWingData, GetTeachersByWingVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeachersByWingVariables): QueryRef<GetTeachersByWingData, GetTeachersByWingVariables>;
+  operationName: string;
+}
+export const getTeachersByWingRef: GetTeachersByWingRef;
+
+export function getTeachersByWing(vars: GetTeachersByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersByWingData, GetTeachersByWingVariables>;
+export function getTeachersByWing(dc: DataConnect, vars: GetTeachersByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeachersByWingData, GetTeachersByWingVariables>;
+
+interface GetCoordinatorTeachersByWingRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCoordinatorTeachersByWingVariables): QueryRef<GetCoordinatorTeachersByWingData, GetCoordinatorTeachersByWingVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCoordinatorTeachersByWingVariables): QueryRef<GetCoordinatorTeachersByWingData, GetCoordinatorTeachersByWingVariables>;
+  operationName: string;
+}
+export const getCoordinatorTeachersByWingRef: GetCoordinatorTeachersByWingRef;
+
+export function getCoordinatorTeachersByWing(vars: GetCoordinatorTeachersByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorTeachersByWingData, GetCoordinatorTeachersByWingVariables>;
+export function getCoordinatorTeachersByWing(dc: DataConnect, vars: GetCoordinatorTeachersByWingVariables, options?: ExecuteQueryOptions): QueryPromise<GetCoordinatorTeachersByWingData, GetCoordinatorTeachersByWingVariables>;
+
+interface GetTeacherProfileRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeacherProfileVariables): QueryRef<GetTeacherProfileData, GetTeacherProfileVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeacherProfileVariables): QueryRef<GetTeacherProfileData, GetTeacherProfileVariables>;
+  operationName: string;
+}
+export const getTeacherProfileRef: GetTeacherProfileRef;
+
+export function getTeacherProfile(vars: GetTeacherProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherProfileData, GetTeacherProfileVariables>;
+export function getTeacherProfile(dc: DataConnect, vars: GetTeacherProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherProfileData, GetTeacherProfileVariables>;
+
+interface GetTeacherProfileByUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeacherProfileByUserVariables): QueryRef<GetTeacherProfileByUserData, GetTeacherProfileByUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeacherProfileByUserVariables): QueryRef<GetTeacherProfileByUserData, GetTeacherProfileByUserVariables>;
+  operationName: string;
+}
+export const getTeacherProfileByUserRef: GetTeacherProfileByUserRef;
+
+export function getTeacherProfileByUser(vars: GetTeacherProfileByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherProfileByUserData, GetTeacherProfileByUserVariables>;
+export function getTeacherProfileByUser(dc: DataConnect, vars: GetTeacherProfileByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherProfileByUserData, GetTeacherProfileByUserVariables>;
+
+interface GetTeacherDashboardRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetTeacherDashboardVariables): QueryRef<GetTeacherDashboardData, GetTeacherDashboardVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetTeacherDashboardVariables): QueryRef<GetTeacherDashboardData, GetTeacherDashboardVariables>;
+  operationName: string;
+}
+export const getTeacherDashboardRef: GetTeacherDashboardRef;
+
+export function getTeacherDashboard(vars: GetTeacherDashboardVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherDashboardData, GetTeacherDashboardVariables>;
+export function getTeacherDashboard(dc: DataConnect, vars: GetTeacherDashboardVariables, options?: ExecuteQueryOptions): QueryPromise<GetTeacherDashboardData, GetTeacherDashboardVariables>;
+
+interface GetSubjectsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetSubjectsVariables): QueryRef<GetSubjectsData, GetSubjectsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetSubjectsVariables): QueryRef<GetSubjectsData, GetSubjectsVariables>;
+  operationName: string;
+}
+export const getSubjectsRef: GetSubjectsRef;
+
+export function getSubjects(vars?: GetSubjectsVariables, options?: ExecuteQueryOptions): QueryPromise<GetSubjectsData, GetSubjectsVariables>;
+export function getSubjects(dc: DataConnect, vars?: GetSubjectsVariables, options?: ExecuteQueryOptions): QueryPromise<GetSubjectsData, GetSubjectsVariables>;
+
+interface GetSectionsForTeacherAssignmentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetSectionsForTeacherAssignmentVariables): QueryRef<GetSectionsForTeacherAssignmentData, GetSectionsForTeacherAssignmentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetSectionsForTeacherAssignmentVariables): QueryRef<GetSectionsForTeacherAssignmentData, GetSectionsForTeacherAssignmentVariables>;
+  operationName: string;
+}
+export const getSectionsForTeacherAssignmentRef: GetSectionsForTeacherAssignmentRef;
+
+export function getSectionsForTeacherAssignment(vars: GetSectionsForTeacherAssignmentVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsForTeacherAssignmentData, GetSectionsForTeacherAssignmentVariables>;
+export function getSectionsForTeacherAssignment(dc: DataConnect, vars: GetSectionsForTeacherAssignmentVariables, options?: ExecuteQueryOptions): QueryPromise<GetSectionsForTeacherAssignmentData, GetSectionsForTeacherAssignmentVariables>;
+
+interface GetAccountantsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAccountantsVariables): QueryRef<GetAccountantsData, GetAccountantsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetAccountantsVariables): QueryRef<GetAccountantsData, GetAccountantsVariables>;
+  operationName: string;
+}
+export const getAccountantsRef: GetAccountantsRef;
+
+export function getAccountants(vars: GetAccountantsVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantsData, GetAccountantsVariables>;
+export function getAccountants(dc: DataConnect, vars: GetAccountantsVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantsData, GetAccountantsVariables>;
+
+interface GetAccountantProfileRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAccountantProfileVariables): QueryRef<GetAccountantProfileData, GetAccountantProfileVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetAccountantProfileVariables): QueryRef<GetAccountantProfileData, GetAccountantProfileVariables>;
+  operationName: string;
+}
+export const getAccountantProfileRef: GetAccountantProfileRef;
+
+export function getAccountantProfile(vars: GetAccountantProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantProfileData, GetAccountantProfileVariables>;
+export function getAccountantProfile(dc: DataConnect, vars: GetAccountantProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantProfileData, GetAccountantProfileVariables>;
+
+interface GetAccountantByUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetAccountantByUserVariables): QueryRef<GetAccountantByUserData, GetAccountantByUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetAccountantByUserVariables): QueryRef<GetAccountantByUserData, GetAccountantByUserVariables>;
+  operationName: string;
+}
+export const getAccountantByUserRef: GetAccountantByUserRef;
+
+export function getAccountantByUser(vars: GetAccountantByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantByUserData, GetAccountantByUserVariables>;
+export function getAccountantByUser(dc: DataConnect, vars: GetAccountantByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetAccountantByUserData, GetAccountantByUserVariables>;
+
+interface GetFeeCategoriesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetFeeCategoriesVariables): QueryRef<GetFeeCategoriesData, GetFeeCategoriesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetFeeCategoriesVariables): QueryRef<GetFeeCategoriesData, GetFeeCategoriesVariables>;
+  operationName: string;
+}
+export const getFeeCategoriesRef: GetFeeCategoriesRef;
+
+export function getFeeCategories(vars?: GetFeeCategoriesVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeCategoriesData, GetFeeCategoriesVariables>;
+export function getFeeCategories(dc: DataConnect, vars?: GetFeeCategoriesVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeCategoriesData, GetFeeCategoriesVariables>;
+
+interface GetStudentFeeProfileRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentFeeProfileVariables): QueryRef<GetStudentFeeProfileData, GetStudentFeeProfileVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStudentFeeProfileVariables): QueryRef<GetStudentFeeProfileData, GetStudentFeeProfileVariables>;
+  operationName: string;
+}
+export const getStudentFeeProfileRef: GetStudentFeeProfileRef;
+
+export function getStudentFeeProfile(vars: GetStudentFeeProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentFeeProfileData, GetStudentFeeProfileVariables>;
+export function getStudentFeeProfile(dc: DataConnect, vars: GetStudentFeeProfileVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentFeeProfileData, GetStudentFeeProfileVariables>;
+
+interface GetPaymentHistoryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetPaymentHistoryVariables): QueryRef<GetPaymentHistoryData, GetPaymentHistoryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetPaymentHistoryVariables): QueryRef<GetPaymentHistoryData, GetPaymentHistoryVariables>;
+  operationName: string;
+}
+export const getPaymentHistoryRef: GetPaymentHistoryRef;
+
+export function getPaymentHistory(vars: GetPaymentHistoryVariables, options?: ExecuteQueryOptions): QueryPromise<GetPaymentHistoryData, GetPaymentHistoryVariables>;
+export function getPaymentHistory(dc: DataConnect, vars: GetPaymentHistoryVariables, options?: ExecuteQueryOptions): QueryPromise<GetPaymentHistoryData, GetPaymentHistoryVariables>;
+
+interface GetReceiptSequenceRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetReceiptSequenceVariables): QueryRef<GetReceiptSequenceData, GetReceiptSequenceVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetReceiptSequenceVariables): QueryRef<GetReceiptSequenceData, GetReceiptSequenceVariables>;
+  operationName: string;
+}
+export const getReceiptSequenceRef: GetReceiptSequenceRef;
+
+export function getReceiptSequence(vars: GetReceiptSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetReceiptSequenceData, GetReceiptSequenceVariables>;
+export function getReceiptSequence(dc: DataConnect, vars: GetReceiptSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetReceiptSequenceData, GetReceiptSequenceVariables>;
+
+interface GetFeeReportsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetFeeReportsVariables): QueryRef<GetFeeReportsData, GetFeeReportsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetFeeReportsVariables): QueryRef<GetFeeReportsData, GetFeeReportsVariables>;
+  operationName: string;
+}
+export const getFeeReportsRef: GetFeeReportsRef;
+
+export function getFeeReports(vars: GetFeeReportsVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeReportsData, GetFeeReportsVariables>;
+export function getFeeReports(dc: DataConnect, vars: GetFeeReportsVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeReportsData, GetFeeReportsVariables>;
+
+interface GetGlobalStudentExplorerRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetGlobalStudentExplorerVariables): QueryRef<GetGlobalStudentExplorerData, GetGlobalStudentExplorerVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetGlobalStudentExplorerVariables): QueryRef<GetGlobalStudentExplorerData, GetGlobalStudentExplorerVariables>;
+  operationName: string;
+}
+export const getGlobalStudentExplorerRef: GetGlobalStudentExplorerRef;
+
+export function getGlobalStudentExplorer(vars?: GetGlobalStudentExplorerVariables, options?: ExecuteQueryOptions): QueryPromise<GetGlobalStudentExplorerData, GetGlobalStudentExplorerVariables>;
+export function getGlobalStudentExplorer(dc: DataConnect, vars?: GetGlobalStudentExplorerVariables, options?: ExecuteQueryOptions): QueryPromise<GetGlobalStudentExplorerData, GetGlobalStudentExplorerVariables>;
+
+interface GetGlobalReportsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<GetGlobalReportsData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<GetGlobalReportsData, undefined>;
+  operationName: string;
+}
+export const getGlobalReportsRef: GetGlobalReportsRef;
+
+export function getGlobalReports(options?: ExecuteQueryOptions): QueryPromise<GetGlobalReportsData, undefined>;
+export function getGlobalReports(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetGlobalReportsData, undefined>;
+
+interface GetAuditLogsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars?: GetAuditLogsVariables): QueryRef<GetAuditLogsData, GetAuditLogsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars?: GetAuditLogsVariables): QueryRef<GetAuditLogsData, GetAuditLogsVariables>;
+  operationName: string;
+}
+export const getAuditLogsRef: GetAuditLogsRef;
+
+export function getAuditLogs(vars?: GetAuditLogsVariables, options?: ExecuteQueryOptions): QueryPromise<GetAuditLogsData, GetAuditLogsVariables>;
+export function getAuditLogs(dc: DataConnect, vars?: GetAuditLogsVariables, options?: ExecuteQueryOptions): QueryPromise<GetAuditLogsData, GetAuditLogsVariables>;
 

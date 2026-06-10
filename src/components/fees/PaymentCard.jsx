@@ -15,12 +15,14 @@ const PaymentCard = ({payment}) => (
     </View>
     <View style={styles.copy}>
       <Text style={styles.title}>
-        ₹{payment.amount.toLocaleString('en-IN')}
+        Rs {Number(payment.amount || 0).toLocaleString('en-IN')}
       </Text>
       <Text style={styles.meta}>
-        {payment.studentName} - {payment.mode}
+        {payment.studentName || payment.student?.fullName || 'Student'} - {payment.mode || payment.paymentMode || '-'}
       </Text>
-      <Text style={styles.date}>{payment.date}</Text>
+      <Text style={styles.date}>
+        {payment.date || payment.paymentDate || '-'} {payment.receiptNumber ? `| ${payment.receiptNumber}` : ''}
+      </Text>
     </View>
   </View>
 );

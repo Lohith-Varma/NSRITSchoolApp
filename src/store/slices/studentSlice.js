@@ -16,7 +16,7 @@ export const createStudent = createAsyncThunk(
   'students/create',
   async (payload, {rejectWithValue}) => {
     try {
-      return await studentService.createStudent(payload);
+      return await studentService.createStudent(payload.data || payload, payload.scope);
     } catch (error) {
       return rejectWithValue(error.message || 'Unable to create student');
     }

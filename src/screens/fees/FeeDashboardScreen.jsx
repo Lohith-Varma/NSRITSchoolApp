@@ -1,5 +1,6 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
+import {useFocusEffect} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   EmptyState,
@@ -16,6 +17,7 @@ import useFeeAccess from '../../hooks/useFeeAccess';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {fetchFees, setSelectedStudentFee} from '../../store/slices/feeSlice';
+import feeService from '../../services/fees/feeService';
 
 const tabs = [
   {label: 'All', value: 'all'},
@@ -29,12 +31,20 @@ const FeeDashboardScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const access = useFeeAccess();
   const {records, summary, loading} = useSelector(state => state.fees);
+  const canManagePlans = feeService.canManageFeePlans(access.role);
+  const canRecordPayments = feeService.canRecordPayments(access.role);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
 
   useEffect(() => {
     dispatch(fetchFees(access));
   }, [access, dispatch]);
+
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchFees(access));
+    }, [access, dispatch]),
+  );
 
   const filteredRecords = useMemo(
     () =>
@@ -82,18 +92,30 @@ const FeeDashboardScreen = ({navigation}) => {
         tone={colors.primary}
       />
       <View style={styles.quickActions}>
-        <StatCard
-          title="Paid List"
-          value={summary.paidStudents}
-          icon="account-check"
-          onPress={() => navigation.navigate('PaidStudents')}
-        />
-        <StatCard
-          title="History"
-          value="View"
-          icon="history"
-          onPress={() => navigation.navigate('PaymentHistory')}
-        />
+        {canManagePlans ? (
+          <StatCard
+            title="Fee Plans"
+            value="Manage"
+            icon="book-edit-outline"
+            onPress={() => navigation.navigate('FeePlanManagement')}
+          />
+        ) : null}
+        {canRecordPayments ? (
+          <StatCard
+            title="Collection"
+            value="Record"
+            icon="cash-plus"
+            onPress={() => navigation.navigate('FeeCollection')}
+          />
+        ) : null}
+        {canRecordPayments ? (
+          <StatCard
+            title="History"
+            value="View"
+            icon="history"
+            onPress={() => navigation.navigate('PaymentHistory')}
+          />
+        ) : null}
         <StatCard
           title="Ledger"
           value="Open"

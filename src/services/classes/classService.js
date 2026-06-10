@@ -1,6 +1,5 @@
 import {PREDEFINED_CLASSES} from '../../config/academic';
-import dataConnectClient from '../dataconnect/dataConnectClient';
-import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
+import academicRepository from '../../repositories/academicRepository';
 
 export const classService = {
   getPredefinedClasses() {
@@ -8,19 +7,13 @@ export const classService = {
   },
 
   async getClassesByWing(wingId) {
-    if (!wingId) {
-      return [];
-    }
-
-    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASSES_BY_WING, {
-      wingId,
-    });
-
-    return response.academicClasses || [];
+    const classes = await academicRepository.getAcademicClasses();
+    return wingId ? classes.filter(item => item.wingId === wingId || item.wing?.code === wingId) : classes;
   },
 
   async getClasses() {
-    return PREDEFINED_CLASSES;
+    const classes = await academicRepository.getAcademicClasses();
+    return classes.length ? classes : PREDEFINED_CLASSES;
   },
 
   async createClass() {
@@ -28,11 +21,8 @@ export const classService = {
   },
 
   async createSection(payload) {
-    const response = await dataConnectClient.mutate(
-      DATA_CONNECT_MUTATIONS.CREATE_SECTION,
-      payload,
-    );
-    return {id: response.section_insert, ...payload, isActive: true};
+    const id = await academicRepository.createSection(payload);
+    return {id, ...payload, isActive: true};
   },
 };
 

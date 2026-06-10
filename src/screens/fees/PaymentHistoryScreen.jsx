@@ -9,15 +9,27 @@ import {
 } from '../../components';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {fetchFees} from '../../store/slices/feeSlice';
+import feeService from '../../services/fees/feeService';
 
 const PaymentHistoryScreen = () => {
   const dispatch = useDispatch();
   const access = useFeeAccess();
+  const canViewPaymentHistory = feeService.canRecordPayments(access.role);
   const {payments, loading} = useSelector(state => state.fees);
 
   useEffect(() => {
-    dispatch(fetchFees(access));
-  }, [access, dispatch]);
+    if (canViewPaymentHistory) {
+      dispatch(fetchFees(access));
+    }
+  }, [access, canViewPaymentHistory, dispatch]);
+
+  if (!canViewPaymentHistory) {
+    return (
+      <ScreenContainer>
+        <EmptyState title="Payment history access denied" message="Only accountants and principals can view payment history." />
+      </ScreenContainer>
+    );
+  }
 
   return (
     <ScreenContainer>

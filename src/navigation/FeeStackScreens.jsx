@@ -1,11 +1,17 @@
 import React from 'react';
 import ClassWiseFeeReportScreen from '../screens/fees/ClassWiseFeeReportScreen';
+import CreateFeePlanScreen from '../screens/fees/CreateFeePlanScreen';
 import DueStudentsScreen from '../screens/fees/DueStudentsScreen';
+import FeeCategoryManagementScreen from '../screens/fees/FeeCategoryManagementScreen';
+import FeeCollectionScreen from '../screens/fees/FeeCollectionScreen';
 import FeeDashboardScreen from '../screens/fees/FeeDashboardScreen';
 import FeeLedgerScreen from '../screens/fees/FeeLedgerScreen';
+import FeePlanManagementScreen from '../screens/fees/FeePlanManagementScreen';
+import FeeReportsScreen from '../screens/fees/FeeReportsScreen';
 import PaidStudentsScreen from '../screens/fees/PaidStudentsScreen';
 import PaymentHistoryScreen from '../screens/fees/PaymentHistoryScreen';
 import StudentFeeDetailsScreen from '../screens/fees/StudentFeeDetailsScreen';
+import StudentFeeProfileScreen from '../screens/fees/StudentFeeProfileScreen';
 import UploadOfflinePaymentScreen from '../screens/fees/UploadOfflinePaymentScreen';
 
 export const renderFeeStackScreens = (Stack, options = {}) => (
@@ -19,6 +25,31 @@ export const renderFeeStackScreens = (Stack, options = {}) => (
       name="StudentFeeDetails"
       component={StudentFeeDetailsScreen}
       options={{title: 'Student Fee'}}
+    />
+    <Stack.Screen
+      name="StudentFeeProfile"
+      component={StudentFeeProfileScreen}
+      options={{title: 'Student Fee Profile'}}
+    />
+    <Stack.Screen
+      name="FeePlanManagement"
+      component={FeePlanManagementScreen}
+      options={{title: 'Fee Plans'}}
+    />
+    <Stack.Screen
+      name="CreateFeePlan"
+      component={CreateFeePlanScreen}
+      options={{title: 'Create Fee Plan'}}
+    />
+    <Stack.Screen
+      name="FeeCollection"
+      component={FeeCollectionScreen}
+      options={{title: 'Fee Collection'}}
+    />
+    <Stack.Screen
+      name="FeeCategoryManagement"
+      component={FeeCategoryManagementScreen}
+      options={{title: 'Fee Categories'}}
     />
     <Stack.Screen
       name="PaymentHistory"
@@ -48,11 +79,18 @@ export const renderFeeStackScreens = (Stack, options = {}) => (
       />
     ) : null}
     {options.reports ? (
-      <Stack.Screen
-        name="ClassWiseFeeReport"
-        component={ClassWiseFeeReportScreen}
-        options={{title: 'Class-wise Report'}}
-      />
+      <>
+        <Stack.Screen
+          name="ClassWiseFeeReport"
+          component={ClassWiseFeeReportScreen}
+          options={{title: 'Class-wise Report'}}
+        />
+        <Stack.Screen
+          name="FeeReports"
+          component={FeeReportsScreen}
+          options={{title: 'Fee Reports'}}
+        />
+      </>
     ) : null}
   </>
 );

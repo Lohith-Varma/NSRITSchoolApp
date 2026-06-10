@@ -1,80 +1,76 @@
 import React, {useMemo, useState} from 'react';
-import {FlatList} from 'react-native';
+import {FlatList, StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
-import {
-  EmptyState,
-  ScreenContainer,
-  SearchBar,
-  SectionHeader,
-  StudentListItem,
-} from '../../components';
-import {ATTENDANCE_STATUS} from '../../config/constants';
-import {getAccessScope} from '../../services/rbacScope';
-import studentService from '../../services/students/studentService';
+import {DashboardCard, EmptyState, Header, SearchBar} from '../../components';
+import attendanceService from '../../services/attendance/attendanceService';
+import {colors, spacing} from '../../theme';
+import {useQuery} from '@tanstack/react-query';
 
 const WingAttendanceScreen = () => {
   const user = useSelector(state => state.auth.user);
   const [query, setQuery] = useState('');
-  const [absentees, setAbsentees] = useState([]);
-  const [error, setError] = useState('');
-  const scope = useMemo(() => getAccessScope(user), [user]);
+  const {data: records = [], error, isLoading} = useQuery({
+    queryKey: ['branchAttendance', user?.branchId, user?.wing],
+    queryFn: () => attendanceService.getAttendance({branchId: user.branchId}),
+    enabled: Boolean(user?.branchId && user?.wing),
+  });
 
-  const handleSearch = async value => {
-    setQuery(value);
+  const wingRecords = useMemo(
+    () =>
+      records.filter(item => {
+        const inWing = item.academicClass?.wing?.code === user?.wing;
+        const searchText = `${item.student?.fullName || ''} ${item.student?.studentId || ''} ${item.academicClass?.name || ''}-${item.section?.name || ''}`.toLowerCase();
+        return inWing && (!query.trim() || searchText.includes(query.toLowerCase()));
+      }),
+    [query, records, user?.wing],
+  );
 
-    if (!value.trim()) {
-      setAbsentees([]);
-      return;
-    }
-
-    try {
-      const results = await studentService.searchStudents(
-        {branchId: scope.branchId, searchText: value},
-        scope,
-      );
-      setAbsentees(results);
-    } catch (searchError) {
-      setError(searchError.message);
-    }
-  };
+  const summary = attendanceService.getAttendanceSummary(wingRecords);
 
   return (
-    <ScreenContainer>
-      <SectionHeader
-        title="Wing Attendance"
-        subtitle="Search wing students and review attendance from submitted records"
-      />
-      <SearchBar
-        value={query}
-        onChangeText={handleSearch}
-        placeholder="Search students in your wing"
-      />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Header title="Wing Attendance" subtitle={isLoading ? 'Loading submitted records' : user?.wing} />
+        <DashboardCard title="Present" value={String(summary.present)} icon="clipboard-check-outline" />
+        <DashboardCard title="Absent" value={String(summary.absent)} icon="clipboard-alert-outline" />
+        <SearchBar value={query} onChangeText={setQuery} placeholder="Search submitted attendance" />
+      </View>
       <FlatList
-        data={absentees}
+        data={wingRecords}
         keyExtractor={item => item.id}
-        scrollEnabled={false}
+        contentContainerStyle={styles.list}
         renderItem={({item}) => (
-          <StudentListItem
-            student={{
-              id: item.id,
-              name: item.fullName,
-              rollNo: item.studentId,
-              section: item.sectionId,
-            }}
-            checked={false}
-            status={ATTENDANCE_STATUS.ABSENT}
-            onToggle={() => {}}
+          <DashboardCard
+            title={item.student?.fullName || item.studentId}
+            value={item.status}
+            description={`${item.academicClass?.name || '-'}-${item.section?.name || '-'} | ${item.attendanceDate}`}
+            icon="clipboard-text-outline"
           />
         )}
         ListEmptyComponent={
           <EmptyState
-            title={error ? 'Unable to load attendance' : 'No students found'}
-            message={error || 'Search by student name, ID, or parent phone.'}
+            title={error ? 'Unable to load attendance' : 'No attendance records'}
+            message={error?.message || 'Submitted wing attendance will appear here.'}
           />
         }
       />
-    </ScreenContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.background,
+    flex: 1,
+  },
+  header: {
+    padding: spacing.lg,
+    paddingBottom: 0,
+  },
+  list: {
+    padding: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+});
 
 export default WingAttendanceScreen;

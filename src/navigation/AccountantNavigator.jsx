@@ -1,14 +1,7 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import DashboardScreen from '../screens/accountant/DashboardScreen';
-import ClassWiseFeeReportScreen from '../screens/fees/ClassWiseFeeReportScreen';
-import DueStudentsScreen from '../screens/fees/DueStudentsScreen';
-import FeeDashboardScreen from '../screens/fees/FeeDashboardScreen';
-import FeeLedgerScreen from '../screens/fees/FeeLedgerScreen';
-import PaidStudentsScreen from '../screens/fees/PaidStudentsScreen';
-import PaymentHistoryScreen from '../screens/fees/PaymentHistoryScreen';
-import StudentFeeDetailsScreen from '../screens/fees/StudentFeeDetailsScreen';
-import UploadOfflinePaymentScreen from '../screens/fees/UploadOfflinePaymentScreen';
+import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,46 +12,7 @@ const AccountantNavigator = () => (
       component={DashboardScreen}
       options={{title: 'Accountant'}}
     />
-    <Stack.Screen
-      name="FeeDashboard"
-      component={FeeDashboardScreen}
-      options={{title: 'Fees'}}
-    />
-    <Stack.Screen
-      name="StudentFeeDetails"
-      component={StudentFeeDetailsScreen}
-      options={{title: 'Student Fee'}}
-    />
-    <Stack.Screen
-      name="PaymentHistory"
-      component={PaymentHistoryScreen}
-      options={{title: 'Payments'}}
-    />
-    <Stack.Screen
-      name="FeeLedger"
-      component={FeeLedgerScreen}
-      options={{title: 'Ledger'}}
-    />
-    <Stack.Screen
-      name="DueStudents"
-      component={DueStudentsScreen}
-      options={{title: 'Due Students'}}
-    />
-    <Stack.Screen
-      name="PaidStudents"
-      component={PaidStudentsScreen}
-      options={{title: 'Paid Students'}}
-    />
-    <Stack.Screen
-      name="UploadOfflinePayment"
-      component={UploadOfflinePaymentScreen}
-      options={{title: 'Upload Payment'}}
-    />
-    <Stack.Screen
-      name="ClassWiseFeeReport"
-      component={ClassWiseFeeReportScreen}
-      options={{title: 'Class-wise Report'}}
-    />
+    {renderFeeStackScreens(Stack, {canUpload: true, reports: true})}
   </Stack.Navigator>
 );
 

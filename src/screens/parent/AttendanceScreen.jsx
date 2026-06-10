@@ -1,10 +1,12 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
+import {useQuery} from '@tanstack/react-query';
 import {
   CalendarAttendance,
   EmptyState,
   ScreenContainer,
+  SelectField,
   SectionHeader,
   StatCard,
   SummaryCard,
@@ -13,6 +15,7 @@ import {ATTENDANCE_STATUS} from '../../config/constants';
 import attendanceService from '../../services/attendance/attendanceService';
 import parentService from '../../services/parents/parentService';
 import {colors, spacing} from '../../theme';
+import {normalizeAttendanceStatus} from '../../utils/helpers/attendanceHelpers';
 
 const getMonthRange = date => {
   const start = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -23,52 +26,69 @@ const getMonthRange = date => {
   };
 };
 
-const AttendanceScreen = () => {
+const AttendanceScreen = ({route}) => {
   const user = useSelector(state => state.auth.user);
-  const [children, setChildren] = useState([]);
-  const [records, setRecords] = useState([]);
-  const [error, setError] = useState('');
+  const parentId = user?.parentId;
+  const initialStudentId = route?.params?.studentId;
+  const [selectedStudentId, setSelectedStudentId] = useState(initialStudentId || '');
   const monthDate = useMemo(() => new Date(), []);
 
-  useEffect(() => {
-    const load = async () => {
-      const parentChildren = await parentService.getParentChildren(user?.parentId || user?.id);
-      setChildren(parentChildren);
+  const childrenQuery = useQuery({
+    queryKey: ['parentChildren', parentId],
+    queryFn: () => parentService.getParentChildren(parentId),
+    enabled: Boolean(parentId),
+  });
 
-      if (parentChildren[0]?.id) {
-        const monthRange = getMonthRange(monthDate);
-        const attendance = await attendanceService.getAttendance({
-          studentId: parentChildren[0].id,
-          ...monthRange,
-        });
-        setRecords(attendance);
-      }
-    };
+  const children = childrenQuery.data || [];
+  const selectedChild =
+    children.find(child => child.id === selectedStudentId) || children[0] || null;
+  const resolvedStudentId = selectedChild?.id;
 
-    load().catch(loadError => setError(loadError.message));
-  }, [monthDate, user]);
+  const attendanceQuery = useQuery({
+    queryKey: ['parentAttendance', parentId, resolvedStudentId, monthDate.getFullYear(), monthDate.getMonth()],
+    queryFn: () =>
+      attendanceService.getAttendance({
+        studentId: resolvedStudentId,
+        ...getMonthRange(monthDate),
+      }),
+    enabled: Boolean(resolvedStudentId),
+  });
+
+  const records = useMemo(() => attendanceQuery.data || [], [attendanceQuery.data]);
+
+  const normalizedRecords = useMemo(
+    () =>
+      records.map(item => ({
+        ...item,
+        status: normalizeAttendanceStatus(item.status) || item.status,
+      })),
+    [records],
+  );
 
   const attendanceRecords = useMemo(
     () =>
-      records.reduce(
+      normalizedRecords.reduce(
         (acc, item) => ({
           ...acc,
           [item.attendanceDate]: item.status,
         }),
         {},
       ),
-    [records],
+    [normalizedRecords],
   );
 
-  const present = records.filter(item => item.status === ATTENDANCE_STATUS.PRESENT).length;
-  const absent = records.filter(item => item.status === ATTENDANCE_STATUS.ABSENT).length;
+  const present = normalizedRecords.filter(item => item.status === ATTENDANCE_STATUS.PRESENT).length;
+  const absent = normalizedRecords.filter(item => item.status === ATTENDANCE_STATUS.ABSENT).length;
   const total = present + absent;
   const progress = total ? present / total : 0;
 
-  if (error) {
+  if (childrenQuery.error || attendanceQuery.error) {
     return (
       <ScreenContainer>
-        <EmptyState title="Unable to load attendance" message={error} />
+        <EmptyState
+          title="Unable to load attendance"
+          message={childrenQuery.error?.message || attendanceQuery.error?.message}
+        />
       </ScreenContainer>
     );
   }
@@ -77,8 +97,19 @@ const AttendanceScreen = () => {
     <ScreenContainer>
       <SectionHeader
         title="Monthly Attendance"
-        subtitle={children[0]?.fullName || 'Child attendance calendar'}
+        subtitle={selectedChild?.fullName || 'Child attendance calendar'}
       />
+      {children.length > 1 ? (
+        <SelectField
+          label="Child"
+          value={selectedChild?.id}
+          options={children.map(child => ({
+            label: `${child.fullName} (${child.academicClass?.name || '-'}-${child.section?.name || '-'})`,
+            value: child.id,
+          }))}
+          onChange={setSelectedStudentId}
+        />
+      ) : null}
       <SummaryCard
         title="Attendance Percentage"
         value={`${Math.round(progress * 100)}%`}

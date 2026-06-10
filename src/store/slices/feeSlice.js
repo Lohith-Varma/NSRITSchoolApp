@@ -22,7 +22,7 @@ export const uploadOfflinePayment = createAsyncThunk(
   'fees/uploadOfflinePayment',
   async (payload, {rejectWithValue}) => {
     try {
-      return await feeService.uploadOfflinePayment(payload);
+      return await feeService.uploadOfflinePayment(payload.data || payload, payload.scope);
     } catch (error) {
       return rejectWithValue(error.message || 'Unable to upload payment');
     }

@@ -15,10 +15,13 @@ import {errorResponse, successResponse} from '../../utils/firebaseResponse';
 import {formatE164PhoneNumber} from '../../utils/phone';
 import {USER_ROLES} from '../../config/constants';
 import parentService from '../parents/parentService';
+import teacherService from '../teachers/teacherService';
 
 const buildFullPhoneNumber = ({countryCode = '+91', phoneNumber}) => {
   return formatE164PhoneNumber({countryCode, phoneNumber});
 };
+
+const normalizeRole = role => String(role || '').toUpperCase();
 
 const normalizeProfile = (profile, fallback = {}) => {
   const user = profile || {};
@@ -32,8 +35,15 @@ const normalizeProfile = (profile, fallback = {}) => {
     countryCode: user.countryCode || fallback.countryCode,
     phoneNumber: user.phoneNumber || fallback.phoneNumber,
     role: user.role,
+    employeeId: user.employeeId || fallback.employeeId || null,
     branchId: user.branchId || null,
+    branchCode: user.branch?.branchCode || fallback.branchCode || null,
+    branchName: user.branch?.name || fallback.branchName || null,
     wingId: user.wingId || null,
+    wing: user.wing || fallback.wing || null,
+    coordinatorId: user.coordinatorId || fallback.coordinatorId || null,
+    teacherId: user.teacherId || fallback.teacherId || null,
+    accountantId: user.accountantId || fallback.accountantId || null,
     sectionId: user.sectionId || null,
     parentId: user.parentId || fallback.parentId || null,
     isActive: user.isActive ?? true,
@@ -67,7 +77,41 @@ const hydrateRoleProfile = async profile => {
     return null;
   }
 
-  if (profile.role !== USER_ROLES.PARENT) {
+  const role = normalizeRole(profile.role);
+
+  if (role === USER_ROLES.COORDINATOR) {
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_COORDINATOR_BY_USER, {
+      userId: profile.id,
+    });
+    const coordinator = response.coordinators?.[0];
+    return {
+      ...profile,
+      coordinatorId: coordinator?.id || null,
+      wing: coordinator?.wing || null,
+    };
+  }
+
+  if (role === USER_ROLES.TEACHER) {
+    const teacher = await teacherService.getTeacherProfileByUser(profile.id);
+    return {
+      ...profile,
+      teacherId: teacher?.id || null,
+      wing: teacher?.wing || null,
+    };
+  }
+
+  if (role === USER_ROLES.ACCOUNTANT) {
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_ACCOUNTANT_BY_USER, {
+      userId: profile.id,
+    });
+    const accountant = response.accountants?.[0];
+    return {
+      ...profile,
+      accountantId: accountant?.id || null,
+    };
+  }
+
+  if (role !== USER_ROLES.PARENT) {
     return profile;
   }
 
@@ -161,6 +205,7 @@ export const authService = {
     removeStorageKeys([
       STORAGE_KEYS.AUTH_TOKEN,
       STORAGE_KEYS.AUTH_USER,
+      STORAGE_KEYS.MAIN_ADMIN_BRANCH_CONTEXT,
       STORAGE_KEYS.OTP_VERIFICATION_ID,
     ]);
   },

@@ -1,5 +1,6 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
+import {useQuery} from '@tanstack/react-query';
 import {Button, Card, Chip, Text} from 'react-native-paper';
 import {
   EmptyState,
@@ -16,50 +17,64 @@ const PAGE_SIZE = 25;
 
 const GlobalStudentsScreen = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(1);
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null);
 
-  const load = useCallback(
-    async ({forceRefresh = false, nextPage = page} = {}) => {
-      try {
-        forceRefresh ? setRefreshing(true) : setLoading(true);
-        setError(null);
-        const response = await mainAdminService.getGlobalStudents({
-          filters,
-          searchText,
-          page: nextPage,
-          pageSize: PAGE_SIZE,
-          forceRefresh,
-        });
-        setResult(response);
-      } catch (loadError) {
-        setError(loadError.message || 'Unable to load students');
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [filters, page, searchText],
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchText(searchText), 350);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   useEffect(() => {
     setPage(1);
-  }, [filters, searchText]);
+  }, [filters, debouncedSearchText]);
 
-  useEffect(() => {
-    load({nextPage: page});
-  }, [load, page]);
+  const studentsQuery = useQuery({
+    queryKey: ['globalStudents', filters, debouncedSearchText, page],
+    queryFn: () =>
+      mainAdminService.getGlobalStudents({
+        filters,
+        searchText: debouncedSearchText,
+        page,
+        pageSize: PAGE_SIZE,
+      }),
+  });
+
+  const branchesQuery = useQuery({
+    queryKey: ['globalStudentBranches'],
+    queryFn: () => mainAdminService.getAllBranches(),
+  });
+
+  const classesQuery = useQuery({
+    queryKey: ['globalStudentClasses'],
+    queryFn: () => mainAdminService.getGlobalClasses(),
+  });
+
+  const result = studentsQuery.data;
 
   const branches = useMemo(
-    () => [...new Map((result?.items || []).map(item => [item.branchId, item.branchName])).entries()],
-    [result],
+    () => (branchesQuery.data || []).map(branch => [branch.id, branch.name]),
+    [branchesQuery.data],
   );
 
-  if (loading && !result) {
+  const classOptions = useMemo(() => {
+    const scoped = (classesQuery.data || []).filter(
+      item => !filters.branchId || item.branchId === filters.branchId,
+    );
+    return [...new Map(scoped.map(item => [item.classId, item.className])).entries()];
+  }, [classesQuery.data, filters.branchId]);
+
+  const sectionOptions = useMemo(() => {
+    const scoped = (classesQuery.data || []).filter(
+      item =>
+        (!filters.branchId || item.branchId === filters.branchId) &&
+        (!filters.classId || item.classId === filters.classId),
+    );
+    return scoped.map(item => [item.id, `${item.className}-${item.section}`]);
+  }, [classesQuery.data, filters.branchId, filters.classId]);
+
+  if (studentsQuery.isLoading && !result) {
     return <LoadingScreen message="Loading students" />;
   }
 
@@ -120,14 +135,47 @@ const GlobalStudentsScreen = ({navigation}) => {
             </Chip>
           ))}
         </View>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <View style={styles.filters}>
+          {classOptions.slice(0, 6).map(([classId, className]) => (
+            <Chip
+              key={classId}
+              selected={filters.classId === classId}
+              onPress={() =>
+                setFilters(current => ({
+                  ...current,
+                  classId: current.classId === classId ? null : classId,
+                  sectionId: null,
+                }))
+              }
+              compact>
+              {className}
+            </Chip>
+          ))}
+        </View>
+        <View style={styles.filters}>
+          {sectionOptions.slice(0, 8).map(([sectionId, label]) => (
+            <Chip
+              key={sectionId}
+              selected={filters.sectionId === sectionId}
+              onPress={() =>
+                setFilters(current => ({
+                  ...current,
+                  sectionId: current.sectionId === sectionId ? null : sectionId,
+                }))
+              }
+              compact>
+              {label}
+            </Chip>
+          ))}
+        </View>
+        {studentsQuery.error ? <Text style={styles.error}>{studentsQuery.error.message}</Text> : null}
       </View>
       <FlatList
         data={result?.items || []}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => load({forceRefresh: true, nextPage: 1})} />
+          <RefreshControl refreshing={studentsQuery.isFetching} onRefresh={studentsQuery.refetch} />
         }
         ListEmptyComponent={<EmptyState title="No students" message="Adjust filters or search text." />}
         ListFooterComponent={
@@ -153,7 +201,7 @@ const GlobalStudentsScreen = ({navigation}) => {
           <Card
             mode="outlined"
             style={styles.card}
-            onPress={() => navigation.navigate('StudentProfile', {studentId: item.id})}>
+            onPress={() => navigation.navigate('GlobalStudentProfile', {studentId: item.id})}>
             <Card.Content>
               <View style={styles.cardHeader}>
                 <View style={styles.titleBlock}>
@@ -171,6 +219,17 @@ const GlobalStudentsScreen = ({navigation}) => {
                 {item.className} {item.sectionName} - Attendance {item.attendancePercent}%
               </Text>
               <Text style={styles.detail}>Parent phone: {item.parentPhone || 'Not set'}</Text>
+              <View style={styles.cardActions}>
+                <Button compact onPress={() => navigation.navigate('EditStudent', {studentId: item.id})}>
+                  Edit
+                </Button>
+                <Button compact onPress={() => navigation.navigate('ViewAllAttendance', {studentId: item.id})}>
+                  Attendance
+                </Button>
+                <Button compact onPress={() => navigation.navigate('StudentFeeProfile', {studentId: item.id})}>
+                  Fees
+                </Button>
+              </View>
             </Card.Content>
           </Card>
         )}
@@ -220,6 +279,12 @@ const styles = StyleSheet.create({
   },
   detail: {
     color: colors.textMuted,
+    marginTop: spacing.sm,
+  },
+  cardActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     marginTop: spacing.sm,
   },
   pagination: {

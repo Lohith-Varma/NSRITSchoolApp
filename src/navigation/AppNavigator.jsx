@@ -12,9 +12,10 @@ import MainAdminNavigator from './MainAdminNavigator';
 import ParentNavigator from './ParentNavigator';
 import PrincipalNavigator from './PrincipalNavigator';
 import TeacherNavigator from './TeacherNavigator';
+import {ensureMasterClassesForBranch} from '../services/academics/SeedMasterClasses';
 
 const getRoleNavigator = role => {
-  switch (role) {
+  switch (String(role || '').toUpperCase()) {
     case USER_ROLES.MAIN_ADMIN:
       return <MainAdminNavigator />;
     case USER_ROLES.BRANCH_ADMIN:
@@ -36,13 +37,24 @@ const getRoleNavigator = role => {
 
 const AppNavigator = () => {
   const dispatch = useDispatch();
-  const {isBootstrapping, isAuthenticated, role} = useSelector(
+  const {isBootstrapping, isAuthenticated, role, user} = useSelector(
     state => state.auth,
   );
 
   useEffect(() => {
     dispatch(bootstrapAuth());
   }, [dispatch]);
+
+  useEffect(() => {
+    const canSeedClasses = ['PRINCIPAL', 'BRANCH_ADMIN', 'MAIN_ADMIN'].includes(
+      String(role || '').toUpperCase(),
+    );
+    if (isAuthenticated && user?.branchId && canSeedClasses) {
+      ensureMasterClassesForBranch({branchId: user.branchId}).catch(error => {
+        console.log('Master class seed skipped:', error.message);
+      });
+    }
+  }, [isAuthenticated, role, user?.branchId]);
 
   return (
     <NavigationContainer>

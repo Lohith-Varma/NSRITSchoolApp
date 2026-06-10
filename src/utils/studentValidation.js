@@ -6,8 +6,24 @@ export const validateStudentPayload = payload => {
     return 'Student name is required';
   }
 
-  if (!payload.parentName?.trim()) {
-    return 'Parent name is required';
+  if (!payload.gender?.trim()) {
+    return 'Gender is required';
+  }
+
+  if (!payload.dateOfBirth) {
+    return 'Date of birth is required';
+  }
+
+  if (!payload.admissionDate) {
+    return 'Admission date is required';
+  }
+
+  if (!payload.fatherName?.trim()) {
+    return 'Father name is required';
+  }
+
+  if (!payload.motherName?.trim()) {
+    return 'Mother name is required';
   }
 
   if (normalizePhoneNumber(payload.parentPhoneNumber).length < 10) {
@@ -28,6 +44,10 @@ export const validateStudentPayload = payload => {
 
   if (!payload.academicClassId) {
     return 'Class ID is required';
+  }
+
+  if (!payload.wingId || !payload.wingCode) {
+    return 'Class wing is required. Please reselect the class.';
   }
 
   if (!payload.sectionId && !payload.sectionName) {
