@@ -13,9 +13,10 @@ import {
 } from '../../components';
 import {ATTENDANCE_STATUS} from '../../config/constants';
 import attendanceService from '../../services/attendance/attendanceService';
+import classService from '../../services/classes/classService';
 import {getAccessScope} from '../../services/rbacScope';
+import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
-import teacherService from '../../services/teachers/teacherService';
 import {colors, spacing} from '../../theme';
 import {toISODate} from '../../utils/helpers/dateHelpers';
 
@@ -24,27 +25,49 @@ const TakeAttendanceScreen = () => {
   const scope = useMemo(() => getAccessScope(user), [user]);
   const queryClient = useQueryClient();
   const today = toISODate();
+  const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [statuses, setStatuses] = useState({});
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
 
-  const assignmentsQuery = useQuery({
-    queryKey: ['teacherAssignments', user?.teacherId],
-    queryFn: () => teacherService.getAssignments({teacherId: user?.teacherId}),
-    enabled: Boolean(user?.teacherId),
+  const classesQuery = useQuery({
+    queryKey: ['attendanceClasses', user?.branchId],
+    queryFn: () => classService.getClasses(),
+    enabled: Boolean(user?.branchId),
   });
 
-  const assignments = useMemo(() => assignmentsQuery.data || [], [assignmentsQuery.data]);
-  const selectedAssignment =
-    assignments.find(item => item.sectionId === selectedSectionId) || assignments[0] || null;
-  const resolvedSectionId = selectedAssignment?.sectionId;
+  const classes = useMemo(
+    () => (classesQuery.data || []).filter(item => !item.branchId || item.branchId === user?.branchId),
+    [classesQuery.data, user?.branchId],
+  );
 
   useEffect(() => {
-    if (!selectedSectionId && assignments[0]?.sectionId) {
-      setSelectedSectionId(assignments[0].sectionId);
+    if (!selectedClassId && classes[0]?.id) {
+      setSelectedClassId(classes[0].id);
     }
-  }, [assignments, selectedSectionId]);
+  }, [classes, selectedClassId]);
+
+  const sectionsQuery = useQuery({
+    queryKey: ['attendanceSections', selectedClassId],
+    queryFn: () => sectionService.getSectionsByClass(selectedClassId),
+    enabled: Boolean(selectedClassId),
+  });
+
+  const sections = useMemo(
+    () => (sectionsQuery.data || []).filter(item => item.isActive !== false),
+    [sectionsQuery.data],
+  );
+
+  useEffect(() => {
+    if (!sections.some(item => item.id === selectedSectionId)) {
+      setSelectedSectionId(sections[0]?.id || '');
+    }
+  }, [sections, selectedSectionId]);
+
+  const selectedClass = classes.find(item => item.id === selectedClassId) || null;
+  const selectedSection = sections.find(item => item.id === selectedSectionId) || null;
+  const resolvedSectionId = selectedSection?.id;
 
   const studentsQuery = useQuery({
     queryKey: ['sectionStudents', resolvedSectionId],
@@ -102,26 +125,20 @@ const TakeAttendanceScreen = () => {
 
   const mutation = useMutation({
     mutationFn: () => {
-      if (!selectedAssignment) {
-        throw new Error('No section assignment found for this teacher.');
+      if (!selectedClass || !selectedSection) {
+        throw new Error('Select a class and section before submitting attendance.');
       }
 
       const records = students.map(student => ({
         studentId: student.id,
-        academicClassId: selectedAssignment.academicClassId || student.academicClassId,
-        sectionId: selectedAssignment.sectionId,
+        academicClassId: selectedClass.id || student.academicClassId,
+        sectionId: selectedSection.id,
         attendanceDate: today,
         status: statuses[student.id] || ATTENDANCE_STATUS.PRESENT,
         markedById: user.id,
       }));
 
-      return attendanceService.saveAttendanceBatch(
-        {records},
-        {
-          ...scope,
-          assignedSectionIds: assignments.map(item => item.sectionId),
-        },
-      );
+      return attendanceService.saveAttendanceBatch({records}, scope);
     },
     onSuccess: () => {
       setError('');
@@ -139,16 +156,31 @@ const TakeAttendanceScreen = () => {
     },
   });
 
-  const sectionOptions = assignments.map(item => ({
-    label: `${item.section?.academicClass?.name || '-'}-${item.section?.name || '-'}`,
-    value: item.sectionId,
+  const classOptions = classes.map(item => ({
+    label: item.name,
+    value: item.id,
+  }));
+
+  const sectionOptions = sections.map(item => ({
+    label: item.name,
+    value: item.id,
   }));
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <SectionHeader title="Take Attendance" subtitle="Teachers can submit only assigned sections" />
+      <SectionHeader title="Take Attendance" subtitle="Select class and section" />
       <SelectField
-        label="Assigned Section"
+        label="Class"
+        value={selectedClassId}
+        options={classOptions}
+        disabled={!classOptions.length}
+        onChange={value => {
+          setSelectedClassId(value);
+          setSelectedSectionId('');
+        }}
+      />
+      <SelectField
+        label="Section"
         value={resolvedSectionId}
         options={sectionOptions}
         disabled={!sectionOptions.length}
@@ -188,8 +220,8 @@ const TakeAttendanceScreen = () => {
         )}
         ListEmptyComponent={
           <EmptyState
-            title={assignmentsQuery.isLoading || studentsQuery.isLoading ? 'Loading roster' : 'No assigned students'}
-            message={assignmentsQuery.error?.message || studentsQuery.error?.message || 'Ask the coordinator to assign a section.'}
+            title={classesQuery.isLoading || sectionsQuery.isLoading || studentsQuery.isLoading ? 'Loading roster' : 'No students'}
+            message={classesQuery.error?.message || sectionsQuery.error?.message || studentsQuery.error?.message || 'Select a class and section with active students.'}
           />
         }
         ListFooterComponent={
@@ -199,7 +231,7 @@ const TakeAttendanceScreen = () => {
             </HelperText>
             <CustomButton
               loading={mutation.isPending}
-              disabled={mutation.isPending || !assignments.length || !students.length}
+              disabled={mutation.isPending || !selectedClass || !selectedSection || !students.length}
               onPress={() => mutation.mutate()}>
               Submit Attendance
             </CustomButton>

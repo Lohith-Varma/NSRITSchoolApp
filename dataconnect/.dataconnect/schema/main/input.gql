@@ -5,6 +5,12 @@ It has the same format as `AcademicClass_Key`, but is only used as mutation retu
 """
 scalar AcademicClass_KeyOutput
 """
+✨ `AcademicYearFeeTemplate_KeyOutput` returns the primary key fields of table type `AcademicYearFeeTemplate`.
+
+It has the same format as `AcademicYearFeeTemplate_Key`, but is only used as mutation return value.
+"""
+scalar AcademicYearFeeTemplate_KeyOutput
+"""
 ✨ `Accountant_KeyOutput` returns the primary key fields of table type `Accountant`.
 
 It has the same format as `Accountant_Key`, but is only used as mutation return value.
@@ -353,6 +359,10 @@ input AcademicClass_Data {
   """
   updatedAt_update: [Timestamp_Update!] @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `AcademicClass`.`academicYearFeeTemplates_on_academicClass` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_academicClass: [AcademicYearFeeTemplate_Data!]
+  """
   ✨ Generated from Field `AcademicClass`.`attendances_on_academicClass` of type `[Attendance!]!`
   """
   attendances_on_academicClass: [Attendance_Data!]
@@ -457,6 +467,10 @@ input AcademicClass_Filter {
   ✨ Generated from Field `AcademicClass`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicClass`.`academicYearFeeTemplates_on_academicClass` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_academicClass: AcademicYearFeeTemplate_ListFilter
   """
   ✨ Generated from Field `AcademicClass`.`attendances_on_academicClass` of type `[Attendance!]!`
   """
@@ -828,6 +842,685 @@ input AcademicClass_Order {
   updatedAt_max: OrderDirection
 }
 """
+✨ Generated data input type for table 'AcademicYearFeeTemplate'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input AcademicYearFeeTemplate_Data {
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId` of type `UUID!`
+  """
+  academicClassId: UUID
+  """
+  ✨ `_expr` server value variant of `academicClassId` (✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId` of type `UUID!`)
+  """
+  academicClassId_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branchId` of type `UUID!`
+  """
+  branchId: UUID
+  """
+  ✨ `_expr` server value variant of `branchId` (✨ Generated from Field `AcademicYearFeeTemplate`.`branchId` of type `UUID!`)
+  """
+  branchId_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdById` of type `UUID!`
+  """
+  createdById: UUID
+  """
+  ✨ `_expr` server value variant of `createdById` (✨ Generated from Field `AcademicYearFeeTemplate`.`createdById` of type `UUID!`)
+  """
+  createdById_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClass` of type `AcademicClass!`
+  """
+  academicClass: AcademicClass_Key @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branch` of type `Branch!`
+  """
+  branch: Branch_Key @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdBy` of type `User!`
+  """
+  createdBy: User_Key @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear` of type `Int!`
+  """
+  academicYear: Int
+  """
+  ✨ `_expr` server value variant of `academicYear` (✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear` of type `Int!`)
+  """
+  academicYear_expr: Int_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `academicYear` (✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear` of type `Int!`)
+  """
+  academicYear_update: [Int_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture` of type `Boolean!`
+  """
+  applyToFuture: Boolean
+  """
+  ✨ `_expr` server value variant of `applyToFuture` (✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture` of type `Boolean!`)
+  """
+  applyToFuture_expr: Boolean_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `createdAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_expr: Timestamp_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_time` server value variant of `createdAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_time: Timestamp_Relative @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `createdAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`)
+  """
+  createdAt_update: [Timestamp_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`status` of type `String!`
+  """
+  status: String
+  """
+  ✨ `_expr` server value variant of `status` (✨ Generated from Field `AcademicYearFeeTemplate`.`status` of type `String!`)
+  """
+  status_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee` of type `Float!`
+  """
+  term1Fee: Float
+  """
+  ✨ `_expr` server value variant of `term1Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee` of type `Float!`)
+  """
+  term1Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term1Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee` of type `Float!`)
+  """
+  term1Fee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee` of type `Float!`
+  """
+  term2Fee: Float
+  """
+  ✨ `_expr` server value variant of `term2Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee` of type `Float!`)
+  """
+  term2Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term2Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee` of type `Float!`)
+  """
+  term2Fee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee` of type `Float!`
+  """
+  term3Fee: Float
+  """
+  ✨ `_expr` server value variant of `term3Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee` of type `Float!`)
+  """
+  term3Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term3Fee` (✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee` of type `Float!`)
+  """
+  term3Fee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee` of type `Float!`
+  """
+  totalTuitionFee: Float
+  """
+  ✨ `_expr` server value variant of `totalTuitionFee` (✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee` of type `Float!`)
+  """
+  totalTuitionFee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `totalTuitionFee` (✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee` of type `Float!`)
+  """
+  totalTuitionFee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`
+  """
+  updatedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `updatedAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`)
+  """
+  updatedAt_expr: Timestamp_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_time` server value variant of `updatedAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`)
+  """
+  updatedAt_time: Timestamp_Relative @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `updatedAt` (✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`)
+  """
+  updatedAt_update: [Timestamp_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`studentFeePlans_on_classFeeTemplate` of type `[StudentFeePlan!]!`
+  """
+  studentFeePlans_on_classFeeTemplate: [StudentFeePlan_Data!]
+}
+"""
+✨ Generated filter input type for table 'AcademicYearFeeTemplate'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input AcademicYearFeeTemplate_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [AcademicYearFeeTemplate_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: AcademicYearFeeTemplate_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [AcademicYearFeeTemplate_Filter!]
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId` of type `UUID!`
+  """
+  academicClassId: UUID_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branchId` of type `UUID!`
+  """
+  branchId: UUID_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdById` of type `UUID!`
+  """
+  createdById: UUID_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClass` of type `AcademicClass!`
+  """
+  academicClass: AcademicClass_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branch` of type `Branch!`
+  """
+  branch: Branch_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdBy` of type `User!`
+  """
+  createdBy: User_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear` of type `Int!`
+  """
+  academicYear: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture` of type `Boolean!`
+  """
+  applyToFuture: Boolean_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`status` of type `String!`
+  """
+  status: String_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee` of type `Float!`
+  """
+  term1Fee: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee` of type `Float!`
+  """
+  term2Fee: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee` of type `Float!`
+  """
+  term3Fee: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee` of type `Float!`
+  """
+  totalTuitionFee: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`
+  """
+  updatedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`studentFeePlans_on_classFeeTemplate` of type `[StudentFeePlan!]!`
+  """
+  studentFeePlans_on_classFeeTemplate: StudentFeePlan_ListFilter
+}
+"""
+✨ Generated first-row input type for table 'AcademicYearFeeTemplate'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input AcademicYearFeeTemplate_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [AcademicYearFeeTemplate_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: AcademicYearFeeTemplate_Filter
+}
+"""
+✨ Generated having input type for table 'AcademicYearFeeTemplate'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input AcademicYearFeeTemplate_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [AcademicYearFeeTemplate_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: AcademicYearFeeTemplate_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [AcademicYearFeeTemplate_Having!]
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId_count` of type `Int!`
+  """
+  academicClassId_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_count` of type `Int!`
+  """
+  academicYear_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture_count` of type `Int!`
+  """
+  applyToFuture_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branchId_count` of type `Int!`
+  """
+  branchId_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdById_count` of type `Int!`
+  """
+  createdById_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`status_count` of type `Int!`
+  """
+  status_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_count` of type `Int!`
+  """
+  term1Fee_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_count` of type `Int!`
+  """
+  term2Fee_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_count` of type `Int!`
+  """
+  term3Fee_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_count` of type `Int!`
+  """
+  totalTuitionFee_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_count` of type `Int!`
+  """
+  updatedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_sum` of type `Int`
+  """
+  academicYear_sum: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_sum` of type `Float`
+  """
+  term1Fee_sum: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_sum` of type `Float`
+  """
+  term2Fee_sum: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_sum` of type `Float`
+  """
+  term3Fee_sum: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_sum` of type `Float`
+  """
+  totalTuitionFee_sum: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_avg` of type `Float`
+  """
+  academicYear_avg: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_avg` of type `Float`
+  """
+  term1Fee_avg: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_avg` of type `Float`
+  """
+  term2Fee_avg: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_avg` of type `Float`
+  """
+  term3Fee_avg: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_avg` of type `Float`
+  """
+  totalTuitionFee_avg: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_min` of type `Int`
+  """
+  academicYear_min: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_min` of type `Timestamp`
+  """
+  createdAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_min` of type `Float`
+  """
+  term1Fee_min: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_min` of type `Float`
+  """
+  term2Fee_min: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_min` of type `Float`
+  """
+  term3Fee_min: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_min` of type `Float`
+  """
+  totalTuitionFee_min: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_min` of type `Timestamp`
+  """
+  updatedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_max` of type `Int`
+  """
+  academicYear_max: Int_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_max` of type `Timestamp`
+  """
+  createdAt_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_max` of type `Float`
+  """
+  term1Fee_max: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_max` of type `Float`
+  """
+  term2Fee_max: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_max` of type `Float`
+  """
+  term3Fee_max: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_max` of type `Float`
+  """
+  totalTuitionFee_max: Float_Filter
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_max` of type `Timestamp`
+  """
+  updatedAt_max: Timestamp_Filter
+}
+"""
+✨ Generated key input type for table 'AcademicYearFeeTemplate'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input AcademicYearFeeTemplate_Key {
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr @fdc_forbiddenInVariables
+}
+"""
+✨ Generated list filter input type for table 'AcademicYearFeeTemplate'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input AcademicYearFeeTemplate_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: AcademicYearFeeTemplate_Filter
+}
+"""
+✨ Generated order input type for table 'AcademicYearFeeTemplate'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input AcademicYearFeeTemplate_Order {
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId` of type `UUID!`
+  """
+  academicClassId: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branchId` of type `UUID!`
+  """
+  branchId: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdById` of type `UUID!`
+  """
+  createdById: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClass` of type `AcademicClass!`
+  """
+  academicClass: AcademicClass_Order
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branch` of type `Branch!`
+  """
+  branch: Branch_Order
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdBy` of type `User!`
+  """
+  createdBy: User_Order
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear` of type `Int!`
+  """
+  academicYear: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture` of type `Boolean!`
+  """
+  applyToFuture: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt` of type `Timestamp!`
+  """
+  createdAt: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`status` of type `String!`
+  """
+  status: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee` of type `Float!`
+  """
+  term1Fee: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee` of type `Float!`
+  """
+  term2Fee: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee` of type `Float!`
+  """
+  term3Fee: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee` of type `Float!`
+  """
+  totalTuitionFee: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt` of type `Timestamp!`
+  """
+  updatedAt: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicClassId_count` of type `Int!`
+  """
+  academicClassId_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_count` of type `Int!`
+  """
+  academicYear_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`applyToFuture_count` of type `Int!`
+  """
+  applyToFuture_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`branchId_count` of type `Int!`
+  """
+  branchId_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_count` of type `Int!`
+  """
+  createdAt_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdById_count` of type `Int!`
+  """
+  createdById_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`status_count` of type `Int!`
+  """
+  status_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_count` of type `Int!`
+  """
+  term1Fee_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_count` of type `Int!`
+  """
+  term2Fee_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_count` of type `Int!`
+  """
+  term3Fee_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_count` of type `Int!`
+  """
+  totalTuitionFee_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_count` of type `Int!`
+  """
+  updatedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_sum` of type `Int`
+  """
+  academicYear_sum: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_sum` of type `Float`
+  """
+  term1Fee_sum: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_sum` of type `Float`
+  """
+  term2Fee_sum: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_sum` of type `Float`
+  """
+  term3Fee_sum: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_sum` of type `Float`
+  """
+  totalTuitionFee_sum: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_avg` of type `Float`
+  """
+  academicYear_avg: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_avg` of type `Float`
+  """
+  term1Fee_avg: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_avg` of type `Float`
+  """
+  term2Fee_avg: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_avg` of type `Float`
+  """
+  term3Fee_avg: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_avg` of type `Float`
+  """
+  totalTuitionFee_avg: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_min` of type `Int`
+  """
+  academicYear_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_min` of type `Timestamp`
+  """
+  createdAt_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_min` of type `Float`
+  """
+  term1Fee_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_min` of type `Float`
+  """
+  term2Fee_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_min` of type `Float`
+  """
+  term3Fee_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_min` of type `Float`
+  """
+  totalTuitionFee_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_min` of type `Timestamp`
+  """
+  updatedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`academicYear_max` of type `Int`
+  """
+  academicYear_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`createdAt_max` of type `Timestamp`
+  """
+  createdAt_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term1Fee_max` of type `Float`
+  """
+  term1Fee_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term2Fee_max` of type `Float`
+  """
+  term2Fee_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`term3Fee_max` of type `Float`
+  """
+  term3Fee_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`totalTuitionFee_max` of type `Float`
+  """
+  totalTuitionFee_max: OrderDirection
+  """
+  ✨ Generated from Field `AcademicYearFeeTemplate`.`updatedAt_max` of type `Timestamp`
+  """
+  updatedAt_max: OrderDirection
+}
+"""
 ✨ Generated data input type for table 'Accountant'. It includes all necessary fields for creating or upserting rows into table.
 """
 input Accountant_Data {
@@ -992,6 +1685,14 @@ input Accountant_Data {
   """
   qualification_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `Accountant`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `Accountant`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `Accountant`.`state` of type `String`
   """
   state: String
@@ -1109,6 +1810,10 @@ input Accountant_Filter {
   """
   qualification: String_Filter
   """
+  ✨ Generated from Field `Accountant`.`staffType` of type `String!`
+  """
+  staffType: String_Filter
+  """
   ✨ Generated from Field `Accountant`.`state` of type `String`
   """
   state: String_Filter
@@ -1218,6 +1923,10 @@ input Accountant_Having {
   ✨ Generated from Field `Accountant`.`qualification_count` of type `Int!`
   """
   qualification_count: Int_Filter
+  """
+  ✨ Generated from Field `Accountant`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
   """
   ✨ Generated from Field `Accountant`.`state_count` of type `Int!`
   """
@@ -1362,6 +2071,10 @@ input Accountant_Order {
   """
   qualification: OrderDirection
   """
+  ✨ Generated from Field `Accountant`.`staffType` of type `String!`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `Accountant`.`state` of type `String`
   """
   state: OrderDirection
@@ -1437,6 +2150,10 @@ input Accountant_Order {
   ✨ Generated from Field `Accountant`.`qualification_count` of type `Int!`
   """
   qualification_count: OrderDirection
+  """
+  ✨ Generated from Field `Accountant`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `Accountant`.`state_count` of type `Int!`
   """
@@ -2501,6 +3218,10 @@ input Branch_Data {
   """
   academicClasses_on_branch: [AcademicClass_Data!]
   """
+  ✨ Generated from Field `Branch`.`academicYearFeeTemplates_on_branch` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_branch: [AcademicYearFeeTemplate_Data!]
+  """
   ✨ Generated from Field `Branch`.`accountants_on_branch` of type `[Accountant!]!`
   """
   accountants_on_branch: [Accountant_Data!]
@@ -2637,6 +3358,10 @@ input Branch_Filter {
   ✨ Generated from Field `Branch`.`academicClasses_on_branch` of type `[AcademicClass!]!`
   """
   academicClasses_on_branch: AcademicClass_ListFilter
+  """
+  ✨ Generated from Field `Branch`.`academicYearFeeTemplates_on_branch` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_branch: AcademicYearFeeTemplate_ListFilter
   """
   ✨ Generated from Field `Branch`.`accountants_on_branch` of type `[Accountant!]!`
   """
@@ -3064,6 +3789,14 @@ input Coordinator_Data {
   """
   isActive_expr: Boolean_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `Coordinator`.`staffType` of type `String`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `Coordinator`.`staffType` of type `String`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `Coordinator`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: Timestamp
@@ -3145,6 +3878,10 @@ input Coordinator_Filter {
   """
   isActive: Boolean_Filter
   """
+  ✨ Generated from Field `Coordinator`.`staffType` of type `String`
+  """
+  staffType: String_Filter
+  """
   ✨ Generated from Field `Coordinator`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: Timestamp_Filter
@@ -3218,6 +3955,10 @@ input Coordinator_Having {
   ✨ Generated from Field `Coordinator`.`isActive_count` of type `Int!`
   """
   isActive_count: Int_Filter
+  """
+  ✨ Generated from Field `Coordinator`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
   """
   ✨ Generated from Field `Coordinator`.`updatedAt_count` of type `Int!`
   """
@@ -3318,6 +4059,10 @@ input Coordinator_Order {
   """
   isActive: OrderDirection
   """
+  ✨ Generated from Field `Coordinator`.`staffType` of type `String`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `Coordinator`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: OrderDirection
@@ -3357,6 +4102,10 @@ input Coordinator_Order {
   ✨ Generated from Field `Coordinator`.`isActive_count` of type `Int!`
   """
   isActive_count: OrderDirection
+  """
+  ✨ Generated from Field `Coordinator`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `Coordinator`.`updatedAt_count` of type `Int!`
   """
@@ -3878,6 +4627,14 @@ input EmployeeSequence_Data {
   """
   branchCode_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `EmployeeSequence`.`lastSequence` of type `Int!`
   """
   lastSequence: Int
@@ -3930,6 +4687,10 @@ input EmployeeSequence_Filter {
   ✨ Generated from Field `EmployeeSequence`.`branchCode` of type `String!`
   """
   branchCode: String_Filter
+  """
+  ✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`
+  """
+  staffType: String_Filter
   """
   ✨ Generated from Field `EmployeeSequence`.`lastSequence` of type `Int!`
   """
@@ -3984,6 +4745,10 @@ input EmployeeSequence_Having {
   ✨ Generated from Field `EmployeeSequence`.`lastSequence_count` of type `Int!`
   """
   lastSequence_count: Int_Filter
+  """
+  ✨ Generated from Field `EmployeeSequence`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
   """
   ✨ Generated from Field `EmployeeSequence`.`updatedAt_count` of type `Int!`
   """
@@ -4053,6 +4818,14 @@ input EmployeeSequence_Key {
   ✨ `_expr` server value variant of `branchCode` (✨ Generated from Field `EmployeeSequence`.`branchCode` of type `String!`)
   """
   branchCode_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
 }
 """
 ✨ Generated list filter input type for table 'EmployeeSequence'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
@@ -4080,6 +4853,10 @@ input EmployeeSequence_Order {
   """
   branchCode: OrderDirection
   """
+  ✨ Generated from Field `EmployeeSequence`.`staffType` of type `String!`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `EmployeeSequence`.`lastSequence` of type `Int!`
   """
   lastSequence: OrderDirection
@@ -4099,6 +4876,10 @@ input EmployeeSequence_Order {
   ✨ Generated from Field `EmployeeSequence`.`lastSequence_count` of type `Int!`
   """
   lastSequence_count: OrderDirection
+  """
+  ✨ Generated from Field `EmployeeSequence`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `EmployeeSequence`.`updatedAt_count` of type `Int!`
   """
@@ -8060,6 +8841,14 @@ input StaffIdSequence_Data {
   """
   branchCode_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `StaffIdSequence`.`lastSerialNumber` of type `Int!`
   """
   lastSerialNumber: Int
@@ -8112,6 +8901,10 @@ input StaffIdSequence_Filter {
   ✨ Generated from Field `StaffIdSequence`.`branchCode` of type `String!`
   """
   branchCode: String_Filter
+  """
+  ✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`
+  """
+  staffType: String_Filter
   """
   ✨ Generated from Field `StaffIdSequence`.`lastSerialNumber` of type `Int!`
   """
@@ -8170,6 +8963,10 @@ input StaffIdSequence_Having {
   ✨ Generated from Field `StaffIdSequence`.`lastSerialNumber_count` of type `Int!`
   """
   lastSerialNumber_count: Int_Filter
+  """
+  ✨ Generated from Field `StaffIdSequence`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
   """
   ✨ Generated from Field `StaffIdSequence`.`updatedAt_count` of type `Int!`
   """
@@ -8235,6 +9032,14 @@ input StaffIdSequence_Key {
   ✨ `_expr` server value variant of `branchCode` (✨ Generated from Field `StaffIdSequence`.`branchCode` of type `String!`)
   """
   branchCode_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
 }
 """
 ✨ Generated list filter input type for table 'StaffIdSequence'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
@@ -8262,6 +9067,10 @@ input StaffIdSequence_Order {
   """
   branchCode: OrderDirection
   """
+  ✨ Generated from Field `StaffIdSequence`.`staffType` of type `String!`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `StaffIdSequence`.`lastSerialNumber` of type `Int!`
   """
   lastSerialNumber: OrderDirection
@@ -8285,6 +9094,10 @@ input StaffIdSequence_Order {
   ✨ Generated from Field `StaffIdSequence`.`lastSerialNumber_count` of type `Int!`
   """
   lastSerialNumber_count: OrderDirection
+  """
+  ✨ Generated from Field `StaffIdSequence`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `StaffIdSequence`.`updatedAt_count` of type `Int!`
   """
@@ -10440,6 +11253,14 @@ input StudentFeePlan_Data {
   """
   id_expr: UUID_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId` of type `UUID`
+  """
+  classFeeTemplateId: UUID
+  """
+  ✨ `_expr` server value variant of `classFeeTemplateId` (✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId` of type `UUID`)
+  """
+  classFeeTemplateId_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdById` of type `UUID!`
   """
   createdById: UUID
@@ -10455,6 +11276,10 @@ input StudentFeePlan_Data {
   ✨ `_expr` server value variant of `studentId` (✨ Generated from Field `StudentFeePlan`.`studentId` of type `UUID!`)
   """
   studentId_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplate` of type `AcademicYearFeeTemplate`
+  """
+  classFeeTemplate: AcademicYearFeeTemplate_Key @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `StudentFeePlan`.`createdBy` of type `User!`
   """
@@ -10476,6 +11301,50 @@ input StudentFeePlan_Data {
   """
   academicYear_update: [Int_Update!] @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee` of type `Float!`
+  """
+  booksFee: Float
+  """
+  ✨ `_expr` server value variant of `booksFee` (✨ Generated from Field `StudentFeePlan`.`booksFee` of type `Float!`)
+  """
+  booksFee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `booksFee` (✨ Generated from Field `StudentFeePlan`.`booksFee` of type `Float!`)
+  """
+  booksFee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount` of type `Float!`
+  """
+  concessionAmount: Float
+  """
+  ✨ `_expr` server value variant of `concessionAmount` (✨ Generated from Field `StudentFeePlan`.`concessionAmount` of type `Float!`)
+  """
+  concessionAmount_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `concessionAmount` (✨ Generated from Field `StudentFeePlan`.`concessionAmount` of type `Float!`)
+  """
+  concessionAmount_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionType` of type `String`
+  """
+  concessionType: String
+  """
+  ✨ `_expr` server value variant of `concessionType` (✨ Generated from Field `StudentFeePlan`.`concessionType` of type `String`)
+  """
+  concessionType_expr: String_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue` of type `Float!`
+  """
+  concessionValue: Float
+  """
+  ✨ `_expr` server value variant of `concessionValue` (✨ Generated from Field `StudentFeePlan`.`concessionValue` of type `Float!`)
+  """
+  concessionValue_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `concessionValue` (✨ Generated from Field `StudentFeePlan`.`concessionValue` of type `Float!`)
+  """
+  concessionValue_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt` of type `Timestamp!`
   """
   createdAt: Timestamp
@@ -10492,6 +11361,18 @@ input StudentFeePlan_Data {
   """
   createdAt_update: [Timestamp_Update!] @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount` of type `Float!`
+  """
+  grossAmount: Float
+  """
+  ✨ `_expr` server value variant of `grossAmount` (✨ Generated from Field `StudentFeePlan`.`grossAmount` of type `Float!`)
+  """
+  grossAmount_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `grossAmount` (✨ Generated from Field `StudentFeePlan`.`grossAmount` of type `Float!`)
+  """
+  grossAmount_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `StudentFeePlan`.`isActive` of type `Boolean!`
   """
   isActive: Boolean
@@ -10499,6 +11380,42 @@ input StudentFeePlan_Data {
   ✨ `_expr` server value variant of `isActive` (✨ Generated from Field `StudentFeePlan`.`isActive` of type `Boolean!`)
   """
   isActive_expr: Boolean_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee` of type `Float!`
+  """
+  term1Fee: Float
+  """
+  ✨ `_expr` server value variant of `term1Fee` (✨ Generated from Field `StudentFeePlan`.`term1Fee` of type `Float!`)
+  """
+  term1Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term1Fee` (✨ Generated from Field `StudentFeePlan`.`term1Fee` of type `Float!`)
+  """
+  term1Fee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee` of type `Float!`
+  """
+  term2Fee: Float
+  """
+  ✨ `_expr` server value variant of `term2Fee` (✨ Generated from Field `StudentFeePlan`.`term2Fee` of type `Float!`)
+  """
+  term2Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term2Fee` (✨ Generated from Field `StudentFeePlan`.`term2Fee` of type `Float!`)
+  """
+  term2Fee_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee` of type `Float!`
+  """
+  term3Fee: Float
+  """
+  ✨ `_expr` server value variant of `term3Fee` (✨ Generated from Field `StudentFeePlan`.`term3Fee` of type `Float!`)
+  """
+  term3Fee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `term3Fee` (✨ Generated from Field `StudentFeePlan`.`term3Fee` of type `Float!`)
+  """
+  term3Fee_update: [Float_Update!] @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount` of type `Float!`
   """
@@ -10511,6 +11428,18 @@ input StudentFeePlan_Data {
   ✨ `_update` server value variant of `totalAmount` (✨ Generated from Field `StudentFeePlan`.`totalAmount` of type `Float!`)
   """
   totalAmount_update: [Float_Update!] @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee` of type `Float!`
+  """
+  transportFee: Float
+  """
+  ✨ `_expr` server value variant of `transportFee` (✨ Generated from Field `StudentFeePlan`.`transportFee` of type `Float!`)
+  """
+  transportFee_expr: Float_Expr @fdc_forbiddenInVariables
+  """
+  ✨ `_update` server value variant of `transportFee` (✨ Generated from Field `StudentFeePlan`.`transportFee` of type `Float!`)
+  """
+  transportFee_update: [Float_Update!] @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt` of type `Timestamp!`
   """
@@ -10557,6 +11486,10 @@ input StudentFeePlan_Filter {
   """
   id: UUID_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId` of type `UUID`
+  """
+  classFeeTemplateId: UUID_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdById` of type `UUID!`
   """
   createdById: UUID_Filter
@@ -10564,6 +11497,10 @@ input StudentFeePlan_Filter {
   ✨ Generated from Field `StudentFeePlan`.`studentId` of type `UUID!`
   """
   studentId: UUID_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplate` of type `AcademicYearFeeTemplate`
+  """
+  classFeeTemplate: AcademicYearFeeTemplate_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`createdBy` of type `User!`
   """
@@ -10577,17 +11514,53 @@ input StudentFeePlan_Filter {
   """
   academicYear: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee` of type `Float!`
+  """
+  booksFee: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount` of type `Float!`
+  """
+  concessionAmount: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionType` of type `String`
+  """
+  concessionType: String_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue` of type `Float!`
+  """
+  concessionValue: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt` of type `Timestamp!`
   """
   createdAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount` of type `Float!`
+  """
+  grossAmount: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`isActive` of type `Boolean!`
   """
   isActive: Boolean_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee` of type `Float!`
+  """
+  term1Fee: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee` of type `Float!`
+  """
+  term2Fee: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee` of type `Float!`
+  """
+  term3Fee: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount` of type `Float!`
   """
   totalAmount: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee` of type `Float!`
+  """
+  transportFee: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt` of type `Timestamp!`
   """
@@ -10643,6 +11616,26 @@ input StudentFeePlan_Having {
   """
   academicYear_count: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_count` of type `Int!`
+  """
+  booksFee_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId_count` of type `Int!`
+  """
+  classFeeTemplateId_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_count` of type `Int!`
+  """
+  concessionAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionType_count` of type `Int!`
+  """
+  concessionType_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_count` of type `Int!`
+  """
+  concessionValue_count: Int_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_count` of type `Int!`
   """
   createdAt_count: Int_Filter
@@ -10650,6 +11643,10 @@ input StudentFeePlan_Having {
   ✨ Generated from Field `StudentFeePlan`.`createdById_count` of type `Int!`
   """
   createdById_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_count` of type `Int!`
+  """
+  grossAmount_count: Int_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`id_count` of type `Int!`
   """
@@ -10663,9 +11660,25 @@ input StudentFeePlan_Having {
   """
   studentId_count: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_count` of type `Int!`
+  """
+  term1Fee_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_count` of type `Int!`
+  """
+  term2Fee_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_count` of type `Int!`
+  """
+  term3Fee_count: Int_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_count` of type `Int!`
   """
   totalAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_count` of type `Int!`
+  """
+  transportFee_count: Int_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_count` of type `Int!`
   """
@@ -10675,29 +11688,125 @@ input StudentFeePlan_Having {
   """
   academicYear_sum: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_sum` of type `Float`
+  """
+  booksFee_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_sum` of type `Float`
+  """
+  concessionAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_sum` of type `Float`
+  """
+  concessionValue_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_sum` of type `Float`
+  """
+  grossAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_sum` of type `Float`
+  """
+  term1Fee_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_sum` of type `Float`
+  """
+  term2Fee_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_sum` of type `Float`
+  """
+  term3Fee_sum: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_sum` of type `Float`
   """
   totalAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_sum` of type `Float`
+  """
+  transportFee_sum: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`academicYear_avg` of type `Float`
   """
   academicYear_avg: Float_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_avg` of type `Float`
+  """
+  booksFee_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_avg` of type `Float`
+  """
+  concessionAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_avg` of type `Float`
+  """
+  concessionValue_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_avg` of type `Float`
+  """
+  grossAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_avg` of type `Float`
+  """
+  term1Fee_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_avg` of type `Float`
+  """
+  term2Fee_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_avg` of type `Float`
+  """
+  term3Fee_avg: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_avg` of type `Float`
   """
   totalAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_avg` of type `Float`
+  """
+  transportFee_avg: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`academicYear_min` of type `Int`
   """
   academicYear_min: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_min` of type `Float`
+  """
+  booksFee_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_min` of type `Float`
+  """
+  concessionAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_min` of type `Float`
+  """
+  concessionValue_min: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_min` of type `Timestamp`
   """
   createdAt_min: Timestamp_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_min` of type `Float`
+  """
+  grossAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_min` of type `Float`
+  """
+  term1Fee_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_min` of type `Float`
+  """
+  term2Fee_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_min` of type `Float`
+  """
+  term3Fee_min: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_min` of type `Float`
   """
   totalAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_min` of type `Float`
+  """
+  transportFee_min: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_min` of type `Timestamp`
   """
@@ -10707,13 +11816,45 @@ input StudentFeePlan_Having {
   """
   academicYear_max: Int_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_max` of type `Float`
+  """
+  booksFee_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_max` of type `Float`
+  """
+  concessionAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_max` of type `Float`
+  """
+  concessionValue_max: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_max` of type `Timestamp`
   """
   createdAt_max: Timestamp_Filter
   """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_max` of type `Float`
+  """
+  grossAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_max` of type `Float`
+  """
+  term1Fee_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_max` of type `Float`
+  """
+  term2Fee_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_max` of type `Float`
+  """
+  term3Fee_max: Float_Filter
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_max` of type `Float`
   """
   totalAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_max` of type `Float`
+  """
+  transportFee_max: Float_Filter
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_max` of type `Timestamp`
   """
@@ -10754,6 +11895,10 @@ input StudentFeePlan_Order {
   """
   id: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId` of type `UUID`
+  """
+  classFeeTemplateId: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdById` of type `UUID!`
   """
   createdById: OrderDirection
@@ -10761,6 +11906,10 @@ input StudentFeePlan_Order {
   ✨ Generated from Field `StudentFeePlan`.`studentId` of type `UUID!`
   """
   studentId: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplate` of type `AcademicYearFeeTemplate`
+  """
+  classFeeTemplate: AcademicYearFeeTemplate_Order
   """
   ✨ Generated from Field `StudentFeePlan`.`createdBy` of type `User!`
   """
@@ -10774,17 +11923,53 @@ input StudentFeePlan_Order {
   """
   academicYear: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee` of type `Float!`
+  """
+  booksFee: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount` of type `Float!`
+  """
+  concessionAmount: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionType` of type `String`
+  """
+  concessionType: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue` of type `Float!`
+  """
+  concessionValue: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt` of type `Timestamp!`
   """
   createdAt: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount` of type `Float!`
+  """
+  grossAmount: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`isActive` of type `Boolean!`
   """
   isActive: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee` of type `Float!`
+  """
+  term1Fee: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee` of type `Float!`
+  """
+  term2Fee: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee` of type `Float!`
+  """
+  term3Fee: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount` of type `Float!`
   """
   totalAmount: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee` of type `Float!`
+  """
+  transportFee: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt` of type `Timestamp!`
   """
@@ -10798,6 +11983,26 @@ input StudentFeePlan_Order {
   """
   academicYear_count: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_count` of type `Int!`
+  """
+  booksFee_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`classFeeTemplateId_count` of type `Int!`
+  """
+  classFeeTemplateId_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_count` of type `Int!`
+  """
+  concessionAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionType_count` of type `Int!`
+  """
+  concessionType_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_count` of type `Int!`
+  """
+  concessionValue_count: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_count` of type `Int!`
   """
   createdAt_count: OrderDirection
@@ -10805,6 +12010,10 @@ input StudentFeePlan_Order {
   ✨ Generated from Field `StudentFeePlan`.`createdById_count` of type `Int!`
   """
   createdById_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_count` of type `Int!`
+  """
+  grossAmount_count: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`id_count` of type `Int!`
   """
@@ -10818,9 +12027,25 @@ input StudentFeePlan_Order {
   """
   studentId_count: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_count` of type `Int!`
+  """
+  term1Fee_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_count` of type `Int!`
+  """
+  term2Fee_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_count` of type `Int!`
+  """
+  term3Fee_count: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_count` of type `Int!`
   """
   totalAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_count` of type `Int!`
+  """
+  transportFee_count: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_count` of type `Int!`
   """
@@ -10830,29 +12055,125 @@ input StudentFeePlan_Order {
   """
   academicYear_sum: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_sum` of type `Float`
+  """
+  booksFee_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_sum` of type `Float`
+  """
+  concessionAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_sum` of type `Float`
+  """
+  concessionValue_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_sum` of type `Float`
+  """
+  grossAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_sum` of type `Float`
+  """
+  term1Fee_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_sum` of type `Float`
+  """
+  term2Fee_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_sum` of type `Float`
+  """
+  term3Fee_sum: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_sum` of type `Float`
   """
   totalAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_sum` of type `Float`
+  """
+  transportFee_sum: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`academicYear_avg` of type `Float`
   """
   academicYear_avg: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_avg` of type `Float`
+  """
+  booksFee_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_avg` of type `Float`
+  """
+  concessionAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_avg` of type `Float`
+  """
+  concessionValue_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_avg` of type `Float`
+  """
+  grossAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_avg` of type `Float`
+  """
+  term1Fee_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_avg` of type `Float`
+  """
+  term2Fee_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_avg` of type `Float`
+  """
+  term3Fee_avg: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_avg` of type `Float`
   """
   totalAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_avg` of type `Float`
+  """
+  transportFee_avg: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`academicYear_min` of type `Int`
   """
   academicYear_min: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_min` of type `Float`
+  """
+  booksFee_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_min` of type `Float`
+  """
+  concessionAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_min` of type `Float`
+  """
+  concessionValue_min: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_min` of type `Timestamp`
   """
   createdAt_min: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_min` of type `Float`
+  """
+  grossAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_min` of type `Float`
+  """
+  term1Fee_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_min` of type `Float`
+  """
+  term2Fee_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_min` of type `Float`
+  """
+  term3Fee_min: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_min` of type `Float`
   """
   totalAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_min` of type `Float`
+  """
+  transportFee_min: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_min` of type `Timestamp`
   """
@@ -10862,13 +12183,45 @@ input StudentFeePlan_Order {
   """
   academicYear_max: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`booksFee_max` of type `Float`
+  """
+  booksFee_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionAmount_max` of type `Float`
+  """
+  concessionAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`concessionValue_max` of type `Float`
+  """
+  concessionValue_max: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`createdAt_max` of type `Timestamp`
   """
   createdAt_max: OrderDirection
   """
+  ✨ Generated from Field `StudentFeePlan`.`grossAmount_max` of type `Float`
+  """
+  grossAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term1Fee_max` of type `Float`
+  """
+  term1Fee_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term2Fee_max` of type `Float`
+  """
+  term2Fee_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`term3Fee_max` of type `Float`
+  """
+  term3Fee_max: OrderDirection
+  """
   ✨ Generated from Field `StudentFeePlan`.`totalAmount_max` of type `Float`
   """
   totalAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `StudentFeePlan`.`transportFee_max` of type `Float`
+  """
+  transportFee_max: OrderDirection
   """
   ✨ Generated from Field `StudentFeePlan`.`updatedAt_max` of type `Timestamp`
   """
@@ -13061,6 +14414,14 @@ input Teacher_Data {
   """
   qualification_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `Teacher`.`staffType` of type `String!`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `Teacher`.`staffType` of type `String!`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `Teacher`.`state` of type `String`
   """
   state: String
@@ -13206,6 +14567,10 @@ input Teacher_Filter {
   """
   qualification: String_Filter
   """
+  ✨ Generated from Field `Teacher`.`staffType` of type `String!`
+  """
+  staffType: String_Filter
+  """
   ✨ Generated from Field `Teacher`.`state` of type `String`
   """
   state: String_Filter
@@ -13339,6 +14704,10 @@ input Teacher_Having {
   ✨ Generated from Field `Teacher`.`qualification_count` of type `Int!`
   """
   qualification_count: Int_Filter
+  """
+  ✨ Generated from Field `Teacher`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
   """
   ✨ Generated from Field `Teacher`.`state_count` of type `Int!`
   """
@@ -13503,6 +14872,10 @@ input Teacher_Order {
   """
   qualification: OrderDirection
   """
+  ✨ Generated from Field `Teacher`.`staffType` of type `String!`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `Teacher`.`state` of type `String`
   """
   state: OrderDirection
@@ -13590,6 +14963,10 @@ input Teacher_Order {
   ✨ Generated from Field `Teacher`.`qualification_count` of type `Int!`
   """
   qualification_count: OrderDirection
+  """
+  ✨ Generated from Field `Teacher`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `Teacher`.`state_count` of type `Int!`
   """
@@ -15076,6 +16453,14 @@ input User_Data {
   """
   role_expr: String_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `User`.`staffType` of type `String`
+  """
+  staffType: String
+  """
+  ✨ `_expr` server value variant of `staffType` (✨ Generated from Field `User`.`staffType` of type `String`)
+  """
+  staffType_expr: String_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: Timestamp
@@ -15095,6 +16480,10 @@ input User_Data {
   ✨ Generated from Field `User`.`academicClasses_on_activatedBy` of type `[AcademicClass!]!`
   """
   academicClasses_on_activatedBy: [AcademicClass_Data!]
+  """
+  ✨ Generated from Field `User`.`academicYearFeeTemplates_on_createdBy` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_createdBy: [AcademicYearFeeTemplate_Data!]
   """
   ✨ Generated from Field `User`.`attendances_on_editedBy` of type `[Attendance!]!`
   """
@@ -15233,6 +16622,10 @@ input User_Filter {
   """
   role: String_Filter
   """
+  ✨ Generated from Field `User`.`staffType` of type `String`
+  """
+  staffType: String_Filter
+  """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: Timestamp_Filter
@@ -15240,6 +16633,10 @@ input User_Filter {
   ✨ Generated from Field `User`.`academicClasses_on_activatedBy` of type `[AcademicClass!]!`
   """
   academicClasses_on_activatedBy: AcademicClass_ListFilter
+  """
+  ✨ Generated from Field `User`.`academicYearFeeTemplates_on_createdBy` of type `[AcademicYearFeeTemplate!]!`
+  """
+  academicYearFeeTemplates_on_createdBy: AcademicYearFeeTemplate_ListFilter
   """
   ✨ Generated from Field `User`.`attendances_on_editedBy` of type `[Attendance!]!`
   """
@@ -15395,6 +16792,10 @@ input User_Having {
   """
   role_count: Int_Filter
   """
+  ✨ Generated from Field `User`.`staffType_count` of type `Int!`
+  """
+  staffType_count: Int_Filter
+  """
   ✨ Generated from Field `User`.`updatedAt_count` of type `Int!`
   """
   updatedAt_count: Int_Filter
@@ -15502,6 +16903,10 @@ input User_Order {
   """
   role: OrderDirection
   """
+  ✨ Generated from Field `User`.`staffType` of type `String`
+  """
+  staffType: OrderDirection
+  """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp!`
   """
   updatedAt: OrderDirection
@@ -15549,6 +16954,10 @@ input User_Order {
   ✨ Generated from Field `User`.`role_count` of type `Int!`
   """
   role_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`staffType_count` of type `Int!`
+  """
+  staffType_count: OrderDirection
   """
   ✨ Generated from Field `User`.`updatedAt_count` of type `Int!`
   """

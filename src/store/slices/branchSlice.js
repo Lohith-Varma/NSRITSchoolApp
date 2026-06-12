@@ -45,8 +45,18 @@ const branchSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(createBranch.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createBranch.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
         state.items.unshift(action.payload);
+      })
+      .addCase(createBranch.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

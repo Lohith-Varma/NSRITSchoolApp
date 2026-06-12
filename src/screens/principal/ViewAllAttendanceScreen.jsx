@@ -4,7 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer} from '../../components';
 import attendanceService from '../../services/attendance/attendanceService';
 
-const ViewAllAttendanceScreen = () => {
+const ViewAllAttendanceScreen = ({navigation}) => {
   const user = useSelector(state => state.auth.user);
   const {data: items = [], error, isLoading} = useQuery({
     queryKey: ['branchAttendance', user?.branchId],
@@ -14,7 +14,7 @@ const ViewAllAttendanceScreen = () => {
 
   return (
     <ScreenContainer>
-      <Header title="All Attendance" subtitle={isLoading ? 'Loading submitted attendance' : 'Principal read-only attendance view'} />
+      <Header title="All Attendance" subtitle={isLoading ? 'Loading submitted attendance' : 'Review and correct attendance'} />
       {error ? <EmptyState title="Unable to load attendance" message={error.message} /> : null}
       {items.length ? (
         items.map(item => (
@@ -24,6 +24,7 @@ const ViewAllAttendanceScreen = () => {
             value={item.attendanceDate}
             description={`${item.academicClass?.name || '-'}-${item.section?.name || '-'} | ${item.status} | Submitted by ${item.markedBy?.fullName || '-'}`}
             icon="clipboard-text-outline"
+            onPress={() => navigation.navigate('EditAttendance')}
           />
         ))
       ) : (

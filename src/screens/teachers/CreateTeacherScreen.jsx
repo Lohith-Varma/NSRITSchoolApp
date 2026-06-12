@@ -4,11 +4,16 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useSelector} from 'react-redux';
 import {CustomButton, CustomInput, ScreenContainer, SectionHeader, SelectField} from '../../components';
 import {WINGS, WING_LABELS} from '../../config/academic';
+import {STAFF_TYPE_LABELS, STAFF_TYPES} from '../../config/constants';
 import teacherService from '../../services/teachers/teacherService';
 import {getAccessScope} from '../../services/rbacScope';
 
 const wingOptions = Object.values(WINGS).map(value => ({label: WING_LABELS[value], value}));
 const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, value}));
+const staffTypeOptions = [
+  {label: STAFF_TYPE_LABELS[STAFF_TYPES.TEACHING], value: STAFF_TYPES.TEACHING},
+  {label: STAFF_TYPE_LABELS[STAFF_TYPES.SUPPORTING], value: STAFF_TYPES.SUPPORTING},
+];
 
 const initialForm = {
   fullName: '',
@@ -18,6 +23,7 @@ const initialForm = {
   gender: '',
   joiningDate: new Date().toISOString().slice(0, 10),
   designation: '',
+  staffType: STAFF_TYPES.TEACHING,
   dateOfBirth: '',
   qualification: '',
   experience: '',
@@ -57,6 +63,7 @@ const CreateTeacherScreen = ({navigation}) => {
       <SelectField label="Gender" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
       <CustomInput label="Joining Date (YYYY-MM-DD)" value={form.joiningDate} onChangeText={value => updateField('joiningDate', value)} />
       <CustomInput label="Designation" value={form.designation} onChangeText={value => updateField('designation', value)} />
+      <SelectField label="Staff Type" value={form.staffType} options={staffTypeOptions} onChange={value => updateField('staffType', value)} />
       <SelectField label="Wing" value={form.wing} options={wingOptions} disabled={user?.role === 'COORDINATOR'} onChange={value => updateField('wing', value)} />
       <SectionHeader title="Optional Information" />
       <CustomInput label="Alternate Mobile Number" keyboardType="phone-pad" value={form.alternateMobileNumber} onChangeText={value => updateField('alternateMobileNumber', value)} />

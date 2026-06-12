@@ -1,4 +1,4 @@
-import {USER_ROLES} from '../../config/constants';
+import {STAFF_TYPES, USER_ROLES} from '../../config/constants';
 import {WINGS} from '../../config/academic';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
@@ -48,6 +48,9 @@ const validateTeacher = payload => {
   if (!payload.designation?.trim()) {
     return 'Designation is required.';
   }
+  if (![STAFF_TYPES.TEACHING, STAFF_TYPES.SUPPORTING].includes(payload.staffType)) {
+    return 'Staff type is required.';
+  }
   if (!validWings.includes(payload.wing)) {
     return 'Select a valid wing.';
   }
@@ -71,6 +74,7 @@ const normalizeTeacherPayload = (payload, scope) => {
     countryCode,
     phoneNumber,
     joiningDate: payload.joiningDate || today(),
+    staffType: payload.staffType || STAFF_TYPES.TEACHING,
     fullName: payload.fullName?.trim(),
     designation: payload.designation?.trim(),
   };
@@ -82,6 +86,7 @@ const flattenTeacher = teacher => ({
   phoneNumber: teacher.user?.phoneNumber,
   countryCode: teacher.user?.countryCode,
   role: teacher.user?.role,
+  staffType: teacher.staffType || teacher.user?.staffType || STAFF_TYPES.TEACHING,
   subjects:
     (teacher.subjects || teacher.teacherSubjects_on_teacher || [])
       .map(item => item.subject)
@@ -256,11 +261,10 @@ export const teacherService = {
       throw new Error('A user with this phone number already exists.');
     }
 
-    const joiningYear = Number(String(normalized.joiningDate).slice(2, 4));
     const staffId = await StaffIdService.getNextStaffId({
       branchId: normalized.branchId,
       branchCode: scope?.branchCode,
-      joiningYear,
+      staffType: normalized.staffType,
     });
 
     const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_TEACHER, {
@@ -288,6 +292,7 @@ export const teacherService = {
       emergencyContact: normalized.emergencyContact || null,
       bloodGroup: normalized.bloodGroup || null,
       employeeId: staffId.employeeId,
+      staffType: staffId.staffType,
       joiningYear: staffId.joiningYear,
       branchCode: staffId.branchCode,
       serialNumber: staffId.serialNumber,

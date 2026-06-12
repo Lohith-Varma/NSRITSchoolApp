@@ -237,6 +237,20 @@ exports.createStudent = function createStudent(dcOrVars, vars) {
 }
 ;
 
+const updateStudentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateStudent', inputVars);
+}
+updateStudentRef.operationName = 'UpdateStudent';
+exports.updateStudentRef = updateStudentRef;
+
+exports.updateStudent = function updateStudent(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateStudentRef(dcInstance, inputVars));
+}
+;
+
 const createAttendanceRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -461,6 +475,34 @@ exports.updateFeeCategory = function updateFeeCategory(dcOrVars, vars) {
 }
 ;
 
+const createClassFeeRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'CreateClassFee', inputVars);
+}
+createClassFeeRef.operationName = 'CreateClassFee';
+exports.createClassFeeRef = createClassFeeRef;
+
+exports.createClassFee = function createClassFee(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(createClassFeeRef(dcInstance, inputVars));
+}
+;
+
+const updateClassFeeRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateClassFee', inputVars);
+}
+updateClassFeeRef.operationName = 'UpdateClassFee';
+exports.updateClassFeeRef = updateClassFeeRef;
+
+exports.updateClassFee = function updateClassFee(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateClassFeeRef(dcInstance, inputVars));
+}
+;
+
 const createFeePlanRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -528,6 +570,20 @@ exports.recordPaymentRef = recordPaymentRef;
 exports.recordPayment = function recordPayment(dcOrVars, vars) {
   const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
   return executeMutation(recordPaymentRef(dcInstance, inputVars));
+}
+;
+
+const updatePaymentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdatePayment', inputVars);
+}
+updatePaymentRef.operationName = 'UpdatePayment';
+exports.updatePaymentRef = updatePaymentRef;
+
+exports.updatePayment = function updatePayment(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updatePaymentRef(dcInstance, inputVars));
 }
 ;
 
@@ -976,6 +1032,21 @@ exports.getEmployeeSequence = function getEmployeeSequence(dcOrVars, varsOrOptio
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(getEmployeeSequenceRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
+
+const getStaffIdsByPrefixRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetStaffIdsByPrefix', inputVars);
+}
+getStaffIdsByPrefixRef.operationName = 'GetStaffIdsByPrefix';
+exports.getStaffIdsByPrefixRef = getStaffIdsByPrefixRef;
+
+exports.getStaffIdsByPrefix = function getStaffIdsByPrefix(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getStaffIdsByPrefixRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 
@@ -1546,6 +1617,21 @@ exports.getFeeCategories = function getFeeCategories(dcOrVars, varsOrOptions, op
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, false);
   return executeQuery(getFeeCategoriesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+;
+
+const getClassFeesRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetClassFees', inputVars);
+}
+getClassFeesRef.operationName = 'GetClassFees';
+exports.getClassFeesRef = getClassFeesRef;
+
+exports.getClassFees = function getClassFees(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getClassFeesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 

@@ -2,7 +2,7 @@
 # Roles and statuses are stored as strings because Data Connect table fields are
 # safest across generated SDKs when represented as varchar values.
 
-type Branch @table(name: "branches", key: "id") {
+type Branch @table(name: "branches", key: "id") @unique(fields: ["branchCode"]) {
   id: UUID! @default(expr: "uuidV4()")
   name: String! @col(dataType: "varchar(120)")
   branchCode: String! @col(dataType: "varchar(2)")
@@ -86,6 +86,7 @@ type Coordinator @table(name: "coordinators", key: "id") @index(fields: ["branch
   branch: Branch!
   wing: String! @col(dataType: "varchar(20)")
   employeeId: String @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String @col(name: "staff_type", dataType: "varchar(20)")
   gender: String @col(dataType: "varchar(20)")
   email: String @col(dataType: "varchar(140)")
   isActive: Boolean! @default(value: true)
@@ -106,6 +107,7 @@ type User @table(name: "users", key: "id") {
   phoneNumber: String! @col(dataType: "varchar(20)")
   role: String! @col(dataType: "varchar(30)")
   employeeId: String @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String @col(name: "staff_type", dataType: "varchar(20)")
   branch: Branch
   wing: Wing
   isActive: Boolean! @default(value: true)
@@ -156,17 +158,19 @@ type StudentSequence
 }
 
 type StaffIdSequence
-  @table(name: "staff_id_sequences", key: ["joiningYear", "branchCode"]) {
+  @table(name: "staff_id_sequences", key: ["joiningYear", "branchCode", "staffType"]) {
   joiningYear: Int!
   branchCode: String! @col(dataType: "varchar(2)")
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)")
   lastSerialNumber: Int! @default(value: 0)
   updatedAt: Timestamp! @default(expr: "request.time")
 }
 
 type EmployeeSequence
-  @table(name: "employee_sequences", key: ["year", "branchCode"]) {
+  @table(name: "employee_sequences", key: ["year", "branchCode", "staffType"]) {
   year: Int!
   branchCode: String! @col(name: "branch_code", dataType: "varchar(2)")
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)")
   lastSequence: Int! @col(name: "last_sequence") @default(value: 0)
   updatedAt: Timestamp! @default(expr: "request.time")
 }
@@ -175,6 +179,7 @@ type Teacher @table(name: "teachers", key: "id") @unique(fields: ["user"]) @inde
   id: UUID! @default(expr: "uuidV4()")
   user: User!
   employeeId: String! @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)") @default(value: "TEACHING")
   branch: Branch!
   wing: String! @col(dataType: "varchar(20)")
   joiningDate: Date! @col(name: "joining_date")
@@ -205,6 +210,7 @@ type Accountant @table(name: "accountants", key: "id") @unique(fields: ["user"])
   id: UUID! @default(expr: "uuidV4()")
   user: User!
   employeeId: String! @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)") @default(value: "SUPPORTING")
   branch: Branch!
   joiningDate: Date! @col(name: "joining_date")
   designation: String! @col(dataType: "varchar(80)")
@@ -465,10 +471,45 @@ type FeeCategory @table(name: "fee_categories", key: "id") @unique(fields: ["nam
   updatedAt: Timestamp! @default(expr: "request.time")
 }
 
+type AcademicYearFeeTemplate
+  @table(name: "academic_year_fee_templates", key: "id")
+  @unique(fields: ["branch", "academicClass", "academicYear"])
+  @index(fields: ["branchId", "academicYear"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  branch: Branch!
+  academicClass: AcademicClass!
+  academicYear: Int! @col(name: "academic_year")
+  term1Fee: Float! @col(name: "term1_fee") @default(value: 0)
+  term2Fee: Float! @col(name: "term2_fee") @default(value: 0)
+  term3Fee: Float! @col(name: "term3_fee") @default(value: 0)
+  totalTuitionFee: Float! @col(name: "total_tuition_fee") @default(value: 0)
+  applyToFuture: Boolean! @col(name: "apply_to_future") @default(value: true)
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
+  createdBy: User!
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type AcademicYearFeeTemplate {
+  branchId: UUID!
+  academicClassId: UUID!
+  createdById: UUID!
+}
+
 type StudentFeePlan @table(name: "student_fee_plans", key: "id") @unique(fields: ["student", "academicYear"]) @index(fields: ["studentId", "academicYear"]) {
   id: UUID! @default(expr: "uuidV4()")
   student: Student!
+  classFeeTemplate: AcademicYearFeeTemplate
   academicYear: Int! @col(name: "academic_year")
+  term1Fee: Float! @col(name: "term1_fee") @default(value: 0)
+  term2Fee: Float! @col(name: "term2_fee") @default(value: 0)
+  term3Fee: Float! @col(name: "term3_fee") @default(value: 0)
+  booksFee: Float! @col(name: "books_fee") @default(value: 0)
+  transportFee: Float! @col(name: "transport_fee") @default(value: 0)
+  concessionType: String @col(name: "concession_type", dataType: "varchar(20)")
+  concessionValue: Float! @col(name: "concession_value") @default(value: 0)
+  concessionAmount: Float! @col(name: "concession_amount") @default(value: 0)
+  grossAmount: Float! @col(name: "gross_amount") @default(value: 0)
   totalAmount: Float! @col(name: "total_amount")
   createdBy: User!
   isActive: Boolean! @default(value: true)
@@ -478,6 +519,7 @@ type StudentFeePlan @table(name: "student_fee_plans", key: "id") @unique(fields:
 
 extend type StudentFeePlan {
   studentId: UUID!
+  classFeeTemplateId: UUID
   createdById: UUID!
 }
 

@@ -1,4 +1,4 @@
-import {USER_ROLES} from '../../config/constants';
+import {STAFF_TYPES, USER_ROLES} from '../../config/constants';
 import {formatE164PhoneNumber, normalizePhoneNumber} from '../../utils/phone';
 import {assertBranchAccess} from '../academics/academicAccess';
 import dataConnectClient from '../dataconnect/dataConnectClient';
@@ -87,11 +87,10 @@ export const accountantService = {
       throw new Error('A user with this phone number already exists.');
     }
 
-    const joiningYear = Number(String(normalized.joiningDate).slice(2, 4));
     const staffId = await StaffIdService.getNextStaffId({
       branchId: normalized.branchId,
       branchCode: scope.branchCode,
-      joiningYear,
+      staffType: STAFF_TYPES.SUPPORTING,
     });
 
     const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_ACCOUNTANT, {
@@ -117,6 +116,7 @@ export const accountantService = {
       emergencyContact: normalized.emergencyContact || null,
       bloodGroup: normalized.bloodGroup || null,
       employeeId: staffId.employeeId,
+      staffType: staffId.staffType,
       joiningYear: staffId.joiningYear,
       branchCode: staffId.branchCode,
       serialNumber: staffId.serialNumber,

@@ -1,11 +1,17 @@
 import React from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer} from '../../components';
 import teacherService from '../../services/teachers/teacherService';
+import feeService from '../../services/fees/feeService';
+import useFeeAccess from '../../hooks/useFeeAccess';
+import {formatCurrency} from '../../utils/formatters/currency';
+import {logoutUser} from '../../store/slices/authSlice';
 
 const TeacherDashboardScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const access = useFeeAccess();
   const teacherId = user?.teacherId;
 
   const {data, isLoading} = useQuery({
@@ -13,10 +19,22 @@ const TeacherDashboardScreen = ({navigation}) => {
     queryFn: () => teacherService.getTeacherDashboard(teacherId),
     enabled: Boolean(teacherId),
   });
+  const {data: feeData} = useQuery({
+    queryKey: ['teacherFeeStatus', access.branchId],
+    queryFn: () => feeService.getFeeReports(access),
+    enabled: Boolean(access.branchId),
+  });
+  const feeSummary = feeData?.summary || {};
 
   if (!teacherId) {
     return (
       <ScreenContainer>
+        <Header
+          title="Teacher"
+          subtitle={user?.fullName || 'Profile pending'}
+          actionLabel="Logout"
+          onAction={() => dispatch(logoutUser())}
+        />
         <EmptyState title="Teacher profile pending" message="Ask the principal to complete your teacher profile." />
       </ScreenContainer>
     );
@@ -28,7 +46,12 @@ const TeacherDashboardScreen = ({navigation}) => {
 
   return (
     <ScreenContainer>
-      <Header title="Teacher" subtitle={isLoading ? 'Loading dashboard' : user?.fullName} />
+      <Header
+        title="Teacher"
+        subtitle={isLoading ? 'Loading dashboard' : user?.fullName}
+        actionLabel="Logout"
+        onAction={() => dispatch(logoutUser())}
+      />
       <DashboardCard
         title="Assigned Sections"
         value={String(sections.length)}
@@ -60,6 +83,9 @@ const TeacherDashboardScreen = ({navigation}) => {
         }
         icon="account-tie-outline"
       />
+      <DashboardCard title="Fee Status" value={`${Math.round((feeSummary.collectionRate || 0) * 100)}%`} description="Collection status only" icon="cash-check" />
+      <DashboardCard title="Paid Amount" value={formatCurrency(feeSummary.paidAmount)} icon="cash-check" />
+      <DashboardCard title="Due Amount" value={formatCurrency(feeSummary.dueAmount)} icon="cash-clock" />
     </ScreenContainer>
   );
 };

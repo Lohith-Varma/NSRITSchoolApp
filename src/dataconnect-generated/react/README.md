@@ -45,6 +45,7 @@ You can also follow the instructions from the [Data Connect documentation](https
   - [*GetStudents*](#getstudents)
   - [*GetStaffIdSequence*](#getstaffidsequence)
   - [*GetEmployeeSequence*](#getemployeesequence)
+  - [*GetStaffIdsByPrefix*](#getstaffidsbyprefix)
   - [*GetAttendanceByMonth*](#getattendancebymonth)
   - [*GetAttendanceBySection*](#getattendancebysection)
   - [*GetAttendanceByBranch*](#getattendancebybranch)
@@ -83,6 +84,7 @@ You can also follow the instructions from the [Data Connect documentation](https
   - [*GetAccountantProfile*](#getaccountantprofile)
   - [*GetAccountantByUser*](#getaccountantbyuser)
   - [*GetFeeCategories*](#getfeecategories)
+  - [*GetClassFees*](#getclassfees)
   - [*GetStudentFeeProfile*](#getstudentfeeprofile)
   - [*GetPaymentHistory*](#getpaymenthistory)
   - [*GetReceiptSequence*](#getreceiptsequence)
@@ -107,6 +109,7 @@ You can also follow the instructions from the [Data Connect documentation](https
   - [*CreateParent*](#createparent)
   - [*CreateParentWithoutUser*](#createparentwithoutuser)
   - [*CreateStudent*](#createstudent)
+  - [*UpdateStudent*](#updatestudent)
   - [*CreateAttendance*](#createattendance)
   - [*UpdateAttendance*](#updateattendance)
   - [*UploadFeePayment*](#uploadfeepayment)
@@ -123,11 +126,14 @@ You can also follow the instructions from the [Data Connect documentation](https
   - [*UpdateAccountant*](#updateaccountant)
   - [*CreateFeeCategory*](#createfeecategory)
   - [*UpdateFeeCategory*](#updatefeecategory)
+  - [*CreateClassFee*](#createclassfee)
+  - [*UpdateClassFee*](#updateclassfee)
   - [*CreateFeePlan*](#createfeeplan)
   - [*UpdateFeePlan*](#updatefeeplan)
   - [*ClearFeePlanItems*](#clearfeeplanitems)
   - [*CreateFeePlanItem*](#createfeeplanitem)
   - [*RecordPayment*](#recordpayment)
+  - [*UpdatePayment*](#updatepayment)
   - [*ReversePayment*](#reversepayment)
   - [*RecordAuditLog*](#recordauditlog)
 
@@ -256,6 +262,7 @@ export interface GetCurrentUserData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
     branch?: {
@@ -354,6 +361,7 @@ export interface GetUserByPhoneData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
     branch?: {
@@ -740,29 +748,48 @@ export interface GetParentChildrenData {
                 parentFeePlans: ({
                   id: UUIDString;
                   academicYear: number;
+                  classFeeTemplateId?: UUIDString | null;
+                  term1Fee: number;
+                  term2Fee: number;
+                  term3Fee: number;
+                  booksFee: number;
+                  transportFee: number;
+                  concessionType?: string | null;
+                  concessionValue: number;
+                  concessionAmount: number;
+                  grossAmount: number;
                   totalAmount: number;
                   isActive: boolean;
-                  parentFeeItems: ({
+                  classFeeTemplate?: {
                     id: UUIDString;
-                    amount: number;
-                    category: {
-                      id: UUIDString;
-                      name: string;
-                    } & FeeCategory_Key;
-                  } & StudentFeeItem_Key)[];
-                    parentFeePayments: ({
+                    totalTuitionFee: number;
+                    applyToFuture: boolean;
+                    status: string;
+                  } & AcademicYearFeeTemplate_Key;
+                    parentFeeItems: ({
                       id: UUIDString;
                       amount: number;
-                      paymentDate: DateString;
-                      paymentMode: string;
-                      referenceNumber?: string | null;
-                      receiptNumber: string;
-                      remarks?: string | null;
-                      collectedBy: {
+                      category: {
                         id: UUIDString;
-                        fullName: string;
-                      } & User_Key;
-                    } & FeePayment_Key)[];
+                        name: string;
+                      } & FeeCategory_Key;
+                    } & StudentFeeItem_Key)[];
+                      parentFeePayments: ({
+                        id: UUIDString;
+                        amount: number;
+                        paymentDate: DateString;
+                        paymentMode: string;
+                        referenceNumber?: string | null;
+                        receiptNumber: string;
+                        status: string;
+                        reversedAt?: TimestampString | null;
+                        reverseReason?: string | null;
+                        remarks?: string | null;
+                        collectedBy: {
+                          id: UUIDString;
+                          fullName: string;
+                        } & User_Key;
+                      } & FeePayment_Key)[];
                 } & StudentFeePlan_Key)[];
   } & Student_Key)[];
 }
@@ -1048,6 +1075,8 @@ export interface GetBranchesData {
     status: string;
     branchAdminId?: UUIDString | null;
     principalId?: UUIDString | null;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
     branchAdmin?: {
       id: UUIDString;
       fullName: string;
@@ -1166,6 +1195,8 @@ export interface GetBranchDetailsData {
     branchAdminId?: UUIDString | null;
     principalId?: UUIDString | null;
     isActive: boolean;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
     branchAdmin?: {
       id: UUIDString;
       fullName: string;
@@ -1214,6 +1245,8 @@ export interface GetBranchDetailsData {
             fullName: string;
             phoneNumber: string;
             role: string;
+            employeeId?: string | null;
+            staffType?: string | null;
             branchId?: UUIDString | null;
             isActive: boolean;
           } & User_Key)[];
@@ -3314,6 +3347,7 @@ The `GetStaffIdSequence` Query requires an argument of type `GetStaffIdSequenceV
 export interface GetStaffIdSequenceVariables {
   joiningYear: number;
   branchCode: string;
+  staffType: string;
 }
 ```
 ### Return Type
@@ -3327,6 +3361,7 @@ export interface GetStaffIdSequenceData {
   staffIdSequences: ({
     joiningYear: number;
     branchCode: string;
+    staffType: string;
     lastSerialNumber: number;
   } & StaffIdSequence_Key)[];
 }
@@ -3346,13 +3381,14 @@ export default function GetStaffIdSequenceComponent() {
   const getStaffIdSequenceVars: GetStaffIdSequenceVariables = {
     joiningYear: ..., 
     branchCode: ..., 
+    staffType: ..., 
   };
 
   // You don't have to do anything to "execute" the Query.
   // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
   const query = useGetStaffIdSequence(getStaffIdSequenceVars);
   // Variables can be defined inline as well.
-  const query = useGetStaffIdSequence({ joiningYear: ..., branchCode: ..., });
+  const query = useGetStaffIdSequence({ joiningYear: ..., branchCode: ..., staffType: ..., });
 
   // You can also pass in a `DataConnect` instance to the Query hook function.
   const dataConnect = getDataConnect(connectorConfig);
@@ -3402,6 +3438,7 @@ The `GetEmployeeSequence` Query requires an argument of type `GetEmployeeSequenc
 export interface GetEmployeeSequenceVariables {
   year: number;
   branchCode: string;
+  staffType: string;
 }
 ```
 ### Return Type
@@ -3415,6 +3452,7 @@ export interface GetEmployeeSequenceData {
   employeeSequences: ({
     year: number;
     branchCode: string;
+    staffType: string;
     lastSequence: number;
   } & EmployeeSequence_Key)[];
 }
@@ -3434,13 +3472,14 @@ export default function GetEmployeeSequenceComponent() {
   const getEmployeeSequenceVars: GetEmployeeSequenceVariables = {
     year: ..., 
     branchCode: ..., 
+    staffType: ..., 
   };
 
   // You don't have to do anything to "execute" the Query.
   // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
   const query = useGetEmployeeSequence(getEmployeeSequenceVars);
   // Variables can be defined inline as well.
-  const query = useGetEmployeeSequence({ year: ..., branchCode: ..., });
+  const query = useGetEmployeeSequence({ year: ..., branchCode: ..., staffType: ..., });
 
   // You can also pass in a `DataConnect` instance to the Query hook function.
   const dataConnect = getDataConnect(connectorConfig);
@@ -3467,6 +3506,96 @@ export default function GetEmployeeSequenceComponent() {
   // If the Query is successful, you can access the data returned using the `UseQueryResult.data` field.
   if (query.isSuccess) {
     console.log(query.data.employeeSequences);
+  }
+  return <div>Query execution {query.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
+## GetStaffIdsByPrefix
+You can execute the `GetStaffIdsByPrefix` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
+
+```javascript
+useGetStaffIdsByPrefix(dc: DataConnect, vars: GetStaffIdsByPrefixVariables, options?: useDataConnectQueryOptions<GetStaffIdsByPrefixData>): UseDataConnectQueryResult<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
+```
+You can also pass in a `DataConnect` instance to the Query hook function.
+```javascript
+useGetStaffIdsByPrefix(vars: GetStaffIdsByPrefixVariables, options?: useDataConnectQueryOptions<GetStaffIdsByPrefixData>): UseDataConnectQueryResult<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
+```
+
+### Variables
+The `GetStaffIdsByPrefix` Query requires an argument of type `GetStaffIdsByPrefixVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface GetStaffIdsByPrefixVariables {
+  branchId: UUIDString;
+  staffType: string;
+  employeeIdPrefix: string;
+}
+```
+### Return Type
+Recall that calling the `GetStaffIdsByPrefix` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
+
+To check the status of a Query, use the `UseQueryResult.status` field. You can also check for pending / success / error status using the `UseQueryResult.isPending`, `UseQueryResult.isSuccess`, and `UseQueryResult.isError` fields.
+
+To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `GetStaffIdsByPrefix` Query is of type `GetStaffIdsByPrefixData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface GetStaffIdsByPrefixData {
+  users: ({
+    id: UUIDString;
+    employeeId?: string | null;
+    staffType?: string | null;
+  } & User_Key)[];
+}
+```
+
+To learn more about the `UseQueryResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
+
+### Using `GetStaffIdsByPrefix`'s Query hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, GetStaffIdsByPrefixVariables } from '@dataconnect/generated';
+import { useGetStaffIdsByPrefix } from '@dataconnect/generated/react'
+
+export default function GetStaffIdsByPrefixComponent() {
+  // The `useGetStaffIdsByPrefix` Query hook requires an argument of type `GetStaffIdsByPrefixVariables`:
+  const getStaffIdsByPrefixVars: GetStaffIdsByPrefixVariables = {
+    branchId: ..., 
+    staffType: ..., 
+    employeeIdPrefix: ..., 
+  };
+
+  // You don't have to do anything to "execute" the Query.
+  // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
+  const query = useGetStaffIdsByPrefix(getStaffIdsByPrefixVars);
+  // Variables can be defined inline as well.
+  const query = useGetStaffIdsByPrefix({ branchId: ..., staffType: ..., employeeIdPrefix: ..., });
+
+  // You can also pass in a `DataConnect` instance to the Query hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const query = useGetStaffIdsByPrefix(dataConnect, getStaffIdsByPrefixVars);
+
+  // You can also pass in a `useDataConnectQueryOptions` object to the Query hook function.
+  const options = { staleTime: 5 * 1000 };
+  const query = useGetStaffIdsByPrefix(getStaffIdsByPrefixVars, options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectQueryOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = { staleTime: 5 * 1000 };
+  const query = useGetStaffIdsByPrefix(dataConnect, getStaffIdsByPrefixVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Query.
+  if (query.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (query.isError) {
+    return <div>Error: {query.error.message}</div>;
+  }
+
+  // If the Query is successful, you can access the data returned using the `UseQueryResult.data` field.
+  if (query.isSuccess) {
+    console.log(query.data.users);
   }
   return <div>Query execution {query.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -4833,6 +4962,7 @@ export interface GetCoordinatorsData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -4842,6 +4972,7 @@ export interface GetCoordinatorsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
     } & User_Key;
@@ -4933,6 +5064,7 @@ export interface GetCoordinatorDetailsData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -4942,6 +5074,7 @@ export interface GetCoordinatorDetailsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
     } & User_Key;
@@ -5033,6 +5166,7 @@ export interface GetCoordinatorByUserData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -6069,6 +6203,7 @@ export interface GetTeachersData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -6084,6 +6219,7 @@ export interface GetTeachersData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -6203,6 +6339,7 @@ export interface GetTeachersByBranchData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
   } & User_Key)[];
 }
@@ -6293,6 +6430,7 @@ export interface GetTeachersByWingData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -6308,6 +6446,7 @@ export interface GetTeachersByWingData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -6429,6 +6568,7 @@ export interface GetCoordinatorTeachersByWingData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -6444,6 +6584,7 @@ export interface GetCoordinatorTeachersByWingData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -6562,6 +6703,7 @@ export interface GetTeacherProfileData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -6746,6 +6888,7 @@ export interface GetTeacherProfileByUserData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -6840,6 +6983,7 @@ export interface GetTeacherDashboardData {
     branchId: UUIDString;
     wing: string;
     employeeId: string;
+    staffType: string;
     designation: string;
     user: {
       id: UUIDString;
@@ -7191,6 +7335,7 @@ export interface GetAccountantsData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -7205,6 +7350,7 @@ export interface GetAccountantsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       branch: {
@@ -7300,6 +7446,7 @@ export interface GetAccountantProfileData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -7320,6 +7467,7 @@ export interface GetAccountantProfileData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       branch: {
@@ -7413,6 +7561,7 @@ export interface GetAccountantByUserData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -7568,6 +7717,122 @@ export default function GetFeeCategoriesComponent() {
 }
 ```
 
+## GetClassFees
+You can execute the `GetClassFees` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
+
+```javascript
+useGetClassFees(dc: DataConnect, vars: GetClassFeesVariables, options?: useDataConnectQueryOptions<GetClassFeesData>): UseDataConnectQueryResult<GetClassFeesData, GetClassFeesVariables>;
+```
+You can also pass in a `DataConnect` instance to the Query hook function.
+```javascript
+useGetClassFees(vars: GetClassFeesVariables, options?: useDataConnectQueryOptions<GetClassFeesData>): UseDataConnectQueryResult<GetClassFeesData, GetClassFeesVariables>;
+```
+
+### Variables
+The `GetClassFees` Query requires an argument of type `GetClassFeesVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface GetClassFeesVariables {
+  branchId: UUIDString;
+  academicYear?: number | null;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+### Return Type
+Recall that calling the `GetClassFees` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
+
+To check the status of a Query, use the `UseQueryResult.status` field. You can also check for pending / success / error status using the `UseQueryResult.isPending`, `UseQueryResult.isSuccess`, and `UseQueryResult.isError` fields.
+
+To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `GetClassFees` Query is of type `GetClassFeesData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface GetClassFeesData {
+  academicYearFeeTemplates: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    academicYear: number;
+    term1Fee: number;
+    term2Fee: number;
+    term3Fee: number;
+    totalTuitionFee: number;
+    applyToFuture: boolean;
+    status: string;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      classCode?: string | null;
+      sortOrder: number;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      createdBy: {
+        id: UUIDString;
+        fullName: string;
+      } & User_Key;
+  } & AcademicYearFeeTemplate_Key)[];
+}
+```
+
+To learn more about the `UseQueryResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
+
+### Using `GetClassFees`'s Query hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, GetClassFeesVariables } from '@dataconnect/generated';
+import { useGetClassFees } from '@dataconnect/generated/react'
+
+export default function GetClassFeesComponent() {
+  // The `useGetClassFees` Query hook requires an argument of type `GetClassFeesVariables`:
+  const getClassFeesVars: GetClassFeesVariables = {
+    branchId: ..., 
+    academicYear: ..., // optional
+    limit: ..., // optional
+    offset: ..., // optional
+  };
+
+  // You don't have to do anything to "execute" the Query.
+  // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
+  const query = useGetClassFees(getClassFeesVars);
+  // Variables can be defined inline as well.
+  const query = useGetClassFees({ branchId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+  // You can also pass in a `DataConnect` instance to the Query hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const query = useGetClassFees(dataConnect, getClassFeesVars);
+
+  // You can also pass in a `useDataConnectQueryOptions` object to the Query hook function.
+  const options = { staleTime: 5 * 1000 };
+  const query = useGetClassFees(getClassFeesVars, options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectQueryOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = { staleTime: 5 * 1000 };
+  const query = useGetClassFees(dataConnect, getClassFeesVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Query.
+  if (query.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (query.isError) {
+    return <div>Error: {query.error.message}</div>;
+  }
+
+  // If the Query is successful, you can access the data returned using the `UseQueryResult.data` field.
+  if (query.isSuccess) {
+    console.log(query.data.academicYearFeeTemplates);
+  }
+  return <div>Query execution {query.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
 ## GetStudentFeeProfile
 You can execute the `GetStudentFeeProfile` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
 
@@ -7628,42 +7893,58 @@ export interface GetStudentFeeProfileData {
             profileFeePlans: ({
               id: UUIDString;
               academicYear: number;
+              classFeeTemplateId?: UUIDString | null;
+              term1Fee: number;
+              term2Fee: number;
+              term3Fee: number;
+              booksFee: number;
+              transportFee: number;
+              concessionType?: string | null;
+              concessionValue: number;
+              concessionAmount: number;
+              grossAmount: number;
               totalAmount: number;
               isActive: boolean;
               createdAt: TimestampString;
-              createdBy: {
+              classFeeTemplate?: {
                 id: UUIDString;
-                fullName: string;
-              } & User_Key;
-                profileFeeItems: ({
+                totalTuitionFee: number;
+                applyToFuture: boolean;
+                status: string;
+              } & AcademicYearFeeTemplate_Key;
+                createdBy: {
                   id: UUIDString;
-                  amount: number;
-                  category: {
-                    id: UUIDString;
-                    name: string;
-                    status: string;
-                  } & FeeCategory_Key;
-                } & StudentFeeItem_Key)[];
-                  profileFeePayments: ({
+                  fullName: string;
+                } & User_Key;
+                  profileFeeItems: ({
                     id: UUIDString;
                     amount: number;
-                    paymentDate: DateString;
-                    paymentMode: string;
-                    referenceNumber?: string | null;
-                    receiptNumber: string;
-                    status: string;
-                    reversedAt?: TimestampString | null;
-                    reverseReason?: string | null;
-                    remarks?: string | null;
-                    collectedBy: {
+                    category: {
                       id: UUIDString;
-                      fullName: string;
-                    } & User_Key;
-                      reversedBy?: {
+                      name: string;
+                      status: string;
+                    } & FeeCategory_Key;
+                  } & StudentFeeItem_Key)[];
+                    profileFeePayments: ({
+                      id: UUIDString;
+                      amount: number;
+                      paymentDate: DateString;
+                      paymentMode: string;
+                      referenceNumber?: string | null;
+                      receiptNumber: string;
+                      status: string;
+                      reversedAt?: TimestampString | null;
+                      reverseReason?: string | null;
+                      remarks?: string | null;
+                      collectedBy: {
                         id: UUIDString;
                         fullName: string;
                       } & User_Key;
-                  } & FeePayment_Key)[];
+                        reversedBy?: {
+                          id: UUIDString;
+                          fullName: string;
+                        } & User_Key;
+                    } & FeePayment_Key)[];
             } & StudentFeePlan_Key)[];
   } & Student_Key;
 }
@@ -7993,6 +8274,16 @@ export interface GetFeeReportsData {
         reportFeePlans: ({
           id: UUIDString;
           academicYear: number;
+          classFeeTemplateId?: UUIDString | null;
+          term1Fee: number;
+          term2Fee: number;
+          term3Fee: number;
+          booksFee: number;
+          transportFee: number;
+          concessionType?: string | null;
+          concessionValue: number;
+          concessionAmount: number;
+          grossAmount: number;
           totalAmount: number;
           isActive: boolean;
           reportFeePayments: ({
@@ -8276,6 +8567,8 @@ export interface GetGlobalReportsData {
           studentFeePlans: ({
             id: UUIDString;
             studentId: UUIDString;
+            grossAmount: number;
+            concessionAmount: number;
             totalAmount: number;
             isActive: boolean;
             student: {
@@ -8804,6 +9097,10 @@ The `AssignPrincipal` Mutation requires an argument of type `AssignPrincipalVari
 export interface AssignPrincipalVariables {
   branchId: UUIDString;
   principalId: UUIDString;
+  employeeId: string;
+  joiningYear: number;
+  branchCode: string;
+  serialNumber: number;
 }
 ```
 ### Return Type
@@ -8816,7 +9113,11 @@ To execute the Mutation, call `UseMutationResult.mutate()`. This function execut
 To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `AssignPrincipal` Mutation is of type `AssignPrincipalData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
 ```javascript
 export interface AssignPrincipalData {
+  employeeSequence_upsert: EmployeeSequence_Key;
+  staffIdSequence_upsert: StaffIdSequence_Key;
+  user_update?: User_Key | null;
   branch_update?: Branch_Key | null;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -8855,10 +9156,14 @@ export default function AssignPrincipalComponent() {
   const assignPrincipalVars: AssignPrincipalVariables = {
     branchId: ..., 
     principalId: ..., 
+    employeeId: ..., 
+    joiningYear: ..., 
+    branchCode: ..., 
+    serialNumber: ..., 
   };
   mutation.mutate(assignPrincipalVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ branchId: ..., principalId: ..., });
+  mutation.mutate({ branchId: ..., principalId: ..., employeeId: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -8877,7 +9182,11 @@ export default function AssignPrincipalComponent() {
 
   // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
   if (mutation.isSuccess) {
+    console.log(mutation.data.employeeSequence_upsert);
+    console.log(mutation.data.staffIdSequence_upsert);
+    console.log(mutation.data.user_update);
     console.log(mutation.data.branch_update);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -9589,6 +9898,8 @@ export interface CreateUserVariables {
   countryCode: string;
   phoneNumber: string;
   role: string;
+  employeeId?: string | null;
+  staffType?: string | null;
   branchId?: UUIDString | null;
   wingId?: UUIDString | null;
 }
@@ -9645,12 +9956,14 @@ export default function CreateUserComponent() {
     countryCode: ..., 
     phoneNumber: ..., 
     role: ..., 
+    employeeId: ..., // optional
+    staffType: ..., // optional
     branchId: ..., // optional
     wingId: ..., // optional
   };
   mutation.mutate(createUserVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., role: ..., branchId: ..., wingId: ..., });
+  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., role: ..., employeeId: ..., staffType: ..., branchId: ..., wingId: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -10042,6 +10355,7 @@ export interface CreateStudentData {
   studentIdSequence_upsert: StudentIdSequence_Key;
   studentSequence_upsert: StudentSequence_Key;
   student_insert: Student_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -10128,6 +10442,149 @@ export default function CreateStudentComponent() {
     console.log(mutation.data.studentIdSequence_upsert);
     console.log(mutation.data.studentSequence_upsert);
     console.log(mutation.data.student_insert);
+    console.log(mutation.data.auditLog_insert);
+  }
+  return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
+## UpdateStudent
+You can execute the `UpdateStudent` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+```javascript
+useUpdateStudent(options?: useDataConnectMutationOptions<UpdateStudentData, FirebaseError, UpdateStudentVariables>): UseDataConnectMutationResult<UpdateStudentData, UpdateStudentVariables>;
+```
+You can also pass in a `DataConnect` instance to the Mutation hook function.
+```javascript
+useUpdateStudent(dc: DataConnect, options?: useDataConnectMutationOptions<UpdateStudentData, FirebaseError, UpdateStudentVariables>): UseDataConnectMutationResult<UpdateStudentData, UpdateStudentVariables>;
+```
+
+### Variables
+The `UpdateStudent` Mutation requires an argument of type `UpdateStudentVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface UpdateStudentVariables {
+  studentId: UUIDString;
+  parentId: UUIDString;
+  branchId: UUIDString;
+  fullName: string;
+  gender?: string | null;
+  dateOfBirth?: DateString | null;
+  photoUrl?: string | null;
+  aadhaarNumber?: string | null;
+  bloodGroup?: string | null;
+  academicClassId: UUIDString;
+  sectionId: UUIDString;
+  countryCode?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  transportRequired?: boolean | null;
+  admissionDate: DateString;
+  fatherName?: string | null;
+  motherName?: string | null;
+  parentPhoneNumber?: string | null;
+}
+```
+### Return Type
+Recall that calling the `UpdateStudent` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+
+To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
+
+To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
+
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `UpdateStudent` Mutation is of type `UpdateStudentData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface UpdateStudentData {
+  student_update?: Student_Key | null;
+  parent_update?: Parent_Key | null;
+  auditLog_insert: AuditLog_Key;
+}
+```
+
+To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
+
+### Using `UpdateStudent`'s Mutation hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, UpdateStudentVariables } from '@dataconnect/generated';
+import { useUpdateStudent } from '@dataconnect/generated/react'
+
+export default function UpdateStudentComponent() {
+  // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
+  const mutation = useUpdateStudent();
+
+  // You can also pass in a `DataConnect` instance to the Mutation hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const mutation = useUpdateStudent(dataConnect);
+
+  // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdateStudent(options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdateStudent(dataConnect, options);
+
+  // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
+  // The `useUpdateStudent` Mutation requires an argument of type `UpdateStudentVariables`:
+  const updateStudentVars: UpdateStudentVariables = {
+    studentId: ..., 
+    parentId: ..., 
+    branchId: ..., 
+    fullName: ..., 
+    gender: ..., // optional
+    dateOfBirth: ..., // optional
+    photoUrl: ..., // optional
+    aadhaarNumber: ..., // optional
+    bloodGroup: ..., // optional
+    academicClassId: ..., 
+    sectionId: ..., 
+    countryCode: ..., // optional
+    phoneNumber: ..., // optional
+    address: ..., // optional
+    city: ..., // optional
+    state: ..., // optional
+    pincode: ..., // optional
+    emergencyContact: ..., // optional
+    transportRequired: ..., // optional
+    admissionDate: ..., 
+    fatherName: ..., // optional
+    motherName: ..., // optional
+    parentPhoneNumber: ..., // optional
+  };
+  mutation.mutate(updateStudentVars);
+  // Variables can be defined inline as well.
+  mutation.mutate({ studentId: ..., parentId: ..., branchId: ..., fullName: ..., gender: ..., dateOfBirth: ..., photoUrl: ..., aadhaarNumber: ..., bloodGroup: ..., academicClassId: ..., sectionId: ..., countryCode: ..., phoneNumber: ..., address: ..., city: ..., state: ..., pincode: ..., emergencyContact: ..., transportRequired: ..., admissionDate: ..., fatherName: ..., motherName: ..., parentPhoneNumber: ..., });
+
+  // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  mutation.mutate(updateStudentVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Mutation.
+  if (mutation.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (mutation.isError) {
+    return <div>Error: {mutation.error.message}</div>;
+  }
+
+  // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
+  if (mutation.isSuccess) {
+    console.log(mutation.data.student_update);
+    console.log(mutation.data.parent_update);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -10168,6 +10625,7 @@ To access the data returned by a Mutation, use the `UseMutationResult.data` fiel
 ```javascript
 export interface CreateAttendanceData {
   attendance_insert: Attendance_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -10234,6 +10692,7 @@ export default function CreateAttendanceComponent() {
   // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
   if (mutation.isSuccess) {
     console.log(mutation.data.attendance_insert);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -10271,6 +10730,7 @@ To access the data returned by a Mutation, use the `UseMutationResult.data` fiel
 ```javascript
 export interface UpdateAttendanceData {
   attendance_update?: Attendance_Key | null;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -10334,6 +10794,7 @@ export default function UpdateAttendanceComponent() {
   // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
   if (mutation.isSuccess) {
     console.log(mutation.data.attendance_update);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -10573,6 +11034,7 @@ export interface CreateCoordinatorVariables {
   email?: string | null;
   gender?: string | null;
   employeeId: string;
+  staffType?: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -10594,6 +11056,7 @@ export interface CreateCoordinatorData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   coordinator_insert: Coordinator_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -10637,6 +11100,7 @@ export default function CreateCoordinatorComponent() {
     email: ..., // optional
     gender: ..., // optional
     employeeId: ..., 
+    staffType: ..., // optional
     joiningYear: ..., 
     branchCode: ..., 
     serialNumber: ..., 
@@ -10645,7 +11109,7 @@ export default function CreateCoordinatorComponent() {
   };
   mutation.mutate(createCoordinatorVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., email: ..., gender: ..., employeeId: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., wing: ..., });
+  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., email: ..., gender: ..., employeeId: ..., staffType: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., wing: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -10668,6 +11132,7 @@ export default function CreateCoordinatorComponent() {
     console.log(mutation.data.staffIdSequence_upsert);
     console.log(mutation.data.user_insert);
     console.log(mutation.data.coordinator_insert);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -10707,6 +11172,7 @@ export interface CreateTeacherVariables {
   emergencyContact?: string | null;
   bloodGroup?: string | null;
   employeeId: string;
+  staffType: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -10728,6 +11194,7 @@ export interface CreateTeacherData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   teacher_insert: Teacher_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -10783,6 +11250,7 @@ export default function CreateTeacherComponent() {
     emergencyContact: ..., // optional
     bloodGroup: ..., // optional
     employeeId: ..., 
+    staffType: ..., 
     joiningYear: ..., 
     branchCode: ..., 
     serialNumber: ..., 
@@ -10791,7 +11259,7 @@ export default function CreateTeacherComponent() {
   };
   mutation.mutate(createTeacherVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., alternateMobileNumber: ..., email: ..., dateOfBirth: ..., gender: ..., joiningDate: ..., designation: ..., qualification: ..., experience: ..., address: ..., city: ..., state: ..., pincode: ..., emergencyContact: ..., bloodGroup: ..., employeeId: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., wing: ..., });
+  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., alternateMobileNumber: ..., email: ..., dateOfBirth: ..., gender: ..., joiningDate: ..., designation: ..., qualification: ..., experience: ..., address: ..., city: ..., state: ..., pincode: ..., emergencyContact: ..., bloodGroup: ..., employeeId: ..., staffType: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., wing: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -10814,6 +11282,7 @@ export default function CreateTeacherComponent() {
     console.log(mutation.data.staffIdSequence_upsert);
     console.log(mutation.data.user_insert);
     console.log(mutation.data.teacher_insert);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -11479,6 +11948,7 @@ export interface CreateAccountantVariables {
   emergencyContact?: string | null;
   bloodGroup?: string | null;
   employeeId: string;
+  staffType?: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -11499,6 +11969,7 @@ export interface CreateAccountantData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   accountant_insert: Accountant_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 
@@ -11552,6 +12023,7 @@ export default function CreateAccountantComponent() {
     emergencyContact: ..., // optional
     bloodGroup: ..., // optional
     employeeId: ..., 
+    staffType: ..., // optional
     joiningYear: ..., 
     branchCode: ..., 
     serialNumber: ..., 
@@ -11559,7 +12031,7 @@ export default function CreateAccountantComponent() {
   };
   mutation.mutate(createAccountantVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., email: ..., gender: ..., joiningDate: ..., designation: ..., qualification: ..., experience: ..., address: ..., city: ..., state: ..., pincode: ..., emergencyContact: ..., bloodGroup: ..., employeeId: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., });
+  mutation.mutate({ firebaseUID: ..., fullName: ..., countryCode: ..., phoneNumber: ..., email: ..., gender: ..., joiningDate: ..., designation: ..., qualification: ..., experience: ..., address: ..., city: ..., state: ..., pincode: ..., emergencyContact: ..., bloodGroup: ..., employeeId: ..., staffType: ..., joiningYear: ..., branchCode: ..., serialNumber: ..., branchId: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -11582,6 +12054,7 @@ export default function CreateAccountantComponent() {
     console.log(mutation.data.staffIdSequence_upsert);
     console.log(mutation.data.user_insert);
     console.log(mutation.data.accountant_insert);
+    console.log(mutation.data.auditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }
@@ -11913,6 +12386,230 @@ export default function UpdateFeeCategoryComponent() {
 }
 ```
 
+## CreateClassFee
+You can execute the `CreateClassFee` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+```javascript
+useCreateClassFee(options?: useDataConnectMutationOptions<CreateClassFeeData, FirebaseError, CreateClassFeeVariables>): UseDataConnectMutationResult<CreateClassFeeData, CreateClassFeeVariables>;
+```
+You can also pass in a `DataConnect` instance to the Mutation hook function.
+```javascript
+useCreateClassFee(dc: DataConnect, options?: useDataConnectMutationOptions<CreateClassFeeData, FirebaseError, CreateClassFeeVariables>): UseDataConnectMutationResult<CreateClassFeeData, CreateClassFeeVariables>;
+```
+
+### Variables
+The `CreateClassFee` Mutation requires an argument of type `CreateClassFeeVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface CreateClassFeeVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  academicYear: number;
+  term1Fee: number;
+  term2Fee: number;
+  term3Fee: number;
+  totalTuitionFee: number;
+  applyToFuture: boolean;
+  status: string;
+  createdById: UUIDString;
+}
+```
+### Return Type
+Recall that calling the `CreateClassFee` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+
+To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
+
+To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
+
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `CreateClassFee` Mutation is of type `CreateClassFeeData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface CreateClassFeeData {
+  academicYearFeeTemplate_insert: AcademicYearFeeTemplate_Key;
+}
+```
+
+To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
+
+### Using `CreateClassFee`'s Mutation hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, CreateClassFeeVariables } from '@dataconnect/generated';
+import { useCreateClassFee } from '@dataconnect/generated/react'
+
+export default function CreateClassFeeComponent() {
+  // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
+  const mutation = useCreateClassFee();
+
+  // You can also pass in a `DataConnect` instance to the Mutation hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const mutation = useCreateClassFee(dataConnect);
+
+  // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useCreateClassFee(options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useCreateClassFee(dataConnect, options);
+
+  // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
+  // The `useCreateClassFee` Mutation requires an argument of type `CreateClassFeeVariables`:
+  const createClassFeeVars: CreateClassFeeVariables = {
+    branchId: ..., 
+    academicClassId: ..., 
+    academicYear: ..., 
+    term1Fee: ..., 
+    term2Fee: ..., 
+    term3Fee: ..., 
+    totalTuitionFee: ..., 
+    applyToFuture: ..., 
+    status: ..., 
+    createdById: ..., 
+  };
+  mutation.mutate(createClassFeeVars);
+  // Variables can be defined inline as well.
+  mutation.mutate({ branchId: ..., academicClassId: ..., academicYear: ..., term1Fee: ..., term2Fee: ..., term3Fee: ..., totalTuitionFee: ..., applyToFuture: ..., status: ..., createdById: ..., });
+
+  // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  mutation.mutate(createClassFeeVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Mutation.
+  if (mutation.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (mutation.isError) {
+    return <div>Error: {mutation.error.message}</div>;
+  }
+
+  // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
+  if (mutation.isSuccess) {
+    console.log(mutation.data.academicYearFeeTemplate_insert);
+  }
+  return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
+## UpdateClassFee
+You can execute the `UpdateClassFee` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+```javascript
+useUpdateClassFee(options?: useDataConnectMutationOptions<UpdateClassFeeData, FirebaseError, UpdateClassFeeVariables>): UseDataConnectMutationResult<UpdateClassFeeData, UpdateClassFeeVariables>;
+```
+You can also pass in a `DataConnect` instance to the Mutation hook function.
+```javascript
+useUpdateClassFee(dc: DataConnect, options?: useDataConnectMutationOptions<UpdateClassFeeData, FirebaseError, UpdateClassFeeVariables>): UseDataConnectMutationResult<UpdateClassFeeData, UpdateClassFeeVariables>;
+```
+
+### Variables
+The `UpdateClassFee` Mutation requires an argument of type `UpdateClassFeeVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface UpdateClassFeeVariables {
+  classFeeId: UUIDString;
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  academicYear: number;
+  term1Fee: number;
+  term2Fee: number;
+  term3Fee: number;
+  totalTuitionFee: number;
+  applyToFuture: boolean;
+  status: string;
+}
+```
+### Return Type
+Recall that calling the `UpdateClassFee` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+
+To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
+
+To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
+
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `UpdateClassFee` Mutation is of type `UpdateClassFeeData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface UpdateClassFeeData {
+  academicYearFeeTemplate_update?: AcademicYearFeeTemplate_Key | null;
+}
+```
+
+To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
+
+### Using `UpdateClassFee`'s Mutation hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, UpdateClassFeeVariables } from '@dataconnect/generated';
+import { useUpdateClassFee } from '@dataconnect/generated/react'
+
+export default function UpdateClassFeeComponent() {
+  // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
+  const mutation = useUpdateClassFee();
+
+  // You can also pass in a `DataConnect` instance to the Mutation hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const mutation = useUpdateClassFee(dataConnect);
+
+  // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdateClassFee(options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdateClassFee(dataConnect, options);
+
+  // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
+  // The `useUpdateClassFee` Mutation requires an argument of type `UpdateClassFeeVariables`:
+  const updateClassFeeVars: UpdateClassFeeVariables = {
+    classFeeId: ..., 
+    branchId: ..., 
+    academicClassId: ..., 
+    academicYear: ..., 
+    term1Fee: ..., 
+    term2Fee: ..., 
+    term3Fee: ..., 
+    totalTuitionFee: ..., 
+    applyToFuture: ..., 
+    status: ..., 
+  };
+  mutation.mutate(updateClassFeeVars);
+  // Variables can be defined inline as well.
+  mutation.mutate({ classFeeId: ..., branchId: ..., academicClassId: ..., academicYear: ..., term1Fee: ..., term2Fee: ..., term3Fee: ..., totalTuitionFee: ..., applyToFuture: ..., status: ..., });
+
+  // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  mutation.mutate(updateClassFeeVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Mutation.
+  if (mutation.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (mutation.isError) {
+    return <div>Error: {mutation.error.message}</div>;
+  }
+
+  // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
+  if (mutation.isSuccess) {
+    console.log(mutation.data.academicYearFeeTemplate_update);
+  }
+  return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
 ## CreateFeePlan
 You can execute the `CreateFeePlan` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
 ```javascript
@@ -11930,6 +12627,16 @@ The `CreateFeePlan` Mutation requires an argument of type `CreateFeePlanVariable
 export interface CreateFeePlanVariables {
   studentId: UUIDString;
   academicYear: number;
+  classFeeTemplateId?: UUIDString | null;
+  term1Fee?: number;
+  term2Fee?: number;
+  term3Fee?: number;
+  booksFee?: number;
+  transportFee?: number;
+  concessionType?: string | null;
+  concessionValue?: number;
+  concessionAmount?: number;
+  grossAmount?: number;
   totalAmount: number;
   createdById: UUIDString;
   branchId: UUIDString;
@@ -11988,6 +12695,16 @@ export default function CreateFeePlanComponent() {
   const createFeePlanVars: CreateFeePlanVariables = {
     studentId: ..., 
     academicYear: ..., 
+    classFeeTemplateId: ..., // optional
+    term1Fee: ..., // optional
+    term2Fee: ..., // optional
+    term3Fee: ..., // optional
+    booksFee: ..., // optional
+    transportFee: ..., // optional
+    concessionType: ..., // optional
+    concessionValue: ..., // optional
+    concessionAmount: ..., // optional
+    grossAmount: ..., // optional
     totalAmount: ..., 
     createdById: ..., 
     branchId: ..., 
@@ -11997,7 +12714,7 @@ export default function CreateFeePlanComponent() {
   };
   mutation.mutate(createFeePlanVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ studentId: ..., academicYear: ..., totalAmount: ..., createdById: ..., branchId: ..., actorRole: ..., oldValue: ..., newValue: ..., });
+  mutation.mutate({ studentId: ..., academicYear: ..., classFeeTemplateId: ..., term1Fee: ..., term2Fee: ..., term3Fee: ..., booksFee: ..., transportFee: ..., concessionType: ..., concessionValue: ..., concessionAmount: ..., grossAmount: ..., totalAmount: ..., createdById: ..., branchId: ..., actorRole: ..., oldValue: ..., newValue: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -12040,6 +12757,16 @@ The `UpdateFeePlan` Mutation requires an argument of type `UpdateFeePlanVariable
 export interface UpdateFeePlanVariables {
   feePlanId: UUIDString;
   studentId: UUIDString;
+  classFeeTemplateId?: UUIDString | null;
+  term1Fee?: number;
+  term2Fee?: number;
+  term3Fee?: number;
+  booksFee?: number;
+  transportFee?: number;
+  concessionType?: string | null;
+  concessionValue?: number;
+  concessionAmount?: number;
+  grossAmount?: number;
   totalAmount: number;
   isActive: boolean;
   branchId: UUIDString;
@@ -12099,6 +12826,16 @@ export default function UpdateFeePlanComponent() {
   const updateFeePlanVars: UpdateFeePlanVariables = {
     feePlanId: ..., 
     studentId: ..., 
+    classFeeTemplateId: ..., // optional
+    term1Fee: ..., // optional
+    term2Fee: ..., // optional
+    term3Fee: ..., // optional
+    booksFee: ..., // optional
+    transportFee: ..., // optional
+    concessionType: ..., // optional
+    concessionValue: ..., // optional
+    concessionAmount: ..., // optional
+    grossAmount: ..., // optional
     totalAmount: ..., 
     isActive: ..., 
     branchId: ..., 
@@ -12109,7 +12846,7 @@ export default function UpdateFeePlanComponent() {
   };
   mutation.mutate(updateFeePlanVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ feePlanId: ..., studentId: ..., totalAmount: ..., isActive: ..., branchId: ..., updatedById: ..., actorRole: ..., oldValue: ..., newValue: ..., });
+  mutation.mutate({ feePlanId: ..., studentId: ..., classFeeTemplateId: ..., term1Fee: ..., term2Fee: ..., term3Fee: ..., booksFee: ..., transportFee: ..., concessionType: ..., concessionValue: ..., concessionAmount: ..., grossAmount: ..., totalAmount: ..., isActive: ..., branchId: ..., updatedById: ..., actorRole: ..., oldValue: ..., newValue: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
@@ -12453,6 +13190,124 @@ export default function RecordPaymentComponent() {
   if (mutation.isSuccess) {
     console.log(mutation.data.receiptSequence_upsert);
     console.log(mutation.data.feePayment_insert);
+    console.log(mutation.data.feeAuditLog_insert);
+  }
+  return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
+## UpdatePayment
+You can execute the `UpdatePayment` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+```javascript
+useUpdatePayment(options?: useDataConnectMutationOptions<UpdatePaymentData, FirebaseError, UpdatePaymentVariables>): UseDataConnectMutationResult<UpdatePaymentData, UpdatePaymentVariables>;
+```
+You can also pass in a `DataConnect` instance to the Mutation hook function.
+```javascript
+useUpdatePayment(dc: DataConnect, options?: useDataConnectMutationOptions<UpdatePaymentData, FirebaseError, UpdatePaymentVariables>): UseDataConnectMutationResult<UpdatePaymentData, UpdatePaymentVariables>;
+```
+
+### Variables
+The `UpdatePayment` Mutation requires an argument of type `UpdatePaymentVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+
+```javascript
+export interface UpdatePaymentVariables {
+  paymentId: UUIDString;
+  studentId: UUIDString;
+  branchId: UUIDString;
+  amount: number;
+  paymentDate: DateString;
+  paymentMode: string;
+  referenceNumber?: string | null;
+  remarks?: string | null;
+  updatedById: UUIDString;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+```
+### Return Type
+Recall that calling the `UpdatePayment` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+
+To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
+
+To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
+
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `UpdatePayment` Mutation is of type `UpdatePaymentData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface UpdatePaymentData {
+  feePayment_update?: FeePayment_Key | null;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+```
+
+To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
+
+### Using `UpdatePayment`'s Mutation hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, UpdatePaymentVariables } from '@dataconnect/generated';
+import { useUpdatePayment } from '@dataconnect/generated/react'
+
+export default function UpdatePaymentComponent() {
+  // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
+  const mutation = useUpdatePayment();
+
+  // You can also pass in a `DataConnect` instance to the Mutation hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const mutation = useUpdatePayment(dataConnect);
+
+  // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdatePayment(options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useUpdatePayment(dataConnect, options);
+
+  // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
+  // The `useUpdatePayment` Mutation requires an argument of type `UpdatePaymentVariables`:
+  const updatePaymentVars: UpdatePaymentVariables = {
+    paymentId: ..., 
+    studentId: ..., 
+    branchId: ..., 
+    amount: ..., 
+    paymentDate: ..., 
+    paymentMode: ..., 
+    referenceNumber: ..., // optional
+    remarks: ..., // optional
+    updatedById: ..., 
+    actorRole: ..., // optional
+    oldValue: ..., // optional
+    newValue: ..., // optional
+  };
+  mutation.mutate(updatePaymentVars);
+  // Variables can be defined inline as well.
+  mutation.mutate({ paymentId: ..., studentId: ..., branchId: ..., amount: ..., paymentDate: ..., paymentMode: ..., referenceNumber: ..., remarks: ..., updatedById: ..., actorRole: ..., oldValue: ..., newValue: ..., });
+
+  // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  mutation.mutate(updatePaymentVars, options);
+
+  // Then, you can render your component dynamically based on the status of the Mutation.
+  if (mutation.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (mutation.isError) {
+    return <div>Error: {mutation.error.message}</div>;
+  }
+
+  // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
+  if (mutation.isSuccess) {
+    console.log(mutation.data.feePayment_update);
     console.log(mutation.data.feeAuditLog_insert);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;

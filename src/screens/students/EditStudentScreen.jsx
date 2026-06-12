@@ -19,6 +19,11 @@ const EditStudentScreen = ({navigation, route}) => {
   const academicYear = new Date().getFullYear();
   const [form, setForm] = useState(null);
   const [error, setError] = useState('');
+  const effectiveBranchId = form?.branchId || user?.branchId;
+  const effectiveScope = useMemo(
+    () => ({...scope, branchId: effectiveBranchId || scope.branchId}),
+    [effectiveBranchId, scope],
+  );
 
   const detailsQuery = useQuery({
     queryKey: ['studentDetails', studentId],
@@ -26,13 +31,13 @@ const EditStudentScreen = ({navigation, route}) => {
     enabled: Boolean(studentId),
   });
   const classesQuery = useQuery({
-    queryKey: ['academicClasses', user?.branchId],
+    queryKey: ['academicClasses', effectiveBranchId],
     queryFn: () => academicRepository.getAcademicClasses(),
   });
   const sectionsQuery = useQuery({
-    queryKey: ['sections', user?.branchId, academicYear],
-    queryFn: () => sectionService.getSections({branchId: user.branchId, academicYear}, scope),
-    enabled: Boolean(user?.branchId),
+    queryKey: ['sections', effectiveBranchId, academicYear],
+    queryFn: () => sectionService.getSections({branchId: effectiveBranchId, academicYear}, effectiveScope),
+    enabled: Boolean(effectiveBranchId),
   });
 
   useEffect(() => {
@@ -45,7 +50,11 @@ const EditStudentScreen = ({navigation, route}) => {
       studentId: student.id,
       parentId: student.parentId,
       branchId: student.branchId,
+      branchCode: student.branchCode || student.branch?.branchCode,
+      admissionYear: student.admissionYear,
       academicClassId: student.academicClassId,
+      wingId: student.academicClass?.wing?.id,
+      wingCode: student.academicClass?.wing?.code,
       sectionId: student.sectionId,
       className: student.academicClass?.name,
       fullName: student.fullName || '',
@@ -69,11 +78,11 @@ const EditStudentScreen = ({navigation, route}) => {
   }, [detailsQuery.data?.student]);
 
   const classes = useMemo(() => {
-    const items = (classesQuery.data || []).filter(item => item.branchId === user?.branchId);
+    const items = (classesQuery.data || []).filter(item => item.branchId === effectiveBranchId);
     return user?.role === USER_ROLES.COORDINATOR
       ? items.filter(item => item.wing?.code === user.wing || item.wing === user.wing)
       : items;
-  }, [classesQuery.data, user?.branchId, user?.role, user?.wing]);
+  }, [classesQuery.data, effectiveBranchId, user?.role, user?.wing]);
   const sections = useMemo(
     () =>
       (sectionsQuery.data?.sections || []).filter(
@@ -83,10 +92,10 @@ const EditStudentScreen = ({navigation, route}) => {
   );
 
   const mutation = useMutation({
-    mutationFn: payload => studentService.updateStudent(payload, scope),
+    mutationFn: payload => studentService.updateStudent({...payload, branchId: payload.branchId || effectiveBranchId}, effectiveScope),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['studentDetails', studentId]});
-      queryClient.invalidateQueries({queryKey: ['students', user?.branchId]});
+      queryClient.invalidateQueries({queryKey: ['students', effectiveBranchId]});
       navigation.goBack();
     },
     onError: err => setError(err.message),
@@ -114,6 +123,8 @@ const EditStudentScreen = ({navigation, route}) => {
             ...current,
             academicClassId: value,
             className: option.item.name,
+            wingId: option.item.wingId || option.item.wing?.id,
+            wingCode: option.item.wing?.code,
             sectionId: '',
           }))
         }

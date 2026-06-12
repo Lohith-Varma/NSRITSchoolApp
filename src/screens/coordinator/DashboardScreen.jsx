@@ -85,6 +85,24 @@ const DashboardScreen = ({navigation}) => {
           icon: 'cash-clock',
           tone: colors.danger,
         },
+        {
+          title: 'Students With Dues',
+          value: String(summary.dueStudents || 0),
+          icon: 'account-alert-outline',
+          tone: colors.danger,
+        },
+        {
+          title: 'Concessions',
+          value: String(summary.concessionStudents || 0),
+          icon: 'sale-outline',
+          tone: colors.info,
+        },
+        {
+          title: 'Collection Status',
+          value: `${Math.round((summary.collectionRate || 0) * 100)}%`,
+          icon: 'chart-line',
+          tone: colors.accent,
+        },
       ]}
     />
   );

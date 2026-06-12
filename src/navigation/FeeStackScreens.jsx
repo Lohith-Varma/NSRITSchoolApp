@@ -1,4 +1,5 @@
 import React from 'react';
+import ClassFeeManagementScreen from '../screens/fees/ClassFeeManagementScreen';
 import ClassWiseFeeReportScreen from '../screens/fees/ClassWiseFeeReportScreen';
 import CreateFeePlanScreen from '../screens/fees/CreateFeePlanScreen';
 import DueStudentsScreen from '../screens/fees/DueStudentsScreen';
@@ -35,6 +36,11 @@ export const renderFeeStackScreens = (Stack, options = {}) => (
       name="FeePlanManagement"
       component={FeePlanManagementScreen}
       options={{title: 'Fee Plans'}}
+    />
+    <Stack.Screen
+      name="ClassFeeManagement"
+      component={ClassFeeManagementScreen}
+      options={{title: 'Class Fees'}}
     />
     <Stack.Screen
       name="CreateFeePlan"

@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {HelperText} from 'react-native-paper';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SearchBar, SelectField} from '../../components';
+import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SearchBar, SectionHeader, SelectField} from '../../components';
 import feeService from '../../services/fees/feeService';
 import studentService from '../../services/students/studentService';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -17,6 +17,15 @@ const CreateFeePlanScreen = ({navigation, route}) => {
   const [searchText, setSearchText] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [academicYear, setAcademicYear] = useState(String(new Date().getFullYear()));
+  const [feeFields, setFeeFields] = useState({
+    term1Fee: '',
+    term2Fee: '',
+    term3Fee: '',
+    booksFee: '',
+    transportFee: '',
+    concessionType: '',
+    concessionValue: '',
+  });
   const [itemDraft, setItemDraft] = useState({categoryId: '', amount: ''});
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
@@ -39,7 +48,28 @@ const CreateFeePlanScreen = ({navigation, route}) => {
   const categoryOptions = (categoriesQuery.data || [])
     .filter(item => String(item.status || 'ACTIVE').toUpperCase() === 'ACTIVE')
     .map(item => ({label: item.name, value: item.id, item}));
-  const total = useMemo(() => items.reduce((sum, item) => sum + Number(item.amount || 0), 0), [items]);
+  const concessionOptions = [
+    {label: 'No Concession', value: ''},
+    {label: 'Amount', value: 'AMOUNT'},
+    {label: 'Percentage', value: 'PERCENTAGE'},
+  ];
+  const total = useMemo(() => {
+    const standardTotal =
+      Number(feeFields.term1Fee || 0) +
+      Number(feeFields.term2Fee || 0) +
+      Number(feeFields.term3Fee || 0) +
+      Number(feeFields.booksFee || 0) +
+      Number(feeFields.transportFee || 0);
+    const extraTotal = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const concessionValue = Number(feeFields.concessionValue || 0);
+    const concession =
+      feeFields.concessionType === 'PERCENTAGE'
+        ? (standardTotal * concessionValue) / 100
+        : feeFields.concessionType === 'AMOUNT'
+          ? concessionValue
+          : 0;
+    return Math.max(standardTotal + extraTotal - concession, 0);
+  }, [feeFields, items]);
 
   useEffect(() => {
     if (!profileQuery.data || selectedStudent) {
@@ -62,6 +92,15 @@ const CreateFeePlanScreen = ({navigation, route}) => {
         amount: Number(item.amount || 0),
       })),
     );
+    setFeeFields({
+      term1Fee: String(profile.term1Fee || ''),
+      term2Fee: String(profile.term2Fee || ''),
+      term3Fee: String(profile.term3Fee || ''),
+      booksFee: String(profile.booksFee || ''),
+      transportFee: String(profile.transportFee || ''),
+      concessionType: profile.concessionType || '',
+      concessionValue: String(profile.concessionValue || ''),
+    });
   }, [profileQuery.data, selectedStudent]);
 
   const addItem = () => {
@@ -81,7 +120,18 @@ const CreateFeePlanScreen = ({navigation, route}) => {
   const mutation = useMutation({
     mutationFn: () =>
       feeService.saveFeePlan(
-        {studentId: selectedStudent?.id, academicYear: Number(academicYear), items},
+        {
+          studentId: selectedStudent?.id,
+          academicYear: Number(academicYear),
+          items,
+          term1Fee: Number(feeFields.term1Fee || 0),
+          term2Fee: Number(feeFields.term2Fee || 0),
+          term3Fee: Number(feeFields.term3Fee || 0),
+          booksFee: Number(feeFields.booksFee || 0),
+          transportFee: Number(feeFields.transportFee || 0),
+          concessionType: feeFields.concessionType || null,
+          concessionValue: Number(feeFields.concessionValue || 0),
+        },
         access,
       ),
     onSuccess: () => {
@@ -98,11 +148,12 @@ const CreateFeePlanScreen = ({navigation, route}) => {
     },
     onError: err => setError(err.message),
   });
+  const updateFeeField = (field, value) => setFeeFields(current => ({...current, [field]: value}));
 
   if (!canManagePlans) {
     return (
       <View style={styles.container}>
-        <EmptyState title="Fee plan access denied" message="Only coordinators and principals can create or edit fee plans." />
+        <EmptyState title="Fee plan access denied" message="Only coordinators, principals, branch admins, and main admins can create or edit fee plans." />
       </View>
     );
   }
@@ -137,6 +188,16 @@ const CreateFeePlanScreen = ({navigation, route}) => {
               ))
             )}
             <CustomInput label="Academic Year" keyboardType="number-pad" value={academicYear} onChangeText={setAcademicYear} />
+            <SectionHeader title="Tuition Structure" />
+            <CustomInput label="1st Term Fee" keyboardType="numeric" value={feeFields.term1Fee} onChangeText={value => updateFeeField('term1Fee', value)} />
+            <CustomInput label="2nd Term Fee" keyboardType="numeric" value={feeFields.term2Fee} onChangeText={value => updateFeeField('term2Fee', value)} />
+            <CustomInput label="3rd Term Fee" keyboardType="numeric" value={feeFields.term3Fee} onChangeText={value => updateFeeField('term3Fee', value)} />
+            <SectionHeader title="Student Custom Fees" />
+            <CustomInput label="Books Fee" keyboardType="numeric" value={feeFields.booksFee} onChangeText={value => updateFeeField('booksFee', value)} />
+            <CustomInput label="Transport Fee" keyboardType="numeric" value={feeFields.transportFee} onChangeText={value => updateFeeField('transportFee', value)} />
+            <SelectField label="Concession Type" value={feeFields.concessionType} options={concessionOptions} onChange={value => updateFeeField('concessionType', value)} />
+            <CustomInput label="Concession Value" keyboardType="numeric" value={feeFields.concessionValue} onChangeText={value => updateFeeField('concessionValue', value)} />
+            <SectionHeader title="Additional Fee Categories" />
             <SelectField
               label="Fee Category"
               value={itemDraft.categoryId}
@@ -145,7 +206,7 @@ const CreateFeePlanScreen = ({navigation, route}) => {
             />
             <CustomInput label="Amount" keyboardType="numeric" value={itemDraft.amount} onChangeText={value => setItemDraft(current => ({...current, amount: value}))} />
             <CustomButton mode="outlined" onPress={addItem}>Add Fee Item</CustomButton>
-            <DashboardCard title="Total" value={formatCurrency(total)} icon="cash-multiple" />
+            <DashboardCard title="Final Payable" value={formatCurrency(total)} icon="cash-multiple" />
           </>
         }
         renderItem={({item}) => (
@@ -160,7 +221,7 @@ const CreateFeePlanScreen = ({navigation, route}) => {
         ListFooterComponent={
           <View style={styles.footer}>
             <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
-            <CustomButton loading={mutation.isPending} disabled={mutation.isPending || !selectedStudent || !items.length} onPress={() => mutation.mutate()}>
+            <CustomButton loading={mutation.isPending} disabled={mutation.isPending || !selectedStudent} onPress={() => mutation.mutate()}>
               Save Fee Plan
             </CustomButton>
           </View>

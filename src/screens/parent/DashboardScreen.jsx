@@ -1,10 +1,13 @@
 import React from 'react';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from '../../components';
 import parentService from '../../services/parents/parentService';
+import {formatCurrency} from '../../utils/formatters/currency';
+import {logoutUser} from '../../store/slices/authSlice';
 
 const DashboardScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const parentId = user?.parentId;
 
@@ -19,12 +22,17 @@ const DashboardScreen = ({navigation}) => {
 
   return (
     <ScreenContainer>
-      <Header title="Parent Dashboard" subtitle={isLoading ? 'Loading live child data' : user?.fullName || user?.name} />
+      <Header
+        title="Parent Dashboard"
+        subtitle={isLoading ? 'Loading live child data' : user?.fullName || user?.name}
+        actionLabel="Logout"
+        onAction={() => dispatch(logoutUser())}
+      />
       {error ? (
         <EmptyState title="Unable to load parent data" message={error.message} />
       ) : null}
       <DashboardCard title="Linked Children" value={String(children.length)} icon="account-child-outline" />
-      <DashboardCard title="Fee Due" value={String(data?.totalDue || 0)} icon="cash-clock" />
+      <DashboardCard title="Fee Due" value={formatCurrency(data?.totalDue || 0)} icon="cash-clock" onPress={() => navigation.navigate('FeeLedger')} />
       <DashboardCard
         title="Attendance"
         value={`${selectedChild?.attendanceSummary?.percentage || 0}%`}
@@ -35,14 +43,22 @@ const DashboardScreen = ({navigation}) => {
       <SectionHeader title="Children" />
       {children.length ? (
         children.map(child => (
-          <DashboardCard
-            key={child.id}
-            title={child.fullName}
-            value={child.studentId}
-            description={`${child.academicClass?.name || '-'}-${child.section?.name || '-'} | Attendance ${child.attendanceSummary?.percentage || 0}%`}
-            icon="account-school-outline"
-            onPress={() => navigation.navigate('Attendance', {studentId: child.id})}
-          />
+          <React.Fragment key={child.id}>
+            <DashboardCard
+              title={child.fullName}
+              value={child.studentId}
+              description={`${child.academicClass?.name || '-'}-${child.section?.name || '-'} | Attendance ${child.attendanceSummary?.percentage || 0}%`}
+              icon="account-school-outline"
+              onPress={() => navigation.navigate('Attendance', {studentId: child.id})}
+            />
+            <DashboardCard
+              title={`${child.fullName} Fees`}
+              value={formatCurrency(child.feeSummary?.due || 0)}
+              description={`${child.academicClass?.name || '-'}-${child.section?.name || '-'} | Paid ${formatCurrency(child.feeSummary?.paid || 0)}`}
+              icon="cash-clock"
+              onPress={() => navigation.navigate('FeeLedger')}
+            />
+          </React.Fragment>
         ))
       ) : (
         <EmptyState title="No linked children" message="Linked child records will appear here after admission." />

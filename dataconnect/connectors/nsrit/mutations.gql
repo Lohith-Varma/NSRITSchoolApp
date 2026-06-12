@@ -8,7 +8,22 @@ mutation CreateBranch(
   $phone: String
   $email: String
   $status: String = "ACTIVE"
-) @auth(level: USER) {
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Main Admin required") {
+      id
+      role
+    }
+    existingBranches: branches(
+      where: {branchCode: {eq: $branchCode}}
+      limit: 1
+    ) @check(expr: "!this.exists(b, true)", message: "Branch code already exists") {
+      id
+    }
+  }
   branch_insert(
     data: {
       name: $name
@@ -83,7 +98,14 @@ mutation AssignBranchAdmin($branchId: UUID!, $branchAdminId: UUID!) @auth(level:
   )
 }
 
-mutation AssignPrincipal($branchId: UUID!, $principalId: UUID!) @auth(level: USER) @transaction {
+mutation AssignPrincipal(
+  $branchId: UUID!
+  $principalId: UUID!
+  $employeeId: String!
+  $joiningYear: Int!
+  $branchCode: String!
+  $serialNumber: Int!
+) @auth(level: USER) @transaction {
   query @redact {
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
@@ -93,11 +115,48 @@ mutation AssignPrincipal($branchId: UUID!, $principalId: UUID!) @auth(level: USE
       role
     }
   }
+  employeeSequence_upsert(
+    data: {
+      year: $joiningYear
+      branchCode: $branchCode
+      staffType: "TEACHING"
+      lastSequence: $serialNumber
+      updatedAt_expr: "request.time"
+    }
+  )
+  staffIdSequence_upsert(
+    data: {
+      joiningYear: $joiningYear
+      branchCode: $branchCode
+      staffType: "TEACHING"
+      lastSerialNumber: $serialNumber
+      updatedAt_expr: "request.time"
+    }
+  )
+  user_update(
+    id: $principalId
+    data: {
+      employeeId: $employeeId
+      staffType: "TEACHING"
+      updatedAt_expr: "request.time"
+    }
+  )
   branch_update(
     id: $branchId
     data: {
       principal: {id: $principalId}
       updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STAFF_CREATED"
+      entityType: "STAFF"
+      entityId: $employeeId
+      branchId: $branchId
+      newData: "Principal teaching staff created"
     }
   )
 }
@@ -238,6 +297,8 @@ mutation CreateUser(
   $countryCode: String!
   $phoneNumber: String!
   $role: String!
+  $employeeId: String
+  $staffType: String
   $branchId: UUID
   $wingId: UUID
 ) @auth(level: USER) {
@@ -248,6 +309,8 @@ mutation CreateUser(
       countryCode: $countryCode
       phoneNumber: $phoneNumber
       role: $role
+      employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       wing: {id: $wingId}
       isActive: true
@@ -447,6 +510,118 @@ mutation CreateStudent(
       updatedAt_expr: "request.time"
     }
   )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STUDENT_CREATED"
+      entityType: "STUDENT"
+      entityId: $studentId
+      branchId: $branchId
+      newData: "Student created"
+    }
+  )
+}
+
+mutation UpdateStudent(
+  $studentId: UUID!
+  $parentId: UUID!
+  $branchId: UUID!
+  $fullName: String!
+  $gender: String
+  $dateOfBirth: Date
+  $photoUrl: String
+  $aadhaarNumber: String
+  $bloodGroup: String
+  $academicClassId: UUID!
+  $sectionId: UUID!
+  $countryCode: String
+  $phoneNumber: String
+  $address: String
+  $city: String
+  $state: String
+  $pincode: String
+  $emergencyContact: String
+  $transportRequired: Boolean
+  $admissionDate: Date!
+  $fatherName: String
+  $motherName: String
+  $parentPhoneNumber: String
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, ((u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Student update access denied") {
+      id
+      role
+      branchId
+    }
+    selectedStudent: students(
+      where: {id: {eq: $studentId}, branchId: {eq: $branchId}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(s, true)", message: "Student not found in branch") {
+      id
+    }
+    selectedClass: academicClasses(
+      where: {id: {eq: $academicClassId}, branchId: {eq: $branchId}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(c, true)", message: "Selected class is not active for this branch") {
+      id
+    }
+    selectedSection: sections(
+      where: {id: {eq: $sectionId}, branchId: {eq: $branchId}, academicClassId: {eq: $academicClassId}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(s, true)", message: "Selected section is not active for this class") {
+      id
+    }
+  }
+  student_update(
+    id: $studentId
+    data: {
+      fullName: $fullName
+      gender: $gender
+      dateOfBirth: $dateOfBirth
+      photoUrl: $photoUrl
+      aadhaarNumber: $aadhaarNumber
+      bloodGroup: $bloodGroup
+      academicClass: {id: $academicClassId}
+      section: {id: $sectionId}
+      countryCode: $countryCode
+      phoneNumber: $phoneNumber
+      address: $address
+      city: $city
+      state: $state
+      pincode: $pincode
+      emergencyContact: $emergencyContact
+      transportRequired: $transportRequired
+      admissionDate: $admissionDate
+      updatedAt_expr: "request.time"
+    }
+  )
+  parent_update(
+    id: $parentId
+    data: {
+      fullName: $fatherName
+      fatherName: $fatherName
+      motherName: $motherName
+      countryCode: $countryCode
+      phoneNumber: $parentPhoneNumber
+      address: $address
+      updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STUDENT_UPDATED"
+      entityType: "STUDENT"
+      entityId_expr: "response.student_update.id"
+      branchId: $branchId
+      newData: "Student updated"
+    }
+  )
 }
 
 mutation CreateAttendance(
@@ -457,7 +632,23 @@ mutation CreateAttendance(
   $status: String!
   $markedById: UUID!
   $remarks: String
-) @auth(level: USER) {
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.id == vars.markedById && (u.role == 'TEACHER' || u.role == 'teacher' || u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin'))", message: "Attendance creation access required") {
+      id
+      role
+      branchId
+    }
+    students(
+      where: {id: {eq: $studentId}, academicClassId: {eq: $academicClassId}, sectionId: {eq: $sectionId}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(s, true)", message: "Active student not found for selected class and section") {
+      id
+    }
+  }
   attendance_insert(
     data: {
       student: {id: $studentId}
@@ -470,6 +661,17 @@ mutation CreateAttendance(
       updatedAt_expr: "request.time"
     }
   )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "ATTENDANCE_MARKED"
+      entityType: "ATTENDANCE"
+      entityId_expr: "response.attendance_insert.id"
+      branchId_expr: "response.query.users[0].branchId"
+      newData: "Attendance marked"
+    }
+  )
 }
 
 mutation UpdateAttendance(
@@ -477,7 +679,17 @@ mutation UpdateAttendance(
   $status: String!
   $editedById: UUID!
   $remarks: String
-) @auth(level: USER) {
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.id == vars.editedById && (u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin'))", message: "Attendance edit access required") {
+      id
+      role
+      branchId
+    }
+  }
   attendance_update(
     id: $id
     data: {
@@ -485,6 +697,17 @@ mutation UpdateAttendance(
       editedBy: {id: $editedById}
       remarks: $remarks
       updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "ATTENDANCE_EDITED"
+      entityType: "ATTENDANCE"
+      entityId_expr: "response.attendance_update.id"
+      branchId_expr: "response.query.users[0].branchId"
+      newData: "Attendance edited"
     }
   )
 }
@@ -545,6 +768,7 @@ mutation CreateCoordinator(
   $email: String
   $gender: String
   $employeeId: String!
+  $staffType: String! = "TEACHING"
   $joiningYear: Int!
   $branchCode: String!
   $serialNumber: Int!
@@ -571,6 +795,7 @@ mutation CreateCoordinator(
     data: {
       year: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSequence: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -579,6 +804,7 @@ mutation CreateCoordinator(
     data: {
       joiningYear: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSerialNumber: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -591,6 +817,7 @@ mutation CreateCoordinator(
       phoneNumber: $phoneNumber
       role: "COORDINATOR"
       employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       isActive: true
       updatedAt_expr: "request.time"
@@ -604,8 +831,20 @@ mutation CreateCoordinator(
       email: $email
       gender: $gender
       employeeId: $employeeId
+      staffType: $staffType
       isActive: true
       updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STAFF_CREATED"
+      entityType: "STAFF"
+      entityId: $employeeId
+      branchId: $branchId
+      newData: "Coordinator teaching staff created"
     }
   )
 }
@@ -630,6 +869,7 @@ mutation CreateTeacher(
   $emergencyContact: String
   $bloodGroup: String
   $employeeId: String!
+  $staffType: String!
   $joiningYear: Int!
   $branchCode: String!
   $serialNumber: Int!
@@ -650,6 +890,7 @@ mutation CreateTeacher(
     data: {
       year: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSequence: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -658,6 +899,7 @@ mutation CreateTeacher(
     data: {
       joiningYear: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSerialNumber: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -670,6 +912,7 @@ mutation CreateTeacher(
       phoneNumber: $phoneNumber
       role: "TEACHER"
       employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       isActive: true
       updatedAt_expr: "request.time"
@@ -679,6 +922,7 @@ mutation CreateTeacher(
     data: {
       userId_expr: "response.user_insert.id"
       employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       wing: $wing
       joiningDate: $joiningDate
@@ -697,6 +941,17 @@ mutation CreateTeacher(
       bloodGroup: $bloodGroup
       isActive: true
       updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STAFF_CREATED"
+      entityType: "STAFF"
+      entityId: $employeeId
+      branchId: $branchId
+      newData: "Teacher staff created"
     }
   )
 }
@@ -911,6 +1166,7 @@ mutation CreateAccountant(
   $emergencyContact: String
   $bloodGroup: String
   $employeeId: String!
+  $staffType: String! = "SUPPORTING"
   $joiningYear: Int!
   $branchCode: String!
   $serialNumber: Int!
@@ -930,6 +1186,7 @@ mutation CreateAccountant(
     data: {
       year: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSequence: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -938,6 +1195,7 @@ mutation CreateAccountant(
     data: {
       joiningYear: $joiningYear
       branchCode: $branchCode
+      staffType: $staffType
       lastSerialNumber: $serialNumber
       updatedAt_expr: "request.time"
     }
@@ -950,6 +1208,7 @@ mutation CreateAccountant(
       phoneNumber: $phoneNumber
       role: "ACCOUNTANT"
       employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       isActive: true
       updatedAt_expr: "request.time"
@@ -959,6 +1218,7 @@ mutation CreateAccountant(
     data: {
       userId_expr: "response.user_insert.id"
       employeeId: $employeeId
+      staffType: $staffType
       branch: {id: $branchId}
       joiningDate: $joiningDate
       designation: $designation
@@ -974,6 +1234,17 @@ mutation CreateAccountant(
       bloodGroup: $bloodGroup
       isActive: true
       updatedAt_expr: "request.time"
+    }
+  )
+  auditLog_insert(
+    data: {
+      performedBy_expr: "response.query.users[0].id"
+      performedRole_expr: "response.query.users[0].role"
+      action: "STAFF_CREATED"
+      entityType: "STAFF"
+      entityId: $employeeId
+      branchId: $branchId
+      newData: "Accountant supporting staff created"
     }
   )
 }
@@ -1066,9 +1337,108 @@ mutation UpdateFeeCategory($categoryId: UUID!, $name: String!, $status: String!)
   feeCategory_update(id: $categoryId, data: {name: $name, status: $status, updatedAt_expr: "request.time"})
 }
 
+mutation CreateClassFee(
+  $branchId: UUID!
+  $academicClassId: UUID!
+  $academicYear: Int!
+  $term1Fee: Float!
+  $term2Fee: Float!
+  $term3Fee: Float!
+  $totalTuitionFee: Float!
+  $applyToFuture: Boolean!
+  $status: String!
+  $createdById: UUID!
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Class fee management access required") {
+      id
+      role
+      branchId
+    }
+    academicClasses(where: {id: {eq: $academicClassId}, branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 1) @check(expr: "this.exists(c, true)", message: "Class not found in branch") {
+      id
+    }
+    academicYearFeeTemplates(where: {branchId: {eq: $branchId}, academicClassId: {eq: $academicClassId}, academicYear: {eq: $academicYear}}, limit: 1) @check(expr: "!this.exists(t, true)", message: "Class fee already exists for this academic year") {
+      id
+    }
+  }
+  academicYearFeeTemplate_insert(
+    data: {
+      branch: {id: $branchId}
+      academicClass: {id: $academicClassId}
+      academicYear: $academicYear
+      term1Fee: $term1Fee
+      term2Fee: $term2Fee
+      term3Fee: $term3Fee
+      totalTuitionFee: $totalTuitionFee
+      applyToFuture: $applyToFuture
+      status: $status
+      createdBy: {id: $createdById}
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
+mutation UpdateClassFee(
+  $classFeeId: UUID!
+  $branchId: UUID!
+  $academicClassId: UUID!
+  $academicYear: Int!
+  $term1Fee: Float!
+  $term2Fee: Float!
+  $term3Fee: Float!
+  $totalTuitionFee: Float!
+  $applyToFuture: Boolean!
+  $status: String!
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Class fee management access required") {
+      id
+      role
+      branchId
+    }
+    academicYearFeeTemplates(where: {id: {eq: $classFeeId}, branchId: {eq: $branchId}}, limit: 1) @check(expr: "this.exists(t, true)", message: "Class fee not found in branch") {
+      id
+    }
+    academicClasses(where: {id: {eq: $academicClassId}, branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 1) @check(expr: "this.exists(c, true)", message: "Class not found in branch") {
+      id
+    }
+  }
+  academicYearFeeTemplate_update(
+    id: $classFeeId
+    data: {
+      academicClass: {id: $academicClassId}
+      academicYear: $academicYear
+      term1Fee: $term1Fee
+      term2Fee: $term2Fee
+      term3Fee: $term3Fee
+      totalTuitionFee: $totalTuitionFee
+      applyToFuture: $applyToFuture
+      status: $status
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
 mutation CreateFeePlan(
   $studentId: UUID!
   $academicYear: Int!
+  $classFeeTemplateId: UUID
+  $term1Fee: Float! = 0
+  $term2Fee: Float! = 0
+  $term3Fee: Float! = 0
+  $booksFee: Float! = 0
+  $transportFee: Float! = 0
+  $concessionType: String
+  $concessionValue: Float! = 0
+  $concessionAmount: Float! = 0
+  $grossAmount: Float! = 0
   $totalAmount: Float!
   $createdById: UUID!
   $branchId: UUID!
@@ -1080,7 +1450,7 @@ mutation CreateFeePlan(
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
       limit: 1
-    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
       id
       role
       branchId
@@ -1092,7 +1462,17 @@ mutation CreateFeePlan(
   studentFeePlan_insert(
     data: {
       student: {id: $studentId}
+      classFeeTemplateId: $classFeeTemplateId
       academicYear: $academicYear
+      term1Fee: $term1Fee
+      term2Fee: $term2Fee
+      term3Fee: $term3Fee
+      booksFee: $booksFee
+      transportFee: $transportFee
+      concessionType: $concessionType
+      concessionValue: $concessionValue
+      concessionAmount: $concessionAmount
+      grossAmount: $grossAmount
       totalAmount: $totalAmount
       createdBy: {id: $createdById}
       isActive: true
@@ -1114,6 +1494,16 @@ mutation CreateFeePlan(
 mutation UpdateFeePlan(
   $feePlanId: UUID!
   $studentId: UUID!
+  $classFeeTemplateId: UUID
+  $term1Fee: Float! = 0
+  $term2Fee: Float! = 0
+  $term3Fee: Float! = 0
+  $booksFee: Float! = 0
+  $transportFee: Float! = 0
+  $concessionType: String
+  $concessionValue: Float! = 0
+  $concessionAmount: Float! = 0
+  $grossAmount: Float! = 0
   $totalAmount: Float!
   $isActive: Boolean!
   $branchId: UUID!
@@ -1126,7 +1516,7 @@ mutation UpdateFeePlan(
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
       limit: 1
-    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
       id
       role
       branchId
@@ -1137,7 +1527,21 @@ mutation UpdateFeePlan(
   }
   studentFeePlan_update(
     id: $feePlanId
-    data: {totalAmount: $totalAmount, isActive: $isActive, updatedAt_expr: "request.time"}
+    data: {
+      classFeeTemplateId: $classFeeTemplateId
+      term1Fee: $term1Fee
+      term2Fee: $term2Fee
+      term3Fee: $term3Fee
+      booksFee: $booksFee
+      transportFee: $transportFee
+      concessionType: $concessionType
+      concessionValue: $concessionValue
+      concessionAmount: $concessionAmount
+      grossAmount: $grossAmount
+      totalAmount: $totalAmount
+      isActive: $isActive
+      updatedAt_expr: "request.time"
+    }
   )
   feeAuditLog_insert(
     data: {
@@ -1156,7 +1560,7 @@ mutation ClearFeePlanItems($feePlanId: UUID!, $branchId: UUID!) @auth(level: USE
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
       limit: 1
-    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
       id
       role
       branchId
@@ -1173,7 +1577,7 @@ mutation CreateFeePlanItem($feePlanId: UUID!, $categoryId: UUID!, $amount: Float
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
       limit: 1
-    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
+    ) @check(expr: "this.exists(u, ((u.role == 'COORDINATOR' || u.role == 'coordinator' || u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee plan branch access required") {
       id
       role
       branchId
@@ -1258,6 +1662,58 @@ mutation RecordPayment(
   )
 }
 
+mutation UpdatePayment(
+  $paymentId: UUID!
+  $studentId: UUID!
+  $branchId: UUID!
+  $amount: Float!
+  $paymentDate: Date!
+  $paymentMode: String!
+  $referenceNumber: String
+  $remarks: String
+  $updatedById: UUID!
+  $actorRole: String
+  $oldValue: String
+  $newValue: String
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, ((u.role == 'ACCOUNTANT' || u.role == 'accountant') && u.branchId == vars.branchId) || ((u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Fee collection branch access required") {
+      id
+      role
+      branchId
+    }
+    feePayments(
+      where: {id: {eq: $paymentId}, studentId: {eq: $studentId}, student: {branchId: {eq: $branchId}}, paymentDate: {eq: $paymentDate}, status: {eq: "RECORDED"}}
+      limit: 1
+    ) @check(expr: "this.exists(p, true)", message: "Only same-day recorded payments can be edited") {
+      id
+    }
+  }
+  feePayment_update(
+    id: $paymentId
+    data: {
+      amount: $amount
+      paymentMode: $paymentMode
+      referenceNumber: $referenceNumber
+      remarks: $remarks
+      updatedAt_expr: "request.time"
+    }
+  )
+  feeAuditLog_insert(
+    data: {
+      user: {id: $updatedById}
+      role: $actorRole
+      action: "PAYMENT_EDITED"
+      student: {id: $studentId}
+      oldValue: $oldValue
+      newValue: $newValue
+    }
+  )
+}
+
 mutation ReversePayment(
   $paymentId: UUID!
   $studentId: UUID!
@@ -1272,7 +1728,7 @@ mutation ReversePayment(
     users(
       where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
       limit: 1
-    ) @check(expr: "this.exists(u, ((u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Only principal can reverse payments") {
+    ) @check(expr: "this.exists(u, ((u.role == 'ACCOUNTANT' || u.role == 'accountant' || u.role == 'PRINCIPAL' || u.role == 'principal') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Payment reversal access required") {
       id
       role
       branchId

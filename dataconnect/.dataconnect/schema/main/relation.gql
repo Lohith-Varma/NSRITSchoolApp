@@ -1,5 +1,39 @@
 extend type AcademicClass {
   """
+  ✨ List `AcademicYearFeeTemplate` objects in a one-to-many relationship (where `AcademicYearFeeTemplate`.`academicClass` is this object).
+  """
+  academicYearFeeTemplates_on_academicClass(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AcademicYearFeeTemplate_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AcademicYearFeeTemplate_Having
+  ): [AcademicYearFeeTemplate!]! @fdc_generated(from: "AcademicYearFeeTemplate.academicClass", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `Attendance` objects in a one-to-many relationship (where `Attendance`.`academicClass` is this object).
   """
   attendances_on_academicClass(
@@ -434,6 +468,317 @@ extend type AcademicClass {
   """
   _id: ID! @fdc_generated(from: "AcademicClass.id", purpose: ENTITY_ID)
 }
+extend type AcademicYearFeeTemplate {
+  """
+  ✨ List `StudentFeePlan` objects in a one-to-many relationship (where `StudentFeePlan`.`classFeeTemplate` is this object).
+  """
+  studentFeePlans_on_classFeeTemplate(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: StudentFeePlan_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [StudentFeePlan_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: StudentFeePlan_Having
+  ): [StudentFeePlan!]! @fdc_generated(from: "StudentFeePlan.classFeeTemplate", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "AcademicYearFeeTemplate", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table.
+  """
+  _count: Int! @fdc_generated(from: "AcademicYearFeeTemplate.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `academicClassId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  academicClassId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.academicClassId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `academicYear` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  academicYear_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.academicYear", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `applyToFuture` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  applyToFuture_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.applyToFuture", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `branchId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  branchId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.branchId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  createdAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.createdAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `createdById` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  createdById_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.createdById", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  status_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.status", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `term1Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term1Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.term1Fee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `term2Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term2Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.term2Fee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `term3Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term3Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.term3Fee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `totalTuitionFee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  totalTuitionFee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.totalTuitionFee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AcademicYearFeeTemplate` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  updatedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate.updatedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Sum the `academicYear` field in the `AcademicYearFeeTemplate` table.
+  """
+  academicYear_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "AcademicYearFeeTemplate.academicYear", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term1Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term1Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term1Fee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term2Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term2Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term2Fee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term3Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term3Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term3Fee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `totalTuitionFee` field in the `AcademicYearFeeTemplate` table.
+  """
+  totalTuitionFee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.totalTuitionFee", purpose: QUERY_SUM)
+  """
+  ✨ Average the `academicYear` field in the `AcademicYearFeeTemplate` table.
+  """
+  academicYear_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.academicYear", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term1Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term1Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term1Fee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term2Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term2Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term2Fee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term3Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term3Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.term3Fee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `totalTuitionFee` field in the `AcademicYearFeeTemplate` table.
+  """
+  totalTuitionFee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "AcademicYearFeeTemplate.totalTuitionFee", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `academicYear` field in the `AcademicYearFeeTemplate` table.
+  """
+  academicYear_min: Int @fdc_generated(from: "AcademicYearFeeTemplate.academicYear", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `createdAt` field in the `AcademicYearFeeTemplate` table.
+  """
+  createdAt_min: Timestamp @fdc_generated(from: "AcademicYearFeeTemplate.createdAt", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term1Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term1Fee_min: Float @fdc_generated(from: "AcademicYearFeeTemplate.term1Fee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term2Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term2Fee_min: Float @fdc_generated(from: "AcademicYearFeeTemplate.term2Fee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term3Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term3Fee_min: Float @fdc_generated(from: "AcademicYearFeeTemplate.term3Fee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `totalTuitionFee` field in the `AcademicYearFeeTemplate` table.
+  """
+  totalTuitionFee_min: Float @fdc_generated(from: "AcademicYearFeeTemplate.totalTuitionFee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `updatedAt` field in the `AcademicYearFeeTemplate` table.
+  """
+  updatedAt_min: Timestamp @fdc_generated(from: "AcademicYearFeeTemplate.updatedAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `academicYear` field in the `AcademicYearFeeTemplate` table.
+  """
+  academicYear_max: Int @fdc_generated(from: "AcademicYearFeeTemplate.academicYear", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `createdAt` field in the `AcademicYearFeeTemplate` table.
+  """
+  createdAt_max: Timestamp @fdc_generated(from: "AcademicYearFeeTemplate.createdAt", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term1Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term1Fee_max: Float @fdc_generated(from: "AcademicYearFeeTemplate.term1Fee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term2Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term2Fee_max: Float @fdc_generated(from: "AcademicYearFeeTemplate.term2Fee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term3Fee` field in the `AcademicYearFeeTemplate` table.
+  """
+  term3Fee_max: Float @fdc_generated(from: "AcademicYearFeeTemplate.term3Fee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `totalTuitionFee` field in the `AcademicYearFeeTemplate` table.
+  """
+  totalTuitionFee_max: Float @fdc_generated(from: "AcademicYearFeeTemplate.totalTuitionFee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `updatedAt` field in the `AcademicYearFeeTemplate` table.
+  """
+  updatedAt_max: Timestamp @fdc_generated(from: "AcademicYearFeeTemplate.updatedAt", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "AcademicYearFeeTemplate.id", purpose: ENTITY_ID)
+}
 extend type Accountant {
   """
   Implicit metadata field that cannot be written. It provides extra information about query results.
@@ -587,6 +932,15 @@ extend type Accountant {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Accountant.qualification", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Accountant` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Accountant.staffType", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Accountant` table where the `state` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -936,6 +1290,40 @@ extend type Branch {
     """
     having: AcademicClass_Having
   ): [AcademicClass!]! @fdc_generated(from: "AcademicClass.branch", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `AcademicYearFeeTemplate` objects in a one-to-many relationship (where `AcademicYearFeeTemplate`.`branch` is this object).
+  """
+  academicYearFeeTemplates_on_branch(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AcademicYearFeeTemplate_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AcademicYearFeeTemplate_Having
+  ): [AcademicYearFeeTemplate!]! @fdc_generated(from: "AcademicYearFeeTemplate.branch", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
   ✨ List `Accountant` objects in a one-to-many relationship (where `Accountant`.`branch` is this object).
   """
@@ -1581,6 +1969,15 @@ extend type Coordinator {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Coordinator.isActive", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Coordinator` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Coordinator.staffType", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Coordinator` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   updatedAt_count(
@@ -1809,6 +2206,15 @@ extend type EmployeeSequence {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "EmployeeSequence.lastSequence", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `EmployeeSequence` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "EmployeeSequence.staffType", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `EmployeeSequence` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   updatedAt_count(
@@ -1889,7 +2295,7 @@ extend type EmployeeSequence {
   """
   A generated field that is used for caching results in SDKs.
   """
-  _id: ID! @fdc_generated(from: "EmployeeSequence.year,branchCode", purpose: ENTITY_ID)
+  _id: ID! @fdc_generated(from: "EmployeeSequence.year,branchCode,staffType", purpose: ENTITY_ID)
 }
 extend type FeeAuditLog {
   """
@@ -3544,6 +3950,15 @@ extend type StaffIdSequence {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "StaffIdSequence.lastSerialNumber", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `StaffIdSequence` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StaffIdSequence.staffType", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `StaffIdSequence` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   updatedAt_count(
@@ -3615,7 +4030,7 @@ extend type StaffIdSequence {
   """
   A generated field that is used for caching results in SDKs.
   """
-  _id: ID! @fdc_generated(from: "StaffIdSequence.joiningYear,branchCode", purpose: ENTITY_ID)
+  _id: ID! @fdc_generated(from: "StaffIdSequence.joiningYear,branchCode,staffType", purpose: ENTITY_ID)
 }
 extend type Student {
   """
@@ -4823,6 +5238,51 @@ extend type StudentFeePlan {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "StudentFeePlan.academicYear", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `booksFee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  booksFee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.booksFee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `classFeeTemplateId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  classFeeTemplateId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.classFeeTemplateId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `concessionAmount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  concessionAmount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.concessionAmount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `concessionType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  concessionType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.concessionType", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `concessionValue` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  concessionValue_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.concessionValue", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `StudentFeePlan` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   createdAt_count(
@@ -4840,6 +5300,15 @@ extend type StudentFeePlan {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "StudentFeePlan.createdById", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `grossAmount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  grossAmount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.grossAmount", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `StudentFeePlan` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -4868,6 +5337,33 @@ extend type StudentFeePlan {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "StudentFeePlan.studentId", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `term1Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term1Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.term1Fee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `term2Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term2Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.term2Fee", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `term3Fee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  term3Fee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.term3Fee", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `StudentFeePlan` table where the `totalAmount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   totalAmount_count(
@@ -4876,6 +5372,15 @@ extend type StudentFeePlan {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "StudentFeePlan.totalAmount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentFeePlan` table where the `transportFee` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  transportFee_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentFeePlan.transportFee", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `StudentFeePlan` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -4895,6 +5400,69 @@ extend type StudentFeePlan {
     distinct: Boolean = false
   ): Int @fdc_generated(from: "StudentFeePlan.academicYear", purpose: QUERY_SUM)
   """
+  ✨ Sum the `booksFee` field in the `StudentFeePlan` table.
+  """
+  booksFee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.booksFee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `concessionAmount` field in the `StudentFeePlan` table.
+  """
+  concessionAmount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.concessionAmount", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `concessionValue` field in the `StudentFeePlan` table.
+  """
+  concessionValue_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.concessionValue", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `grossAmount` field in the `StudentFeePlan` table.
+  """
+  grossAmount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.grossAmount", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term1Fee` field in the `StudentFeePlan` table.
+  """
+  term1Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term1Fee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term2Fee` field in the `StudentFeePlan` table.
+  """
+  term2Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term2Fee", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `term3Fee` field in the `StudentFeePlan` table.
+  """
+  term3Fee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term3Fee", purpose: QUERY_SUM)
+  """
   ✨ Sum the `totalAmount` field in the `StudentFeePlan` table.
   """
   totalAmount_sum(
@@ -4903,6 +5471,15 @@ extend type StudentFeePlan {
     """
     distinct: Boolean = false
   ): Float @fdc_generated(from: "StudentFeePlan.totalAmount", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `transportFee` field in the `StudentFeePlan` table.
+  """
+  transportFee_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.transportFee", purpose: QUERY_SUM)
   """
   ✨ Average the `academicYear` field in the `StudentFeePlan` table.
   """
@@ -4913,6 +5490,69 @@ extend type StudentFeePlan {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "StudentFeePlan.academicYear", purpose: QUERY_AVG)
   """
+  ✨ Average the `booksFee` field in the `StudentFeePlan` table.
+  """
+  booksFee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.booksFee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `concessionAmount` field in the `StudentFeePlan` table.
+  """
+  concessionAmount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.concessionAmount", purpose: QUERY_AVG)
+  """
+  ✨ Average the `concessionValue` field in the `StudentFeePlan` table.
+  """
+  concessionValue_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.concessionValue", purpose: QUERY_AVG)
+  """
+  ✨ Average the `grossAmount` field in the `StudentFeePlan` table.
+  """
+  grossAmount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.grossAmount", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term1Fee` field in the `StudentFeePlan` table.
+  """
+  term1Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term1Fee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term2Fee` field in the `StudentFeePlan` table.
+  """
+  term2Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term2Fee", purpose: QUERY_AVG)
+  """
+  ✨ Average the `term3Fee` field in the `StudentFeePlan` table.
+  """
+  term3Fee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.term3Fee", purpose: QUERY_AVG)
+  """
   ✨ Average the `totalAmount` field in the `StudentFeePlan` table.
   """
   totalAmount_avg(
@@ -4922,17 +5562,58 @@ extend type StudentFeePlan {
     distinct: Boolean = false
   ): Float @fdc_generated(from: "StudentFeePlan.totalAmount", purpose: QUERY_AVG)
   """
+  ✨ Average the `transportFee` field in the `StudentFeePlan` table.
+  """
+  transportFee_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "StudentFeePlan.transportFee", purpose: QUERY_AVG)
+  """
   ✨ Minimum of the `academicYear` field in the `StudentFeePlan` table.
   """
   academicYear_min: Int @fdc_generated(from: "StudentFeePlan.academicYear", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `booksFee` field in the `StudentFeePlan` table.
+  """
+  booksFee_min: Float @fdc_generated(from: "StudentFeePlan.booksFee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `concessionAmount` field in the `StudentFeePlan` table.
+  """
+  concessionAmount_min: Float @fdc_generated(from: "StudentFeePlan.concessionAmount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `concessionValue` field in the `StudentFeePlan` table.
+  """
+  concessionValue_min: Float @fdc_generated(from: "StudentFeePlan.concessionValue", purpose: QUERY_MIN)
   """
   ✨ Minimum of the `createdAt` field in the `StudentFeePlan` table.
   """
   createdAt_min: Timestamp @fdc_generated(from: "StudentFeePlan.createdAt", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `grossAmount` field in the `StudentFeePlan` table.
+  """
+  grossAmount_min: Float @fdc_generated(from: "StudentFeePlan.grossAmount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term1Fee` field in the `StudentFeePlan` table.
+  """
+  term1Fee_min: Float @fdc_generated(from: "StudentFeePlan.term1Fee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term2Fee` field in the `StudentFeePlan` table.
+  """
+  term2Fee_min: Float @fdc_generated(from: "StudentFeePlan.term2Fee", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `term3Fee` field in the `StudentFeePlan` table.
+  """
+  term3Fee_min: Float @fdc_generated(from: "StudentFeePlan.term3Fee", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `totalAmount` field in the `StudentFeePlan` table.
   """
   totalAmount_min: Float @fdc_generated(from: "StudentFeePlan.totalAmount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `transportFee` field in the `StudentFeePlan` table.
+  """
+  transportFee_min: Float @fdc_generated(from: "StudentFeePlan.transportFee", purpose: QUERY_MIN)
   """
   ✨ Minimum of the `updatedAt` field in the `StudentFeePlan` table.
   """
@@ -4942,13 +5623,45 @@ extend type StudentFeePlan {
   """
   academicYear_max: Int @fdc_generated(from: "StudentFeePlan.academicYear", purpose: QUERY_MAX)
   """
+  ✨ Maximum of the `booksFee` field in the `StudentFeePlan` table.
+  """
+  booksFee_max: Float @fdc_generated(from: "StudentFeePlan.booksFee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `concessionAmount` field in the `StudentFeePlan` table.
+  """
+  concessionAmount_max: Float @fdc_generated(from: "StudentFeePlan.concessionAmount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `concessionValue` field in the `StudentFeePlan` table.
+  """
+  concessionValue_max: Float @fdc_generated(from: "StudentFeePlan.concessionValue", purpose: QUERY_MAX)
+  """
   ✨ Maximum of the `createdAt` field in the `StudentFeePlan` table.
   """
   createdAt_max: Timestamp @fdc_generated(from: "StudentFeePlan.createdAt", purpose: QUERY_MAX)
   """
+  ✨ Maximum of the `grossAmount` field in the `StudentFeePlan` table.
+  """
+  grossAmount_max: Float @fdc_generated(from: "StudentFeePlan.grossAmount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term1Fee` field in the `StudentFeePlan` table.
+  """
+  term1Fee_max: Float @fdc_generated(from: "StudentFeePlan.term1Fee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term2Fee` field in the `StudentFeePlan` table.
+  """
+  term2Fee_max: Float @fdc_generated(from: "StudentFeePlan.term2Fee", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `term3Fee` field in the `StudentFeePlan` table.
+  """
+  term3Fee_max: Float @fdc_generated(from: "StudentFeePlan.term3Fee", purpose: QUERY_MAX)
+  """
   ✨ Maximum of the `totalAmount` field in the `StudentFeePlan` table.
   """
   totalAmount_max: Float @fdc_generated(from: "StudentFeePlan.totalAmount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `transportFee` field in the `StudentFeePlan` table.
+  """
+  transportFee_max: Float @fdc_generated(from: "StudentFeePlan.transportFee", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `updatedAt` field in the `StudentFeePlan` table.
   """
@@ -5860,6 +6573,15 @@ extend type Teacher {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Teacher.qualification", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Teacher` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Teacher.staffType", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Teacher` table where the `state` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   state_count(
@@ -6323,6 +7045,40 @@ extend type User {
     """
     having: AcademicClass_Having
   ): [AcademicClass!]! @fdc_generated(from: "AcademicClass.activatedBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `AcademicYearFeeTemplate` objects in a one-to-many relationship (where `AcademicYearFeeTemplate`.`createdBy` is this object).
+  """
+  academicYearFeeTemplates_on_createdBy(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AcademicYearFeeTemplate_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AcademicYearFeeTemplate_Having
+  ): [AcademicYearFeeTemplate!]! @fdc_generated(from: "AcademicYearFeeTemplate.createdBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
   ✨ List `Attendance` objects in a one-to-many relationship (where `Attendance`.`editedBy` is this object).
   """
@@ -7007,6 +7763,15 @@ extend type User {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.role", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `staffType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  staffType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.staffType", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `User` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """

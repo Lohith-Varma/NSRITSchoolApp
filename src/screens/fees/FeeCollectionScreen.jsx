@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {HelperText} from 'react-native-paper';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SearchBar, SelectField} from '../../components';
+import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SearchBar, SelectField, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import studentService from '../../services/students/studentService';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -10,6 +10,7 @@ import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 const paymentModes = ['Cash', 'UPI', 'Bank Transfer', 'Cheque'].map(value => ({label: value, value}));
+const today = () => new Date().toISOString().slice(0, 10);
 
 const FeeCollectionScreen = ({navigation, route}) => {
   const access = useFeeAccess();
@@ -17,8 +18,9 @@ const FeeCollectionScreen = ({navigation, route}) => {
   const canRecordPayments = feeService.canRecordPayments(access.role);
   const [searchText, setSearchText] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState(route.params?.studentId || '');
+  const [editingPayment, setEditingPayment] = useState(null);
   const [form, setForm] = useState({
-    paymentDate: new Date().toISOString().slice(0, 10),
+    paymentDate: today(),
     amount: '',
     paymentMode: 'Cash',
     referenceNumber: '',
@@ -40,17 +42,31 @@ const FeeCollectionScreen = ({navigation, route}) => {
 
   const mutation = useMutation({
     mutationFn: () =>
-      feeService.recordPayment(
-        {
-          ...form,
-          studentId: profile.studentId,
-          feePlanId: profile.feePlanId,
-          branchId: profile.branchId,
-          branchCode: profile.branchCode || access.branchCode,
-          amount: Number(form.amount),
-        },
-        access,
-      ),
+      editingPayment
+        ? feeService.updatePayment(
+            {
+              ...editingPayment,
+              ...form,
+              paymentId: editingPayment.id,
+              studentId: profile.studentId,
+              feePlanId: profile.feePlanId,
+              branchId: profile.branchId,
+              amount: Number(form.amount),
+              original: editingPayment,
+            },
+            access,
+          )
+        : feeService.recordPayment(
+            {
+              ...form,
+              studentId: profile.studentId,
+              feePlanId: profile.feePlanId,
+              branchId: profile.branchId,
+              branchCode: profile.branchCode || access.branchCode,
+              amount: Number(form.amount),
+            },
+            access,
+          ),
     onSuccess: payment => {
       queryClient.invalidateQueries({queryKey: ['feeRecords']});
       queryClient.invalidateQueries({queryKey: ['studentFeeProfile', selectedStudentId]});
@@ -62,13 +78,52 @@ const FeeCollectionScreen = ({navigation, route}) => {
       queryClient.invalidateQueries({queryKey: ['parentChildren']});
       queryClient.invalidateQueries({queryKey: ['parentDashboard']});
       queryClient.invalidateQueries({queryKey: ['studentDetails', selectedStudentId]});
-      navigation.navigate('StudentFeeProfile', {studentId: selectedStudentId, receiptNumber: payment.receiptNumber});
+      setEditingPayment(null);
+      setForm({paymentDate: today(), amount: '', paymentMode: 'Cash', referenceNumber: '', remarks: ''});
+      navigation.navigate('StudentFeeProfile', {studentId: selectedStudentId, receiptNumber: payment?.receiptNumber});
     },
     onError: err => setError(err.message),
   });
 
   const updateField = (field, value) => setForm(current => ({...current, [field]: value}));
   const searchResults = useMemo(() => studentsQuery.data || [], [studentsQuery.data]);
+  const reverseMutation = useMutation({
+    mutationFn: payment =>
+      feeService.reversePayment(
+        {
+          ...payment,
+          paymentId: payment.id,
+          studentId: profile.studentId,
+          branchId: profile.branchId,
+          reason: 'Reversed from fee collection screen',
+        },
+        access,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['feeRecords']});
+      queryClient.invalidateQueries({queryKey: ['studentFeeProfile', selectedStudentId]});
+      queryClient.invalidateQueries({queryKey: ['paymentHistory']});
+      queryClient.invalidateQueries({queryKey: ['feeReports']});
+      queryClient.invalidateQueries({queryKey: ['parentChildren']});
+      queryClient.invalidateQueries({queryKey: ['parentDashboard']});
+    },
+    onError: err => setError(err.message),
+  });
+  const startEditPayment = payment => {
+    if (payment.paymentDate !== today()) {
+      setError('Only same-day payments can be edited.');
+      return;
+    }
+    setEditingPayment(payment);
+    setForm({
+      paymentDate: payment.paymentDate || today(),
+      amount: String(payment.amount || ''),
+      paymentMode: payment.paymentMode || 'Cash',
+      referenceNumber: payment.referenceNumber || '',
+      remarks: payment.remarks || '',
+    });
+    setError('');
+  };
 
   if (!canRecordPayments) {
     return (
@@ -103,6 +158,23 @@ const FeeCollectionScreen = ({navigation, route}) => {
                 <SelectField label="Payment Mode" value={form.paymentMode} options={paymentModes} onChange={value => updateField('paymentMode', value)} />
                 <CustomInput label="Reference Number" value={form.referenceNumber} onChangeText={value => updateField('referenceNumber', value)} />
                 <CustomInput label="Remarks" value={form.remarks} multiline onChangeText={value => updateField('remarks', value)} />
+                <SectionHeader title="Payment History" />
+                {(profile.payments || []).map(payment => (
+                  <DashboardCard
+                    key={payment.id}
+                    title={payment.receiptNumber || 'Receipt'}
+                    value={formatCurrency(payment.amount)}
+                    description={`${payment.paymentDate || '-'} | ${payment.paymentMode || '-'} | ${payment.status || 'RECORDED'}`}
+                    icon="receipt-text-outline"
+                    onPress={() => startEditPayment(payment)}
+                  />
+                ))}
+                {editingPayment ? <CustomButton mode="text" onPress={() => setEditingPayment(null)}>Cancel Edit</CustomButton> : null}
+                {feeService.canReversePayments(access.role) && editingPayment ? (
+                  <CustomButton mode="outlined" loading={reverseMutation.isPending} onPress={() => reverseMutation.mutate(editingPayment)}>
+                    Reverse Payment
+                  </CustomButton>
+                ) : null}
               </>
             ) : null}
           </>
@@ -122,7 +194,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
             <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
             {profile ? (
               <CustomButton loading={mutation.isPending} disabled={mutation.isPending || !form.amount || !profile.feePlanId} onPress={() => mutation.mutate()}>
-                Record Payment
+                {editingPayment ? 'Update Same Day Payment' : 'Record Payment'}
               </CustomButton>
             ) : null}
           </View>

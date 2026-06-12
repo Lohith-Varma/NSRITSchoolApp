@@ -4,6 +4,13 @@ import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/opera
 import {normalizeAttendanceStatus} from '../../utils/helpers/attendanceHelpers';
 
 const today = () => new Date().toISOString().slice(0, 10);
+const canEditAttendance = role =>
+  [
+    USER_ROLES.COORDINATOR,
+    USER_ROLES.PRINCIPAL,
+    USER_ROLES.BRANCH_ADMIN,
+    USER_ROLES.MAIN_ADMIN,
+  ].includes(String(role || '').toUpperCase());
 
 export const summarizeAttendance = records => {
   const normalizedRecords = records.map(item => ({
@@ -77,14 +84,6 @@ export const attendanceService = {
 
   async markAttendance(payload, scope = {}) {
     const role = String(scope?.role || '').toUpperCase();
-    const assignedSectionIds = scope?.assignedSectionIds || (scope?.sectionId ? [scope.sectionId] : []);
-    if (
-      role === USER_ROLES.TEACHER &&
-      assignedSectionIds.length &&
-      !assignedSectionIds.includes(payload.sectionId)
-    ) {
-      throw new Error('Teachers can mark attendance only for assigned sections.');
-    }
 
     try {
       const response = await dataConnectClient.query(
@@ -99,6 +98,9 @@ export const attendanceService = {
       );
 
       if (existingRecord?.id) {
+        if (!canEditAttendance(role)) {
+          throw new Error('Attendance already submitted. Ask a coordinator or principal to make corrections.');
+        }
         const updateResponse = await dataConnectClient.mutate(
           DATA_CONNECT_MUTATIONS.UPDATE_ATTENDANCE,
           {
@@ -130,14 +132,6 @@ export const attendanceService = {
     }
 
     const role = String(scope?.role || '').toUpperCase();
-    const assignedSectionIds = scope?.assignedSectionIds || (scope?.sectionId ? [scope.sectionId] : []);
-    if (
-      role === USER_ROLES.TEACHER &&
-      assignedSectionIds.length &&
-      records.some(record => !assignedSectionIds.includes(record.sectionId))
-    ) {
-      throw new Error('Teachers can mark attendance only for assigned sections.');
-    }
 
     const existingBySectionDate = {};
     const uniqueKeys = [...new Set(records.map(record => `${record.sectionId}|${record.attendanceDate}`))];
@@ -151,6 +145,9 @@ export const attendanceService = {
       const key = `${record.sectionId}|${record.attendanceDate}`;
       const existingRecord = existingBySectionDate[key]?.[record.studentId];
       if (existingRecord?.id) {
+        if (!canEditAttendance(role)) {
+          throw new Error('Attendance already submitted. Ask a coordinator or principal to make corrections.');
+        }
         const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_ATTENDANCE, {
           id: existingRecord.id,
           status: normalizeAttendanceStatus(record.status) || record.status,
@@ -172,8 +169,9 @@ export const attendanceService = {
   },
 
   async correctAttendance({attendanceId, records, actorRole, scope}) {
-    if (actorRole !== USER_ROLES.COORDINATOR) {
-      throw new Error('Only coordinators can correct submitted attendance');
+    const role = String(actorRole || scope?.role || '').toUpperCase();
+    if (!canEditAttendance(role)) {
+      throw new Error('Only coordinators, principals, branch admins, and main admins can correct submitted attendance');
     }
 
     if (scope?.wingId && records?.some(record => record.wingId && record.wingId !== scope.wingId)) {

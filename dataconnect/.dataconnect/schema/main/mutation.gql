@@ -9,6 +9,15 @@ extend type Mutation {
     data: AcademicClass_Data!
   ): AcademicClass_KeyOutput! @fdc_generated(from: "AcademicClass", purpose: INSERT_SINGLE)
   """
+  ✨ Insert a single `AcademicYearFeeTemplate` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  academicYearFeeTemplate_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: AcademicYearFeeTemplate_Data!
+  ): AcademicYearFeeTemplate_KeyOutput! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: INSERT_SINGLE)
+  """
   ✨ Insert a single `Accountant` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
   accountant_insert(
@@ -323,6 +332,15 @@ extend type Mutation {
     """
     data: [AcademicClass_Data!]!
   ): [AcademicClass_KeyOutput!]! @fdc_generated(from: "AcademicClass", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `AcademicYearFeeTemplate` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  academicYearFeeTemplate_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [AcademicYearFeeTemplate_Data!]!
+  ): [AcademicYearFeeTemplate_KeyOutput!]! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: INSERT_MULTIPLE)
   """
   ✨ Insert `Accountant` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -639,6 +657,15 @@ extend type Mutation {
     data: AcademicClass_Data!
   ): AcademicClass_KeyOutput! @fdc_generated(from: "AcademicClass", purpose: UPSERT_SINGLE)
   """
+  ✨ Insert or update a single `AcademicYearFeeTemplate` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AcademicYearFeeTemplate`.
+  """
+  academicYearFeeTemplate_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: AcademicYearFeeTemplate_Data!
+  ): AcademicYearFeeTemplate_KeyOutput! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: UPSERT_SINGLE)
+  """
   ✨ Insert or update a single `Accountant` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Accountant`.
   """
   accountant_upsert(
@@ -953,6 +980,15 @@ extend type Mutation {
     """
     data: [AcademicClass_Data!]!
   ): [AcademicClass_KeyOutput!]! @fdc_generated(from: "AcademicClass", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `AcademicYearFeeTemplate` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AcademicYearFeeTemplate`.
+  """
+  academicYearFeeTemplate_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [AcademicYearFeeTemplate_Data!]!
+  ): [AcademicYearFeeTemplate_KeyOutput!]! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: UPSERT_MULTIPLE)
   """
   ✨ Insert or update `Accountant` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Accountant`.
   """
@@ -1283,6 +1319,30 @@ extend type Mutation {
     """
     data: AcademicClass_Data!
   ): AcademicClass_KeyOutput @fdc_generated(from: "AcademicClass", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `AcademicYearFeeTemplate` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `AcademicYearFeeTemplate` or `null` if not found.
+  """
+  academicYearFeeTemplate_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AcademicYearFeeTemplate_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AcademicYearFeeTemplate_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: AcademicYearFeeTemplate_Data!
+  ): AcademicYearFeeTemplate_KeyOutput @fdc_generated(from: "AcademicYearFeeTemplate", purpose: UPDATE_SINGLE)
   """
   ✨ Update a single `Accountant` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Accountant` or `null` if not found.
   """
@@ -2094,6 +2154,25 @@ extend type Mutation {
     data: AcademicClass_Data!
   ): Int! @fdc_generated(from: "AcademicClass", purpose: UPDATE_MULTIPLE)
   """
+  ✨ Update `AcademicYearFeeTemplate` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  academicYearFeeTemplate_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: AcademicYearFeeTemplate_Data!
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: UPDATE_MULTIPLE)
+  """
   ✨ Update `Accountant` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
   accountant_updateMany(
@@ -2759,6 +2838,25 @@ extend type Mutation {
     first: AcademicClass_FirstRow
   ): AcademicClass_KeyOutput @fdc_generated(from: "AcademicClass", purpose: DELETE_SINGLE)
   """
+  ✨ Delete a single `AcademicYearFeeTemplate` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  academicYearFeeTemplate_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AcademicYearFeeTemplate_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AcademicYearFeeTemplate_FirstRow
+  ): AcademicYearFeeTemplate_KeyOutput @fdc_generated(from: "AcademicYearFeeTemplate", purpose: DELETE_SINGLE)
+  """
   ✨ Delete a single `Accountant` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
   accountant_delete(
@@ -3393,6 +3491,20 @@ extend type Mutation {
     """
     all: Boolean = false
   ): Int! @fdc_generated(from: "AcademicClass", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `AcademicYearFeeTemplate` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  academicYearFeeTemplate_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: DELETE_MULTIPLE)
   """
   ✨ Delete `Accountant` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """

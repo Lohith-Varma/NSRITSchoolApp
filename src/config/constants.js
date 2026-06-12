@@ -10,6 +10,16 @@ export const USER_ROLES = {
   ACCOUNTANT: 'ACCOUNTANT',
 };
 
+export const STAFF_TYPES = {
+  TEACHING: 'TEACHING',
+  SUPPORTING: 'SUPPORTING',
+};
+
+export const STAFF_TYPE_LABELS = {
+  [STAFF_TYPES.TEACHING]: 'Teaching Staff',
+  [STAFF_TYPES.SUPPORTING]: 'Supporting Staff',
+};
+
 export const ROLE_LABELS = {
   [USER_ROLES.MAIN_ADMIN]: 'Main Admin',
   [USER_ROLES.BRANCH_ADMIN]: 'Branch Admin',

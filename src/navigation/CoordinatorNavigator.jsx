@@ -128,7 +128,7 @@ const CoordinatorNavigator = () => (
       component={TransferStudentScreen}
       options={{title: 'Transfer Student'}}
     />
-    {renderFeeStackScreens(Stack)}
+    {renderFeeStackScreens(Stack, {reports: true})}
   </Stack.Navigator>
 );
 

@@ -33,6 +33,7 @@ const FeeDashboardScreen = ({navigation}) => {
   const {records, summary, loading} = useSelector(state => state.fees);
   const canManagePlans = feeService.canManageFeePlans(access.role);
   const canRecordPayments = feeService.canRecordPayments(access.role);
+  const canViewReports = feeService.canViewReports(access.role);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
 
@@ -94,6 +95,14 @@ const FeeDashboardScreen = ({navigation}) => {
       <View style={styles.quickActions}>
         {canManagePlans ? (
           <StatCard
+            title="Class Fees"
+            value="Setup"
+            icon="google-classroom"
+            onPress={() => navigation.navigate('ClassFeeManagement')}
+          />
+        ) : null}
+        {canManagePlans ? (
+          <StatCard
             title="Fee Plans"
             value="Manage"
             icon="book-edit-outline"
@@ -122,6 +131,14 @@ const FeeDashboardScreen = ({navigation}) => {
           icon="book-open-variant"
           onPress={() => navigation.navigate('FeeLedger')}
         />
+        {canViewReports ? (
+          <StatCard
+            title="Reports"
+            value="View"
+            icon="file-chart-outline"
+            onPress={() => navigation.navigate('FeeReports')}
+          />
+        ) : null}
       </View>
       <SearchBar
         value={query}
@@ -156,6 +173,7 @@ const styles = StyleSheet.create({
   },
   quickActions: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
     marginBottom: spacing.md,
   },

@@ -33,9 +33,12 @@ const FeePlanManagementScreen = ({navigation}) => {
         <Header
           title="Fee Plans"
           subtitle="Assign and review student fee plans"
-          actionLabel={canManagePlans ? 'Create' : undefined}
-          onAction={canManagePlans ? () => navigation.navigate('CreateFeePlan') : undefined}
+          actionLabel={canManagePlans ? 'Class Fees' : undefined}
+          onAction={canManagePlans ? () => navigation.navigate('ClassFeeManagement') : undefined}
         />
+        {canManagePlans ? (
+          <DashboardCard title="Student Fee Plan" value="Create/Edit" icon="book-edit-outline" onPress={() => navigation.navigate('CreateFeePlan')} />
+        ) : null}
         <SummaryCard
           title="Assigned Fees"
           value={formatCurrency(summary.totalFee)}

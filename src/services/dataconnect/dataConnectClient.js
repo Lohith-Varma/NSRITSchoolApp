@@ -51,9 +51,12 @@ const ACTING_AS_BY_MUTATION = {
   UpdateAttendance: USER_ROLES.TEACHER,
   CreateFeeCategory: USER_ROLES.ACCOUNTANT,
   UpdateFeeCategory: USER_ROLES.ACCOUNTANT,
+  CreateClassFee: USER_ROLES.COORDINATOR,
+  UpdateClassFee: USER_ROLES.COORDINATOR,
   CreateFeePlan: USER_ROLES.ACCOUNTANT,
   UpdateFeePlan: USER_ROLES.ACCOUNTANT,
   RecordPayment: USER_ROLES.ACCOUNTANT,
+  UpdatePayment: USER_ROLES.ACCOUNTANT,
   ReversePayment: USER_ROLES.ACCOUNTANT,
 };
 
@@ -152,10 +155,10 @@ const executeConnectorOperation = async ({
 
   const payload = await response.json();
 
-  if (!response.ok || payload.errors?.length) {
+  if (!response.ok || payload.errors?.length || payload.error) {
     console.log('Data Connect Request Failed. Response Status:', response.status);
     console.log('Data Connect Error Payload:', JSON.stringify(payload, null, 2));
-    const message = payload.errors?.[0]?.message || 'Data Connect request failed';
+    const message = payload.errors?.[0]?.message || payload.error?.message || 'Data Connect request failed';
     throw new Error(message);
   }
 

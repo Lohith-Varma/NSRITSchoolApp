@@ -16,6 +16,11 @@ export interface AcademicClass_Key {
   __typename?: 'AcademicClass_Key';
 }
 
+export interface AcademicYearFeeTemplate_Key {
+  id: UUIDString;
+  __typename?: 'AcademicYearFeeTemplate_Key';
+}
+
 export interface Accountant_Key {
   id: UUIDString;
   __typename?: 'Accountant_Key';
@@ -48,12 +53,20 @@ export interface AssignClassTeacherVariables {
 }
 
 export interface AssignPrincipalData {
+  employeeSequence_upsert: EmployeeSequence_Key;
+  staffIdSequence_upsert: StaffIdSequence_Key;
+  user_update?: User_Key | null;
   branch_update?: Branch_Key | null;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface AssignPrincipalVariables {
   branchId: UUIDString;
   principalId: UUIDString;
+  employeeId: string;
+  joiningYear: number;
+  branchCode: string;
+  serialNumber: number;
 }
 
 export interface AssignTeacherClassTeacherData {
@@ -143,6 +156,7 @@ export interface CreateAccountantData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   accountant_insert: Accountant_Key;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface CreateAccountantVariables {
@@ -163,6 +177,7 @@ export interface CreateAccountantVariables {
   emergencyContact?: string | null;
   bloodGroup?: string | null;
   employeeId: string;
+  staffType?: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -171,6 +186,7 @@ export interface CreateAccountantVariables {
 
 export interface CreateAttendanceData {
   attendance_insert: Attendance_Key;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface CreateAttendanceVariables {
@@ -203,6 +219,23 @@ export interface CreateClassData {
   academicClass_insert: AcademicClass_Key;
 }
 
+export interface CreateClassFeeData {
+  academicYearFeeTemplate_insert: AcademicYearFeeTemplate_Key;
+}
+
+export interface CreateClassFeeVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  academicYear: number;
+  term1Fee: number;
+  term2Fee: number;
+  term3Fee: number;
+  totalTuitionFee: number;
+  applyToFuture: boolean;
+  status: string;
+  createdById: UUIDString;
+}
+
 export interface CreateClassVariables {
   branchId: UUIDString;
   wingId: UUIDString;
@@ -215,6 +248,7 @@ export interface CreateCoordinatorData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   coordinator_insert: Coordinator_Key;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface CreateCoordinatorVariables {
@@ -225,6 +259,7 @@ export interface CreateCoordinatorVariables {
   email?: string | null;
   gender?: string | null;
   employeeId: string;
+  staffType?: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -260,6 +295,16 @@ export interface CreateFeePlanItemVariables {
 export interface CreateFeePlanVariables {
   studentId: UUIDString;
   academicYear: number;
+  classFeeTemplateId?: UUIDString | null;
+  term1Fee?: number;
+  term2Fee?: number;
+  term3Fee?: number;
+  booksFee?: number;
+  transportFee?: number;
+  concessionType?: string | null;
+  concessionValue?: number;
+  concessionAmount?: number;
+  grossAmount?: number;
   totalAmount: number;
   createdById: UUIDString;
   branchId: UUIDString;
@@ -315,6 +360,7 @@ export interface CreateStudentData {
   studentIdSequence_upsert: StudentIdSequence_Key;
   studentSequence_upsert: StudentSequence_Key;
   student_insert: Student_Key;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface CreateStudentVariables {
@@ -360,6 +406,7 @@ export interface CreateTeacherData {
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
   teacher_insert: Teacher_Key;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface CreateTeacherVariables {
@@ -382,6 +429,7 @@ export interface CreateTeacherVariables {
   emergencyContact?: string | null;
   bloodGroup?: string | null;
   employeeId: string;
+  staffType: string;
   joiningYear: number;
   branchCode: string;
   serialNumber: number;
@@ -399,6 +447,8 @@ export interface CreateUserVariables {
   countryCode: string;
   phoneNumber: string;
   role: string;
+  employeeId?: string | null;
+  staffType?: string | null;
   branchId?: UUIDString | null;
   wingId?: UUIDString | null;
 }
@@ -429,6 +479,7 @@ export interface DueTracking_Key {
 export interface EmployeeSequence_Key {
   year: number;
   branchCode: string;
+  staffType: string;
   __typename?: 'EmployeeSequence_Key';
 }
 
@@ -495,6 +546,7 @@ export interface GetAccountantByUserData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -512,6 +564,7 @@ export interface GetAccountantProfileData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -532,6 +585,7 @@ export interface GetAccountantProfileData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       branch: {
@@ -551,6 +605,7 @@ export interface GetAccountantsData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     joiningDate: DateString;
     designation: string;
@@ -565,6 +620,7 @@ export interface GetAccountantsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       branch: {
@@ -793,6 +849,8 @@ export interface GetBranchDetailsData {
     branchAdminId?: UUIDString | null;
     principalId?: UUIDString | null;
     isActive: boolean;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
     branchAdmin?: {
       id: UUIDString;
       fullName: string;
@@ -841,6 +899,8 @@ export interface GetBranchDetailsData {
             fullName: string;
             phoneNumber: string;
             role: string;
+            employeeId?: string | null;
+            staffType?: string | null;
             branchId?: UUIDString | null;
             isActive: boolean;
           } & User_Key)[];
@@ -889,6 +949,8 @@ export interface GetBranchesData {
     status: string;
     branchAdminId?: UUIDString | null;
     principalId?: UUIDString | null;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
     branchAdmin?: {
       id: UUIDString;
       fullName: string;
@@ -992,6 +1054,45 @@ export interface GetClassDetailsVariables {
   sectionId: UUIDString;
 }
 
+export interface GetClassFeesData {
+  academicYearFeeTemplates: ({
+    id: UUIDString;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    academicYear: number;
+    term1Fee: number;
+    term2Fee: number;
+    term3Fee: number;
+    totalTuitionFee: number;
+    applyToFuture: boolean;
+    status: string;
+    createdAt: TimestampString;
+    updatedAt: TimestampString;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      classCode?: string | null;
+      sortOrder: number;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+      createdBy: {
+        id: UUIDString;
+        fullName: string;
+      } & User_Key;
+  } & AcademicYearFeeTemplate_Key)[];
+}
+
+export interface GetClassFeesVariables {
+  branchId: UUIDString;
+  academicYear?: number | null;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetClassesByWingCodeData {
   academicClasses: ({
     id: UUIDString;
@@ -1038,6 +1139,7 @@ export interface GetCoordinatorByUserData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -1055,6 +1157,7 @@ export interface GetCoordinatorDetailsData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -1064,6 +1167,7 @@ export interface GetCoordinatorDetailsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
     } & User_Key;
@@ -1120,6 +1224,7 @@ export interface GetCoordinatorTeachersByWingData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -1135,6 +1240,7 @@ export interface GetCoordinatorTeachersByWingData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -1181,6 +1287,7 @@ export interface GetCoordinatorsData {
     branchId: UUIDString;
     wing: string;
     employeeId?: string | null;
+    staffType?: string | null;
     gender?: string | null;
     email?: string | null;
     isActive: boolean;
@@ -1190,6 +1297,7 @@ export interface GetCoordinatorsData {
       countryCode: string;
       phoneNumber: string;
       role: string;
+      staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
     } & User_Key;
@@ -1209,6 +1317,7 @@ export interface GetCurrentUserData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
     branch?: {
@@ -1283,6 +1392,7 @@ export interface GetEmployeeSequenceData {
   employeeSequences: ({
     year: number;
     branchCode: string;
+    staffType: string;
     lastSequence: number;
   } & EmployeeSequence_Key)[];
 }
@@ -1290,6 +1400,7 @@ export interface GetEmployeeSequenceData {
 export interface GetEmployeeSequenceVariables {
   year: number;
   branchCode: string;
+  staffType: string;
 }
 
 export interface GetFeeCategoriesData {
@@ -1384,6 +1495,16 @@ export interface GetFeeReportsData {
         reportFeePlans: ({
           id: UUIDString;
           academicYear: number;
+          classFeeTemplateId?: UUIDString | null;
+          term1Fee: number;
+          term2Fee: number;
+          term3Fee: number;
+          booksFee: number;
+          transportFee: number;
+          concessionType?: string | null;
+          concessionValue: number;
+          concessionAmount: number;
+          grossAmount: number;
           totalAmount: number;
           isActive: boolean;
           reportFeePayments: ({
@@ -1506,6 +1627,8 @@ export interface GetGlobalReportsData {
           studentFeePlans: ({
             id: UUIDString;
             studentId: UUIDString;
+            grossAmount: number;
+            concessionAmount: number;
             totalAmount: number;
             isActive: boolean;
             student: {
@@ -1787,29 +1910,48 @@ export interface GetParentChildrenData {
                 parentFeePlans: ({
                   id: UUIDString;
                   academicYear: number;
+                  classFeeTemplateId?: UUIDString | null;
+                  term1Fee: number;
+                  term2Fee: number;
+                  term3Fee: number;
+                  booksFee: number;
+                  transportFee: number;
+                  concessionType?: string | null;
+                  concessionValue: number;
+                  concessionAmount: number;
+                  grossAmount: number;
                   totalAmount: number;
                   isActive: boolean;
-                  parentFeeItems: ({
+                  classFeeTemplate?: {
                     id: UUIDString;
-                    amount: number;
-                    category: {
-                      id: UUIDString;
-                      name: string;
-                    } & FeeCategory_Key;
-                  } & StudentFeeItem_Key)[];
-                    parentFeePayments: ({
+                    totalTuitionFee: number;
+                    applyToFuture: boolean;
+                    status: string;
+                  } & AcademicYearFeeTemplate_Key;
+                    parentFeeItems: ({
                       id: UUIDString;
                       amount: number;
-                      paymentDate: DateString;
-                      paymentMode: string;
-                      referenceNumber?: string | null;
-                      receiptNumber: string;
-                      remarks?: string | null;
-                      collectedBy: {
+                      category: {
                         id: UUIDString;
-                        fullName: string;
-                      } & User_Key;
-                    } & FeePayment_Key)[];
+                        name: string;
+                      } & FeeCategory_Key;
+                    } & StudentFeeItem_Key)[];
+                      parentFeePayments: ({
+                        id: UUIDString;
+                        amount: number;
+                        paymentDate: DateString;
+                        paymentMode: string;
+                        referenceNumber?: string | null;
+                        receiptNumber: string;
+                        status: string;
+                        reversedAt?: TimestampString | null;
+                        reverseReason?: string | null;
+                        remarks?: string | null;
+                        collectedBy: {
+                          id: UUIDString;
+                          fullName: string;
+                        } & User_Key;
+                      } & FeePayment_Key)[];
                 } & StudentFeePlan_Key)[];
   } & Student_Key)[];
 }
@@ -2077,6 +2219,7 @@ export interface GetStaffIdSequenceData {
   staffIdSequences: ({
     joiningYear: number;
     branchCode: string;
+    staffType: string;
     lastSerialNumber: number;
   } & StaffIdSequence_Key)[];
 }
@@ -2084,6 +2227,21 @@ export interface GetStaffIdSequenceData {
 export interface GetStaffIdSequenceVariables {
   joiningYear: number;
   branchCode: string;
+  staffType: string;
+}
+
+export interface GetStaffIdsByPrefixData {
+  users: ({
+    id: UUIDString;
+    employeeId?: string | null;
+    staffType?: string | null;
+  } & User_Key)[];
+}
+
+export interface GetStaffIdsByPrefixVariables {
+  branchId: UUIDString;
+  staffType: string;
+  employeeIdPrefix: string;
 }
 
 export interface GetStudentAttendanceData {
@@ -2320,42 +2478,58 @@ export interface GetStudentFeeProfileData {
             profileFeePlans: ({
               id: UUIDString;
               academicYear: number;
+              classFeeTemplateId?: UUIDString | null;
+              term1Fee: number;
+              term2Fee: number;
+              term3Fee: number;
+              booksFee: number;
+              transportFee: number;
+              concessionType?: string | null;
+              concessionValue: number;
+              concessionAmount: number;
+              grossAmount: number;
               totalAmount: number;
               isActive: boolean;
               createdAt: TimestampString;
-              createdBy: {
+              classFeeTemplate?: {
                 id: UUIDString;
-                fullName: string;
-              } & User_Key;
-                profileFeeItems: ({
+                totalTuitionFee: number;
+                applyToFuture: boolean;
+                status: string;
+              } & AcademicYearFeeTemplate_Key;
+                createdBy: {
                   id: UUIDString;
-                  amount: number;
-                  category: {
-                    id: UUIDString;
-                    name: string;
-                    status: string;
-                  } & FeeCategory_Key;
-                } & StudentFeeItem_Key)[];
-                  profileFeePayments: ({
+                  fullName: string;
+                } & User_Key;
+                  profileFeeItems: ({
                     id: UUIDString;
                     amount: number;
-                    paymentDate: DateString;
-                    paymentMode: string;
-                    referenceNumber?: string | null;
-                    receiptNumber: string;
-                    status: string;
-                    reversedAt?: TimestampString | null;
-                    reverseReason?: string | null;
-                    remarks?: string | null;
-                    collectedBy: {
+                    category: {
                       id: UUIDString;
-                      fullName: string;
-                    } & User_Key;
-                      reversedBy?: {
+                      name: string;
+                      status: string;
+                    } & FeeCategory_Key;
+                  } & StudentFeeItem_Key)[];
+                    profileFeePayments: ({
+                      id: UUIDString;
+                      amount: number;
+                      paymentDate: DateString;
+                      paymentMode: string;
+                      referenceNumber?: string | null;
+                      receiptNumber: string;
+                      status: string;
+                      reversedAt?: TimestampString | null;
+                      reverseReason?: string | null;
+                      remarks?: string | null;
+                      collectedBy: {
                         id: UUIDString;
                         fullName: string;
                       } & User_Key;
-                  } & FeePayment_Key)[];
+                        reversedBy?: {
+                          id: UUIDString;
+                          fullName: string;
+                        } & User_Key;
+                    } & FeePayment_Key)[];
             } & StudentFeePlan_Key)[];
   } & Student_Key;
 }
@@ -2675,6 +2849,7 @@ export interface GetTeacherDashboardData {
     branchId: UUIDString;
     wing: string;
     employeeId: string;
+    staffType: string;
     designation: string;
     user: {
       id: UUIDString;
@@ -2747,6 +2922,7 @@ export interface GetTeacherProfileByUserData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -2765,6 +2941,7 @@ export interface GetTeacherProfileData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -2877,6 +3054,7 @@ export interface GetTeachersByBranchData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
   } & User_Key)[];
 }
@@ -2890,6 +3068,7 @@ export interface GetTeachersByWingData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -2905,6 +3084,7 @@ export interface GetTeachersByWingData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -2949,6 +3129,7 @@ export interface GetTeachersData {
     id: UUIDString;
     userId: UUIDString;
     employeeId: string;
+    staffType: string;
     branchId: UUIDString;
     wing: string;
     joiningDate: DateString;
@@ -2964,6 +3145,7 @@ export interface GetTeachersData {
       phoneNumber: string;
       countryCode: string;
       role: string;
+      staffType?: string | null;
       isActive: boolean;
     } & User_Key;
       teacherSubjects_on_teacher: ({
@@ -3011,6 +3193,7 @@ export interface GetUserByPhoneData {
     phoneNumber: string;
     role: string;
     employeeId?: string | null;
+    staffType?: string | null;
     branchId?: UUIDString | null;
     wingId?: UUIDString | null;
     branch?: {
@@ -3211,6 +3394,7 @@ export interface SeedAcademicClassVariables {
 export interface StaffIdSequence_Key {
   joiningYear: number;
   branchCode: string;
+  staffType: string;
   __typename?: 'StaffIdSequence_Key';
 }
 
@@ -3320,6 +3504,7 @@ export interface UpdateAccountantVariables {
 
 export interface UpdateAttendanceData {
   attendance_update?: Attendance_Key | null;
+  auditLog_insert: AuditLog_Key;
 }
 
 export interface UpdateAttendanceVariables {
@@ -3346,6 +3531,23 @@ export interface UpdateBranchVariables {
   isActive: boolean;
 }
 
+export interface UpdateClassFeeData {
+  academicYearFeeTemplate_update?: AcademicYearFeeTemplate_Key | null;
+}
+
+export interface UpdateClassFeeVariables {
+  classFeeId: UUIDString;
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  academicYear: number;
+  term1Fee: number;
+  term2Fee: number;
+  term3Fee: number;
+  totalTuitionFee: number;
+  applyToFuture: boolean;
+  status: string;
+}
+
 export interface UpdateFeeCategoryData {
   feeCategory_update?: FeeCategory_Key | null;
 }
@@ -3364,6 +3566,16 @@ export interface UpdateFeePlanData {
 export interface UpdateFeePlanVariables {
   feePlanId: UUIDString;
   studentId: UUIDString;
+  classFeeTemplateId?: UUIDString | null;
+  term1Fee?: number;
+  term2Fee?: number;
+  term3Fee?: number;
+  booksFee?: number;
+  transportFee?: number;
+  concessionType?: string | null;
+  concessionValue?: number;
+  concessionAmount?: number;
+  grossAmount?: number;
   totalAmount: number;
   isActive: boolean;
   branchId: UUIDString;
@@ -3371,6 +3583,58 @@ export interface UpdateFeePlanVariables {
   actorRole?: string | null;
   oldValue?: string | null;
   newValue?: string | null;
+}
+
+export interface UpdatePaymentData {
+  feePayment_update?: FeePayment_Key | null;
+  feeAuditLog_insert: FeeAuditLog_Key;
+}
+
+export interface UpdatePaymentVariables {
+  paymentId: UUIDString;
+  studentId: UUIDString;
+  branchId: UUIDString;
+  amount: number;
+  paymentDate: DateString;
+  paymentMode: string;
+  referenceNumber?: string | null;
+  remarks?: string | null;
+  updatedById: UUIDString;
+  actorRole?: string | null;
+  oldValue?: string | null;
+  newValue?: string | null;
+}
+
+export interface UpdateStudentData {
+  student_update?: Student_Key | null;
+  parent_update?: Parent_Key | null;
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface UpdateStudentVariables {
+  studentId: UUIDString;
+  parentId: UUIDString;
+  branchId: UUIDString;
+  fullName: string;
+  gender?: string | null;
+  dateOfBirth?: DateString | null;
+  photoUrl?: string | null;
+  aadhaarNumber?: string | null;
+  bloodGroup?: string | null;
+  academicClassId: UUIDString;
+  sectionId: UUIDString;
+  countryCode?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  emergencyContact?: string | null;
+  transportRequired?: boolean | null;
+  admissionDate: DateString;
+  fatherName?: string | null;
+  motherName?: string | null;
+  parentPhoneNumber?: string | null;
 }
 
 export interface UpdateTeacherData {
@@ -3619,6 +3883,18 @@ export const createStudentRef: CreateStudentRef;
 export function createStudent(vars: CreateStudentVariables): MutationPromise<CreateStudentData, CreateStudentVariables>;
 export function createStudent(dc: DataConnect, vars: CreateStudentVariables): MutationPromise<CreateStudentData, CreateStudentVariables>;
 
+interface UpdateStudentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateStudentVariables): MutationRef<UpdateStudentData, UpdateStudentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateStudentVariables): MutationRef<UpdateStudentData, UpdateStudentVariables>;
+  operationName: string;
+}
+export const updateStudentRef: UpdateStudentRef;
+
+export function updateStudent(vars: UpdateStudentVariables): MutationPromise<UpdateStudentData, UpdateStudentVariables>;
+export function updateStudent(dc: DataConnect, vars: UpdateStudentVariables): MutationPromise<UpdateStudentData, UpdateStudentVariables>;
+
 interface CreateAttendanceRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: CreateAttendanceVariables): MutationRef<CreateAttendanceData, CreateAttendanceVariables>;
@@ -3811,6 +4087,30 @@ export const updateFeeCategoryRef: UpdateFeeCategoryRef;
 export function updateFeeCategory(vars: UpdateFeeCategoryVariables): MutationPromise<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
 export function updateFeeCategory(dc: DataConnect, vars: UpdateFeeCategoryVariables): MutationPromise<UpdateFeeCategoryData, UpdateFeeCategoryVariables>;
 
+interface CreateClassFeeRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateClassFeeVariables): MutationRef<CreateClassFeeData, CreateClassFeeVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateClassFeeVariables): MutationRef<CreateClassFeeData, CreateClassFeeVariables>;
+  operationName: string;
+}
+export const createClassFeeRef: CreateClassFeeRef;
+
+export function createClassFee(vars: CreateClassFeeVariables): MutationPromise<CreateClassFeeData, CreateClassFeeVariables>;
+export function createClassFee(dc: DataConnect, vars: CreateClassFeeVariables): MutationPromise<CreateClassFeeData, CreateClassFeeVariables>;
+
+interface UpdateClassFeeRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateClassFeeVariables): MutationRef<UpdateClassFeeData, UpdateClassFeeVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateClassFeeVariables): MutationRef<UpdateClassFeeData, UpdateClassFeeVariables>;
+  operationName: string;
+}
+export const updateClassFeeRef: UpdateClassFeeRef;
+
+export function updateClassFee(vars: UpdateClassFeeVariables): MutationPromise<UpdateClassFeeData, UpdateClassFeeVariables>;
+export function updateClassFee(dc: DataConnect, vars: UpdateClassFeeVariables): MutationPromise<UpdateClassFeeData, UpdateClassFeeVariables>;
+
 interface CreateFeePlanRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: CreateFeePlanVariables): MutationRef<CreateFeePlanData, CreateFeePlanVariables>;
@@ -3870,6 +4170,18 @@ export const recordPaymentRef: RecordPaymentRef;
 
 export function recordPayment(vars: RecordPaymentVariables): MutationPromise<RecordPaymentData, RecordPaymentVariables>;
 export function recordPayment(dc: DataConnect, vars: RecordPaymentVariables): MutationPromise<RecordPaymentData, RecordPaymentVariables>;
+
+interface UpdatePaymentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdatePaymentVariables): MutationRef<UpdatePaymentData, UpdatePaymentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdatePaymentVariables): MutationRef<UpdatePaymentData, UpdatePaymentVariables>;
+  operationName: string;
+}
+export const updatePaymentRef: UpdatePaymentRef;
+
+export function updatePayment(vars: UpdatePaymentVariables): MutationPromise<UpdatePaymentData, UpdatePaymentVariables>;
+export function updatePayment(dc: DataConnect, vars: UpdatePaymentVariables): MutationPromise<UpdatePaymentData, UpdatePaymentVariables>;
 
 interface ReversePaymentRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -4230,6 +4542,18 @@ export const getEmployeeSequenceRef: GetEmployeeSequenceRef;
 
 export function getEmployeeSequence(vars: GetEmployeeSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
 export function getEmployeeSequence(dc: DataConnect, vars: GetEmployeeSequenceVariables, options?: ExecuteQueryOptions): QueryPromise<GetEmployeeSequenceData, GetEmployeeSequenceVariables>;
+
+interface GetStaffIdsByPrefixRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStaffIdsByPrefixVariables): QueryRef<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetStaffIdsByPrefixVariables): QueryRef<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
+  operationName: string;
+}
+export const getStaffIdsByPrefixRef: GetStaffIdsByPrefixRef;
+
+export function getStaffIdsByPrefix(vars: GetStaffIdsByPrefixVariables, options?: ExecuteQueryOptions): QueryPromise<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
+export function getStaffIdsByPrefix(dc: DataConnect, vars: GetStaffIdsByPrefixVariables, options?: ExecuteQueryOptions): QueryPromise<GetStaffIdsByPrefixData, GetStaffIdsByPrefixVariables>;
 
 interface GetAttendanceByMonthRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -4686,6 +5010,18 @@ export const getFeeCategoriesRef: GetFeeCategoriesRef;
 
 export function getFeeCategories(vars?: GetFeeCategoriesVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeCategoriesData, GetFeeCategoriesVariables>;
 export function getFeeCategories(dc: DataConnect, vars?: GetFeeCategoriesVariables, options?: ExecuteQueryOptions): QueryPromise<GetFeeCategoriesData, GetFeeCategoriesVariables>;
+
+interface GetClassFeesRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassFeesVariables): QueryRef<GetClassFeesData, GetClassFeesVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetClassFeesVariables): QueryRef<GetClassFeesData, GetClassFeesVariables>;
+  operationName: string;
+}
+export const getClassFeesRef: GetClassFeesRef;
+
+export function getClassFees(vars: GetClassFeesVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassFeesData, GetClassFeesVariables>;
+export function getClassFees(dc: DataConnect, vars: GetClassFeesVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassFeesData, GetClassFeesVariables>;
 
 interface GetStudentFeeProfileRef {
   /* Allow users to create refs without passing in DataConnect */

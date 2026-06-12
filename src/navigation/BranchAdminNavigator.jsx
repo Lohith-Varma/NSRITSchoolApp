@@ -48,7 +48,7 @@ const BranchAdminNavigator = () => (
       component={BranchSettingsScreen}
       options={{title: 'Settings'}}
     />
-    {renderFeeStackScreens(Stack)}
+    {renderFeeStackScreens(Stack, {reports: true})}
   </Stack.Navigator>
 );
 

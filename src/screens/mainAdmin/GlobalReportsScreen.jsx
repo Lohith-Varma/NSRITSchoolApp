@@ -16,6 +16,7 @@ const columns = [
   'Attendance',
   'Collected',
   'Pending',
+  'Concessions',
   'Admissions',
 ];
 
@@ -29,6 +30,7 @@ const buildRows = rows =>
     `${row.attendancePercent}%`,
     row.paidFees,
     row.pendingFees,
+    row.concessionFees,
     row.admissions,
   ]);
 
@@ -90,7 +92,9 @@ const GlobalReportsScreen = () => {
         <Metric label="Coordinators" value={totals.coordinators} />
         <Metric label="Accountants" value={totals.accountants} />
         <Metric label="Attendance" value={`${totals.attendancePercent || 0}%`} />
+        <Metric label="Collected Fees" value={formatCurrency(totals.paidFees || 0)} />
         <Metric label="Pending Fees" value={formatCurrency(totals.pendingFees || 0)} />
+        <Metric label="Concessions" value={formatCurrency(totals.concessionFees || 0)} />
       </View>
 
       <Card mode="outlined" style={styles.card}>
@@ -102,12 +106,14 @@ const GlobalReportsScreen = () => {
                 <DataTable.Title>Branch</DataTable.Title>
                 <DataTable.Title numeric>Students</DataTable.Title>
                 <DataTable.Title numeric>Pending</DataTable.Title>
+                <DataTable.Title numeric>Concession</DataTable.Title>
               </DataTable.Header>
               {branchWise.map(row => (
                 <DataTable.Row key={row.branchId}>
                   <DataTable.Cell>{row.branchCode}</DataTable.Cell>
                   <DataTable.Cell numeric>{row.students}</DataTable.Cell>
                   <DataTable.Cell numeric>{formatCurrency(row.pendingFees)}</DataTable.Cell>
+                  <DataTable.Cell numeric>{formatCurrency(row.concessionFees)}</DataTable.Cell>
                 </DataTable.Row>
               ))}
             </DataTable>

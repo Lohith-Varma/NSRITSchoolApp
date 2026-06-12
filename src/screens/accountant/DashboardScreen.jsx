@@ -1,10 +1,11 @@
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {DashboardCard, Header, PaymentCard, ScreenContainer, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {logoutUser} from '../../store/slices/authSlice';
 
 const isSameMonth = date => {
   const value = new Date(date);
@@ -13,6 +14,7 @@ const isSameMonth = date => {
 };
 
 const DashboardScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const access = useFeeAccess();
   const {data} = useQuery({
@@ -33,7 +35,12 @@ const DashboardScreen = ({navigation}) => {
 
   return (
     <ScreenContainer>
-      <Header title="Accountant" subtitle={user?.fullName || 'Fee collection desk'} />
+      <Header
+        title="Accountant"
+        subtitle={user?.fullName || 'Fee collection desk'}
+        actionLabel="Logout"
+        onAction={() => dispatch(logoutUser())}
+      />
       <DashboardCard title="Today's Collections" value={formatCurrency(todaysCollections)} icon="cash-check" />
       <DashboardCard title="Monthly Collections" value={formatCurrency(monthlyCollections)} icon="calendar-month-outline" />
       <DashboardCard title="Pending Amount" value={formatCurrency(summary.dueAmount)} icon="cash-clock" />

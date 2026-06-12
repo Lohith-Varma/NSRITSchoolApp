@@ -28,6 +28,12 @@ const FeeLedgerScreen = () => {
             <React.Fragment key={child.id}>
               <SectionHeader title={child.fullName} subtitle={`${child.academicClass?.name || '-'}-${child.section?.name || '-'}`} />
               <DashboardCard title="Fee Plan" value={child.feePlan ? `AY ${child.feePlan.academicYear || '-'}` : 'Not assigned'} icon="book-open-variant" />
+              <DashboardCard title="1st Term" value={formatCurrency(child.feePlan?.term1Fee)} icon="numeric-1-circle-outline" />
+              <DashboardCard title="2nd Term" value={formatCurrency(child.feePlan?.term2Fee)} icon="numeric-2-circle-outline" />
+              <DashboardCard title="3rd Term" value={formatCurrency(child.feePlan?.term3Fee)} icon="numeric-3-circle-outline" />
+              <DashboardCard title="Books Fee" value={formatCurrency(child.feePlan?.booksFee)} icon="book-open-page-variant-outline" />
+              <DashboardCard title="Transport Fee" value={formatCurrency(child.feePlan?.transportFee)} icon="bus-school" />
+              <DashboardCard title="Concession" value={formatCurrency(child.feeSummary?.concession)} icon="sale-outline" />
               <DashboardCard title="Total Fee" value={formatCurrency(child.feeSummary?.total)} icon="cash-multiple" />
               <DashboardCard title="Paid Amount" value={formatCurrency(child.feeSummary?.paid)} icon="cash-check" />
               <DashboardCard title="Pending Amount" value={formatCurrency(child.feeSummary?.due)} icon="cash-clock" />

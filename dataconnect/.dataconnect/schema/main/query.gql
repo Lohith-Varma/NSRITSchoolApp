@@ -19,6 +19,25 @@ extend type Query {
     first: AcademicClass_FirstRow
   ): AcademicClass @fdc_generated(from: "AcademicClass", purpose: QUERY_SINGLE)
   """
+  ✨ Look up a single `AcademicYearFeeTemplate` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  academicYearFeeTemplate(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: AcademicYearFeeTemplate_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: AcademicYearFeeTemplate_FirstRow
+  ): AcademicYearFeeTemplate @fdc_generated(from: "AcademicYearFeeTemplate", purpose: QUERY_SINGLE)
+  """
   ✨ Look up a single `Accountant` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
   accountant(
@@ -673,6 +692,40 @@ extend type Query {
     """
     having: AcademicClass_Having
   ): [AcademicClass!]! @fdc_generated(from: "AcademicClass", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `AcademicYearFeeTemplate` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  academicYearFeeTemplates(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AcademicYearFeeTemplate_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AcademicYearFeeTemplate_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AcademicYearFeeTemplate_Having
+  ): [AcademicYearFeeTemplate!]! @fdc_generated(from: "AcademicYearFeeTemplate", purpose: QUERY_MULTIPLE)
   """
   ✨ List `Accountant` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

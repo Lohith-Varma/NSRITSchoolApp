@@ -11,6 +11,20 @@ const normalizeRole = role => String(role || '').toUpperCase();
 const getFeePlans = student => student?.feePlans || student?.parentFeePlans || [];
 const getFeeItems = plan => plan?.items || plan?.parentFeeItems || [];
 const getFeePayments = plan => plan?.payments || plan?.parentFeePayments || [];
+const isActivePayment = payment => !['REVERSED', 'CANCELLED'].includes(String(payment?.status || 'RECORDED').toUpperCase());
+const toAmount = value => Math.max(Number(value || 0), 0);
+const calculateConcessionAmount = plan => {
+  const gross = toAmount(plan?.grossAmount || plan?.totalAmount);
+  const value = toAmount(plan?.concessionValue);
+  const type = String(plan?.concessionType || '').toUpperCase();
+  if (type === 'PERCENTAGE') {
+    return Math.min((gross * value) / 100, gross);
+  }
+  if (type === 'AMOUNT') {
+    return Math.min(value, gross);
+  }
+  return toAmount(plan?.concessionAmount);
+};
 
 export const parentService = {
   async getParentChildren(parentId) {
@@ -28,12 +42,13 @@ export const parentService = {
         const activePlan = feePlans.find(plan => plan.isActive !== false) || feePlans[0];
         const planItems = getFeeItems(activePlan);
         const planPayments = getFeePayments(activePlan);
-        const paid = planPayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
-        const total = Number(
-          activePlan?.totalAmount ||
-            planItems.reduce((sum, item) => sum + Number(item.amount || 0), 0) ||
-            0,
-        );
+        const activePayments = planPayments.filter(isActivePayment);
+        const paid = activePayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+        const tuition = toAmount(activePlan?.term1Fee) + toAmount(activePlan?.term2Fee) + toAmount(activePlan?.term3Fee);
+        const extras = toAmount(activePlan?.booksFee) + toAmount(activePlan?.transportFee);
+        const gross = toAmount(activePlan?.grossAmount || tuition + extras || planItems.reduce((sum, item) => sum + Number(item.amount || 0), 0));
+        const concession = calculateConcessionAmount(activePlan);
+        const total = toAmount(activePlan?.totalAmount || gross - concession);
         const legacyFees = student.fees || [];
         const legacyFeeSummary = legacyFees.reduce(
           (summary, fee) => ({
@@ -44,7 +59,7 @@ export const parentService = {
           {total: 0, paid: 0, due: 0},
         );
         const feeSummary = activePlan
-          ? {total, paid, due: Math.max(total - paid, 0)}
+          ? {total, gross, concession, paid, due: Math.max(total - paid, 0)}
           : legacyFeeSummary;
         return {
           ...student,

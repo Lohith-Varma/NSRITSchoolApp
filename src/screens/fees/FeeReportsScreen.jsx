@@ -2,25 +2,36 @@ import React, {useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import {useQuery} from '@tanstack/react-query';
-import {CustomButton, DashboardCard, EmptyState, Header, SearchBar, SectionHeader} from '../../components';
+import {CustomButton, DashboardCard, EmptyState, FilterTabs, Header, SearchBar, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 const toCsv = records => [
-  'Student,Admission Number,Class,Section,Total Fee,Paid Amount,Pending Amount',
+  'Student,Admission Number,Class,Section,Total Fee,Paid Amount,Pending Amount,Concession',
   ...records.map(item =>
-    [item.studentName, item.admissionNumber, item.className, item.sectionName, item.totalFee, item.paidAmount, item.dueAmount]
+    [item.studentName, item.admissionNumber, item.className, item.sectionName, item.totalFee, item.paidAmount, item.dueAmount, item.concessionAmount]
       .map(value => `"${String(value ?? '').replace(/"/g, '""')}"`)
       .join(','),
   ),
 ].join('\n');
 
+const statusTabs = [
+  {label: 'All', value: 'ALL'},
+  {label: 'Paid', value: 'PAID'},
+  {label: 'Partial', value: 'PARTIAL'},
+  {label: 'Due', value: 'DUE'},
+  {label: 'Concession', value: 'CONCESSION'},
+  {label: 'Transport', value: 'TRANSPORT'},
+  {label: 'Books', value: 'BOOKS'},
+];
+
 const FeeReportsScreen = () => {
   const access = useFeeAccess();
-  const canViewReports = feeService.canRecordPayments(access.role);
+  const canViewReports = feeService.canViewReports(access.role);
   const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('ALL');
   const [csvPreview, setCsvPreview] = useState('');
   const {data, error, isLoading} = useQuery({
     queryKey: ['feeReports', access.branchId],
@@ -31,16 +42,23 @@ const FeeReportsScreen = () => {
     () => {
       const records = data?.records || [];
       return records.filter(item =>
-        `${item.studentName} ${item.className} ${item.sectionName}`.toLowerCase().includes(query.toLowerCase()),
+        `${item.studentName} ${item.admissionNumber} ${item.className} ${item.sectionName}`.toLowerCase().includes(query.toLowerCase()) &&
+        (
+          status === 'ALL' ||
+          item.status === status ||
+          (status === 'CONCESSION' && Number(item.concessionAmount || 0) > 0) ||
+          (status === 'TRANSPORT' && Number(item.transportFee || 0) > 0) ||
+          (status === 'BOOKS' && Number(item.booksFee || 0) > 0)
+        ),
       );
     },
-    [query, data?.records],
+    [query, status, data?.records],
   );
 
   return (
     <View style={styles.container}>
       {!canViewReports ? (
-        <EmptyState title="Fee reports access denied" message="Only accountants and principals can view fee reports." />
+        <EmptyState title="Fee reports access denied" message="Only coordinators, accountants, principals, branch admins, and main admins can view fee reports." />
       ) : (
       <FlatList
         data={filtered}
@@ -53,9 +71,12 @@ const FeeReportsScreen = () => {
               <DashboardCard title="Assigned" value={formatCurrency(data?.summary?.totalFee || 0)} icon="cash-multiple" />
               <DashboardCard title="Collected" value={formatCurrency(data?.summary?.paidAmount || 0)} icon="cash-check" />
               <DashboardCard title="Pending" value={formatCurrency(data?.summary?.dueAmount || 0)} icon="cash-clock" />
+              <DashboardCard title="Concessions" value={formatCurrency(data?.summary?.concessionAmount || 0)} icon="sale-outline" />
             </View>
             <SearchBar value={query} onChangeText={setQuery} placeholder="Filter reports" />
-            <CustomButton mode="outlined" onPress={() => setCsvPreview(toCsv(filtered))}>Generate CSV</CustomButton>
+            <FilterTabs tabs={statusTabs} value={status} onChange={setStatus} />
+            <CustomButton mode="outlined" onPress={() => setCsvPreview(toCsv(filtered))}>Export CSV</CustomButton>
+            <CustomButton mode="outlined" onPress={() => setCsvPreview(toCsv(filtered))}>Export Excel</CustomButton>
             {csvPreview ? <Text style={styles.csvPreview} numberOfLines={4}>{csvPreview}</Text> : null}
             <SectionHeader title="Class-wise Report" />
             {(data?.classWise || []).map(item => (
@@ -74,7 +95,7 @@ const FeeReportsScreen = () => {
           <DashboardCard
             title={item.studentName}
             value={formatCurrency(item.dueAmount)}
-            description={`${item.className}-${item.sectionName} | Paid ${formatCurrency(item.paidAmount)}`}
+            description={`${item.className}-${item.sectionName} | Paid ${formatCurrency(item.paidAmount)} | Concession ${formatCurrency(item.concessionAmount)}`}
             icon="account-school-outline"
           />
         )}

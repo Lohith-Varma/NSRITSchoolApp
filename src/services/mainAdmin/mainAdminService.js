@@ -2,6 +2,7 @@ import {USER_ROLES} from '../../config/constants';
 import {formatE164PhoneNumber, normalizePhoneNumber} from '../../utils/phone';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
+import StaffIdService from '../staff/StaffIdService';
 
 const CACHE_TTL = 60 * 1000;
 const cache = new Map();
@@ -238,6 +239,7 @@ const buildReports = data => {
     const branchAttendance = attendances.filter(item => item.section?.branchId === branch.id);
     const branchPlans = feePlans.filter(plan => plan.student?.branchId === branch.id);
     const totalFees = branchPlans.reduce((sum, plan) => sum + Number(plan.totalAmount || 0), 0);
+    const concessionFees = branchPlans.reduce((sum, plan) => sum + Number(plan.concessionAmount || 0), 0);
     const paidFees = branchPlans.reduce(
       (sum, plan) =>
         sum +
@@ -259,6 +261,7 @@ const buildReports = data => {
       totalFees,
       paidFees,
       pendingFees: Math.max(totalFees - paidFees, 0),
+      concessionFees,
       admissions: branchStudents.filter(student =>
         String(student.admissionDate || '').startsWith(String(new Date().getFullYear())),
       ).length,
@@ -276,6 +279,7 @@ const buildReports = data => {
       totalFees: branchWise.reduce((sum, branch) => sum + branch.totalFees, 0),
       paidFees: branchWise.reduce((sum, branch) => sum + branch.paidFees, 0),
       pendingFees: branchWise.reduce((sum, branch) => sum + branch.pendingFees, 0),
+      concessionFees: branchWise.reduce((sum, branch) => sum + branch.concessionFees, 0),
     },
   };
 };
@@ -306,6 +310,8 @@ const mainAdminService = {
     );
     const students = asArray(data.students).filter(student => student.isActive !== false);
     const teachers = asArray(data.users).filter(user => isTeacherRole(user.role));
+    const coordinators = asArray(data.users).filter(user => isRole(user.role, USER_ROLES.COORDINATOR));
+    const accountants = asArray(data.users).filter(user => isRole(user.role, USER_ROLES.ACCOUNTANT));
     const activeClasses = asArray(data.academicClasses).filter(item => item.isActive !== false);
 
     return {
@@ -315,6 +321,8 @@ const mainAdminService = {
         totalClasses: activeClasses.length,
         totalStudents: students.length,
         totalTeachers: teachers.length,
+        totalCoordinators: coordinators.length,
+        totalAccountants: accountants.length,
         attendancePercent: attendancePercent(data.attendances),
         feeCollectionPercent: feeCollectionPercent(data.studentFees),
         totalFees: asArray(data.studentFees).reduce((sum, item) => sum + Number(item.totalFee || 0), 0),
@@ -362,7 +370,15 @@ const mainAdminService = {
     return data.users?.[0] || null;
   },
 
-  async createBranchRoleUser({branchId, fullName, countryCode = '+91', phoneNumber, role}) {
+  async createBranchRoleUser({
+    branchId,
+    fullName,
+    countryCode = '+91',
+    phoneNumber,
+    role,
+    employeeId = null,
+    staffType = null,
+  }) {
     const trimmedName = String(fullName || '').trim();
     const fullPhoneNumber = formatE164PhoneNumber({countryCode, phoneNumber});
 
@@ -385,6 +401,8 @@ const mainAdminService = {
       countryCode,
       phoneNumber: fullPhoneNumber,
       role,
+      employeeId,
+      staffType,
       branchId,
     });
 
@@ -394,6 +412,8 @@ const mainAdminService = {
       countryCode,
       phoneNumber: fullPhoneNumber,
       role,
+      employeeId,
+      staffType,
       branchId,
       isActive: true,
     };
@@ -437,28 +457,45 @@ const mainAdminService = {
     return user;
   },
 
-  async assignPrincipal({branchId, userId, allowMultipleAssignments = false}) {
+  async assignPrincipal({branchId, userId, staffId, allowMultipleAssignments = false}) {
     if (!allowMultipleAssignments) {
       await this.ensureAssignable(userId, branchId, 'principal');
     }
+    const resolvedStaffId =
+      staffId ||
+      (await StaffIdService.getNextStaffId({
+        branchId,
+        staffType: 'TEACHING',
+      }));
     await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.ASSIGN_PRINCIPAL, {
       branchId,
       principalId: userId,
+      employeeId: resolvedStaffId.employeeId,
+      joiningYear: resolvedStaffId.joiningYear,
+      branchCode: resolvedStaffId.branchCode,
+      serialNumber: resolvedStaffId.serialNumber,
     });
     invalidate('branch:', 'branches:');
   },
 
   async createAndAssignPrincipal(payload) {
+    const staffId = await StaffIdService.getNextStaffId({
+      branchId: payload.branchId,
+      staffType: 'TEACHING',
+    });
     const user = await this.createBranchRoleUser({
       ...payload,
       role: USER_ROLES.PRINCIPAL,
+      employeeId: staffId.employeeId,
+      staffType: staffId.staffType,
     });
     await this.assignPrincipal({
       branchId: payload.branchId,
       userId: user.id,
+      staffId,
       allowMultipleAssignments: true,
     });
-    return user;
+    return {...user, ...staffId};
   },
 
   async getGlobalClasses({filters = {}, searchText = '', forceRefresh = false} = {}) {
@@ -583,17 +620,30 @@ const mainAdminService = {
     const todayAttendance = asArray(data.attendances).filter(record =>
       String(record.attendanceDate || '').startsWith(todayKey()),
     );
+    const feePlans = asArray(data.studentFeePlans);
+    const paidFees = feePlans.reduce(
+      (sum, plan) =>
+        sum +
+        asArray(plan.reportPayments)
+          .filter(payment => String(payment.status || 'RECORDED').toUpperCase() !== 'REVERSED')
+          .reduce((paymentSum, payment) => paymentSum + Number(payment.amount || 0), 0),
+      0,
+    );
+    const totalFees = feePlans.reduce((sum, plan) => sum + Number(plan.totalAmount || 0), 0);
+    const concessionFees = feePlans.reduce((sum, plan) => sum + Number(plan.concessionAmount || 0), 0);
 
     return {
-      totalBranches: asArray(data.branches).filter(branch => branch.isActive !== false).length,
+      totalBranches: asArray(data.branches).length,
+      activeBranches: asArray(data.branches).filter(branch => branch.isActive !== false).length,
+      inactiveBranches: asArray(data.branches).filter(branch => branch.isActive === false).length,
       totalClasses: asArray(data.academicClasses).filter(item => item.isActive !== false).length,
       totalTeachers: teachers.length,
       totalStudents: asArray(data.students).length,
       todayAttendance: attendancePercent(todayAttendance),
-      pendingFees: asArray(data.studentFees).reduce(
-        (sum, item) => sum + Number(item.remainingAmount || 0),
-        0,
-      ),
+      branchWiseCollection: paidFees,
+      branchWiseDues: Math.max(totalFees - paidFees, 0),
+      branchWiseConcessions: concessionFees,
+      pendingFees: Math.max(totalFees - paidFees, 0),
     };
   },
 };

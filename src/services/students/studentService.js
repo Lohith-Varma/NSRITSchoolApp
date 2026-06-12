@@ -49,11 +49,11 @@ const normalizeStudentPayload = (payload, scope = {}) => {
     admissionDate: payload.admissionDate || new Date().toISOString().slice(0, 10),
     parentName: payload.fatherName || payload.parentName,
     className: payload.className || payload.academicClass?.name,
-    wingId: payload.wingId || payload.academicClass?.wingId || payload.section?.wingId,
+    wingId: payload.wingId || payload.academicClass?.wingId || payload.academicClass?.wing?.id || payload.section?.wingId,
     wingCode:
       payload.wingCode ||
-      payload.wing?.code ||
       payload.academicClass?.wing?.code ||
+      payload.wing?.code ||
       getClassWing(payload.className || payload.academicClass?.name),
   };
 };
@@ -101,6 +101,63 @@ const filterStudentsForScope = (students, scope) => {
     return students.filter(item => item.academicClass?.wing?.code === scope?.wing);
   }
   return applyRoleFilter(students, scope);
+};
+
+const assignFutureClassFee = async ({student, scope}) => {
+  if (!student?.id || !student.branchId || !student.academicClassId || !scope?.userId) {
+    return;
+  }
+
+  try {
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_FEES, {
+      branchId: student.branchId,
+      academicYear: Number(student.admissionYear || currentYear()),
+      limit: 200,
+      offset: 0,
+    });
+    const template = (response.academicYearFeeTemplates || []).find(
+      item =>
+        item.academicClassId === student.academicClassId &&
+        item.applyToFuture !== false &&
+        String(item.status || 'ACTIVE').toUpperCase() === 'ACTIVE',
+    );
+    if (!template) {
+      return;
+    }
+
+    const grossAmount = Number(template.totalTuitionFee || 0);
+    await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_FEE_PLAN, {
+      studentId: student.id,
+      academicYear: Number(template.academicYear),
+      classFeeTemplateId: template.id,
+      term1Fee: Number(template.term1Fee || 0),
+      term2Fee: Number(template.term2Fee || 0),
+      term3Fee: Number(template.term3Fee || 0),
+      booksFee: 0,
+      transportFee: 0,
+      concessionType: null,
+      concessionValue: 0,
+      concessionAmount: 0,
+      grossAmount,
+      totalAmount: grossAmount,
+      createdById: scope.userId,
+      branchId: student.branchId,
+      actorRole: normalizeRole(scope.role),
+      oldValue: null,
+      newValue: JSON.stringify({
+        studentId: student.id,
+        academicYear: template.academicYear,
+        classFeeTemplateId: template.id,
+        totalAmount: grossAmount,
+      }),
+    });
+  } catch (error) {
+    console.log('[StudentCreate] Future class fee assignment skipped:', {
+      studentId: student.id,
+      academicClassId: student.academicClassId,
+      error,
+    });
+  }
 };
 
 const mapCsvRow = row => ({
@@ -291,7 +348,7 @@ export const studentService = {
 
     console.log('[StudentCreate] CreateStudent mutation response:', response);
 
-    return {
+    const createdStudent = {
       id: response.student_insert?.id || response.student_insert,
       ...normalized,
       ...idPayload,
@@ -299,10 +356,15 @@ export const studentService = {
       status: 'ACTIVE',
       isActive: true,
     };
+    await assignFutureClassFee({student: createdStudent, scope});
+    return createdStudent;
   },
 
   async updateStudent(payload, scope) {
     const normalized = normalizeStudentPayload(payload, scope);
+    if (!normalized.branchId) {
+      throw new Error('Student branch is required to update student details.');
+    }
     assertBranchAccess(scope, normalized.branchId);
     assertCoordinatorWing(scope, normalized.className || normalized.wing);
 

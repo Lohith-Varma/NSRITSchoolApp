@@ -4,6 +4,7 @@ import DashboardScreen from '../screens/principal/DashboardScreen';
 import AcademicStructureScreen from '../screens/principal/AcademicStructureScreen';
 import CreateSectionScreen from '../screens/principal/CreateSectionScreen';
 import ViewAllAttendanceScreen from '../screens/principal/ViewAllAttendanceScreen';
+import EditAttendanceScreen from '../screens/coordinator/EditAttendanceScreen';
 import CoordinatorManagementScreen from '../screens/principal/CoordinatorManagementScreen';
 import CreateCoordinatorScreen from '../screens/principal/CreateCoordinatorScreen';
 import EditCoordinatorScreen from '../screens/principal/EditCoordinatorScreen';
@@ -197,6 +198,11 @@ const PrincipalNavigator = () => (
       name="ViewAllAttendance"
       component={ViewAllAttendanceScreen}
       options={{title: 'Attendance'}}
+    />
+    <Stack.Screen
+      name="EditAttendance"
+      component={EditAttendanceScreen}
+      options={{title: 'Correct Attendance'}}
     />
     {renderFeeStackScreens(Stack, {canUpload: true, reports: true})}
   </Stack.Navigator>

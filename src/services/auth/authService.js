@@ -168,21 +168,8 @@ export const authService = {
       }
 
       if (!profile) {
-        // Auto-create the user as a MAIN_ADMIN for testing.
-        console.log('No profile found, auto-creating MAIN_ADMIN profile...');
-        await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_USER, {
-          firebaseUID: credentialUser.uid,
-          fullName: 'Main Admin',
-          countryCode: countryCode,
-          phoneNumber: fullPhoneNumber,
-          role: USER_ROLES.MAIN_ADMIN,
-        });
-        
-        // Fetch the newly created profile
-        profile = await hydrateRoleProfile(await fetchUserProfile(credentialUser.uid));
-        if (!profile) {
-          throw new Error('Active user profile not found and auto-creation failed');
-        }
+        await authInstance.signOut();
+        throw new Error('Phone number not linked with the school');
       }
 
       const user = normalizeProfile(profile, {
@@ -205,7 +192,6 @@ export const authService = {
     removeStorageKeys([
       STORAGE_KEYS.AUTH_TOKEN,
       STORAGE_KEYS.AUTH_USER,
-      STORAGE_KEYS.MAIN_ADMIN_BRANCH_CONTEXT,
       STORAGE_KEYS.OTP_VERIFICATION_ID,
     ]);
   },

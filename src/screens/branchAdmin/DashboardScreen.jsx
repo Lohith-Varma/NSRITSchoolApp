@@ -1,14 +1,27 @@
 import React from 'react';
+import {useQuery} from '@tanstack/react-query';
 import {RoleDashboard} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import {colors} from '../../theme';
+import feeService from '../../services/fees/feeService';
+import useFeeAccess from '../../hooks/useFeeAccess';
+import {formatCurrency} from '../../utils/formatters/currency';
 
-const DashboardScreen = ({navigation}) => (
-  <RoleDashboard
-    role={USER_ROLES.BRANCH_ADMIN}
-    navigation={navigation}
-    subtitle="Branch users, students, attendance, and fee visibility"
-    primaryActions={[
+const DashboardScreen = ({navigation}) => {
+  const access = useFeeAccess();
+  const {data} = useQuery({
+    queryKey: ['branchAdminFeeDashboard', access.branchId],
+    queryFn: () => feeService.getFeeReports(access),
+    enabled: Boolean(access.branchId),
+  });
+  const summary = data?.summary || {};
+
+  return (
+    <RoleDashboard
+      role={USER_ROLES.BRANCH_ADMIN}
+      navigation={navigation}
+      subtitle="Branch users, students, attendance, and fee visibility"
+      primaryActions={[
       {
         title: 'Teachers',
         value: 'Team',
@@ -35,21 +48,34 @@ const DashboardScreen = ({navigation}) => (
         tone: colors.accent,
       },
     ]}
-    stats={[
+      stats={[
       {
-        title: 'Staff',
-        value: '28',
-        icon: 'account-group',
-        tone: colors.secondary,
+        title: 'Fee Assigned',
+        value: formatCurrency(summary.totalFee),
+        icon: 'cash-multiple',
+        tone: colors.primary,
       },
       {
-        title: 'Open Tasks',
-        value: '6',
-        icon: 'clipboard-clock-outline',
-        tone: colors.warning,
+        title: 'Collected',
+        value: formatCurrency(summary.paidAmount),
+        icon: 'cash-check',
+        tone: colors.success,
+      },
+      {
+        title: 'Outstanding',
+        value: formatCurrency(summary.dueAmount),
+        icon: 'cash-clock',
+        tone: colors.danger,
+      },
+      {
+        title: 'Concessions',
+        value: formatCurrency(summary.concessionAmount),
+        icon: 'sale-outline',
+        tone: colors.info,
       },
     ]}
-  />
-);
+    />
+  );
+};
 
 export default DashboardScreen;

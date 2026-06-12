@@ -1,30 +1,69 @@
 import {FEE_STATUS, USER_ROLES} from '../../config/constants';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
+import studentService from '../students/studentService';
 
 const normalizeRole = role => String(role || '').toUpperCase();
 const currentYear = () => new Date().getFullYear();
 const today = () => new Date().toISOString().slice(0, 10);
+const toAmount = value => Math.max(Number(value || 0), 0);
 const padBranchCode = branchCode => String(branchCode || '').padStart(2, '0').slice(-2);
 const formatReceiptNumber = ({year, branchCode, sequence}) =>
   `RCPT-${year}-${padBranchCode(branchCode)}-${String(sequence).padStart(5, '0')}`;
 
+const FEE_CATEGORY_NAMES = {
+  TERM1: '1st Term Tuition',
+  TERM2: '2nd Term Tuition',
+  TERM3: '3rd Term Tuition',
+  BOOKS: 'Books Fee',
+  TRANSPORT: 'Transport Fee',
+};
+
 const DEFAULT_FEE_CATEGORIES = [
-  'Admission Fee',
+  FEE_CATEGORY_NAMES.TERM1,
+  FEE_CATEGORY_NAMES.TERM2,
+  FEE_CATEGORY_NAMES.TERM3,
   'Tuition Fee',
-  'Transport Fee',
-  'Books Fee',
+  FEE_CATEGORY_NAMES.BOOKS,
+  FEE_CATEGORY_NAMES.TRANSPORT,
+  'Admission Fee',
   'Uniform Fee',
   'Exam Fee',
 ];
 
 const canManageFeePlans = role =>
-  [USER_ROLES.COORDINATOR, USER_ROLES.PRINCIPAL, USER_ROLES.MAIN_ADMIN].includes(normalizeRole(role));
+  [USER_ROLES.COORDINATOR, USER_ROLES.PRINCIPAL, USER_ROLES.BRANCH_ADMIN, USER_ROLES.MAIN_ADMIN].includes(normalizeRole(role));
+
+const canGrantConcessions = role =>
+  [USER_ROLES.COORDINATOR, USER_ROLES.PRINCIPAL, USER_ROLES.BRANCH_ADMIN, USER_ROLES.MAIN_ADMIN].includes(normalizeRole(role));
 
 const canRecordPayments = role =>
   [USER_ROLES.ACCOUNTANT, USER_ROLES.PRINCIPAL, USER_ROLES.MAIN_ADMIN].includes(normalizeRole(role));
 
+const canReversePayments = role =>
+  [USER_ROLES.ACCOUNTANT, USER_ROLES.PRINCIPAL, USER_ROLES.MAIN_ADMIN].includes(normalizeRole(role));
+
+const canViewReports = role =>
+  [
+    USER_ROLES.COORDINATOR,
+    USER_ROLES.PRINCIPAL,
+    USER_ROLES.BRANCH_ADMIN,
+    USER_ROLES.MAIN_ADMIN,
+    USER_ROLES.ACCOUNTANT,
+  ].includes(normalizeRole(role));
+
+const canViewPaymentTimeline = role =>
+  [
+    USER_ROLES.COORDINATOR,
+    USER_ROLES.PRINCIPAL,
+    USER_ROLES.BRANCH_ADMIN,
+    USER_ROLES.MAIN_ADMIN,
+    USER_ROLES.ACCOUNTANT,
+    USER_ROLES.PARENT,
+  ].includes(normalizeRole(role));
+
 const isCoordinator = role => normalizeRole(role) === USER_ROLES.COORDINATOR;
+const isTeacher = role => normalizeRole(role) === USER_ROLES.TEACHER;
 const isActivePayment = payment => !['REVERSED', 'CANCELLED'].includes(String(payment?.status || 'RECORDED').toUpperCase());
 
 const getStudentWing = student =>
@@ -56,14 +95,80 @@ const getPlanPayments = plan =>
   plan?.feePayments_on_feePlan ||
   [];
 
-const getPlanTotal = plan =>
-  Number(plan?.totalAmount || getPlanItems(plan).reduce((sum, item) => sum + Number(item.amount || 0), 0));
+const categoryName = item => String(item?.categoryName || item?.category?.name || '').trim().toLowerCase();
+const categoryAmount = (plan, names = []) => {
+  const targets = names.map(name => name.toLowerCase());
+  return getPlanItems(plan)
+    .filter(item => targets.includes(categoryName(item)))
+    .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+};
 
-const serializeFeePlanSnapshot = ({studentId, academicYear, totalAmount, items = []}) =>
+const calculateConcessionAmount = ({grossAmount, concessionType, concessionValue}) => {
+  const type = String(concessionType || '').toUpperCase();
+  const value = toAmount(concessionValue);
+  if (!value || !grossAmount) {
+    return 0;
+  }
+  if (type === 'PERCENTAGE') {
+    return Math.min((grossAmount * value) / 100, grossAmount);
+  }
+  if (type === 'AMOUNT') {
+    return Math.min(value, grossAmount);
+  }
+  return 0;
+};
+
+const calculatePlanAmounts = payload => {
+  const term1Fee = toAmount(payload.term1Fee);
+  const term2Fee = toAmount(payload.term2Fee);
+  const term3Fee = toAmount(payload.term3Fee);
+  const booksFee = toAmount(payload.booksFee);
+  const transportFee = toAmount(payload.transportFee);
+  const itemTotal = (payload.items || []).reduce((sum, item) => sum + toAmount(item.amount), 0);
+  const tuitionTotal = term1Fee + term2Fee + term3Fee;
+  const grossAmount = payload.grossAmount !== undefined ? toAmount(payload.grossAmount) : tuitionTotal + booksFee + transportFee || itemTotal;
+  const concessionType = payload.concessionType || null;
+  const concessionValue = toAmount(payload.concessionValue);
+  const concessionAmount = calculateConcessionAmount({grossAmount, concessionType, concessionValue});
+  const totalAmount = Math.max(grossAmount - concessionAmount, 0);
+  return {
+    term1Fee,
+    term2Fee,
+    term3Fee,
+    booksFee,
+    transportFee,
+    concessionType,
+    concessionValue,
+    concessionAmount,
+    grossAmount,
+    totalAmount,
+  };
+};
+
+const getPlanTotal = plan => {
+  if (!plan) {
+    return 0;
+  }
+  const calculated = calculatePlanAmounts({
+    term1Fee: plan.term1Fee || categoryAmount(plan, [FEE_CATEGORY_NAMES.TERM1]),
+    term2Fee: plan.term2Fee || categoryAmount(plan, [FEE_CATEGORY_NAMES.TERM2]),
+    term3Fee: plan.term3Fee || categoryAmount(plan, [FEE_CATEGORY_NAMES.TERM3]),
+    booksFee: plan.booksFee || categoryAmount(plan, [FEE_CATEGORY_NAMES.BOOKS]),
+    transportFee: plan.transportFee || categoryAmount(plan, [FEE_CATEGORY_NAMES.TRANSPORT]),
+    concessionType: plan.concessionType,
+    concessionValue: plan.concessionValue,
+    grossAmount: plan.grossAmount,
+    items: getPlanItems(plan),
+  });
+  return Number(plan.totalAmount || calculated.totalAmount || getPlanItems(plan).reduce((sum, item) => sum + Number(item.amount || 0), 0));
+};
+
+const serializeFeePlanSnapshot = ({studentId, academicYear, totalAmount, items = [], amounts = {}}) =>
   JSON.stringify({
     studentId,
     academicYear,
     totalAmount: Number(totalAmount || 0),
+    ...amounts,
     items: items.map(item => ({
       categoryId: item.categoryId || item.category?.id,
       categoryName: item.categoryName || item.category?.name,
@@ -82,24 +187,38 @@ const serializePaymentSnapshot = payment =>
     status: payment.status || 'RECORDED',
   });
 
-const buildFeeRecord = (student, plan = null) => {
+const buildFeeRecord = (student, plan = null, options = {}) => {
   const plans = getStudentFeePlans(student);
   const selectedPlan = plan || plans.find(item => item.isActive !== false) || plans[0];
-  const payments = getPlanPayments(selectedPlan);
-  const activePayments = payments.filter(isActivePayment);
+  const allPayments = getPlanPayments(selectedPlan);
+  const activePayments = allPayments.filter(isActivePayment);
+  const amounts = calculatePlanAmounts({
+    term1Fee: selectedPlan?.term1Fee || categoryAmount(selectedPlan, [FEE_CATEGORY_NAMES.TERM1]),
+    term2Fee: selectedPlan?.term2Fee || categoryAmount(selectedPlan, [FEE_CATEGORY_NAMES.TERM2]),
+    term3Fee: selectedPlan?.term3Fee || categoryAmount(selectedPlan, [FEE_CATEGORY_NAMES.TERM3]),
+    booksFee: selectedPlan?.booksFee || categoryAmount(selectedPlan, [FEE_CATEGORY_NAMES.BOOKS]),
+    transportFee: selectedPlan?.transportFee || categoryAmount(selectedPlan, [FEE_CATEGORY_NAMES.TRANSPORT]),
+    concessionType: selectedPlan?.concessionType,
+    concessionValue: selectedPlan?.concessionValue,
+    grossAmount: selectedPlan?.grossAmount,
+    items: getPlanItems(selectedPlan),
+  });
   const totalFee = getPlanTotal(selectedPlan);
   const paidAmount = activePayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const dueAmount = Math.max(totalFee - paidAmount, 0);
   const status =
     !selectedPlan ? FEE_STATUS.DUE : dueAmount <= 0 ? FEE_STATUS.PAID : paidAmount > 0 ? FEE_STATUS.PARTIAL : FEE_STATUS.DUE;
+  const payments = options.includePayments === false ? [] : allPayments;
 
   return {
     id: selectedPlan?.id || student?.id,
     feePlanId: selectedPlan?.id || null,
+    classFeeTemplateId: selectedPlan?.classFeeTemplateId,
     studentId: student?.id,
     admissionNumber: student?.studentId,
     studentName: student?.fullName || '',
     className: student?.academicClass?.name || '',
+    academicClassId: student?.academicClass?.id || student?.academicClassId,
     wing: getStudentWing(student),
     sectionName: student?.section?.name || '',
     branchId: student?.branchId || student?.branch?.id,
@@ -108,6 +227,15 @@ const buildFeeRecord = (student, plan = null) => {
     parent: student?.parent,
     academicYear: selectedPlan?.academicYear || currentYear(),
     categories: getPlanItems(selectedPlan),
+    term1Fee: amounts.term1Fee,
+    term2Fee: amounts.term2Fee,
+    term3Fee: amounts.term3Fee,
+    booksFee: amounts.booksFee,
+    transportFee: amounts.transportFee,
+    concessionType: amounts.concessionType,
+    concessionValue: amounts.concessionValue,
+    concessionAmount: Number(selectedPlan?.concessionAmount || amounts.concessionAmount || 0),
+    grossAmount: Number(selectedPlan?.grossAmount || amounts.grossAmount || totalFee),
     totalFee,
     paidAmount,
     dueAmount,
@@ -136,7 +264,7 @@ const assertCoordinatorWingAccess = (access = {}, feeRecordOrStudent = {}) => {
 
   const targetWing = getStudentWing(feeRecordOrStudent) || feeRecordOrStudent.wing;
   if (!targetWing || targetWing !== access.wing) {
-    throw new Error('Coordinators can manage fee plans only for students in their assigned wing.');
+    throw new Error('Coordinators can manage fees only for students in their assigned wing.');
   }
 };
 
@@ -145,9 +273,27 @@ const filterRecordsByAccess = (records, access = {}) =>
     ? records.filter(record => record.wing === access.wing)
     : records;
 
+const buildStandardItems = (categories, amounts) => {
+  const byName = new Map(categories.map(category => [String(category.name || '').toLowerCase(), category]));
+  return [
+    {name: FEE_CATEGORY_NAMES.TERM1, amount: amounts.term1Fee},
+    {name: FEE_CATEGORY_NAMES.TERM2, amount: amounts.term2Fee},
+    {name: FEE_CATEGORY_NAMES.TERM3, amount: amounts.term3Fee},
+    {name: FEE_CATEGORY_NAMES.BOOKS, amount: amounts.booksFee},
+    {name: FEE_CATEGORY_NAMES.TRANSPORT, amount: amounts.transportFee},
+  ]
+    .map(item => ({...item, category: byName.get(item.name.toLowerCase())}))
+    .filter(item => item.category && Number(item.amount) > 0)
+    .map(item => ({categoryId: item.category.id, categoryName: item.name, amount: Number(item.amount)}));
+};
+
 export const feeService = {
   canManageFeePlans,
+  canGrantConcessions,
   canRecordPayments,
+  canReversePayments,
+  canViewReports,
+  canViewPaymentTimeline,
 
   async getFeeRecords(access = {}) {
     if (access.studentId) {
@@ -164,7 +310,10 @@ export const feeService = {
       limit: access.limit || 1000,
       offset: access.offset || 0,
     });
-    return filterRecordsByAccess((response.students || []).map(student => buildFeeRecord(student)), access);
+    return filterRecordsByAccess(
+      (response.students || []).map(student => buildFeeRecord(student, null, {includePayments: !isTeacher(access.role)})),
+      access,
+    );
   },
 
   async getStudentFeeProfile(studentId, access = {}) {
@@ -179,9 +328,104 @@ export const feeService = {
       return null;
     }
     assertBranchAccess(access, response.student.branchId);
-    const record = buildFeeRecord(response.student);
+    const record = buildFeeRecord(response.student, null, {includePayments: !isTeacher(access.role)});
     assertCoordinatorWingAccess(access, record);
     return record;
+  },
+
+  async getClassFees(access = {}, filters = {}) {
+    if (!access.branchId && normalizeRole(access.role) !== USER_ROLES.MAIN_ADMIN) {
+      return [];
+    }
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_FEES, {
+      branchId: filters.branchId || access.branchId,
+      academicYear: filters.academicYear ? Number(filters.academicYear) : null,
+      limit: filters.limit || 200,
+      offset: filters.offset || 0,
+    });
+    return (response.academicYearFeeTemplates || []).sort(
+      (a, b) => Number(a.academicClass?.sortOrder || 0) - Number(b.academicClass?.sortOrder || 0),
+    );
+  },
+
+  async saveClassFee(payload, access = {}) {
+    if (!canManageFeePlans(access.role)) {
+      throw new Error('Class fee management access denied.');
+    }
+    const branchId = payload.branchId || access.branchId;
+    if (!branchId || !payload.academicClassId) {
+      throw new Error('Branch and class are required.');
+    }
+    const term1Fee = toAmount(payload.term1Fee);
+    const term2Fee = toAmount(payload.term2Fee);
+    const term3Fee = toAmount(payload.term3Fee);
+    const totalTuitionFee = term1Fee + term2Fee + term3Fee;
+    const variables = {
+      branchId,
+      academicClassId: payload.academicClassId,
+      academicYear: Number(payload.academicYear || currentYear()),
+      term1Fee,
+      term2Fee,
+      term3Fee,
+      totalTuitionFee,
+      applyToFuture: payload.applyToFuture !== false,
+      status: payload.status || 'ACTIVE',
+    };
+    const response = payload.id
+      ? await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_CLASS_FEE, {
+          classFeeId: payload.id,
+          ...variables,
+        })
+      : await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_CLASS_FEE, {
+          ...variables,
+          createdById: access.userId,
+        });
+    return {
+      id: response.academicYearFeeTemplate_insert?.id || response.academicYearFeeTemplate_update?.id || payload.id,
+      ...payload,
+      ...variables,
+    };
+  },
+
+  async applyClassFee(classFee, access = {}, applyTo = 'BOTH') {
+    if (!canManageFeePlans(access.role)) {
+      throw new Error('Class fee application access denied.');
+    }
+    const shouldApplyExisting = ['EXISTING', 'BOTH'].includes(String(applyTo || '').toUpperCase());
+    if (!shouldApplyExisting) {
+      return {applied: 0};
+    }
+
+    const categories = await this.ensureDefaultFeeCategories(access);
+    const students = await studentService.getStudents(
+      {branchId: classFee.branchId || access.branchId, limit: 1000, offset: 0},
+      access,
+    );
+    const targetStudents = students.filter(student => (student.academicClassId || student.academicClass?.id) === classFee.academicClassId);
+    const amounts = {
+      term1Fee: classFee.term1Fee,
+      term2Fee: classFee.term2Fee,
+      term3Fee: classFee.term3Fee,
+      booksFee: 0,
+      transportFee: 0,
+      concessionType: null,
+      concessionValue: 0,
+    };
+    const items = buildStandardItems(categories, amounts);
+
+    for (const student of targetStudents) {
+      await this.saveFeePlan(
+        {
+          studentId: student.id,
+          academicYear: classFee.academicYear,
+          classFeeTemplateId: classFee.id,
+          ...amounts,
+          items,
+        },
+        access,
+      );
+    }
+    return {applied: targetStudents.length};
   },
 
   async getPaymentHistory(access = {}) {
@@ -190,7 +434,7 @@ export const feeService = {
       return profile?.payments || [];
     }
 
-    if (!access.branchId) {
+    if (!access.branchId || !canViewReports(access.role)) {
       return [];
     }
 
@@ -240,13 +484,9 @@ export const feeService = {
       return categories;
     }
 
-    const existingNames = new Set(
-      categories.map(category => String(category.name || '').trim().toLowerCase()),
-    );
+    const existingNames = new Set(categories.map(category => String(category.name || '').trim().toLowerCase()));
     const defaultNames = new Set(DEFAULT_FEE_CATEGORIES.map(name => name.toLowerCase()));
-    const missingCategories = DEFAULT_FEE_CATEGORIES.filter(
-      name => !existingNames.has(name.toLowerCase()),
-    );
+    const missingCategories = DEFAULT_FEE_CATEGORIES.filter(name => !existingNames.has(name.toLowerCase()));
     const inactiveDefaultCategories = categories.filter(
       category =>
         defaultNames.has(String(category.name || '').trim().toLowerCase()) &&
@@ -289,59 +529,73 @@ export const feeService = {
     return {id: response.feeCategory_insert?.id || response.feeCategory_update?.id || payload.id, ...payload};
   },
 
-  async saveFeePlan({studentId, academicYear = currentYear(), items = []}, access = {}) {
+  async saveFeePlan({studentId, academicYear = currentYear(), items = [], ...feePayload}, access = {}) {
     if (!canManageFeePlans(access.role)) {
       throw new Error('Fee plan access denied.');
     }
     if (!studentId) {
       throw new Error('Select a student.');
     }
+    if ((feePayload.concessionType || feePayload.concessionValue) && !canGrantConcessions(access.role)) {
+      throw new Error('Concession access denied.');
+    }
+    const amounts = calculatePlanAmounts({...feePayload, items});
     const normalizedItems = items
       .filter(item => item.categoryId && Number(item.amount) > 0)
       .map(item => ({...item, amount: Number(item.amount)}));
-    if (!normalizedItems.length) {
-      throw new Error('Add at least one fee item.');
+    if (!normalizedItems.length && amounts.totalAmount <= 0) {
+      throw new Error('Add at least one fee item or amount.');
     }
-    const totalAmount = normalizedItems.reduce((sum, item) => sum + item.amount, 0);
     const profile = await this.getStudentFeeProfile(studentId, access);
     assertCoordinatorWingAccess(access, profile);
     const targetBranchId = access.branchId || profile?.branchId;
     if (!targetBranchId) {
       throw new Error('Student branch is required to save a fee plan.');
     }
-    const existingPlan = getStudentFeePlans(profile?.rawStudent).find(
-      plan => Number(plan.academicYear) === Number(academicYear),
-    );
-    const newSnapshot = serializeFeePlanSnapshot({studentId, academicYear, totalAmount, items: normalizedItems});
+    const existingPlan = getStudentFeePlans(profile?.rawStudent).find(plan => Number(plan.academicYear) === Number(academicYear));
+    const newSnapshot = serializeFeePlanSnapshot({studentId, academicYear, totalAmount: amounts.totalAmount, items: normalizedItems, amounts});
     let feePlanId = existingPlan?.id;
+    const mutationVariables = {
+      studentId,
+      academicYear: Number(academicYear),
+      classFeeTemplateId: feePayload.classFeeTemplateId || null,
+      ...amounts,
+      totalAmount: amounts.totalAmount,
+      branchId: targetBranchId,
+      actorRole: normalizeRole(access.role),
+      oldValue: null,
+      newValue: newSnapshot,
+    };
     if (feePlanId) {
+      const oldAmounts = calculatePlanAmounts({
+        term1Fee: existingPlan.term1Fee,
+        term2Fee: existingPlan.term2Fee,
+        term3Fee: existingPlan.term3Fee,
+        booksFee: existingPlan.booksFee,
+        transportFee: existingPlan.transportFee,
+        concessionType: existingPlan.concessionType,
+        concessionValue: existingPlan.concessionValue,
+        grossAmount: existingPlan.grossAmount,
+        items: getPlanItems(existingPlan),
+      });
       const oldSnapshot = serializeFeePlanSnapshot({
         studentId,
         academicYear: existingPlan.academicYear,
         totalAmount: getPlanTotal(existingPlan),
         items: getPlanItems(existingPlan),
+        amounts: oldAmounts,
       });
       await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_FEE_PLAN, {
         feePlanId,
-        studentId,
-        totalAmount,
+        ...mutationVariables,
         isActive: true,
-        branchId: targetBranchId,
         updatedById: access.userId,
-        actorRole: normalizeRole(access.role),
         oldValue: oldSnapshot,
-        newValue: newSnapshot,
       });
     } else {
       const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_FEE_PLAN, {
-        studentId,
-        academicYear: Number(academicYear),
-        totalAmount,
+        ...mutationVariables,
         createdById: access.userId,
-        branchId: targetBranchId,
-        actorRole: normalizeRole(access.role),
-        oldValue: null,
-        newValue: newSnapshot,
       });
       feePlanId = response.studentFeePlan_insert?.id || response.studentFeePlan_insert;
     }
@@ -356,7 +610,7 @@ export const feeService = {
         }),
       ),
     );
-    return {id: feePlanId, studentId, academicYear, totalAmount, items: normalizedItems};
+    return {id: feePlanId, studentId, academicYear, ...amounts, items: normalizedItems};
   },
 
   async generateReceipt({branchCode, year = currentYear()}) {
@@ -433,10 +687,36 @@ export const feeService = {
     };
   },
 
+  async updatePayment(payload, access = {}) {
+    if (!canRecordPayments(access.role)) {
+      throw new Error('Only accountants or principals can edit payments.');
+    }
+    const paymentDate = payload.paymentDate || today();
+    if (paymentDate !== today()) {
+      throw new Error('Only same-day payments can be edited.');
+    }
+    const oldValue = serializePaymentSnapshot(payload.original || payload);
+    const newValue = serializePaymentSnapshot({...payload, status: 'RECORDED'});
+    const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_PAYMENT, {
+      paymentId: payload.paymentId || payload.id,
+      studentId: payload.studentId,
+      branchId: payload.branchId || access.branchId,
+      amount: Number(payload.amount),
+      paymentDate,
+      paymentMode: payload.paymentMode || payload.mode || 'Cash',
+      referenceNumber: payload.referenceNumber || null,
+      remarks: payload.remarks || null,
+      updatedById: access.userId,
+      actorRole: normalizeRole(access.role),
+      oldValue,
+      newValue,
+    });
+    return response.feePayment_update;
+  },
+
   async reversePayment(payload, access = {}) {
-    const role = normalizeRole(access.role);
-    if (![USER_ROLES.PRINCIPAL, USER_ROLES.MAIN_ADMIN].includes(role)) {
-      throw new Error('Only principals can reverse payments.');
+    if (!canReversePayments(access.role)) {
+      throw new Error('Payment reversal access denied.');
     }
     const oldValue = serializePaymentSnapshot(payload);
     const newValue = serializePaymentSnapshot({...payload, status: 'REVERSED'});
@@ -446,7 +726,7 @@ export const feeService = {
       branchId: payload.branchId || access.branchId,
       reversedById: access.userId,
       reason: payload.reason || null,
-      actorRole: role,
+      actorRole: normalizeRole(access.role),
       oldValue,
       newValue,
     });
@@ -459,25 +739,33 @@ export const feeService = {
 
   getFeeSummary(records = []) {
     const totalFee = records.reduce((sum, item) => sum + Number(item.totalFee || 0), 0);
+    const grossAmount = records.reduce((sum, item) => sum + Number(item.grossAmount || item.totalFee || 0), 0);
     const paidAmount = records.reduce((sum, item) => sum + Number(item.paidAmount || 0), 0);
+    const concessionAmount = records.reduce((sum, item) => sum + Number(item.concessionAmount || 0), 0);
     const dueAmount = Math.max(totalFee - paidAmount, 0);
 
     return {
       totalFee,
+      grossAmount,
       paidAmount,
       dueAmount,
+      concessionAmount,
       pendingAmount: dueAmount,
       studentsWithFeePlans: records.filter(item => Boolean(item.feePlanId)).length,
       studentsMissingFeePlans: records.filter(item => !item.feePlanId).length,
       paidStudents: records.filter(item => item.totalFee > 0 && item.dueAmount <= 0).length,
+      partialStudents: records.filter(item => item.paidAmount > 0 && item.dueAmount > 0).length,
       dueStudents: records.filter(item => item.dueAmount > 0).length,
+      concessionStudents: records.filter(item => Number(item.concessionAmount || 0) > 0).length,
+      transportStudents: records.filter(item => Number(item.transportFee || 0) > 0).length,
+      booksStudents: records.filter(item => Number(item.booksFee || 0) > 0).length,
       collectionRate: totalFee ? paidAmount / totalFee : 0,
     };
   },
 
   async getFeeReports(access = {}) {
     const records = await this.getFeeRecords(access);
-    const payments = canRecordPayments(access.role) ? await this.getPaymentHistory(access) : [];
+    const payments = canViewReports(access.role) ? await this.getPaymentHistory(access) : [];
     return {
       records,
       payments,
@@ -485,10 +773,11 @@ export const feeService = {
       classWise: Object.values(
         records.reduce((acc, record) => {
           const key = record.className || 'Unassigned';
-          acc[key] = acc[key] || {className: key, totalFee: 0, paidAmount: 0, dueAmount: 0, students: 0};
+          acc[key] = acc[key] || {className: key, totalFee: 0, paidAmount: 0, dueAmount: 0, concessionAmount: 0, students: 0};
           acc[key].totalFee += record.totalFee;
           acc[key].paidAmount += record.paidAmount;
           acc[key].dueAmount += record.dueAmount;
+          acc[key].concessionAmount += record.concessionAmount;
           acc[key].students += 1;
           return acc;
         }, {}),

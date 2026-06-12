@@ -1,4 +1,5 @@
 import academicRepository from '../../repositories/academicRepository';
+import {STAFF_TYPES} from '../../config/constants';
 import {WINGS} from '../../config/academic';
 import {assertBranchAccess} from '../academics/academicAccess';
 import StaffIdService from '../staff/StaffIdService';
@@ -41,6 +42,7 @@ export const coordinatorService = {
     const staffId = await StaffIdService.getNextStaffId({
       branchId,
       branchCode: scope?.branchCode,
+      staffType: STAFF_TYPES.TEACHING,
     });
 
     const countryCode = payload.countryCode || '+91';
@@ -57,6 +59,7 @@ export const coordinatorService = {
       email: payload.email || null,
       gender: payload.gender || null,
       employeeId: staffId.employeeId,
+      staffType: staffId.staffType,
       joiningYear: staffId.joiningYear,
       branchCode: staffId.branchCode,
       serialNumber: staffId.serialNumber,

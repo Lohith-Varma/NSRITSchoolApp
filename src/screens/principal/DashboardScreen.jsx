@@ -152,6 +152,12 @@ const DashboardScreen = ({navigation}) => {
           tone: colors.danger,
         },
         {
+          title: 'Concessions Granted',
+          value: formatCurrency(feeSummary.concessionAmount),
+          icon: 'sale-outline',
+          tone: colors.info,
+        },
+        {
           title: 'Collection Trend',
           value: `${Math.round((feeSummary.collectionRate || 0) * 100)}%`,
           icon: 'chart-line',

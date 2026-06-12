@@ -1,8 +1,16 @@
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_QUERIES} from '../dataconnect/operations';
-import {buildStaffIdPayload, normalizeStaffBranchCode} from '../../utils/staffIdGenerator';
+import {
+  STAFF_TYPE_CODES,
+  buildStaffIdPayload,
+  normalizeJoiningYear,
+  normalizeStaffBranchCode,
+  normalizeStaffType,
+} from '../../utils/staffIdGenerator';
 
 const currentJoiningYear = () => Number(String(new Date().getFullYear()).slice(-2));
+const isMissingOperationError = error =>
+  /operation "GetStaffIdsByPrefix" not found|NOT_FOUND/i.test(String(error?.message || error));
 
 const resolveBranchCode = async ({branchId, branchCode}) => {
   if (branchCode) {
@@ -23,28 +31,44 @@ const resolveBranchCode = async ({branchId, branchCode}) => {
 };
 
 export const StaffIdService = {
-  async getNextStaffId({branchId, branchCode, joiningYear = currentJoiningYear()}) {
+  async getNextStaffId({
+    branchId,
+    branchCode,
+    joiningYear = currentJoiningYear(),
+    staffType = 'TEACHING',
+  }) {
     const resolvedBranchCode = await resolveBranchCode({branchId, branchCode});
-    const normalizedJoiningYear = Number(String(joiningYear).slice(-2));
+    const normalizedJoiningYear = normalizeJoiningYear(joiningYear);
+    const normalizedStaffType = normalizeStaffType(staffType);
+    const prefix = `${String(normalizedJoiningYear).padStart(2, '0')}${resolvedBranchCode}${STAFF_TYPE_CODES[normalizedStaffType]}`;
 
-    const [employeeResponse, staffResponse] = await Promise.all([
-      dataConnectClient.query(DATA_CONNECT_QUERIES.GET_EMPLOYEE_SEQUENCE, {
-        year: normalizedJoiningYear,
-        branchCode: resolvedBranchCode,
-      }),
-      dataConnectClient.query(DATA_CONNECT_QUERIES.GET_STAFF_ID_SEQUENCE, {
-        joiningYear: normalizedJoiningYear,
-        branchCode: resolvedBranchCode,
-      })
-    ]);
+    let maxSequence = 0;
 
-    const employeeSeq = employeeResponse.employeeSequences?.[0]?.lastSequence || 0;
-    const staffSeq = staffResponse.staffIdSequences?.[0]?.lastSerialNumber || 0;
-    const maxSequence = Math.max(employeeSeq, staffSeq);
+    try {
+      const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_STAFF_IDS_BY_PREFIX, {
+        branchId,
+        staffType: normalizedStaffType,
+        employeeIdPrefix: prefix,
+      });
+
+      maxSequence = (response.users || []).reduce((max, user) => {
+        const employeeId = String(user.employeeId || '');
+        if (!employeeId.startsWith(prefix)) {
+          return max;
+        }
+        return Math.max(max, Number(employeeId.slice(prefix.length)) || 0);
+      }, 0);
+    } catch (error) {
+      if (!isMissingOperationError(error)) {
+        throw error;
+      }
+      console.log('[StaffId] Live connector is missing GetStaffIdsByPrefix; using fresh-start serial seed.');
+    }
 
     return buildStaffIdPayload({
       joiningYear: normalizedJoiningYear,
       branchCode: resolvedBranchCode,
+      staffType: normalizedStaffType,
       lastSerialNumber: maxSequence,
     });
   },
