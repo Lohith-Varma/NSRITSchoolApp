@@ -2,6 +2,7 @@ import React, {useCallback, useMemo} from 'react';
 import {StyleSheet, View, ScrollView, Pressable, TouchableOpacity} from 'react-native';
 import {useFocusEffect} from '@react-navigation/native';
 import {Text, Card} from 'react-native-paper';
+import {useSelector} from 'react-redux';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ERPLayout, LoadingScreen} from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
@@ -107,8 +108,6 @@ const DashboardScreen = ({navigation}) => {
       tone: colors.purple,
     },
   ];
-
-
 
   return (
     <ERPLayout

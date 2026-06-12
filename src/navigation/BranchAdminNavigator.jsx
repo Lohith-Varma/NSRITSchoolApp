@@ -59,6 +59,7 @@ const BranchAdminTabs = () => (
 
 // ─── Stack wraps Tabs + all push-navigable routes ───────────────────────────
 const BranchAdminNavigator = () => (
+<<<<<<< HEAD
   <Stack.Navigator screenOptions={{headerShown: false}}>
     {/* Root: the tab bar */}
     <Stack.Screen name="BranchAdminTabs" component={BranchAdminTabs} />
@@ -79,7 +80,7 @@ const BranchAdminNavigator = () => (
     <Stack.Screen name="BranchSettings" component={BranchSettingsScreen} />
 
     {/* ── Shared fee sub-screens (StudentFeeDetails, PaymentHistory, etc.) ── */}
-    {renderFeeStackScreens(Stack, {skipDashboard: true})}
+    {renderFeeStackScreens(Stack, {skipDashboard: true, reports: true})}
   </Stack.Navigator>
 );
 

@@ -2,7 +2,7 @@
 # Roles and statuses are stored as strings because Data Connect table fields are
 # safest across generated SDKs when represented as varchar values.
 
-type Branch @table(name: "branches", key: "id") {
+type Branch @table(name: "branches", key: "id") @unique(fields: ["branchCode"]) {
   id: UUID! @default(expr: "uuidV4()")
   name: String! @col(dataType: "varchar(120)")
   branchCode: String! @col(dataType: "varchar(2)")
@@ -25,11 +25,11 @@ extend type Branch {
   principalId: UUID
 }
 
-type Wing @table(name: "wings", key: "id") {
+type Wing @table(name: "wings", key: "id") @unique(fields: ["branch", "code"]) {
   id: UUID! @default(expr: "uuidV4()")
   branch: Branch!
   name: String! @col(dataType: "varchar(80)")
-  code: String @col(dataType: "varchar(20)")
+  code: String! @col(dataType: "varchar(20)")
   isActive: Boolean! @default(value: true)
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
@@ -39,13 +39,17 @@ extend type Wing {
   branchId: UUID!
 }
 
-type AcademicClass @table(name: "academic_classes", key: "id") {
+type AcademicClass @table(name: "academic_classes", key: "id") @unique(fields: ["branch", "name"]) @index(fields: ["wingId", "sortOrder"]) {
   id: UUID! @default(expr: "uuidV4()")
   branch: Branch!
+  name: String! @col(dataType: "varchar(20)")
+  classCode: String @col(name: "class_code", dataType: "varchar(20)")
   wing: Wing!
-  name: String! @col(dataType: "varchar(80)")
+  sortOrder: Int! @col(name: "sort_order") @default(value: 0)
   displayOrder: Int @default(value: 0)
   isActive: Boolean! @default(value: true)
+  activatedBy: User
+  activatedAt: Timestamp @col(name: "activated_at")
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
 }
@@ -53,14 +57,17 @@ type AcademicClass @table(name: "academic_classes", key: "id") {
 extend type AcademicClass {
   branchId: UUID!
   wingId: UUID!
+  activatedById: UUID
 }
 
-type Section @table(name: "sections", key: "id") {
+type Section @table(name: "sections", key: "id") @unique(fields: ["branch", "academicClass", "name", "academicYear"]) @index(fields: ["branchId", "academicClassId", "academicYear"]) {
   id: UUID! @default(expr: "uuidV4()")
   branch: Branch!
   wing: Wing!
   academicClass: AcademicClass!
-  name: String! @col(dataType: "varchar(40)")
+  name: String! @col(dataType: "varchar(1)")
+  academicYear: Int! @col(name: "academic_year")
+  classTeacher: User
   isActive: Boolean! @default(value: true)
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
@@ -70,6 +77,26 @@ extend type Section {
   branchId: UUID!
   wingId: UUID!
   academicClassId: UUID!
+  classTeacherId: UUID
+}
+
+type Coordinator @table(name: "coordinators", key: "id") @index(fields: ["branchId", "wing"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  branch: Branch!
+  wing: String! @col(dataType: "varchar(20)")
+  employeeId: String @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String @col(name: "staff_type", dataType: "varchar(20)")
+  gender: String @col(dataType: "varchar(20)")
+  email: String @col(dataType: "varchar(140)")
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type Coordinator {
+  userId: UUID!
+  branchId: UUID!
 }
 
 type User @table(name: "users", key: "id") {
@@ -79,6 +106,8 @@ type User @table(name: "users", key: "id") {
   countryCode: String! @col(dataType: "varchar(5)")
   phoneNumber: String! @col(dataType: "varchar(20)")
   role: String! @col(dataType: "varchar(30)")
+  employeeId: String @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String @col(name: "staff_type", dataType: "varchar(20)")
   branch: Branch
   wing: Wing
   isActive: Boolean! @default(value: true)
@@ -120,9 +149,144 @@ type StudentIdSequence
   updatedAt: Timestamp! @default(expr: "request.time")
 }
 
+type StudentSequence
+  @table(name: "student_sequences", key: ["year", "branchCode"]) {
+  year: Int!
+  branchCode: String! @col(name: "branch_code", dataType: "varchar(2)")
+  lastSerial: Int! @col(name: "last_serial") @default(value: 0)
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type StaffIdSequence
+  @table(name: "staff_id_sequences", key: ["joiningYear", "branchCode", "staffType"]) {
+  joiningYear: Int!
+  branchCode: String! @col(dataType: "varchar(2)")
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)")
+  lastSerialNumber: Int! @default(value: 0)
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type EmployeeSequence
+  @table(name: "employee_sequences", key: ["year", "branchCode", "staffType"]) {
+  year: Int!
+  branchCode: String! @col(name: "branch_code", dataType: "varchar(2)")
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)")
+  lastSequence: Int! @col(name: "last_sequence") @default(value: 0)
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Teacher @table(name: "teachers", key: "id") @unique(fields: ["user"]) @index(fields: ["branchId", "wing"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  employeeId: String! @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)") @default(value: "TEACHING")
+  branch: Branch!
+  wing: String! @col(dataType: "varchar(20)")
+  joiningDate: Date! @col(name: "joining_date")
+  designation: String! @col(dataType: "varchar(80)")
+  gender: String! @col(dataType: "varchar(20)")
+  alternateMobileNumber: String @col(name: "alternate_mobile_number", dataType: "varchar(20)")
+  email: String @col(dataType: "varchar(140)")
+  dateOfBirth: Date @col(name: "date_of_birth")
+  qualification: String @col(dataType: "varchar(140)")
+  experience: String @col(dataType: "varchar(80)")
+  address: String
+  city: String @col(dataType: "varchar(80)")
+  state: String @col(dataType: "varchar(80)")
+  pincode: String @col(dataType: "varchar(12)")
+  emergencyContact: String @col(name: "emergency_contact", dataType: "varchar(20)")
+  bloodGroup: String @col(name: "blood_group", dataType: "varchar(10)")
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type Teacher {
+  userId: UUID!
+  branchId: UUID!
+}
+
+type Accountant @table(name: "accountants", key: "id") @unique(fields: ["user"]) @index(fields: ["branchId"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  employeeId: String! @col(name: "employee_id", dataType: "varchar(40)") @unique
+  staffType: String! @col(name: "staff_type", dataType: "varchar(20)") @default(value: "SUPPORTING")
+  branch: Branch!
+  joiningDate: Date! @col(name: "joining_date")
+  designation: String! @col(dataType: "varchar(80)")
+  gender: String! @col(dataType: "varchar(20)")
+  email: String @col(dataType: "varchar(140)")
+  qualification: String @col(dataType: "varchar(140)")
+  experience: String @col(dataType: "varchar(80)")
+  address: String
+  city: String @col(dataType: "varchar(80)")
+  state: String @col(dataType: "varchar(80)")
+  pincode: String @col(dataType: "varchar(12)")
+  emergencyContact: String @col(name: "emergency_contact", dataType: "varchar(20)")
+  bloodGroup: String @col(name: "blood_group", dataType: "varchar(10)")
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type Accountant {
+  userId: UUID!
+  branchId: UUID!
+}
+
+type Subject @table(name: "subjects", key: "id") @unique(fields: ["code"]) @index(fields: ["status"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String! @col(dataType: "varchar(120)")
+  code: String! @col(dataType: "varchar(30)")
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type TeacherSubject @table(name: "teacher_subjects", key: "id") @unique(fields: ["teacher", "subject"]) @index(fields: ["teacherId"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  teacher: Teacher!
+  subject: Subject!
+  createdAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type TeacherSubject {
+  teacherId: UUID!
+  subjectId: UUID!
+}
+
+type TeacherSectionAssignment @table(name: "teacher_section_assignments", key: "id") @unique(fields: ["teacher", "section", "isClassTeacher"]) @index(fields: ["sectionId", "isClassTeacher"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  teacher: Teacher!
+  section: Section!
+  isClassTeacher: Boolean! @col(name: "is_class_teacher") @default(value: false)
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type TeacherSectionAssignment {
+  teacherId: UUID!
+  sectionId: UUID!
+}
+
+type TeacherTransferHistory @table(name: "teacher_transfer_history", key: "id") @index(fields: ["teacherId", "changedAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  teacher: Teacher!
+  oldWing: String! @col(name: "old_wing", dataType: "varchar(20)")
+  newWing: String! @col(name: "new_wing", dataType: "varchar(20)")
+  changedBy: User!
+  changedAt: Timestamp! @col(name: "changed_at") @default(expr: "request.time")
+}
+
+extend type TeacherTransferHistory {
+  teacherId: UUID!
+  changedById: UUID!
+}
+
 type Student @table(name: "students", key: "id") {
   id: UUID! @default(expr: "uuidV4()")
-  studentId: String! @col(dataType: "varchar(10)")
+  studentId: String! @col(dataType: "varchar(10)") @unique
   admissionYear: Int!
   branchCode: String! @col(dataType: "varchar(2)")
   serialNumber: Int!
@@ -130,6 +294,7 @@ type Student @table(name: "students", key: "id") {
   gender: String @col(dataType: "varchar(20)")
   dateOfBirth: Date
   photoUrl: String
+  aadhaarNumber: String @col(name: "aadhaar_number", dataType: "varchar(20)")
   bloodGroup: String @col(dataType: "varchar(10)")
   branch: Branch!
   wing: Wing
@@ -140,10 +305,16 @@ type Student @table(name: "students", key: "id") {
   countryCode: String @col(dataType: "varchar(5)")
   phoneNumber: String @col(dataType: "varchar(20)")
   address: String
+  city: String @col(dataType: "varchar(80)")
+  state: String @col(dataType: "varchar(80)")
+  pincode: String @col(dataType: "varchar(12)")
+  emergencyContact: String @col(name: "emergency_contact", dataType: "varchar(20)")
+  transportRequired: Boolean @col(name: "transport_required") @default(value: false)
   aadhaarDocumentUrl: String
   transferCertificateUrl: String
   birthCertificateUrl: String
   admissionDate: Date!
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
   isActive: Boolean! @default(value: true)
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
@@ -155,6 +326,42 @@ extend type Student {
   academicClassId: UUID!
   sectionId: UUID!
   parentId: UUID!
+}
+
+type StudentSectionHistory @table(name: "student_section_history", key: "id") @index(fields: ["studentId", "changedAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  student: Student!
+  oldSection: Section!
+  newSection: Section!
+  changedBy: User!
+  changedAt: Timestamp! @col(name: "changed_at") @default(expr: "request.time")
+}
+
+extend type StudentSectionHistory {
+  studentId: UUID!
+  oldSectionId: UUID!
+  newSectionId: UUID!
+  changedById: UUID!
+}
+
+type StudentPromotionHistory @table(name: "student_promotion_history", key: "id") @index(fields: ["studentId", "promotedAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  student: Student!
+  fromClass: AcademicClass!
+  toClass: AcademicClass!
+  fromSection: Section!
+  toSection: Section!
+  promotedBy: User!
+  promotedAt: Timestamp! @col(name: "promoted_at") @default(expr: "request.time")
+}
+
+extend type StudentPromotionHistory {
+  studentId: UUID!
+  fromClassId: UUID!
+  toClassId: UUID!
+  fromSectionId: UUID!
+  toSectionId: UUID!
+  promotedById: UUID!
 }
 
 type TeacherAssignment @table(name: "teacher_assignments", key: "id") {
@@ -254,6 +461,143 @@ extend type Payment {
   studentId: UUID!
   studentFeeId: UUID!
   uploadedById: UUID!
+}
+
+type FeeCategory @table(name: "fee_categories", key: "id") @unique(fields: ["name"]) @index(fields: ["status"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String! @col(dataType: "varchar(120)")
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type AcademicYearFeeTemplate
+  @table(name: "academic_year_fee_templates", key: "id")
+  @unique(fields: ["branch", "academicClass", "academicYear"])
+  @index(fields: ["branchId", "academicYear"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  branch: Branch!
+  academicClass: AcademicClass!
+  academicYear: Int! @col(name: "academic_year")
+  term1Fee: Float! @col(name: "term1_fee") @default(value: 0)
+  term2Fee: Float! @col(name: "term2_fee") @default(value: 0)
+  term3Fee: Float! @col(name: "term3_fee") @default(value: 0)
+  totalTuitionFee: Float! @col(name: "total_tuition_fee") @default(value: 0)
+  applyToFuture: Boolean! @col(name: "apply_to_future") @default(value: true)
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
+  createdBy: User!
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type AcademicYearFeeTemplate {
+  branchId: UUID!
+  academicClassId: UUID!
+  createdById: UUID!
+}
+
+type StudentFeePlan @table(name: "student_fee_plans", key: "id") @unique(fields: ["student", "academicYear"]) @index(fields: ["studentId", "academicYear"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  student: Student!
+  classFeeTemplate: AcademicYearFeeTemplate
+  academicYear: Int! @col(name: "academic_year")
+  term1Fee: Float! @col(name: "term1_fee") @default(value: 0)
+  term2Fee: Float! @col(name: "term2_fee") @default(value: 0)
+  term3Fee: Float! @col(name: "term3_fee") @default(value: 0)
+  booksFee: Float! @col(name: "books_fee") @default(value: 0)
+  transportFee: Float! @col(name: "transport_fee") @default(value: 0)
+  concessionType: String @col(name: "concession_type", dataType: "varchar(20)")
+  concessionValue: Float! @col(name: "concession_value") @default(value: 0)
+  concessionAmount: Float! @col(name: "concession_amount") @default(value: 0)
+  grossAmount: Float! @col(name: "gross_amount") @default(value: 0)
+  totalAmount: Float! @col(name: "total_amount")
+  createdBy: User!
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type StudentFeePlan {
+  studentId: UUID!
+  classFeeTemplateId: UUID
+  createdById: UUID!
+}
+
+type StudentFeeItem @table(name: "student_fee_items", key: "id") @unique(fields: ["feePlan", "category"]) @index(fields: ["feePlanId"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  feePlan: StudentFeePlan!
+  category: FeeCategory!
+  amount: Float!
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type StudentFeeItem {
+  feePlanId: UUID!
+  categoryId: UUID!
+}
+
+type FeePayment @table(name: "fee_payments", key: "id") @unique(fields: ["receiptNumber"]) @index(fields: ["studentId", "paymentDate"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  student: Student!
+  feePlan: StudentFeePlan!
+  amount: Float!
+  paymentDate: Date! @col(name: "payment_date")
+  paymentMode: String! @col(name: "payment_mode", dataType: "varchar(30)")
+  referenceNumber: String @col(name: "reference_number", dataType: "varchar(80)")
+  receiptNumber: String! @col(name: "receipt_number", dataType: "varchar(80)")
+  remarks: String
+  collectedBy: User!
+  status: String! @col(dataType: "varchar(20)") @default(value: "RECORDED")
+  reversedBy: User
+  reversedAt: Timestamp @col(name: "reversed_at")
+  reverseReason: String @col(name: "reverse_reason")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type FeePayment {
+  studentId: UUID!
+  feePlanId: UUID!
+  collectedById: UUID!
+  reversedById: UUID
+}
+
+type ReceiptSequence @table(name: "receipt_sequences", key: ["year", "branchCode"]) {
+  year: Int!
+  branchCode: String! @col(name: "branch_code", dataType: "varchar(2)")
+  lastSequence: Int! @col(name: "last_sequence") @default(value: 0)
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type FeeAuditLog @table(name: "fee_audit_logs", key: "id") @index(fields: ["studentId", "createdAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  role: String @col(dataType: "varchar(30)")
+  action: String! @col(dataType: "varchar(40)")
+  student: Student!
+  oldValue: String @col(name: "old_value")
+  newValue: String @col(name: "new_value")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+}
+
+extend type FeeAuditLog {
+  userId: UUID!
+  studentId: UUID!
+}
+
+type AuditLog @table(name: "audit_logs", key: "id") @index(fields: ["branchId", "createdAt"]) @index(fields: ["performedBy", "createdAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  performedBy: String! @col(name: "performed_by", dataType: "varchar(128)")
+  performedRole: String! @col(name: "performed_role", dataType: "varchar(30)")
+  actingAs: String @col(name: "acting_as", dataType: "varchar(30)")
+  branchId: UUID @col(name: "branch_id")
+  action: String! @col(dataType: "varchar(80)")
+  entityType: String @col(name: "entity_type", dataType: "varchar(80)")
+  entityId: String @col(name: "entity_id", dataType: "varchar(120)")
+  oldData: String @col(name: "old_data")
+  newData: String @col(name: "new_data")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
 }
 
 type DueTracking @table(name: "due_tracking", key: "id") {

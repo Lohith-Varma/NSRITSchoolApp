@@ -69,6 +69,12 @@ const BranchDetailsScreen = ({navigation, route}) => {
 
       <View style={styles.actions}>
         <Button
+          icon="view-dashboard-outline"
+          mode="contained"
+          onPress={() => navigation.navigate('BranchOperationsDashboard', {branchId: branch.id})}>
+          Enter Operations
+        </Button>
+        <Button
           icon="account-tie"
           mode="outlined"
           onPress={() => setShowAdminModal(true)}>
@@ -104,6 +110,8 @@ const BranchDetailsScreen = ({navigation, route}) => {
         <Metric label="Classes" value={summary.totalClasses} />
         <Metric label="Students" value={summary.totalStudents} />
         <Metric label="Teachers" value={summary.totalTeachers} />
+        <Metric label="Coordinators" value={summary.totalCoordinators} />
+        <Metric label="Accountants" value={summary.totalAccountants} />
         <Metric label="Attendance" value={`${summary.attendancePercent}%`} />
       </View>
 

@@ -5,12 +5,27 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {colors} from '../theme';
 
 import DashboardScreen from '../screens/coordinator/DashboardScreen';
-import AssignTeachersScreen from '../screens/coordinator/AssignTeachersScreen';
 import WingAttendanceScreen from '../screens/coordinator/WingAttendanceScreen';
 import EditAttendanceScreen from '../screens/coordinator/EditAttendanceScreen';
 import WingStudentsScreen from '../screens/coordinator/WingStudentsScreen';
 import EventsScreen from '../screens/coordinator/EventsScreen';
 import FeeDashboardScreen from '../screens/fees/FeeDashboardScreen';
+import AssignTeachersScreen from '../screens/coordinator/AssignTeachersScreen';
+
+import AddStudentScreen from '../screens/students/AddStudentScreen';
+import EditStudentScreen from '../screens/students/EditStudentScreen';
+import StudentDetailsScreen from '../screens/students/StudentDetailsScreen';
+import StudentManagementScreen from '../screens/students/StudentManagementScreen';
+import BulkStudentImportScreen from '../screens/students/BulkStudentImportScreen';
+import StudentSearchScreen from '../screens/students/StudentSearchScreen';
+import TransferStudentScreen from '../screens/students/TransferStudentScreen';
+import TeacherManagementScreen from '../screens/teachers/TeacherManagementScreen';
+import CreateTeacherScreen from '../screens/teachers/CreateTeacherScreen';
+import EditTeacherScreen from '../screens/teachers/EditTeacherScreen';
+import TeacherDetailsScreen from '../screens/teachers/TeacherDetailsScreen';
+import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
+import AssignSubjectsScreen from '../screens/teachers/AssignSubjectsScreen';
+import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
@@ -57,7 +72,6 @@ const CoordinatorTabs = () => (
   </Tab.Navigator>
 );
 
-// ─── Stack wraps Tabs + all push-navigable routes ───────────────────────────
 const CoordinatorNavigator = () => (
   <Stack.Navigator screenOptions={{headerShown: false}}>
     {/* Root: the tab bar */}
@@ -71,12 +85,28 @@ const CoordinatorNavigator = () => (
     {/* ERPLayout sidebar calls navigate('FeeDashboard') */}
     <Stack.Screen name="FeeDashboard" component={FeeDashboardScreen} />
 
-    {/* ── Push screens ── */}
+    {/* ── Push/Detail screens ── */}
     <Stack.Screen name="AssignTeachers" component={AssignTeachersScreen} />
     <Stack.Screen name="EditAttendance" component={EditAttendanceScreen} />
+    <Stack.Screen name="TeacherManagement" component={TeacherManagementScreen} />
+    <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
+    <Stack.Screen name="EditTeacher" component={EditTeacherScreen} />
+    <Stack.Screen name="TeacherDetails" component={TeacherDetailsScreen} />
+    <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} />
+    <Stack.Screen name="AssignSubjects" component={AssignSubjectsScreen} />
+    <Stack.Screen name="AssignClassTeacher" component={AssignClassTeacherScreen} />
+    <Stack.Screen name="Students" component={StudentManagementScreen} />
+    <Stack.Screen name="StudentManagement" component={StudentManagementScreen} />
+    <Stack.Screen name="StudentSearch" component={StudentSearchScreen} />
+    <Stack.Screen name="CreateStudent" component={AddStudentScreen} />
+    <Stack.Screen name="AddStudent" component={AddStudentScreen} />
+    <Stack.Screen name="EditStudent" component={EditStudentScreen} />
+    <Stack.Screen name="StudentDetails" component={StudentDetailsScreen} />
+    <Stack.Screen name="BulkStudentImport" component={BulkStudentImportScreen} />
+    <Stack.Screen name="TransferStudent" component={TransferStudentScreen} />
 
     {/* ── Shared fee sub-screens ── */}
-    {renderFeeStackScreens(Stack, {skipDashboard: true})}
+    {renderFeeStackScreens(Stack, {skipDashboard: true, reports: true})}
   </Stack.Navigator>
 );
 

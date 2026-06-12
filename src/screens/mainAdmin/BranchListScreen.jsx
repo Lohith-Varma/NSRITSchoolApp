@@ -14,6 +14,8 @@ import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
 import {colors, radius, spacing, typography} from '../../theme';
 
+const formatDate = value => (value ? String(value).slice(0, 10) : 'Not set');
+
 const BranchListScreen = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
   const {data, loading, refreshing, error, refresh} = useAsyncResource(
@@ -90,10 +92,14 @@ const BranchListScreen = ({navigation}) => {
                 />
               </View>
               <View style={styles.metrics}>
-                <Metric label="Classes" value={item.totalClasses} />
                 <Metric label="Students" value={item.totalStudents} />
                 <Metric label="Teachers" value={item.totalTeachers} />
+                <Metric label="Coordinators" value={item.totalCoordinators} />
               </View>
+              <Text style={styles.detail}>
+                Principal: {item.principal?.fullName || 'Unassigned'}
+              </Text>
+              <Text style={styles.detail}>Created: {formatDate(item.createdAt)}</Text>
               <Text style={styles.detail}>{item.address || 'Address not set'}</Text>
               <Text style={styles.detail}>{item.phone || item.email || 'Contact not set'}</Text>
             </Card.Content>

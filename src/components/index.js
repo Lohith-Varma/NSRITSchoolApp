@@ -20,6 +20,7 @@ export {default as ScreenContainer} from './common/ScreenContainer';
 export {default as SectionHeader} from './common/SectionHeader';
 export {default as StatusBadge} from './common/StatusBadge';
 export {default as CustomInput} from './forms/CustomInput';
+export {default as SelectField} from './forms/SelectField';
 export {default as SkeletonLoader} from './feedback/SkeletonLoader';
 export {default as StudentListItem} from './lists/StudentListItem';
 export {default as LoadingScreen} from './loaders/LoadingScreen';

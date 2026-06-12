@@ -49,4 +49,4 @@ export const parseCsv = csvText => {
 };
 
 export const STUDENT_CSV_TEMPLATE =
-  'Student Name,Gender,Parent Name,Parent Phone,Alternate Number,Class,Section,Admission Year,DOB,Address,Admission Date\n';
+  'Full Name,Gender,DOB,Father Name,Mother Name,Parent Mobile,Class,Section,Admission Date\n';

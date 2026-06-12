@@ -10,12 +10,11 @@ import {fetchClasses} from '../../store/slices/classSlice';
 
 const AcademicStructureScreen = ({navigation}) => {
   const dispatch = useDispatch();
-  const branchId = useSelector(state => state.auth.user?.branchId);
   const {items} = useSelector(state => state.classes);
 
   useEffect(() => {
-    dispatch(fetchClasses(branchId));
-  }, [branchId, dispatch]);
+    dispatch(fetchClasses());
+  }, [dispatch]);
 
   return (
     <ScreenContainer>
@@ -30,14 +29,14 @@ const AcademicStructureScreen = ({navigation}) => {
           <DashboardCard
             key={item.id}
             title={item.name}
-            value={item.wing || 'Wing'}
-            description={`Branch: ${item.branchId || 'Current branch'}`}
+            value={item.wing?.name || item.wing || 'Wing'}
+            description="Master class configuration"
           />
         ))
       ) : (
         <EmptyState
           title="No classes"
-          message="Create classes before adding sections or assigning teachers."
+          message="Seed the fixed class catalog before adding sections or assigning teachers."
         />
       )}
     </ScreenContainer>

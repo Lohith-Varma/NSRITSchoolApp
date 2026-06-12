@@ -5,29 +5,40 @@ export const getAccessScope = user => ({
   firebaseUID: user?.firebaseUID || user?.uid,
   role: user?.role,
   branchId: user?.branchId,
+  branchCode: user?.branchCode,
   wingId: user?.wingId,
+  wing: user?.wing,
+  teacherId: user?.teacherId,
   sectionId: user?.sectionId,
   parentId: user?.parentId || (user?.role === USER_ROLES.PARENT ? user?.id : null),
 });
 
 export const applyRoleFilter = (items, scope) => {
-  if (!scope?.role || scope.role === USER_ROLES.MAIN_ADMIN) {
+  const role = String(scope?.role || '').toUpperCase();
+
+  if (!role || role === USER_ROLES.MAIN_ADMIN) {
     return items;
   }
 
-  if (scope.role === USER_ROLES.BRANCH_ADMIN || scope.role === USER_ROLES.PRINCIPAL) {
+  if (role === USER_ROLES.BRANCH_ADMIN || role === USER_ROLES.PRINCIPAL) {
     return items.filter(item => !item.branchId || item.branchId === scope.branchId);
   }
 
-  if (scope.role === USER_ROLES.COORDINATOR) {
-    return items.filter(item => !item.wingId || item.wingId === scope.wingId);
+  if (role === USER_ROLES.COORDINATOR) {
+    return items.filter(item => {
+      const itemWing = item.wing || item.academicClass?.wing?.code;
+      return (
+        (!item.wingId || item.wingId === scope.wingId) &&
+        (!itemWing || itemWing === scope.wing)
+      );
+    });
   }
 
-  if (scope.role === USER_ROLES.TEACHER) {
+  if (role === USER_ROLES.TEACHER) {
     return items.filter(item => !item.sectionId || item.sectionId === scope.sectionId);
   }
 
-  if (scope.role === USER_ROLES.PARENT) {
+  if (role === USER_ROLES.PARENT) {
     return items.filter(item => !item.parentId || item.parentId === scope.parentId);
   }
 

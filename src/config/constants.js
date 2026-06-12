@@ -11,6 +11,16 @@ export const USER_ROLES = {
   FRONT_DESK: 'FRONT_DESK',
 };
 
+export const STAFF_TYPES = {
+  TEACHING: 'TEACHING',
+  SUPPORTING: 'SUPPORTING',
+};
+
+export const STAFF_TYPE_LABELS = {
+  [STAFF_TYPES.TEACHING]: 'Teaching Staff',
+  [STAFF_TYPES.SUPPORTING]: 'Supporting Staff',
+};
+
 export const ROLE_LABELS = {
   [USER_ROLES.MAIN_ADMIN]: 'Main Admin',
   [USER_ROLES.BRANCH_ADMIN]: 'Branch Admin',
@@ -25,6 +35,7 @@ export const ROLE_LABELS = {
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth.token',
   AUTH_USER: 'auth.user',
+  MAIN_ADMIN_BRANCH_CONTEXT: 'mainAdmin.branchContext',
   OTP_VERIFICATION_ID: 'auth.otpVerificationId',
 };
 
@@ -51,4 +62,14 @@ export const FEE_STATUS = {
   PARTIAL: 'PARTIAL',
   DUE: 'DUE',
   OVERDUE: 'OVERDUE',
+};
+
+export const USER_ROLE_ALIASES = {
+  MAIN_ADMIN: ['MAIN_ADMIN', 'main_admin'],
+  BRANCH_ADMIN: ['BRANCH_ADMIN', 'branch_admin'],
+  PRINCIPAL: ['PRINCIPAL', 'principal'],
+  COORDINATOR: ['COORDINATOR', 'coordinator'],
+  TEACHER: ['TEACHER', 'teacher'],
+  PARENT: ['PARENT', 'parent'],
+  ACCOUNTANT: ['ACCOUNTANT', 'accountant'],
 };

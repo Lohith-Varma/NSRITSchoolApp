@@ -12,13 +12,7 @@ import FeeLedgerScreen from '../screens/fees/FeeLedgerScreen';
 import PaidStudentsScreen from '../screens/fees/PaidStudentsScreen';
 import PaymentHistoryScreen from '../screens/fees/PaymentHistoryScreen';
 import StudentFeeDetailsScreen from '../screens/fees/StudentFeeDetailsScreen';
-
-import RecordPaymentScreen from '../screens/accountant/RecordPaymentScreen';
-import ResultPostingScreen from '../screens/accountant/ResultPostingScreen';
-import CreateNotificationScreen from '../screens/accountant/CreateNotificationScreen';
-import AuditLogsScreen from '../screens/accountant/AuditLogsScreen';
-import AccountantProfileScreen from '../screens/accountant/AccountantProfileScreen';
-import ExpensesScreen from '../screens/accountant/ExpensesScreen';
+import UploadOfflinePaymentScreen from '../screens/fees/UploadOfflinePaymentScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,30 +59,52 @@ const AccountantTabs = () => (
 
 // ─── Stack wraps Tabs + all push-navigable routes ───────────────────────────
 const AccountantNavigator = () => (
-  <Stack.Navigator screenOptions={{headerShown: false}}>
-    {/* Root: the tab bar */}
-    <Stack.Screen name="AccountantTabs" component={AccountantTabs} />
-
-    {/* ── Alias routes so DashboardScreen navigate() calls work ── */}
-    {/* QuickActionGrid calls navigate('FeeDashboard') */}
-    <Stack.Screen name="FeeDashboard" component={FeeDashboardScreen} />
-    {/* ERPLayout sidebar calls navigate('ClassWiseFeeReport') */}
-    <Stack.Screen name="ClassWiseFeeReport" component={ClassWiseFeeReportScreen} />
-
-    {/* ── Accountant-specific push screens ── */}
-    <Stack.Screen name="RecordPayment" component={RecordPaymentScreen} />
-    <Stack.Screen name="ResultPosting" component={ResultPostingScreen} />
-    <Stack.Screen name="CreateNotification" component={CreateNotificationScreen} />
-    <Stack.Screen name="AuditLogs" component={AuditLogsScreen} />
-    <Stack.Screen name="AccountantProfile" component={AccountantProfileScreen} />
-
-    {/* ── Shared fee sub-screens ── */}
-    <Stack.Screen name="StudentFeeDetails" component={StudentFeeDetailsScreen} />
-    <Stack.Screen name="PaymentHistory" component={PaymentHistoryScreen} />
-    <Stack.Screen name="FeeLedger" component={FeeLedgerScreen} />
-    <Stack.Screen name="DueStudents" component={DueStudentsScreen} />
-    <Stack.Screen name="PaidStudents" component={PaidStudentsScreen} />
-    <Stack.Screen name="UploadOfflinePayment" component={RecordPaymentScreen} />
+  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+    <Stack.Screen
+      name="AccountantDashboard"
+      component={DashboardScreen}
+      options={{title: 'Accountant'}}
+    />
+    <Stack.Screen
+      name="FeeDashboard"
+      component={FeeDashboardScreen}
+      options={{title: 'Fees'}}
+    />
+    <Stack.Screen
+      name="StudentFeeDetails"
+      component={StudentFeeDetailsScreen}
+      options={{title: 'Student Fee'}}
+    />
+    <Stack.Screen
+      name="PaymentHistory"
+      component={PaymentHistoryScreen}
+      options={{title: 'Payments'}}
+    />
+    <Stack.Screen
+      name="FeeLedger"
+      component={FeeLedgerScreen}
+      options={{title: 'Ledger'}}
+    />
+    <Stack.Screen
+      name="DueStudents"
+      component={DueStudentsScreen}
+      options={{title: 'Due Students'}}
+    />
+    <Stack.Screen
+      name="PaidStudents"
+      component={PaidStudentsScreen}
+      options={{title: 'Paid Students'}}
+    />
+    <Stack.Screen
+      name="UploadOfflinePayment"
+      component={UploadOfflinePaymentScreen}
+      options={{title: 'Upload Payment'}}
+    />
+    <Stack.Screen
+      name="ClassWiseFeeReport"
+      component={ClassWiseFeeReportScreen}
+      options={{title: 'Class-wise Report'}}
+    />
   </Stack.Navigator>
 );
 

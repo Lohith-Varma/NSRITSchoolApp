@@ -1,5 +1,10 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import authService from '../../services/auth/authService';
+import {
+  applyBranchContextToUser,
+  getMainAdminBranchContext,
+} from '../../services/mainAdmin/mainAdminContextService';
+import {USER_ROLES} from '../../config/constants';
 import {unwrapResponse} from '../../utils/firebaseResponse';
 
 export const bootstrapAuth = createAsyncThunk('auth/bootstrap', async () => {
@@ -7,6 +12,16 @@ export const bootstrapAuth = createAsyncThunk('auth/bootstrap', async () => {
   try {
     const session = await authService.getStoredSession();
     console.log('authSlice: bootstrapAuth thunk got session:', session);
+    const context = getMainAdminBranchContext();
+
+    if (session?.user && context) {
+      return {
+        ...session,
+        user: applyBranchContextToUser(session.user, context),
+        mainAdminBranchContext: context,
+      };
+    }
+
     return session;
   } catch (error) {
     console.error('authSlice: bootstrapAuth thunk error:', error);
@@ -57,6 +72,7 @@ const initialState = {
   token: null,
   user: null,
   role: null,
+  mainAdminBranchContext: null,
   verificationId: null,
   pendingPhone: null,
   loading: false,
@@ -69,6 +85,25 @@ const authSlice = createSlice({
   reducers: {
     clearAuthError: state => {
       state.error = null;
+    },
+    enterMainAdminBranchContext: (state, action) => {
+      state.mainAdminBranchContext = action.payload;
+      state.user = applyBranchContextToUser(state.user, action.payload);
+      state.role = state.user?.role || state.role;
+    },
+    clearMainAdminBranchContext: state => {
+      state.mainAdminBranchContext = null;
+      if (String(state.user?.role || '').toUpperCase() === USER_ROLES.MAIN_ADMIN) {
+        state.user = {
+          ...state.user,
+          branchId: null,
+          branchCode: null,
+          branchName: null,
+          wingId: null,
+          wing: null,
+          mainAdminBranchContext: null,
+        };
+      }
     },
   },
   extraReducers: builder => {
@@ -85,6 +120,7 @@ const authSlice = createSlice({
         state.token = session?.token || null;
         state.user = session?.user || null;
         state.role = session?.user?.role || null;
+        state.mainAdminBranchContext = session?.mainAdminBranchContext || null;
       })
       .addCase(bootstrapAuth.rejected, (state, action) => {
         console.log('authSlice: bootstrapAuth.rejected, action error:', action.error);
@@ -101,6 +137,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.role = action.payload.user.role;
+        state.mainAdminBranchContext = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -129,6 +166,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.role = action.payload.user.role;
+        state.mainAdminBranchContext = null;
         state.verificationId = null;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
@@ -140,11 +178,16 @@ const authSlice = createSlice({
         state.token = null;
         state.user = null;
         state.role = null;
+        state.mainAdminBranchContext = null;
         state.verificationId = null;
         state.pendingPhone = null;
       });
   },
 });
 
-export const {clearAuthError} = authSlice.actions;
+export const {
+  clearAuthError,
+  enterMainAdminBranchContext,
+  clearMainAdminBranchContext,
+} = authSlice.actions;
 export default authSlice.reducer;

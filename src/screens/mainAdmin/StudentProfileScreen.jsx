@@ -68,7 +68,7 @@ const StudentProfileScreen = ({route}) => {
     );
   }
 
-  const {student, summary, payments, fees} = data;
+  const {student, summary, payments, fees, feePlans, transferHistory, promotionHistory} = data;
 
   return (
     <ERPLayout
@@ -115,9 +115,12 @@ const StudentProfileScreen = ({route}) => {
       <ProfileCard title="Academic Details">
         <Info label="Branch" value={student.branch?.name} />
         <Info label="Class" value={student.academicClass?.name} />
+        <Info label="Wing" value={student.academicClass?.wing?.name || student.academicClass?.wing?.code} />
         <Info label="Section" value={student.section?.name} />
         <Info label="Roll Number" value={student.rollNumber} />
         <Info label="Admission Date" value={student.admissionDate} />
+        <Info label="Class Teacher" value={student.section?.classTeacher?.fullName} />
+        <Info label="Coordinator" value="All branch coordinators visible to Main Admin" />
       </ProfileCard>
 
       <ProfileCard title="Attendance Summary">
@@ -154,7 +157,7 @@ const StudentProfileScreen = ({route}) => {
           <List.Item
             key={payment.id}
             title={formatCurrency(payment.amount)}
-            description={`${payment.paymentMode} - ${payment.receiptNumber || 'No receipt'} - ${payment.paidAt}`}
+            description={`${payment.paymentMode || 'Payment'} - ${payment.receiptNumber || 'No receipt'} - ${payment.paidAt || payment.paymentDate || ''}`}
             left={props => <List.Icon {...props} icon="receipt" />}
           />
         ))
@@ -171,6 +174,48 @@ const StudentProfileScreen = ({route}) => {
           left={props => <List.Icon {...props} icon="cash-clock" />}
         />
       ))}
+
+      <SectionHeader title="Administrative Fee Plans" />
+      {feePlans?.length ? (
+        feePlans.map(plan => (
+          <List.Item
+            key={plan.id}
+            title={`Academic Year ${plan.academicYear}`}
+            description={`${formatCurrency(plan.totalAmount)} | ${plan.isActive ? 'Active' : 'Inactive'}`}
+            left={props => <List.Icon {...props} icon="file-document-outline" />}
+          />
+        ))
+      ) : (
+        <EmptyState title="No fee plans" message="Fee plans will appear here once assigned." />
+      )}
+
+      <SectionHeader title="Transfer History" />
+      {transferHistory?.length ? (
+        transferHistory.map(item => (
+          <List.Item
+            key={item.id}
+            title={`${item.oldSection?.academicClass?.name || ''}-${item.oldSection?.name || ''} to ${item.newSection?.academicClass?.name || ''}-${item.newSection?.name || ''}`}
+            description={`${item.changedAt} | By ${item.changedBy?.fullName || 'User'}`}
+            left={props => <List.Icon {...props} icon="swap-horizontal" />}
+          />
+        ))
+      ) : (
+        <EmptyState title="No transfers" message="Section transfer history will appear here." />
+      )}
+
+      <SectionHeader title="Promotion History" />
+      {promotionHistory?.length ? (
+        promotionHistory.map(item => (
+          <List.Item
+            key={item.id}
+            title={`${item.fromClass?.name || '-'} to ${item.toClass?.name || '-'}`}
+            description={`${item.promotedAt} | By ${item.promotedBy?.fullName || 'User'}`}
+            left={props => <List.Icon {...props} icon="school-outline" />}
+          />
+        ))
+      ) : (
+        <EmptyState title="No promotions" message="Promotion history will appear here." />
+      )}
 
       <ProfileCard title="Documents">
         <DocumentLink label="Aadhaar" url={student.aadhaarDocumentUrl} />

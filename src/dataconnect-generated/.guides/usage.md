@@ -12,7 +12,7 @@ For each operation, there is a wrapper hook that can be used to call the operati
 
 Here are all of the hooks that get generated:
 ```ts
-import { useCreateBranch, useUpdateBranch, useAssignBranchAdmin, useAssignPrincipal, useCreateClass, useCreateSection, useRemoveSection, useCreateUser, useClaimUserFirebaseUid, useCreateParent } from '@dataconnect/generated/react';
+import { useCreateBranch, useUpdateBranch, useAssignBranchAdmin, useAssignPrincipal, useCreateClass, useActivateClass, useDeactivateClass, useSeedAcademicClass, useCreateWing, useCreateSection } from '@dataconnect/generated/react';
 // The types of these hooks are available in react/index.d.ts
 
 const { data, isPending, isSuccess, isError, error } = useCreateBranch(createBranchVars);
@@ -25,15 +25,15 @@ const { data, isPending, isSuccess, isError, error } = useAssignPrincipal(assign
 
 const { data, isPending, isSuccess, isError, error } = useCreateClass(createClassVars);
 
+const { data, isPending, isSuccess, isError, error } = useActivateClass(activateClassVars);
+
+const { data, isPending, isSuccess, isError, error } = useDeactivateClass(deactivateClassVars);
+
+const { data, isPending, isSuccess, isError, error } = useSeedAcademicClass(seedAcademicClassVars);
+
+const { data, isPending, isSuccess, isError, error } = useCreateWing(createWingVars);
+
 const { data, isPending, isSuccess, isError, error } = useCreateSection(createSectionVars);
-
-const { data, isPending, isSuccess, isError, error } = useRemoveSection(removeSectionVars);
-
-const { data, isPending, isSuccess, isError, error } = useCreateUser(createUserVars);
-
-const { data, isPending, isSuccess, isError, error } = useClaimUserFirebaseUid(claimUserFirebaseUidVars);
-
-const { data, isPending, isSuccess, isError, error } = useCreateParent(createParentVars);
 
 ```
 
@@ -72,7 +72,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createBranch, updateBranch, assignBranchAdmin, assignPrincipal, createClass, createSection, removeSection, createUser, claimUserFirebaseUid, createParent } from '@dataconnect/generated';
+import { createBranch, updateBranch, assignBranchAdmin, assignPrincipal, createClass, activateClass, deactivateClass, seedAcademicClass, createWing, createSection } from '@dataconnect/generated';
 
 
 // Operation CreateBranch:  For variables, look at type CreateBranchVars in ../index.d.ts
@@ -90,20 +90,20 @@ const { data } = await AssignPrincipal(dataConnect, assignPrincipalVars);
 // Operation CreateClass:  For variables, look at type CreateClassVars in ../index.d.ts
 const { data } = await CreateClass(dataConnect, createClassVars);
 
+// Operation ActivateClass:  For variables, look at type ActivateClassVars in ../index.d.ts
+const { data } = await ActivateClass(dataConnect, activateClassVars);
+
+// Operation DeactivateClass:  For variables, look at type DeactivateClassVars in ../index.d.ts
+const { data } = await DeactivateClass(dataConnect, deactivateClassVars);
+
+// Operation SeedAcademicClass:  For variables, look at type SeedAcademicClassVars in ../index.d.ts
+const { data } = await SeedAcademicClass(dataConnect, seedAcademicClassVars);
+
+// Operation CreateWing:  For variables, look at type CreateWingVars in ../index.d.ts
+const { data } = await CreateWing(dataConnect, createWingVars);
+
 // Operation CreateSection:  For variables, look at type CreateSectionVars in ../index.d.ts
 const { data } = await CreateSection(dataConnect, createSectionVars);
-
-// Operation RemoveSection:  For variables, look at type RemoveSectionVars in ../index.d.ts
-const { data } = await RemoveSection(dataConnect, removeSectionVars);
-
-// Operation CreateUser:  For variables, look at type CreateUserVars in ../index.d.ts
-const { data } = await CreateUser(dataConnect, createUserVars);
-
-// Operation ClaimUserFirebaseUID:  For variables, look at type ClaimUserFirebaseUidVars in ../index.d.ts
-const { data } = await ClaimUserFirebaseUid(dataConnect, claimUserFirebaseUidVars);
-
-// Operation CreateParent:  For variables, look at type CreateParentVars in ../index.d.ts
-const { data } = await CreateParent(dataConnect, createParentVars);
 
 
 ```

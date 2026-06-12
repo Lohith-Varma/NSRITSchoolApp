@@ -2,6 +2,7 @@ import {USER_ROLES} from '../../config/constants';
 import {formatE164PhoneNumber, normalizePhoneNumber} from '../../utils/phone';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
+import StaffIdService from '../staff/StaffIdService';
 
 const CACHE_TTL = 60 * 1000;
 const cache = new Map();
@@ -45,6 +46,7 @@ const asArray = value => (Array.isArray(value) ? value : []);
 const isPresent = status => String(status || '').toUpperCase() === 'PRESENT';
 const isAbsent = status => String(status || '').toUpperCase() === 'ABSENT';
 const isTeacherRole = role => String(role || '').toUpperCase() === USER_ROLES.TEACHER;
+const isRole = (role, expected) => String(role || '').toUpperCase() === expected;
 
 const percent = (part, total) => {
   if (!total) {
@@ -102,12 +104,21 @@ const buildBranchList = data => {
     const branchTeachers = users.filter(
       item => item.branchId === branch.id && isTeacherRole(item.role),
     );
+    const branchCoordinators = users.filter(
+      item => item.branchId === branch.id && isRole(item.role, USER_ROLES.COORDINATOR),
+    );
+    const branchAccountants = users.filter(
+      item => item.branchId === branch.id && isRole(item.role, USER_ROLES.ACCOUNTANT),
+    );
 
     return {
       ...normalizeBranch(branch),
       totalClasses: branchClasses.length,
       totalStudents: branchStudents.length,
       totalTeachers: branchTeachers.length,
+      totalCoordinators: branchCoordinators.length,
+      totalAccountants: branchAccountants.length,
+      principalAvailable: Boolean(branch.principalId || branch.principal),
     };
   });
 };
@@ -146,36 +157,46 @@ const enrichClasses = data => {
   });
 };
 
-const enrichStudents = data => {
-  const attendance = asArray(data.attendances);
-  const fees = asArray(data.studentFees);
+const summarizeNestedStudent = student => {
+  const attendance = asArray(student.explorerAttendance);
+  const plans = asArray(student.explorerFeePlans);
+  const totalAmount = plans.reduce((sum, item) => sum + Number(item.totalAmount || 0), 0);
+  const paidAmount = plans.reduce(
+    (sum, item) =>
+      sum +
+      asArray(item.explorerFeePayments)
+        .filter(payment => String(payment.status || 'RECORDED').toUpperCase() !== 'REVERSED')
+        .reduce((paymentSum, payment) => paymentSum + Number(payment.amount || 0), 0),
+    0,
+  );
+  const pendingAmount = Math.max(totalAmount - paidAmount, 0);
 
-  return asArray(data.students).map(student => {
-    const studentAttendance = attendance.filter(item => item.studentId === student.id);
-    const studentFees = fees.filter(item => item.studentId === student.id);
-    const pendingAmount = studentFees.reduce(
-      (sum, item) => sum + Number(item.remainingAmount || 0),
-      0,
-    );
-
-    return {
-      ...student,
-      admissionNumber: student.studentId,
-      branchName: student.branch?.name || 'Branch',
-      className: student.academicClass?.name || 'Class',
-      sectionName: student.section?.name || '',
-      parentPhone: student.parent?.phoneNumber || student.phoneNumber,
-      attendancePercent: attendancePercent(studentAttendance),
-      feeStatus: pendingAmount > 0 ? 'PENDING' : 'PAID',
-      pendingAmount,
-    };
-  });
+  return {
+    ...student,
+    admissionNumber: student.studentId,
+    branchName: student.branch?.name || 'Branch',
+    branchCode: student.branch?.branchCode,
+    className: student.academicClass?.name || 'Class',
+    wing: student.academicClass?.wing?.code,
+    sectionName: student.section?.name || '',
+    parentPhone: student.parent?.phoneNumber || student.phoneNumber,
+    attendancePercent: attendancePercent(attendance),
+    feeStatus: pendingAmount > 0 ? 'PENDING' : 'PAID',
+    pendingAmount,
+  };
 };
 
 const summarizeProfile = data => {
   const attendance = asArray(data.attendances);
   const fees = asArray(data.studentFees);
-  const payments = asArray(data.payments);
+  const planPayments = asArray(data.studentDetailFeePlans).flatMap(plan =>
+    asArray(plan.detailFeePayments).map(payment => ({
+      ...payment,
+      feePlanId: plan.id,
+      academicYear: plan.academicYear,
+    })),
+  );
+  const payments = asArray(data.payments).length ? asArray(data.payments) : planPayments;
   const presentDays = attendance.filter(item => isPresent(item.status)).length;
   const absentDays = attendance.filter(item => isAbsent(item.status)).length;
 
@@ -184,6 +205,9 @@ const summarizeProfile = data => {
     attendance,
     fees,
     payments,
+    feePlans: asArray(data.studentDetailFeePlans),
+    transferHistory: asArray(data.studentSectionHistories),
+    promotionHistory: asArray(data.studentPromotionHistories),
     summary: {
       presentDays,
       absentDays,
@@ -192,6 +216,70 @@ const summarizeProfile = data => {
       paidAmount: fees.reduce((sum, item) => sum + Number(item.paidAmount || 0), 0),
       pendingAmount: fees.reduce((sum, item) => sum + Number(item.remainingAmount || 0), 0),
       nextDueDate: fees.find(item => Number(item.remainingAmount || 0) > 0)?.dueDate || null,
+    },
+  };
+};
+
+const buildReports = data => {
+  const branches = asArray(data.branches);
+  const users = asArray(data.users);
+  const students = asArray(data.students);
+  const attendances = asArray(data.attendances);
+  const feePlans = asArray(data.studentFeePlans);
+
+  const roleCount = (branchId, role) =>
+    users.filter(
+      user =>
+        user.branchId === branchId &&
+        String(user.role || '').toUpperCase() === String(role || '').toUpperCase(),
+    ).length;
+
+  const branchWise = branches.map(branch => {
+    const branchStudents = students.filter(student => student.branchId === branch.id);
+    const branchAttendance = attendances.filter(item => item.section?.branchId === branch.id);
+    const branchPlans = feePlans.filter(plan => plan.student?.branchId === branch.id);
+    const totalFees = branchPlans.reduce((sum, plan) => sum + Number(plan.totalAmount || 0), 0);
+    const concessionFees = branchPlans.reduce((sum, plan) => sum + Number(plan.concessionAmount || 0), 0);
+    const paidFees = branchPlans.reduce(
+      (sum, plan) =>
+        sum +
+        asArray(plan.reportPayments)
+          .filter(payment => String(payment.status || 'RECORDED').toUpperCase() !== 'REVERSED')
+          .reduce((paymentSum, payment) => paymentSum + Number(payment.amount || 0), 0),
+      0,
+    );
+
+    return {
+      branchId: branch.id,
+      branchName: branch.name,
+      branchCode: branch.branchCode,
+      students: branchStudents.length,
+      teachers: roleCount(branch.id, USER_ROLES.TEACHER),
+      coordinators: roleCount(branch.id, USER_ROLES.COORDINATOR),
+      accountants: roleCount(branch.id, USER_ROLES.ACCOUNTANT),
+      attendancePercent: attendancePercent(branchAttendance),
+      totalFees,
+      paidFees,
+      pendingFees: Math.max(totalFees - paidFees, 0),
+      concessionFees,
+      admissions: branchStudents.filter(student =>
+        String(student.admissionDate || '').startsWith(String(new Date().getFullYear())),
+      ).length,
+    };
+  });
+
+  return {
+    branchWise,
+    totals: {
+      students: students.length,
+      teachers: users.filter(user => isTeacherRole(user.role)).length,
+      coordinators: users.filter(user => String(user.role || '').toUpperCase() === USER_ROLES.COORDINATOR).length,
+      accountants: users.filter(user => String(user.role || '').toUpperCase() === USER_ROLES.ACCOUNTANT).length,
+      attendancePercent: attendancePercent(attendances),
+      totalFees: branchWise.reduce((sum, branch) => sum + branch.totalFees, 0),
+      paidFees: branchWise.reduce((sum, branch) => sum + branch.paidFees, 0),
+      pendingFees: branchWise.reduce((sum, branch) => sum + branch.pendingFees, 0),
+      concessionFees: branchWise.reduce((sum, branch) => sum + branch.concessionFees, 0),
     },
   };
 };
@@ -222,6 +310,8 @@ const mainAdminService = {
     );
     const students = asArray(data.students).filter(student => student.isActive !== false);
     const teachers = asArray(data.users).filter(user => isTeacherRole(user.role));
+    const coordinators = asArray(data.users).filter(user => isRole(user.role, USER_ROLES.COORDINATOR));
+    const accountants = asArray(data.users).filter(user => isRole(user.role, USER_ROLES.ACCOUNTANT));
     const activeClasses = asArray(data.academicClasses).filter(item => item.isActive !== false);
 
     return {
@@ -231,6 +321,8 @@ const mainAdminService = {
         totalClasses: activeClasses.length,
         totalStudents: students.length,
         totalTeachers: teachers.length,
+        totalCoordinators: coordinators.length,
+        totalAccountants: accountants.length,
         attendancePercent: attendancePercent(data.attendances),
         feeCollectionPercent: feeCollectionPercent(data.studentFees),
         totalFees: asArray(data.studentFees).reduce((sum, item) => sum + Number(item.totalFee || 0), 0),
@@ -278,7 +370,15 @@ const mainAdminService = {
     return data.users?.[0] || null;
   },
 
-  async createBranchRoleUser({branchId, fullName, countryCode = '+91', phoneNumber, role}) {
+  async createBranchRoleUser({
+    branchId,
+    fullName,
+    countryCode = '+91',
+    phoneNumber,
+    role,
+    employeeId = null,
+    staffType = null,
+  }) {
     const trimmedName = String(fullName || '').trim();
     const fullPhoneNumber = formatE164PhoneNumber({countryCode, phoneNumber});
 
@@ -301,6 +401,8 @@ const mainAdminService = {
       countryCode,
       phoneNumber: fullPhoneNumber,
       role,
+      employeeId,
+      staffType,
       branchId,
     });
 
@@ -310,6 +412,8 @@ const mainAdminService = {
       countryCode,
       phoneNumber: fullPhoneNumber,
       role,
+      employeeId,
+      staffType,
       branchId,
       isActive: true,
     };
@@ -353,28 +457,45 @@ const mainAdminService = {
     return user;
   },
 
-  async assignPrincipal({branchId, userId, allowMultipleAssignments = false}) {
+  async assignPrincipal({branchId, userId, staffId, allowMultipleAssignments = false}) {
     if (!allowMultipleAssignments) {
       await this.ensureAssignable(userId, branchId, 'principal');
     }
+    const resolvedStaffId =
+      staffId ||
+      (await StaffIdService.getNextStaffId({
+        branchId,
+        staffType: 'TEACHING',
+      }));
     await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.ASSIGN_PRINCIPAL, {
       branchId,
       principalId: userId,
+      employeeId: resolvedStaffId.employeeId,
+      joiningYear: resolvedStaffId.joiningYear,
+      branchCode: resolvedStaffId.branchCode,
+      serialNumber: resolvedStaffId.serialNumber,
     });
     invalidate('branch:', 'branches:');
   },
 
   async createAndAssignPrincipal(payload) {
+    const staffId = await StaffIdService.getNextStaffId({
+      branchId: payload.branchId,
+      staffType: 'TEACHING',
+    });
     const user = await this.createBranchRoleUser({
       ...payload,
       role: USER_ROLES.PRINCIPAL,
+      employeeId: staffId.employeeId,
+      staffType: staffId.staffType,
     });
     await this.assignPrincipal({
       branchId: payload.branchId,
       userId: user.id,
+      staffId,
       allowMultipleAssignments: true,
     });
-    return user;
+    return {...user, ...staffId};
   },
 
   async getGlobalClasses({filters = {}, searchText = '', forceRefresh = false} = {}) {
@@ -423,35 +544,27 @@ const mainAdminService = {
     pageSize = 25,
     forceRefresh = false,
   } = {}) {
-    const data = await withCache(
-      'students:global',
-      () => dataConnectClient.query(DATA_CONNECT_QUERIES.GET_GLOBAL_STUDENTS, {limit: 1000, offset: 0}),
-      forceRefresh,
-    );
-    const filtered = enrichStudents(data).filter(student => {
-      const matchesFilters =
-        (!filters.branchId || student.branchId === filters.branchId) &&
-        (!filters.classId || student.academicClassId === filters.classId) &&
-        (!filters.sectionId || student.sectionId === filters.sectionId) &&
-        (!filters.gender || student.gender === filters.gender) &&
-        (!filters.status ||
-          (filters.status === 'ACTIVE' ? student.isActive !== false : student.isActive === false));
-      return (
-        matchesFilters &&
-        matchesText(
-          [student.fullName, student.studentId, student.parentPhone, student.phoneNumber],
-          searchText,
-        )
-      );
+    const offset = (page - 1) * pageSize;
+    const data = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_GLOBAL_STUDENT_EXPLORER, {
+      branchId: filters.branchId || null,
+      academicClassId: filters.classId || filters.academicClassId || null,
+      sectionId: filters.sectionId || null,
+      status: filters.status || null,
+      searchText: String(searchText || '').trim(),
+      limit: pageSize + 1,
+      offset,
     });
-    const start = (page - 1) * pageSize;
+    const pageItems = asArray(data.students)
+      .map(summarizeNestedStudent)
+      .filter(student => !filters.gender || student.gender === filters.gender);
+    const items = pageItems.slice(0, pageSize);
 
     return {
-      items: filtered.slice(start, start + pageSize),
-      total: filtered.length,
+      items,
+      total: offset + items.length + (pageItems.length > pageSize ? 1 : 0),
       page,
       pageSize,
-      hasNextPage: start + pageSize < filtered.length,
+      hasNextPage: pageItems.length > pageSize,
       hasPreviousPage: page > 1,
     };
   },
@@ -459,10 +572,28 @@ const mainAdminService = {
   async getStudentProfile(studentId, {forceRefresh = false} = {}) {
     const data = await withCache(
       `student:${studentId}`,
-      () => dataConnectClient.query(DATA_CONNECT_QUERIES.GET_STUDENT_PROFILE, {studentId}),
+      () => dataConnectClient.query(DATA_CONNECT_QUERIES.GET_STUDENT_DETAILS, {studentId}),
       forceRefresh,
     );
     return summarizeProfile(data);
+  },
+
+  async getGlobalReports({forceRefresh = false} = {}) {
+    const data = await withCache(
+      'reports:global',
+      () => dataConnectClient.query(DATA_CONNECT_QUERIES.GET_GLOBAL_REPORTS),
+      forceRefresh,
+    );
+    return buildReports(data);
+  },
+
+  async getAuditLogs({branchId = null, limit = 100, offset = 0} = {}) {
+    const data = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_AUDIT_LOGS, {
+      branchId,
+      limit,
+      offset,
+    });
+    return data.auditLogs || [];
   },
 
   async getStudentAttendance(studentId) {
@@ -489,9 +620,22 @@ const mainAdminService = {
     const todayAttendance = asArray(data.attendances).filter(record =>
       String(record.attendanceDate || '').startsWith(todayKey()),
     );
+    const feePlans = asArray(data.studentFeePlans);
+    const paidFees = feePlans.reduce(
+      (sum, plan) =>
+        sum +
+        asArray(plan.reportPayments)
+          .filter(payment => String(payment.status || 'RECORDED').toUpperCase() !== 'REVERSED')
+          .reduce((paymentSum, payment) => paymentSum + Number(payment.amount || 0), 0),
+      0,
+    );
+    const totalFees = feePlans.reduce((sum, plan) => sum + Number(plan.totalAmount || 0), 0);
+    const concessionFees = feePlans.reduce((sum, plan) => sum + Number(plan.concessionAmount || 0), 0);
 
     return {
-      totalBranches: asArray(data.branches).filter(branch => branch.isActive !== false).length,
+      totalBranches: asArray(data.branches).length,
+      activeBranches: asArray(data.branches).filter(branch => branch.isActive !== false).length,
+      inactiveBranches: asArray(data.branches).filter(branch => branch.isActive === false).length,
       totalClasses: asArray(data.academicClasses).filter(item => item.isActive !== false).length,
       totalTeachers: teachers.length,
       totalStudents: asArray(data.students).length,
@@ -501,10 +645,10 @@ const mainAdminService = {
         0,
       ),
       todayAttendance: attendancePercent(todayAttendance),
-      pendingFees: asArray(data.studentFees).reduce(
-        (sum, item) => sum + Number(item.remainingAmount || 0),
-        0,
-      ),
+      branchWiseCollection: paidFees,
+      branchWiseDues: Math.max(totalFees - paidFees, 0),
+      branchWiseConcessions: concessionFees,
+      pendingFees: Math.max(totalFees - paidFees, 0),
       rawBranches: asArray(data.branches),
       rawUsers: asArray(data.users),
     };

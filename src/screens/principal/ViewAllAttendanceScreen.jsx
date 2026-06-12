@@ -1,41 +1,34 @@
-import React, {useEffect} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {
-  DashboardCard,
-  EmptyState,
-  Header,
-  ScreenContainer,
-} from '../../components';
-import {fetchAttendance} from '../../store/slices/attendanceSlice';
+import React from 'react';
+import {useSelector} from 'react-redux';
+import {useQuery} from '@tanstack/react-query';
+import {DashboardCard, EmptyState, Header, ScreenContainer} from '../../components';
+import attendanceService from '../../services/attendance/attendanceService';
 
-const ViewAllAttendanceScreen = () => {
-  const dispatch = useDispatch();
-  const {items} = useSelector(state => state.attendance);
-
-  useEffect(() => {
-    dispatch(fetchAttendance({}));
-  }, [dispatch]);
+const ViewAllAttendanceScreen = ({navigation}) => {
+  const user = useSelector(state => state.auth.user);
+  const {data: items = [], error, isLoading} = useQuery({
+    queryKey: ['branchAttendance', user?.branchId],
+    queryFn: () => attendanceService.getAttendance({branchId: user.branchId}),
+    enabled: Boolean(user?.branchId),
+  });
 
   return (
     <ScreenContainer>
-      <Header
-        title="All Attendance"
-        subtitle="Principal read-only attendance view"
-      />
+      <Header title="All Attendance" subtitle={isLoading ? 'Loading submitted attendance' : 'Review and correct attendance'} />
+      {error ? <EmptyState title="Unable to load attendance" message={error.message} /> : null}
       {items.length ? (
         items.map(item => (
           <DashboardCard
             key={item.id}
-            title={`${item.classId} / ${item.sectionId}`}
-            value={item.date}
-            description={`Submitted by ${item.submittedBy}`}
+            title={item.student?.fullName || item.studentId}
+            value={item.attendanceDate}
+            description={`${item.academicClass?.name || '-'}-${item.section?.name || '-'} | ${item.status} | Submitted by ${item.markedBy?.fullName || '-'}`}
+            icon="clipboard-text-outline"
+            onPress={() => navigation.navigate('EditAttendance')}
           />
         ))
       ) : (
-        <EmptyState
-          title="No attendance submitted"
-          message="Teacher submissions will appear here."
-        />
+        <EmptyState title="No attendance submitted" message="Teacher submissions will appear here." />
       )}
     </ScreenContainer>
   );
