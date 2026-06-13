@@ -59,7 +59,6 @@ const BranchAdminTabs = () => (
 
 // ─── Stack wraps Tabs + all push-navigable routes ───────────────────────────
 const BranchAdminNavigator = () => (
-<<<<<<< HEAD
   <Stack.Navigator screenOptions={{headerShown: false}}>
     {/* Root: the tab bar */}
     <Stack.Screen name="BranchAdminTabs" component={BranchAdminTabs} />

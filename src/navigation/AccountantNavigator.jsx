@@ -5,14 +5,16 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {colors} from '../theme';
 
 import DashboardScreen from '../screens/accountant/DashboardScreen';
-import ClassWiseFeeReportScreen from '../screens/fees/ClassWiseFeeReportScreen';
-import DueStudentsScreen from '../screens/fees/DueStudentsScreen';
+import ExpensesScreen from '../screens/accountant/ExpensesScreen';
+import AccountantProfileScreen from '../screens/accountant/AccountantProfileScreen';
+import RecordPaymentScreen from '../screens/accountant/RecordPaymentScreen';
+import ResultPostingScreen from '../screens/accountant/ResultPostingScreen';
+import CreateNotificationScreen from '../screens/accountant/CreateNotificationScreen';
+import AuditLogsScreen from '../screens/accountant/AuditLogsScreen';
+
 import FeeDashboardScreen from '../screens/fees/FeeDashboardScreen';
-import FeeLedgerScreen from '../screens/fees/FeeLedgerScreen';
-import PaidStudentsScreen from '../screens/fees/PaidStudentsScreen';
-import PaymentHistoryScreen from '../screens/fees/PaymentHistoryScreen';
-import StudentFeeDetailsScreen from '../screens/fees/StudentFeeDetailsScreen';
-import UploadOfflinePaymentScreen from '../screens/fees/UploadOfflinePaymentScreen';
+import ClassWiseFeeReportScreen from '../screens/fees/ClassWiseFeeReportScreen';
+import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -59,52 +61,23 @@ const AccountantTabs = () => (
 
 // ─── Stack wraps Tabs + all push-navigable routes ───────────────────────────
 const AccountantNavigator = () => (
-  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
-    <Stack.Screen
-      name="AccountantDashboard"
-      component={DashboardScreen}
-      options={{title: 'Accountant'}}
-    />
-    <Stack.Screen
-      name="FeeDashboard"
-      component={FeeDashboardScreen}
-      options={{title: 'Fees'}}
-    />
-    <Stack.Screen
-      name="StudentFeeDetails"
-      component={StudentFeeDetailsScreen}
-      options={{title: 'Student Fee'}}
-    />
-    <Stack.Screen
-      name="PaymentHistory"
-      component={PaymentHistoryScreen}
-      options={{title: 'Payments'}}
-    />
-    <Stack.Screen
-      name="FeeLedger"
-      component={FeeLedgerScreen}
-      options={{title: 'Ledger'}}
-    />
-    <Stack.Screen
-      name="DueStudents"
-      component={DueStudentsScreen}
-      options={{title: 'Due Students'}}
-    />
-    <Stack.Screen
-      name="PaidStudents"
-      component={PaidStudentsScreen}
-      options={{title: 'Paid Students'}}
-    />
-    <Stack.Screen
-      name="UploadOfflinePayment"
-      component={UploadOfflinePaymentScreen}
-      options={{title: 'Upload Payment'}}
-    />
-    <Stack.Screen
-      name="ClassWiseFeeReport"
-      component={ClassWiseFeeReportScreen}
-      options={{title: 'Class-wise Report'}}
-    />
+  <Stack.Navigator screenOptions={{headerShown: false}}>
+    {/* Root: the tab bar */}
+    <Stack.Screen name="AccountantTabs" component={AccountantTabs} />
+
+    {/* ── Alias routes so DashboardScreen navigate() calls work ── */}
+    <Stack.Screen name="FeeDashboard" component={FeeDashboardScreen} />
+    <Stack.Screen name="ClassWiseFeeReport" component={ClassWiseFeeReportScreen} />
+
+    {/* ── Accountant-specific push screens ── */}
+    <Stack.Screen name="RecordPayment" component={RecordPaymentScreen} />
+    <Stack.Screen name="ResultPosting" component={ResultPostingScreen} />
+    <Stack.Screen name="CreateNotification" component={CreateNotificationScreen} />
+    <Stack.Screen name="AuditLogs" component={AuditLogsScreen} />
+    <Stack.Screen name="AccountantProfile" component={AccountantProfileScreen} />
+
+    {/* ── Shared fee sub-screens (StudentFeeDetails, PaymentHistory, etc.) ── */}
+    {renderFeeStackScreens(Stack, {skipDashboard: true, canUpload: true, reports: true})}
   </Stack.Navigator>
 );
 
