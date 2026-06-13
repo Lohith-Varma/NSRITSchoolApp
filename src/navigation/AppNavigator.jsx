@@ -47,11 +47,6 @@ const AppNavigator = () => {
   console.log('AppNavigator render state:', {isBootstrapping, isAuthenticated, role});
 
   useEffect(() => {
-    console.log('AppNavigator dispatching bootstrapAuth...');
-    dispatch(bootstrapAuth());
-  }, [dispatch]);
-
-  useEffect(() => {
     const canSeedClasses = ['PRINCIPAL', 'BRANCH_ADMIN', 'MAIN_ADMIN'].includes(
       String(role || '').toUpperCase(),
     );
@@ -66,7 +61,10 @@ const AppNavigator = () => {
     console.log('AppNavigator: rendering SplashScreen');
     return (
       <NavigationContainer onReady={() => console.log('NavigationContainer: Ready')}>
-        <SplashScreen />
+        <SplashScreen onFinish={() => {
+          console.log('AppNavigator: SplashScreen finished, bootstrapping auth...');
+          dispatch(bootstrapAuth());
+        }} />
       </NavigationContainer>
     );
   }
