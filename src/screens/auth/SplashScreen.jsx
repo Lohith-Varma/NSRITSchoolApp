@@ -124,13 +124,9 @@ const SplashScreen = ({ onFinish }) => {
     return (
         <View style={styles.container}>
             <StatusBar
-                backgroundColor="#F2F4F7"
+                backgroundColor="#FFFFFF"
                 barStyle="dark-content"
             />
-
-            {/* Subtle Modern Background Shapes */}
-            <View style={styles.bgCircle1} />
-            <View style={styles.bgCircle2} />
 
             {/* Main Branding Content */}
             <View style={styles.content}>
@@ -186,7 +182,7 @@ const SplashScreen = ({ onFinish }) => {
                         <Animated.View style={[styles.lineHalf, { transform: [{ scaleX: dividerScaleX }] }]} />
                         
                         <Animated.Text style={[styles.sanskritText, { opacity: sanskritOpacity }]}>
-                            ज्ञानं परमं बलम्
+                            जज्ञानं परमं बलम्
                         </Animated.Text>
                         
                         <Animated.View style={[styles.lineHalf, { transform: [{ scaleX: dividerScaleX }] }]} />
@@ -199,14 +195,6 @@ const SplashScreen = ({ onFinish }) => {
                     </Animated.Text>
                 </Animated.View>
             </View>
-
-            {/* Footer System Badge & Loading Indicator */}
-            <Animated.View style={[styles.footer, { opacity: systemOpacity }]}>
-                <Text style={styles.systemText}>
-                    NSRIT CONNECT
-                </Text>
-                <LoadingDots />
-            </Animated.View>
         </View>
     );
 };
@@ -259,42 +247,16 @@ const LoadingDots = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F4F7',
-        justifyContent: 'space-between',
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,
-        paddingTop: 80,
-        paddingBottom: 40,
-    },
-
-    bgCircle1: {
-        position: 'absolute',
-        width: 280,
-        height: 280,
-        borderRadius: 140,
-        backgroundColor: '#E2EAF5',
-        top: -90,
-        right: -60,
-        opacity: 0.6,
-    },
-
-    bgCircle2: {
-        position: 'absolute',
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        backgroundColor: '#E8EDF7',
-        bottom: 80,
-        left: -70,
-        opacity: 0.6,
     },
 
     content: {
         alignItems: 'center',
         justifyContent: 'center',
-        flex: 1,
         width: '100%',
-        marginTop: 20,
     },
 
     titleContainer: {
@@ -308,117 +270,89 @@ const styles = StyleSheet.create({
     },
 
     logo: {
-        width: 140,
-        height: 224, // 1:1.6 aspect ratio
+        width: 180,
+        height: 288,
         marginBottom: 20,
     },
 
     schoolName: {
-        color: '#1F344A',
-        fontSize: 14,
-        fontWeight: '800',
-        letterSpacing: 1.5,
+        color: '#1F3E66',
+        fontSize: 16,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
         textAlign: 'center',
-        lineHeight: 20,
+        lineHeight: 22,
     },
 
     schoolSubName: {
         marginTop: 4,
-        color: '#1F344A',
-        fontSize: 11,
-        fontWeight: '600',
-        letterSpacing: 2.2,
+        color: '#1F3E66',
+        fontSize: 13,
+        fontWeight: 'bold',
+        letterSpacing: 1.5,
         textAlign: 'center',
     },
 
     dividerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: 280,
-        marginTop: 16,
-        marginBottom: 10,
+        width: '85%',
+        marginTop: 20,
+        marginBottom: 12,
     },
 
     sanskritRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: 280,
-        marginTop: 12,
-        marginBottom: 8,
+        width: '85%',
+        marginTop: 14,
+        marginBottom: 10,
     },
 
     greenDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: '#3AAB47',
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#3DAE49',
     },
 
     line: {
         flex: 1,
         height: 1,
-        backgroundColor: '#D4D3D3',
-        marginHorizontal: 8,
+        backgroundColor: '#B0B0B0',
+        marginHorizontal: 10,
     },
 
     lineHalf: {
         flex: 1,
         height: 1,
-        backgroundColor: '#D4D3D3',
-        marginHorizontal: 8,
+        backgroundColor: '#B0B0B0',
+        marginHorizontal: 10,
     },
 
     motto: {
-        color: '#3AAB47',
-        fontSize: 12,
-        letterSpacing: 2.5,
-        fontWeight: '700',
+        color: '#3DAE49',
+        fontSize: 13,
+        letterSpacing: 2,
+        fontWeight: 'bold',
         textAlign: 'center',
     },
 
     sanskritText: {
-        color: '#1F344A',
-        fontSize: 14,
-        fontWeight: '800',
+        color: '#1F3E66',
+        fontSize: 17,
+        fontWeight: 'bold',
         textAlign: 'center',
-        letterSpacing: 0.5,
+        marginHorizontal: 10,
     },
 
     tagline: {
-        color: '#3AAB47',
-        fontSize: 12,
-        fontWeight: '600',
+        color: '#3DAE49',
+        fontSize: 13,
+        fontWeight: 'bold',
         fontStyle: 'italic',
         textAlign: 'center',
-        marginTop: 4,
-    },
-
-    footer: {
-        alignItems: 'center',
-        width: '100%',
-        marginTop: 20,
-    },
-
-    systemText: {
-        color: '#1F344A',
-        fontSize: 11,
-        fontWeight: '700',
-        letterSpacing: 3,
-        marginBottom: 15,
-    },
-
-    loadingRow: {
-        flexDirection: 'row',
-        gap: 8,
-        height: 12,
-        alignItems: 'center',
-    },
-
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#1F344A',
+        marginTop: 6,
     },
 });
 
