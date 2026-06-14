@@ -23,10 +23,31 @@ const DashboardScreen = ({navigation}) => {
       subtitle="Wing attendance, teacher assignments, corrections, and fee plans"
       primaryActions={[
         {
+          title: 'Add Student',
+          value: 'New',
+          icon: 'account-plus-outline',
+          route: 'AddStudent',
+          tone: colors.success,
+        },
+        {
           title: 'Students',
           value: 'Manage',
           icon: 'account-school-outline',
           route: 'StudentManagement',
+        },
+        {
+          title: 'Attendance',
+          value: 'Wing',
+          icon: 'clipboard-check-outline',
+          route: 'WingAttendance',
+          tone: colors.primary,
+        },
+        {
+          title: 'Correct Attendance',
+          value: 'Edit',
+          icon: 'playlist-edit',
+          route: 'EditAttendance',
+          tone: colors.warning,
         },
         {
           title: 'Teachers',
@@ -39,18 +60,6 @@ const DashboardScreen = ({navigation}) => {
           value: 'Assign',
           icon: 'teach',
           route: 'AssignClassTeacher',
-        },
-        {
-          title: 'Wing',
-          value: 'View',
-          icon: 'view-grid-outline',
-          route: 'WingAttendance',
-        },
-        {
-          title: 'Correct',
-          value: 'Edit',
-          icon: 'playlist-edit',
-          route: 'EditAttendance',
         },
         {
           title: 'Fees',

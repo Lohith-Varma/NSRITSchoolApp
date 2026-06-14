@@ -1,8 +1,8 @@
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from '../../components';
-import {WING_LABELS} from '../../config/academic';
 import teacherService from '../../services/teachers/teacherService';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const TeacherProfileScreen = ({route}) => {
   const teacherId = route.params?.teacherId;
@@ -41,17 +41,17 @@ const TeacherProfileScreen = ({route}) => {
     <ScreenContainer>
       <Header
         title={teacher.fullName || teacher.user?.fullName || 'Teacher'}
-        subtitle={`${teacher.designation || 'Teacher'} | ${WING_LABELS[teacher.wing] || teacher.wing}`}
+        subtitle={`${teacher.designation || 'Teacher'} | ${teacher.branch?.name || 'Branch resource'}`}
       />
       <SectionHeader title="Personal Information" />
       <DashboardCard title="Mobile" value={teacher.phoneNumber || teacher.user?.phoneNumber || '-'} icon="phone" />
       <DashboardCard title="Gender" value={teacher.gender || '-'} icon="account-outline" />
       <DashboardCard title="Email" value={teacher.email || '-'} icon="email-outline" />
-      <DashboardCard title="Date of Birth" value={teacher.dateOfBirth || '-'} icon="calendar-account-outline" />
+      <DashboardCard title="Date of Birth" value={formatDateForDisplay(teacher.dateOfBirth) || '-'} icon="calendar-account-outline" />
       <DashboardCard title="Blood Group" value={teacher.bloodGroup || '-'} icon="water-outline" />
       <SectionHeader title="Employment Information" />
       <DashboardCard title="Employee ID" value={teacher.employeeId || '-'} icon="identifier" />
-      <DashboardCard title="Joining Date" value={teacher.joiningDate || '-'} icon="calendar-start" />
+      <DashboardCard title="Joining Date" value={formatDateForDisplay(teacher.joiningDate) || '-'} icon="calendar-start" />
       <DashboardCard title="Designation" value={teacher.designation || '-'} icon="briefcase-account-outline" />
       <DashboardCard title="Qualification" value={teacher.qualification || '-'} icon="school-outline" />
       <DashboardCard title="Experience" value={teacher.experience || '-'} icon="briefcase-outline" />
@@ -59,8 +59,9 @@ const TeacherProfileScreen = ({route}) => {
       <SectionHeader title="Academic Assignments" />
       <DashboardCard title="Assigned Subjects" value={teacher.subjects?.map(item => item.name).join(', ') || 'None'} icon="book-open-outline" />
       <DashboardCard
-        title="Class Teacher Section"
+        title="Class Teacher Assignment"
         value={assignedSection ? `${assignedSection.academicClass?.name}-${assignedSection.name}` : 'None'}
+        description={assignedSection ? 'Assigned as class teacher' : 'No class teacher assignment'}
         icon="google-classroom"
       />
       <DashboardCard

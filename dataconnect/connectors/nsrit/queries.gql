@@ -36,7 +36,7 @@ query GetUserByPhone($phoneNumber: String!) @auth(level: USER) {
     employeeId
     staffType
     branchId
-    wingId
+    wingId @retired
     branch {
       id
       branchCode
@@ -863,7 +863,7 @@ query GetTeacherAssignments($teacherId: UUID!) @auth(level: USER) {
     id
     teacherId
     branchId
-    wingId
+    wingId @retired
     academicClassId
     sectionId
     subjectName
@@ -1654,7 +1654,35 @@ query GetSections($branchId: UUID!, $academicYear: Int!, $limit: Int = 100, $off
       id
       fullName
       phoneNumber
+      employeeId
+      staffType
       role
+    }
+    classTeacherAssignments: teacherSectionAssignments_on_section(
+      where: {isClassTeacher: {eq: true}, isActive: {eq: true}}
+      limit: 1
+    ) {
+      id
+      teacherId
+      sectionId
+      createdAt
+      updatedAt
+      assignedBy {
+        id
+        fullName
+        role
+      }
+      teacher {
+        id
+        employeeId
+        staffType
+        user {
+          id
+          fullName
+          phoneNumber
+          employeeId
+        }
+      }
     }
   }
   students(where: {branchId: {eq: $branchId}, status: {eq: "ACTIVE"}}, limit: 1000) {
@@ -1909,7 +1937,7 @@ query GetTeachers($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(le
   currentUser: users(
     where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
     limit: 1
-  ) @redact @check(expr: "this.exists(u, ((u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Branch leadership required") {
+  ) @redact @check(expr: "this.exists(u, ((u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin' || u.role == 'COORDINATOR' || u.role == 'coordinator') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Branch teacher access required") {
     id
     role
     branchId
@@ -1920,7 +1948,7 @@ query GetTeachers($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(le
     employeeId
     staffType
     branchId
-    wing
+    wing @retired
     joiningDate
     designation
     gender
@@ -1996,13 +2024,13 @@ query GetTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int = 50, $off
     role
     branchId
   }
-  teachers(where: {branchId: {eq: $branchId}, wing: {eq: $wing}}, orderBy: {createdAt: DESC}, limit: $limit, offset: $offset) {
+  teachers(where: {branchId: {eq: $branchId}}, orderBy: {createdAt: DESC}, limit: $limit, offset: $offset) {
     id
     userId
     employeeId
     staffType
     branchId
-    wing
+    wing @retired
     joiningDate
     designation
     gender
@@ -2061,13 +2089,13 @@ query GetCoordinatorTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int
   ) @redact @check(expr: "this.exists(c, true)", message: "Coordinator wing access required") {
     id
   }
-  teachers(where: {branchId: {eq: $branchId}, wing: {eq: $wing}}, orderBy: {createdAt: DESC}, limit: $limit, offset: $offset) {
+  teachers(where: {branchId: {eq: $branchId}}, orderBy: {createdAt: DESC}, limit: $limit, offset: $offset) {
     id
     userId
     employeeId
     staffType
     branchId
-    wing
+    wing @retired
     joiningDate
     designation
     gender
@@ -2129,7 +2157,7 @@ query GetTeacherProfile($teacherId: UUID!) @auth(level: USER) {
     employeeId
     staffType
     branchId
-    wing
+    wing @retired
     joiningDate
     designation
     gender
@@ -2208,7 +2236,7 @@ query GetTeacherProfile($teacherId: UUID!) @auth(level: USER) {
         }
       }
     }
-    transferHistories: teacherTransferHistories_on_teacher(orderBy: {changedAt: DESC}, limit: 20) {
+    transferHistories: teacherTransferHistories_on_teacher(orderBy: {changedAt: DESC}, limit: 20) @retired {
       id
       oldWing
       newWing
@@ -2243,7 +2271,7 @@ query GetTeacherProfileByUser($userId: UUID!) @auth(level: USER) {
     employeeId
     staffType
     branchId
-    wing
+    wing @retired
     joiningDate
     designation
     gender
@@ -2262,7 +2290,7 @@ query GetTeacherDashboard($teacherId: UUID!) @auth(level: USER) {
     id
     userId
     branchId
-    wing
+    wing @retired
     employeeId
     staffType
     designation
@@ -2493,6 +2521,111 @@ query GetFeeCategories($limit: Int = 100, $offset: Int = 0) @auth(level: USER) {
     name
     status
     createdAt
+  }
+}
+
+query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: Int = 500) @auth(level: USER) {
+  currentUser: users(
+    where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+    limit: 1
+  ) @redact @check(expr: "this.exists(u, ((u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'BRANCH_ADMIN' || u.role == 'branch_admin' || u.role == 'COORDINATOR' || u.role == 'coordinator') && u.branchId == vars.branchId) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin' || u.role == 'TEACHER' || u.role == 'teacher')", message: "Class teacher assignment access required") {
+    id
+    role
+    branchId
+  }
+  sections(
+    where: {branchId: {eq: $branchId}, academicYear: {eq: $academicYear}, isActive: {eq: true}}
+    orderBy: {name: ASC}
+    limit: $limit
+  ) {
+    id
+    branchId
+    wingId
+    academicClassId
+    name
+    academicYear
+    classTeacherId
+    isActive
+    academicClass {
+      id
+      name
+      sortOrder
+      wing {
+        id
+        code
+        name
+      }
+    }
+    classTeacher {
+      id
+      fullName
+      phoneNumber
+      employeeId
+      staffType
+      role
+    }
+  }
+  teacherSectionAssignments(
+    where: {section: {branchId: {eq: $branchId}, academicYear: {eq: $academicYear}}, isClassTeacher: {eq: true}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+  ) {
+    id
+    teacherId
+    sectionId
+    isClassTeacher
+    isActive
+    createdAt
+    updatedAt
+    assignedBy {
+      id
+      fullName
+      role
+    }
+    teacher {
+      id
+      employeeId
+      staffType
+      user {
+        id
+        fullName
+        phoneNumber
+        employeeId
+        role
+      }
+    }
+    section {
+      id
+      branchId
+      wingId
+      name
+      academicYear
+      classTeacherId
+      academicClass {
+        id
+        name
+        sortOrder
+        wing {
+          id
+          code
+          name
+        }
+      }
+    }
+  }
+  students(where: {branchId: {eq: $branchId}, status: {eq: "ACTIVE"}, isActive: {eq: true}}, limit: 1000) {
+    id
+    sectionId
+  }
+  coordinators(where: {branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 20) {
+    id
+    wing
+    user {
+      id
+      fullName
+      employeeId
+      phoneNumber
+    }
   }
 }
 

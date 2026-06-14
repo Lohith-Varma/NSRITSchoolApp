@@ -20,22 +20,25 @@ const Header = ({title, subtitle, actionLabel, onAction}) => (
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
+    gap: spacing.md,
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
   },
   copy: {
     flex: 1,
-    paddingRight: spacing.md,
+    minWidth: 0,
   },
   title: {
     ...typography.title,
     color: colors.text,
+    flexShrink: 1,
   },
   subtitle: {
     color: colors.textMuted,
     marginTop: spacing.xs,
+    paddingRight: spacing.sm,
   },
 });
 

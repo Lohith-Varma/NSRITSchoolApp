@@ -1,5 +1,8 @@
 import React, {useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
+import XLSX from 'xlsx';
 import {Text} from 'react-native-paper';
 import {useQuery} from '@tanstack/react-query';
 import {CustomButton, DashboardCard, EmptyState, FilterTabs, Header, SearchBar, SectionHeader} from '../../components';
@@ -8,14 +11,37 @@ import useFeeAccess from '../../hooks/useFeeAccess';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
-const toCsv = records => [
-  'Student,Admission Number,Class,Section,Total Fee,Paid Amount,Pending Amount,Concession',
-  ...records.map(item =>
-    [item.studentName, item.admissionNumber, item.className, item.sectionName, item.totalFee, item.paidAmount, item.dueAmount, item.concessionAmount]
-      .map(value => `"${String(value ?? '').replace(/"/g, '""')}"`)
-      .join(','),
-  ),
-].join('\n');
+const exportReport = async (records, format = 'csv') => {
+  try {
+    const headers = ['Student', 'Admission Number', 'Class', 'Section', 'Total Fee', 'Paid Amount', 'Pending Amount', 'Concession'];
+    const rows = records.map(item => [
+      item.studentName, item.admissionNumber, item.className, item.sectionName,
+      item.totalFee, item.paidAmount, item.dueAmount, item.concessionAmount
+    ]);
+    
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    
+    const bookType = format === 'csv' ? 'csv' : 'xlsx';
+    const wbout = XLSX.write(wb, { type: 'base64', bookType });
+    
+    const ext = format === 'csv' ? 'csv' : 'xlsx';
+    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const filePath = `${RNFS.CachesDirectoryPath}/FeeReport.${ext}`;
+    
+    await RNFS.writeFile(filePath, wbout, 'base64');
+    
+    await Share.open({
+      title: `Fee Report`,
+      url: `file://${filePath}`,
+      type: mimeType,
+      failOnCancel: false,
+    });
+  } catch (err) {
+    console.error("Export error:", err);
+  }
+};
 
 const statusTabs = [
   {label: 'All', value: 'ALL'},
@@ -32,7 +58,6 @@ const FeeReportsScreen = () => {
   const canViewReports = feeService.canViewReports(access.role);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('ALL');
-  const [csvPreview, setCsvPreview] = useState('');
   const {data, error, isLoading} = useQuery({
     queryKey: ['feeReports', access.branchId],
     queryFn: () => feeService.getFeeReports(access),
@@ -75,9 +100,8 @@ const FeeReportsScreen = () => {
             </View>
             <SearchBar value={query} onChangeText={setQuery} placeholder="Filter reports" />
             <FilterTabs tabs={statusTabs} value={status} onChange={setStatus} />
-            <CustomButton mode="outlined" onPress={() => setCsvPreview(toCsv(filtered))}>Export CSV</CustomButton>
-            <CustomButton mode="outlined" onPress={() => setCsvPreview(toCsv(filtered))}>Export Excel</CustomButton>
-            {csvPreview ? <Text style={styles.csvPreview} numberOfLines={4}>{csvPreview}</Text> : null}
+            <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'csv')}>Export CSV</CustomButton>
+            <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'xlsx')}>Export Excel</CustomButton>
             <SectionHeader title="Class-wise Report" />
             {(data?.classWise || []).map(item => (
               <DashboardCard
@@ -110,7 +134,6 @@ const styles = StyleSheet.create({
   container: {backgroundColor: colors.background, flex: 1},
   list: {padding: spacing.lg, paddingBottom: spacing.xxxl},
   grid: {gap: spacing.sm},
-  csvPreview: {color: colors.textMuted, marginVertical: spacing.md},
 });
 
 export default FeeReportsScreen;

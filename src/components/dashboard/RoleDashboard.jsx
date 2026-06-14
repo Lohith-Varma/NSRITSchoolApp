@@ -51,6 +51,27 @@ const RoleDashboard = ({
         onLogout={() => dispatch(logoutUser())}
       />
 
+      <SectionHeader
+        title="Priority Actions"
+        subtitle="Most-used workflows for this role"
+      />
+      <View style={styles.grid}>
+        {primaryActions.map(action => (
+          <StatCard
+            key={action.title}
+            title={action.title}
+            value={action.value}
+            icon={action.icon}
+            tone={action.tone}
+            onPress={() => navigation.navigate(action.route)}
+          />
+        ))}
+      </View>
+
+      <SectionHeader
+        title="Operational Snapshot"
+        subtitle="Attendance, fee, and role-specific metrics"
+      />
       <View style={styles.grid}>
         <StatCard
           title="Attendance"
@@ -67,23 +88,6 @@ const RoleDashboard = ({
         />
         {stats.map(item => (
           <StatCard key={item.title} {...item} />
-        ))}
-      </View>
-
-      <SectionHeader
-        title="Quick Actions"
-        subtitle="Common workflows for this role"
-      />
-      <View style={styles.grid}>
-        {primaryActions.map(action => (
-          <StatCard
-            key={action.title}
-            title={action.title}
-            value={action.value}
-            icon={action.icon}
-            tone={action.tone}
-            onPress={() => navigation.navigate(action.route)}
-          />
         ))}
       </View>
 

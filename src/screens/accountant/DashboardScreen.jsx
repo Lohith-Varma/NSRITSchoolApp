@@ -1,11 +1,20 @@
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {useDispatch, useSelector} from 'react-redux';
-import {DashboardCard, Header, PaymentCard, ScreenContainer, SectionHeader} from '../../components';
+import {
+  DashboardCard,
+  EmptyState,
+  Header,
+  PaymentCard,
+  ScreenContainer,
+  SectionHeader,
+} from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {toISODate} from '../../utils/helpers/dateHelpers';
 import {logoutUser} from '../../store/slices/authSlice';
+import {colors} from '../../theme';
 
 const isSameMonth = date => {
   const value = new Date(date);
@@ -24,7 +33,7 @@ const DashboardScreen = ({navigation}) => {
   });
   const records = data?.records || [];
   const payments = data?.payments || [];
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toISODate(new Date());
   const todaysCollections = payments
     .filter(item => item.paymentDate === today)
     .reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -41,17 +50,22 @@ const DashboardScreen = ({navigation}) => {
         actionLabel="Logout"
         onAction={() => dispatch(logoutUser())}
       />
-      <DashboardCard title="Today's Collections" value={formatCurrency(todaysCollections)} icon="cash-check" />
-      <DashboardCard title="Monthly Collections" value={formatCurrency(monthlyCollections)} icon="calendar-month-outline" />
-      <DashboardCard title="Pending Amount" value={formatCurrency(summary.dueAmount)} icon="cash-clock" />
-      <DashboardCard title="Students with Dues" value={String(summary.dueStudents)} icon="account-alert-outline" />
-      <SectionHeader title="Quick Actions" />
-      <DashboardCard title="Fee Collection" value="Record" icon="cash-plus" onPress={() => navigation.navigate('FeeCollection')} />
-      <DashboardCard title="Outstanding Fees" value="View" icon="account-alert-outline" onPress={() => navigation.navigate('DueStudents')} />
-      <DashboardCard title="Payment History" value="Receipts" icon="receipt-text-clock" onPress={() => navigation.navigate('PaymentHistory')} />
-      <DashboardCard title="Reports" value="View" icon="file-chart-outline" onPress={() => navigation.navigate('FeeReports')} />
+      <SectionHeader title="Priority Actions" subtitle="Fast fee desk workflows" />
+      <DashboardCard title="Record Payment" value="Collect" icon="cash-plus" tone={colors.success} onPress={() => navigation.navigate('FeeCollection')} />
+      <DashboardCard title="Outstanding Fees" value="Follow up" icon="account-alert-outline" tone={colors.danger} onPress={() => navigation.navigate('DueStudents')} />
+      <DashboardCard title="Payment History" value="Receipts" icon="receipt-text-clock" tone={colors.info} onPress={() => navigation.navigate('PaymentHistory')} />
+      <DashboardCard title="Reports" value="View" icon="file-chart-outline" tone={colors.accent} onPress={() => navigation.navigate('FeeReports')} />
+      <SectionHeader title="Collection Summary" />
+      <DashboardCard title="Today's Collections" value={formatCurrency(todaysCollections)} icon="cash-check" tone={colors.success} />
+      <DashboardCard title="Monthly Collections" value={formatCurrency(monthlyCollections)} icon="calendar-month-outline" tone={colors.primary} />
+      <DashboardCard title="Pending Amount" value={formatCurrency(summary.dueAmount)} icon="cash-clock" tone={colors.danger} />
+      <DashboardCard title="Students with Dues" value={String(summary.dueStudents)} icon="account-alert-outline" tone={colors.warning} />
       <SectionHeader title="Recent Payments" />
-      {payments.slice(0, 5).map(payment => <PaymentCard key={payment.id} payment={payment} />)}
+      {payments.length ? (
+        payments.slice(0, 5).map(payment => <PaymentCard key={payment.id} payment={payment} />)
+      ) : (
+        <EmptyState title="No recent payments" message="Recorded payments will appear here." />
+      )}
     </ScreenContainer>
   );
 };

@@ -1,11 +1,16 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DashboardScreen from '../screens/parent/DashboardScreen';
 import AttendanceScreen from '../screens/parent/AttendanceScreen';
 import ProfileScreen from '../screens/parent/ProfileScreen';
 import StudentSelectorScreen from '../screens/parent/StudentSelectorScreen';
+import NoticeBoardScreen from '../screens/parent/NoticeBoardScreen';
+import SuggestionScreen from '../screens/parent/SuggestionScreen';
+import SuggestionStatusScreen from '../screens/parent/SuggestionStatusScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
+import {colors} from '../theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -17,20 +22,80 @@ const ParentHomeStack = () => (
       component={DashboardScreen}
       options={{title: 'Home'}}
     />
+    <Stack.Screen
+      name="ParentNotices"
+      component={NoticeBoardScreen}
+      options={{title: 'Notifications'}}
+    />
+    <Stack.Screen
+      name="ParentSuggestions"
+      component={SuggestionScreen}
+      options={{title: 'Suggestions'}}
+    />
+    <Stack.Screen
+      name="ParentSuggestionStatus"
+      component={SuggestionStatusScreen}
+      options={{title: 'Suggestion Status'}}
+    />
     {renderFeeStackScreens(Stack)}
   </Stack.Navigator>
 );
 
+const HomeIcon = ({color, size}) => (
+  <MaterialCommunityIcons name="home-outline" size={size} color={color} />
+);
+
+const AttendanceIcon = ({color, size}) => (
+  <MaterialCommunityIcons
+    name="calendar-check-outline"
+    size={size}
+    color={color}
+  />
+);
+
+const ProfileIcon = ({color, size}) => (
+  <MaterialCommunityIcons
+    name="account-circle-outline"
+    size={size}
+    color={color}
+  />
+);
+
+const StudentsIcon = ({color, size}) => (
+  <MaterialCommunityIcons
+    name="account-child-outline"
+    size={size}
+    color={color}
+  />
+);
+
 const ParentNavigator = () => (
-  <Tab.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+  <Tab.Navigator
+    screenOptions={{
+      headerTitleAlign: 'center',
+      tabBarActiveTintColor: colors.primary,
+      tabBarInactiveTintColor: colors.textMuted,
+    }}>
     <Tab.Screen
       name="Home"
       component={ParentHomeStack}
-      options={{headerShown: false, title: 'Home'}}
+      options={{headerShown: false, title: 'Home', tabBarIcon: HomeIcon}}
     />
-    <Tab.Screen name="Attendance" component={AttendanceScreen} />
-    <Tab.Screen name="Profile" component={ProfileScreen} />
-    <Tab.Screen name="Students" component={StudentSelectorScreen} />
+    <Tab.Screen
+      name="Attendance"
+      component={AttendanceScreen}
+      options={{tabBarIcon: AttendanceIcon}}
+    />
+    <Tab.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{tabBarIcon: ProfileIcon}}
+    />
+    <Tab.Screen
+      name="Students"
+      component={StudentSelectorScreen}
+      options={{tabBarIcon: StudentsIcon}}
+    />
   </Tab.Navigator>
 );
 

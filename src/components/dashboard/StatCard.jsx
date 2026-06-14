@@ -14,8 +14,17 @@ const StatCard = ({
 }) => (
   <TouchableRipple borderless onPress={onPress} style={styles.wrapper}>
     <View style={styles.card}>
-      <View style={[styles.icon, {backgroundColor: `${tone}1A`}]}>
-        <MaterialCommunityIcons name={icon} size={22} color={tone} />
+      <View style={styles.topRow}>
+        <View style={[styles.icon, {backgroundColor: `${tone}14`}]}>
+          <MaterialCommunityIcons name={icon} size={22} color={tone} />
+        </View>
+        {onPress ? (
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={20}
+            color={colors.textSoft}
+          />
+        ) : null}
       </View>
       <Text style={styles.value}>{value}</Text>
       <Text style={styles.title}>{title}</Text>
@@ -35,16 +44,23 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.soft,
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.lg,
-    minHeight: 132,
+    minHeight: 128,
     padding: spacing.lg,
+  },
+  topRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
   },
   icon: {
     alignItems: 'center',
     borderRadius: radius.md,
     height: 42,
     justifyContent: 'center',
-    marginBottom: spacing.md,
     width: 42,
   },
   value: {

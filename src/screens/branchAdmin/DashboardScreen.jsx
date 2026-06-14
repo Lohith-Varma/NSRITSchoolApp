@@ -22,58 +22,86 @@ const DashboardScreen = ({navigation}) => {
       navigation={navigation}
       subtitle="Branch users, students, attendance, and fee visibility"
       primaryActions={[
-      {
-        title: 'Teachers',
-        value: 'Team',
-        icon: 'account-tie',
-        route: 'ManageTeachers',
-      },
-      {
-        title: 'Students',
-        value: 'Roster',
-        icon: 'account-school',
-        route: 'ManageStudents',
-      },
-      {
-        title: 'Attendance',
-        value: 'View',
-        icon: 'calendar-check',
-        route: 'AttendanceOverview',
-      },
-      {
-        title: 'Fees',
-        value: 'Branch',
-        icon: 'cash-multiple',
-        route: 'FeeDashboard',
-        tone: colors.accent,
-      },
-    ]}
+        {
+          title: 'Add Student',
+          value: 'New',
+          icon: 'account-plus-outline',
+          route: 'CreateStudent',
+          tone: colors.success,
+        },
+        {
+          title: 'Students',
+          value: 'Roster',
+          icon: 'account-school',
+          route: 'ManageStudents',
+        },
+        {
+          title: 'Bulk Import',
+          value: 'CSV',
+          icon: 'file-upload-outline',
+          route: 'BulkStudentUpload',
+          tone: colors.info,
+        },
+        {
+          title: 'Teachers',
+          value: 'Team',
+          icon: 'account-tie',
+          route: 'ManageTeachers',
+        },
+        {
+          title: 'Class Teachers',
+          value: 'Assign',
+          icon: 'account-switch-outline',
+          route: 'AssignClassTeacher',
+          tone: colors.secondary,
+        },
+        {
+          title: 'Attendance',
+          value: 'View',
+          icon: 'calendar-check',
+          route: 'AttendanceOverview',
+        },
+        {
+          title: 'Fees',
+          value: 'Branch',
+          icon: 'cash-multiple',
+          route: 'FeeDashboard',
+          tone: colors.accent,
+        },
+        {
+          title: 'Settings',
+          value: 'Branch',
+          icon: 'cog-outline',
+          route: 'BranchSettings',
+          tone: colors.secondary,
+        },
+      ]}
       stats={[
-      {
-        title: 'Fee Assigned',
-        value: formatCurrency(summary.totalFee),
-        icon: 'cash-multiple',
-        tone: colors.primary,
-      },
-      {
-        title: 'Collected',
-        value: formatCurrency(summary.paidAmount),
-        icon: 'cash-check',
-        tone: colors.success,
-      },
-      {
-        title: 'Outstanding',
-        value: formatCurrency(summary.dueAmount),
-        icon: 'cash-clock',
-        tone: colors.danger,
-      },
-      {
-        title: 'Concessions',
-        value: formatCurrency(summary.concessionAmount),
-        icon: 'sale-outline',
-        tone: colors.info,
-      },
-    ]}
+        {
+          title: 'Fee Assigned',
+          value: formatCurrency(summary.totalFee),
+          icon: 'cash-multiple',
+          tone: colors.primary,
+        },
+        {
+          title: 'Collected',
+          value: formatCurrency(summary.paidAmount),
+          icon: 'cash-check',
+          tone: colors.success,
+        },
+        {
+          title: 'Outstanding',
+          value: formatCurrency(summary.dueAmount),
+          icon: 'cash-clock',
+          tone: colors.danger,
+        },
+        {
+          title: 'Concessions',
+          value: formatCurrency(summary.concessionAmount),
+          icon: 'sale-outline',
+          tone: colors.info,
+        },
+      ]}
     />
   );
 };

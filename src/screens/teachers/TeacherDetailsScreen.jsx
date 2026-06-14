@@ -1,8 +1,8 @@
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer} from '../../components';
-import {WING_LABELS} from '../../config/academic';
 import teacherService from '../../services/teachers/teacherService';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const TeacherDetailsScreen = ({navigation, route}) => {
   const teacherId = route.params?.teacherId;
@@ -27,13 +27,14 @@ const TeacherDetailsScreen = ({navigation, route}) => {
     <ScreenContainer>
       <Header
         title={teacher.fullName || teacher.user?.fullName || 'Teacher'}
-        subtitle={`${teacher.employeeId || '-'} | ${WING_LABELS[teacher.wing] || teacher.wing}`}
+        subtitle={`${teacher.employeeId || '-'} | ${teacher.branch?.name || 'Branch teacher'}`}
         actionLabel="Edit"
         onAction={() => navigation.navigate('EditTeacher', {teacherId})}
       />
       <DashboardCard title="Mobile" value={teacher.phoneNumber || teacher.user?.phoneNumber || '-'} icon="phone" />
+      <DashboardCard title="Employee ID" value={teacher.employeeId || '-'} icon="identifier" />
       <DashboardCard title="Designation" value={teacher.designation || '-'} icon="badge-account-outline" />
-      <DashboardCard title="Joining Date" value={teacher.joiningDate || '-'} icon="calendar-start" />
+      <DashboardCard title="Joining Date" value={formatDateForDisplay(teacher.joiningDate) || '-'} icon="calendar-start" />
       <DashboardCard title="Subjects" value={subjects} icon="book-open-page-variant-outline" onPress={() => navigation.navigate('AssignSubjects', {teacherId})} />
       <DashboardCard
         title="Class Teacher"

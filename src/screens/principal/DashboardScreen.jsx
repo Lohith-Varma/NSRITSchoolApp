@@ -32,16 +32,48 @@ const DashboardScreen = ({navigation}) => {
       subtitle="Academic structure, coordinators, sections, promotions, and fees"
       primaryActions={[
         {
+          title: 'Add Student',
+          value: 'New',
+          icon: 'account-plus-outline',
+          route: 'AddStudent',
+          tone: colors.success,
+        },
+        {
           title: 'Students',
           value: 'Manage',
           icon: 'account-school-outline',
           route: 'StudentManagement',
         },
         {
+          title: 'Attendance',
+          value: 'All',
+          icon: 'clipboard-text-clock',
+          route: 'ViewAllAttendance',
+        },
+        {
           title: 'Teachers',
           value: 'Manage',
           icon: 'account-tie-outline',
           route: 'TeacherManagement',
+        },
+        {
+          title: 'Academic',
+          value: 'Setup',
+          icon: 'school-outline',
+          route: 'AcademicStructure',
+          tone: colors.info,
+        },
+        {
+          title: 'Sections',
+          value: 'Yearly',
+          icon: 'google-classroom',
+          route: 'SectionManagement',
+        },
+        {
+          title: 'Classes',
+          value: 'Master',
+          icon: 'school',
+          route: 'ClassManagement',
         },
         {
           title: 'Subjects',
@@ -57,35 +89,10 @@ const DashboardScreen = ({navigation}) => {
           route: 'CoordinatorManagement',
         },
         {
-          title: 'Classes',
-          value: 'Master',
-          icon: 'school',
-          route: 'ClassManagement',
-        },
-        {
-          title: 'Sections',
-          value: 'Yearly',
-          icon: 'google-classroom',
-          route: 'SectionManagement',
-        },
-        {
           title: 'Class Teacher',
           value: 'Assign',
           icon: 'teach',
           route: 'AssignClassTeacher',
-        },
-        {
-          title: 'Promotions',
-          value: 'Approve',
-          icon: 'school-outline',
-          route: 'PromotionManagement',
-          tone: colors.warning,
-        },
-        {
-          title: 'Attendance',
-          value: 'All',
-          icon: 'clipboard-text-clock',
-          route: 'ViewAllAttendance',
         },
         {
           title: 'Fees',
@@ -93,6 +100,13 @@ const DashboardScreen = ({navigation}) => {
           icon: 'finance',
           route: 'FeeDashboard',
           tone: colors.accent,
+        },
+        {
+          title: 'Promotions',
+          value: 'Approve',
+          icon: 'school-outline',
+          route: 'PromotionManagement',
+          tone: colors.warning,
         },
         {
           title: 'Accountants',

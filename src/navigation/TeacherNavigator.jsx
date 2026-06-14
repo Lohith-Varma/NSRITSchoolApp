@@ -1,15 +1,33 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import TeacherDashboardScreen from '../screens/teacher/TeacherDashboardScreen';
 import TakeAttendanceScreen from '../screens/teacher/TakeAttendanceScreen';
 import StudentsListScreen from '../screens/teacher/StudentsListScreen';
 import StudentProfileScreen from '../screens/teacher/StudentProfileScreen';
 import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
+import {colors} from '../theme';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const TeacherHomeIcon = ({color, size}) => (
+  <MaterialCommunityIcons
+    name="view-dashboard-outline"
+    size={size}
+    color={color}
+  />
+);
+
+const TeacherStudentsIcon = ({color, size}) => (
+  <MaterialCommunityIcons
+    name="account-school-outline"
+    size={size}
+    color={color}
+  />
+);
 
 const TeacherHomeStack = () => (
   <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
@@ -38,12 +56,21 @@ const TeacherHomeStack = () => (
 );
 
 const TeacherNavigator = () => (
-  <Tab.Navigator screenOptions={{headerShown: false}}>
-    <Tab.Screen name="Home" component={TeacherHomeStack} />
+  <Tab.Navigator
+    screenOptions={{
+      headerShown: false,
+      tabBarActiveTintColor: colors.primary,
+      tabBarInactiveTintColor: colors.textMuted,
+    }}>
+    <Tab.Screen
+      name="Home"
+      component={TeacherHomeStack}
+      options={{tabBarIcon: TeacherHomeIcon}}
+    />
     <Tab.Screen
       name="StudentsList"
       component={StudentsListScreen}
-      options={{title: 'Students'}}
+      options={{title: 'Students', tabBarIcon: TeacherStudentsIcon}}
     />
   </Tab.Navigator>
 );

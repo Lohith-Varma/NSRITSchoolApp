@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import {Button} from 'react-native-paper';
-import {spacing} from '../../theme';
+import {radius, spacing} from '../../theme';
 
 const CustomButton = ({
   children,
@@ -14,6 +14,7 @@ const CustomButton = ({
     mode={mode}
     style={[styles.button, style]}
     contentStyle={[styles.content, contentStyle]}
+    labelStyle={styles.label}
     {...props}>
     {children}
   </Button>
@@ -21,11 +22,15 @@ const CustomButton = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
   content: {
-    minHeight: 46,
-    paddingHorizontal: spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
+  },
+  label: {
+    fontWeight: '700',
+    letterSpacing: 0,
   },
 });
 

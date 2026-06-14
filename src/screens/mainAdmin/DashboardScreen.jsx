@@ -29,13 +29,6 @@ const DashboardScreen = ({navigation}) => {
       subtitle="Global branches, users, fees, and operations"
       primaryActions={[
         {
-          title: 'Create Branch',
-          value: 'New',
-          icon: 'office-building-plus',
-          route: 'CreateBranch',
-          tone: colors.success,
-        },
-        {
           title: 'Manage Branches',
           value: 'All',
           icon: 'domain',
@@ -49,11 +42,18 @@ const DashboardScreen = ({navigation}) => {
           route: 'BranchContext',
         },
         {
-          title: 'Classes',
-          value: 'All',
-          icon: 'google-classroom',
-          route: 'GlobalClasses',
-          tone: colors.info,
+          title: 'Manage Users',
+          value: 'Access',
+          icon: 'account-cog-outline',
+          route: 'ManageUsers',
+          tone: colors.primary,
+        },
+        {
+          title: 'Create Branch',
+          value: 'New',
+          icon: 'office-building-plus',
+          route: 'CreateBranch',
+          tone: colors.success,
         },
         {
           title: 'Students',
@@ -61,6 +61,13 @@ const DashboardScreen = ({navigation}) => {
           icon: 'account-school',
           route: 'GlobalStudents',
           tone: colors.success,
+        },
+        {
+          title: 'Classes',
+          value: 'All',
+          icon: 'google-classroom',
+          route: 'GlobalClasses',
+          tone: colors.info,
         },
         {
           title: 'Class Fees',

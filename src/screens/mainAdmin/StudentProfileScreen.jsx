@@ -13,6 +13,7 @@ import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
 import {colors, radius, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const monthLabel = value => {
   if (!value) {
@@ -92,7 +93,7 @@ const StudentProfileScreen = ({route}) => {
       </Card>
 
       <ProfileCard title="Personal Details">
-        <Info label="DOB" value={student.dateOfBirth} />
+        <Info label="DOB" value={formatDateForDisplay(student.dateOfBirth)} />
         <Info label="Gender" value={student.gender} />
         <Info label="Blood Group" value={student.bloodGroup} />
         <Info label="Phone" value={student.phoneNumber} />
@@ -112,7 +113,7 @@ const StudentProfileScreen = ({route}) => {
         <Info label="Wing" value={student.academicClass?.wing?.name || student.academicClass?.wing?.code} />
         <Info label="Section" value={student.section?.name} />
         <Info label="Roll Number" value={student.rollNumber} />
-        <Info label="Admission Date" value={student.admissionDate} />
+        <Info label="Admission Date" value={formatDateForDisplay(student.admissionDate)} />
         <Info label="Class Teacher" value={student.section?.classTeacher?.fullName} />
         <Info label="Coordinator" value="All branch coordinators visible to Main Admin" />
       </ProfileCard>
@@ -151,7 +152,7 @@ const StudentProfileScreen = ({route}) => {
           <List.Item
             key={payment.id}
             title={formatCurrency(payment.amount)}
-            description={`${payment.paymentMode || 'Payment'} - ${payment.receiptNumber || 'No receipt'} - ${payment.paidAt || payment.paymentDate || ''}`}
+            description={`${payment.paymentMode || 'Payment'} - ${payment.receiptNumber || 'No receipt'} - ${formatDateForDisplay(payment.paidAt || payment.paymentDate) || ''}`}
             left={props => <List.Icon {...props} icon="receipt" />}
           />
         ))
@@ -189,7 +190,7 @@ const StudentProfileScreen = ({route}) => {
           <List.Item
             key={item.id}
             title={`${item.oldSection?.academicClass?.name || ''}-${item.oldSection?.name || ''} to ${item.newSection?.academicClass?.name || ''}-${item.newSection?.name || ''}`}
-            description={`${item.changedAt} | By ${item.changedBy?.fullName || 'User'}`}
+            description={`${formatDateForDisplay(item.changedAt) || '-'} | By ${item.changedBy?.fullName || 'User'}`}
             left={props => <List.Icon {...props} icon="swap-horizontal" />}
           />
         ))
@@ -203,7 +204,7 @@ const StudentProfileScreen = ({route}) => {
           <List.Item
             key={item.id}
             title={`${item.fromClass?.name || '-'} to ${item.toClass?.name || '-'}`}
-            description={`${item.promotedAt} | By ${item.promotedBy?.fullName || 'User'}`}
+            description={`${formatDateForDisplay(item.promotedAt) || '-'} | By ${item.promotedBy?.fullName || 'User'}`}
             left={props => <List.Icon {...props} icon="school-outline" />}
           />
         ))

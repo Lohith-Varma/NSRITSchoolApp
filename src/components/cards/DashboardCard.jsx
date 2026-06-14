@@ -10,23 +10,22 @@ const DashboardCard = ({
   description,
   onPress,
   icon = 'view-dashboard-outline',
+  tone = colors.primary,
 }) => (
   <Card mode="outlined" onPress={onPress} style={styles.card}>
-    <Card.Content>
+    <Card.Content style={styles.content}>
       <View style={styles.row}>
-        <View style={styles.icon}>
-          <MaterialCommunityIcons
-            name={icon}
-            size={22}
-            color={colors.primary}
-          />
+        <View style={[styles.icon, {backgroundColor: `${tone}14`}]}>
+          <MaterialCommunityIcons name={icon} size={22} color={tone} />
         </View>
-        <Text style={styles.value}>{value}</Text>
+        <View style={styles.copy}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={[styles.value, {color: tone}]}>{value}</Text>
+          {description ? (
+            <Text style={styles.description}>{description}</Text>
+          ) : null}
+        </View>
       </View>
-      <Text style={styles.title}>{title}</Text>
-      {description ? (
-        <Text style={styles.description}>{description}</Text>
-      ) : null}
     </Card.Content>
   </Card>
 );
@@ -39,27 +38,34 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     marginBottom: spacing.md,
   },
+  content: {
+    paddingVertical: spacing.md,
+  },
   row: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
   icon: {
     alignItems: 'center',
-    backgroundColor: colors.primarySoft,
     borderRadius: radius.md,
     height: 42,
     justifyContent: 'center',
+    marginTop: spacing.xxs,
     width: 42,
   },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+  },
   value: {
-    ...typography.title,
-    color: colors.secondary,
+    ...typography.subtitle,
+    marginTop: spacing.xs,
   },
   title: {
-    ...typography.subtitle,
+    ...typography.body,
     color: colors.text,
-    marginTop: spacing.xs,
+    fontWeight: '800',
   },
   description: {
     color: colors.textMuted,

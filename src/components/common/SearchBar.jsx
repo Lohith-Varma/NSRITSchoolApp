@@ -8,18 +8,23 @@ const SearchBar = ({value, onChangeText, placeholder = 'Search', style}) => (
     value={value}
     onChangeText={onChangeText}
     placeholder={placeholder}
+    elevation={0}
     style={[styles.search, style]}
     inputStyle={styles.input}
+    placeholderTextColor={colors.textSoft}
   />
 );
 
 const styles = StyleSheet.create({
   search: {
     backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    borderWidth: 1,
     marginBottom: spacing.md,
   },
   input: {
+    color: colors.text,
     minHeight: 0,
   },
 });

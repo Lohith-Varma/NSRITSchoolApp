@@ -11,6 +11,8 @@ export const globalStyles = StyleSheet.create({
   },
   card: {
     ...shadows.soft,
+    borderColor: colors.border,
+    borderWidth: 1,
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.lg,

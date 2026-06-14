@@ -2,15 +2,16 @@ import React, {useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {HelperText} from 'react-native-paper';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SearchBar, SelectField, SectionHeader} from '../../components';
+import {CustomButton, CustomInput, DashboardCard, DatePickerField, EmptyState, Header, SearchBar, SelectField, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import studentService from '../../services/students/studentService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {formatDateForDisplay, toISODate} from '../../utils/helpers/dateHelpers';
 
 const paymentModes = ['Cash', 'UPI', 'Bank Transfer', 'Cheque'].map(value => ({label: value, value}));
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => toISODate(new Date());
 
 const FeeCollectionScreen = ({navigation, route}) => {
   const access = useFeeAccess();
@@ -153,7 +154,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
                   onPress={() => setSelectedStudentId('')}
                 />
                 <DashboardCard title="Pending Amount" value={formatCurrency(profile.dueAmount)} icon="cash-clock" />
-                <CustomInput label="Payment Date (YYYY-MM-DD)" value={form.paymentDate} onChangeText={value => updateField('paymentDate', value)} />
+                <DatePickerField label="Payment Date" value={form.paymentDate} maximumDate={toISODate(new Date())} onChange={value => updateField('paymentDate', value)} />
                 <CustomInput label="Amount" keyboardType="numeric" value={form.amount} onChangeText={value => updateField('amount', value)} />
                 <SelectField label="Payment Mode" value={form.paymentMode} options={paymentModes} onChange={value => updateField('paymentMode', value)} />
                 <CustomInput label="Reference Number" value={form.referenceNumber} onChangeText={value => updateField('referenceNumber', value)} />
@@ -164,7 +165,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
                     key={payment.id}
                     title={payment.receiptNumber || 'Receipt'}
                     value={formatCurrency(payment.amount)}
-                    description={`${payment.paymentDate || '-'} | ${payment.paymentMode || '-'} | ${payment.status || 'RECORDED'}`}
+                    description={`${formatDateForDisplay(payment.paymentDate) || '-'} | ${payment.paymentMode || '-'} | ${payment.status || 'RECORDED'}`}
                     icon="receipt-text-outline"
                     onPress={() => startEditPayment(payment)}
                   />

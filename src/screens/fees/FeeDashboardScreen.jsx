@@ -9,6 +9,7 @@ import {
   ScreenContainer,
   SearchBar,
   SectionHeader,
+  SkeletonLoader,
   StatCard,
   SummaryCard,
 } from '../../components';
@@ -70,15 +71,22 @@ const FeeDashboardScreen = ({navigation}) => {
         title="Fee Dashboard"
         subtitle="Collection, dues, and student ledger overview"
       />
+      <SectionHeader title="Fee Summary" />
       <View style={styles.grid}>
         <StatCard
-          title="Collected"
+          title="Total Fee"
+          value={formatCurrency(summary.totalFee)}
+          icon="cash-multiple"
+          tone={colors.primary}
+        />
+        <StatCard
+          title="Paid Fee"
           value={formatCurrency(summary.paidAmount)}
           icon="cash-check"
           tone={colors.success}
         />
         <StatCard
-          title="Due"
+          title="Due Fee"
           value={formatCurrency(summary.dueAmount)}
           icon="cash-clock"
           tone={colors.danger}
@@ -92,6 +100,7 @@ const FeeDashboardScreen = ({navigation}) => {
         progress={summary.collectionRate}
         tone={colors.primary}
       />
+      <SectionHeader title="Priority Actions" />
       <View style={styles.quickActions}>
         {canManagePlans ? (
           <StatCard
@@ -140,6 +149,7 @@ const FeeDashboardScreen = ({navigation}) => {
           />
         ) : null}
       </View>
+      <SectionHeader title="Student Ledgers" subtitle="Search first, filter second, then open a record" />
       <SearchBar
         value={query}
         onChangeText={setQuery}
@@ -155,10 +165,14 @@ const FeeDashboardScreen = ({navigation}) => {
           <FeeCard student={item} onPress={() => openDetails(item)} />
         )}
         ListEmptyComponent={
-          <EmptyState
-            title="No fee records"
-            message="Try another filter or search term."
-          />
+          loading ? (
+            <SkeletonLoader rows={4} />
+          ) : (
+            <EmptyState
+              title="No fee records"
+              message="Try another filter or search term."
+            />
+          )
         }
       />
     </ScreenContainer>
@@ -168,6 +182,7 @@ const FeeDashboardScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.md,
     marginBottom: spacing.md,
   },

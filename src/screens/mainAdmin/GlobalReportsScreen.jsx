@@ -1,5 +1,8 @@
 import React from 'react';
-import {Share, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
+import XLSX from 'xlsx';
 import {useQuery} from '@tanstack/react-query';
 import {Button, Card, DataTable, Text} from 'react-native-paper';
 import {EmptyState, Header, LoadingScreen, ScreenContainer} from '../../components';
@@ -34,14 +37,7 @@ const buildRows = rows =>
     row.admissions,
   ]);
 
-const serialize = (rows, delimiter = ',') =>
-  [columns, ...buildRows(rows)]
-    .map(row =>
-      row
-        .map(value => `"${String(value ?? '').replace(/"/g, '""')}"`)
-        .join(delimiter),
-    )
-    .join('\n');
+
 
 const GlobalReportsScreen = () => {
   const reportsQuery = useQuery({
@@ -49,14 +45,33 @@ const GlobalReportsScreen = () => {
     queryFn: () => mainAdminService.getGlobalReports({forceRefresh: true}),
   });
 
-  const shareReport = async type => {
-    const rows = reportsQuery.data?.branchWise || [];
-    const delimiter = type === 'excel' ? '\t' : ',';
-    const message = serialize(rows, delimiter);
-    await Share.share({
-      title: type === 'excel' ? 'NSRIT Global Reports.xls' : 'NSRIT Global Reports.csv',
-      message,
-    });
+  const shareReport = async (format = 'csv') => {
+    try {
+      const rows = reportsQuery.data?.branchWise || [];
+      const dataRows = buildRows(rows);
+      
+      const ws = XLSX.utils.aoa_to_sheet([columns, ...dataRows]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Global Reports");
+      
+      const bookType = format === 'csv' ? 'csv' : 'xlsx';
+      const wbout = XLSX.write(wb, { type: 'base64', bookType });
+      
+      const ext = format === 'csv' ? 'csv' : 'xlsx';
+      const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      const filePath = `${RNFS.CachesDirectoryPath}/GlobalReports.${ext}`;
+      
+      await RNFS.writeFile(filePath, wbout, 'base64');
+      
+      await Share.open({
+        title: `Global Reports`,
+        url: `file://${filePath}`,
+        type: mimeType,
+        failOnCancel: false,
+      });
+    } catch (err) {
+      console.error("Export error:", err);
+    }
   };
 
   if (reportsQuery.isLoading && !reportsQuery.data) {
@@ -81,7 +96,7 @@ const GlobalReportsScreen = () => {
         <Button icon="file-delimited-outline" mode="outlined" onPress={() => shareReport('csv')}>
           CSV
         </Button>
-        <Button icon="microsoft-excel" mode="outlined" onPress={() => shareReport('excel')}>
+        <Button icon="microsoft-excel" mode="outlined" onPress={() => shareReport('xlsx')}>
           Excel
         </Button>
       </View>
@@ -102,14 +117,16 @@ const GlobalReportsScreen = () => {
           <Text style={styles.sectionTitle}>Branch Wise Reports</Text>
           {branchWise.length ? (
             <DataTable>
-              <DataTable.Header>
+              <DataTable.Header style={styles.tableHeader}>
                 <DataTable.Title>Branch</DataTable.Title>
                 <DataTable.Title numeric>Students</DataTable.Title>
                 <DataTable.Title numeric>Pending</DataTable.Title>
                 <DataTable.Title numeric>Concession</DataTable.Title>
               </DataTable.Header>
-              {branchWise.map(row => (
-                <DataTable.Row key={row.branchId}>
+              {branchWise.map((row, index) => (
+                <DataTable.Row
+                  key={row.branchId}
+                  style={index % 2 ? styles.tableRowAlt : styles.tableRow}>
                   <DataTable.Cell>{row.branchCode}</DataTable.Cell>
                   <DataTable.Cell numeric>{row.students}</DataTable.Cell>
                   <DataTable.Cell numeric>{formatCurrency(row.pendingFees)}</DataTable.Cell>
@@ -172,6 +189,17 @@ const styles = StyleSheet.create({
     ...typography.subtitle,
     color: colors.text,
     marginBottom: spacing.sm,
+  },
+  tableHeader: {
+    backgroundColor: colors.primaryFaint,
+    borderBottomColor: colors.borderStrong,
+    borderBottomWidth: 1,
+  },
+  tableRow: {
+    backgroundColor: colors.surface,
+  },
+  tableRowAlt: {
+    backgroundColor: colors.neutralSoft,
   },
 });
 

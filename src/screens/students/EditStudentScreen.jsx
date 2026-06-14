@@ -2,12 +2,13 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {HelperText} from 'react-native-paper';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useSelector} from 'react-redux';
-import {CustomButton, CustomInput, ScreenContainer, SectionHeader, SelectField} from '../../components';
+import {CustomButton, CustomInput, DatePickerField, ScreenContainer, SectionHeader, SelectField} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import academicRepository from '../../repositories/academicRepository';
 import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
 import {getAccessScope} from '../../services/rbacScope';
+import {isBeforeDate, isFutureDate, toISODate} from '../../utils/helpers/dateHelpers';
 
 const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, value}));
 
@@ -102,6 +103,22 @@ const EditStudentScreen = ({navigation, route}) => {
   });
 
   const updateField = (field, value) => setForm(current => ({...current, [field]: value}));
+  const save = () => {
+    if (isFutureDate(form.dateOfBirth)) {
+      setError('Date of birth cannot be a future date.');
+      return;
+    }
+    if (isFutureDate(form.admissionDate)) {
+      setError('Admission date cannot be a future date.');
+      return;
+    }
+    if (form.dateOfBirth && form.admissionDate && isBeforeDate(form.admissionDate, form.dateOfBirth)) {
+      setError('Admission date cannot be before date of birth.');
+      return;
+    }
+    setError('');
+    mutation.mutate(form);
+  };
 
   if (!form) {
     return (
@@ -137,8 +154,8 @@ const EditStudentScreen = ({navigation, route}) => {
       />
       <CustomInput label="Full Name" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
       <SelectField label="Gender" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
-      <CustomInput label="Date of Birth (YYYY-MM-DD)" value={form.dateOfBirth} onChangeText={value => updateField('dateOfBirth', value)} />
-      <CustomInput label="Admission Date (YYYY-MM-DD)" value={form.admissionDate} onChangeText={value => updateField('admissionDate', value)} />
+      <DatePickerField label="Date of Birth" value={form.dateOfBirth} maximumDate={toISODate(new Date())} onChange={value => updateField('dateOfBirth', value)} />
+      <DatePickerField label="Admission Date" value={form.admissionDate} minimumDate={form.dateOfBirth} maximumDate={toISODate(new Date())} onChange={value => updateField('admissionDate', value)} />
       <CustomInput label="Father Name" value={form.fatherName} onChangeText={value => updateField('fatherName', value)} />
       <CustomInput label="Mother Name" value={form.motherName} onChangeText={value => updateField('motherName', value)} />
       <CustomInput label="Parent Mobile Number" keyboardType="phone-pad" value={form.parentPhoneNumber} onChangeText={value => updateField('parentPhoneNumber', value)} />
@@ -157,7 +174,7 @@ const EditStudentScreen = ({navigation, route}) => {
         onChange={value => updateField('transportRequired', value === 'YES')}
       />
       <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
-      <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={() => mutation.mutate(form)}>
+      <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={save}>
         Save Student
       </CustomButton>
     </ScreenContainer>

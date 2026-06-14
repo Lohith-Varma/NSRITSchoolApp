@@ -4,6 +4,7 @@ import {CustomButton, DashboardCard, EmptyState, Header, PaymentCard, ScreenCont
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {colors} from '../../theme';
 
 const StudentFeeProfileScreen = ({navigation, route}) => {
   const access = useFeeAccess();
@@ -41,22 +42,24 @@ const StudentFeeProfileScreen = ({navigation, route}) => {
       <DashboardCard title="Class" value={`${profile.className || '-'}-${profile.sectionName || '-'}`} icon="google-classroom" />
       <DashboardCard title="Parent Mobile" value={profile.parent?.phoneNumber || '-'} icon="phone-outline" />
       <SectionHeader title="Fee Summary" />
+      <DashboardCard title="Total Fee" value={formatCurrency(profile.totalFee)} icon="cash-multiple" tone={colors.primary} />
+      <DashboardCard title="Paid Fee" value={formatCurrency(profile.paidAmount)} icon="cash-check" tone={colors.success} />
+      <DashboardCard title="Due Fee" value={formatCurrency(profile.dueAmount)} icon="cash-clock" tone={colors.danger} />
+      <DashboardCard
+        title="Concession"
+        value={formatCurrency(profile.concessionAmount)}
+        description={profile.concessionType ? `${profile.concessionType} ${profile.concessionValue}` : 'No concession'}
+        icon="sale-outline"
+        tone={colors.info}
+      />
+      <SectionHeader title="Fee Breakup" />
       <DashboardCard title="Tuition Total" value={formatCurrency(profile.term1Fee + profile.term2Fee + profile.term3Fee)} icon="school-outline" />
       <DashboardCard title="1st Term" value={formatCurrency(profile.term1Fee)} icon="numeric-1-circle-outline" />
       <DashboardCard title="2nd Term" value={formatCurrency(profile.term2Fee)} icon="numeric-2-circle-outline" />
       <DashboardCard title="3rd Term" value={formatCurrency(profile.term3Fee)} icon="numeric-3-circle-outline" />
       <DashboardCard title="Books Fee" value={formatCurrency(profile.booksFee)} icon="book-open-page-variant-outline" />
       <DashboardCard title="Transport Fee" value={formatCurrency(profile.transportFee)} icon="bus-school" />
-      <DashboardCard
-        title="Concession"
-        value={formatCurrency(profile.concessionAmount)}
-        description={profile.concessionType ? `${profile.concessionType} ${profile.concessionValue}` : 'No concession'}
-        icon="sale-outline"
-      />
       <DashboardCard title="Gross Fee" value={formatCurrency(profile.grossAmount)} icon="cash-multiple" />
-      <DashboardCard title="Total Fee" value={formatCurrency(profile.totalFee)} icon="cash-multiple" />
-      <DashboardCard title="Paid Amount" value={formatCurrency(profile.paidAmount)} icon="cash-check" />
-      <DashboardCard title="Pending Amount" value={formatCurrency(profile.dueAmount)} icon="cash-clock" />
       {canRecordPayments ? (
         <CustomButton onPress={() => navigation.navigate('FeeCollection', {studentId: profile.studentId})}>
           Record Payment

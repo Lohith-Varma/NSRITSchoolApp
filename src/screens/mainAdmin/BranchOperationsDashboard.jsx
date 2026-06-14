@@ -28,6 +28,7 @@ const modules = [
   {title: 'Overview', value: 'Branch', icon: 'view-dashboard-outline', route: 'BranchDetails'},
   {title: 'Students', value: 'Manage', icon: 'account-school-outline', route: 'StudentManagement'},
   {title: 'Teachers', value: 'Manage', icon: 'account-tie-outline', route: 'TeacherManagement'},
+  {title: 'Class Teachers', value: 'Assign', icon: 'account-switch-outline', route: 'AssignClassTeacher'},
   {title: 'Coordinators', value: 'Manage', icon: 'account-supervisor-outline', route: 'CoordinatorManagement'},
   {title: 'Accountants', value: 'Manage', icon: 'account-cash-outline', route: 'AccountantManagement'},
   {title: 'Attendance', value: 'View/Edit', icon: 'calendar-check-outline', route: 'ViewAllAttendance'},

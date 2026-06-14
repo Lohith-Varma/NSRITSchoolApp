@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
-import {HelperText} from 'react-native-paper';
+import {HelperText, Text} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {
@@ -108,6 +108,12 @@ const TakeAttendanceScreen = () => {
       ),
     [query, students],
   );
+  const presentCount = students.filter(
+    student => statuses[student.id] === ATTENDANCE_STATUS.PRESENT,
+  ).length;
+  const absentCount = students.filter(
+    student => statuses[student.id] === ATTENDANCE_STATUS.ABSENT,
+  ).length;
 
   const setAll = status => {
     setStatuses(students.reduce((acc, student) => ({...acc, [student.id]: status}), {}));
@@ -168,30 +174,47 @@ const TakeAttendanceScreen = () => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <SectionHeader title="Take Attendance" subtitle="Select class and section" />
-      <SelectField
-        label="Class"
-        value={selectedClassId}
-        options={classOptions}
-        disabled={!classOptions.length}
-        onChange={value => {
-          setSelectedClassId(value);
-          setSelectedSectionId('');
-        }}
-      />
-      <SelectField
-        label="Section"
-        value={resolvedSectionId}
-        options={sectionOptions}
-        disabled={!sectionOptions.length}
-        onChange={setSelectedSectionId}
-      />
+      <SectionHeader title="Take Attendance" subtitle={today} />
+      <View style={styles.selectionPanel}>
+        <SelectField
+          label="Class"
+          value={selectedClassId}
+          options={classOptions}
+          disabled={!classOptions.length}
+          onChange={value => {
+            setSelectedClassId(value);
+            setSelectedSectionId('');
+          }}
+        />
+        <SelectField
+          label="Section"
+          value={resolvedSectionId}
+          options={sectionOptions}
+          disabled={!sectionOptions.length}
+          onChange={setSelectedSectionId}
+        />
+      </View>
       <SearchBar value={query} onChangeText={setQuery} placeholder="Search assigned students" />
+      <View style={styles.summaryRow}>
+        <Text style={[styles.summaryPill, styles.presentPill]}>
+          {presentCount} present
+        </Text>
+        <Text style={[styles.summaryPill, styles.absentPill]}>
+          {absentCount} absent
+        </Text>
+        <Text style={styles.summaryMeta}>{students.length} total</Text>
+      </View>
       <View style={styles.bulkRow}>
-        <CustomButton mode="outlined" onPress={() => setAll(ATTENDANCE_STATUS.PRESENT)}>
+        <CustomButton
+          mode="outlined"
+          style={styles.bulkButton}
+          onPress={() => setAll(ATTENDANCE_STATUS.PRESENT)}>
           All Present
         </CustomButton>
-        <CustomButton mode="outlined" onPress={() => setAll(ATTENDANCE_STATUS.ABSENT)}>
+        <CustomButton
+          mode="outlined"
+          style={styles.bulkButton}
+          onPress={() => setAll(ATTENDANCE_STATUS.ABSENT)}>
           All Absent
         </CustomButton>
       </View>
@@ -224,20 +247,19 @@ const TakeAttendanceScreen = () => {
             message={classesQuery.error?.message || sectionsQuery.error?.message || studentsQuery.error?.message || 'Select a class and section with active students.'}
           />
         }
-        ListFooterComponent={
-          <View style={styles.footer}>
-            <HelperText type="error" visible={Boolean(error)}>
-              {error}
-            </HelperText>
-            <CustomButton
-              loading={mutation.isPending}
-              disabled={mutation.isPending || !selectedClass || !selectedSection || !students.length}
-              onPress={() => mutation.mutate()}>
-              Submit Attendance
-            </CustomButton>
-          </View>
-        }
+        ListFooterComponent={<View style={styles.footerSpacer} />}
       />
+      <View style={styles.stickyFooter}>
+        <HelperText type="error" visible={Boolean(error)}>
+          {error}
+        </HelperText>
+        <CustomButton
+          loading={mutation.isPending}
+          disabled={mutation.isPending || !selectedClass || !selectedSection || !students.length}
+          onPress={() => mutation.mutate()}>
+          Save Attendance
+        </CustomButton>
+      </View>
     </View>
   );
 };
@@ -249,18 +271,64 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: 148,
   },
   header: {
     marginBottom: spacing.md,
+  },
+  selectionPanel: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
+  summaryRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  summaryPill: {
+    borderRadius: 999,
+    fontWeight: '800',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  presentPill: {
+    backgroundColor: colors.successSoft,
+    color: colors.success,
+  },
+  absentPill: {
+    backgroundColor: colors.dangerSoft,
+    color: colors.danger,
+  },
+  summaryMeta: {
+    color: colors.textMuted,
+    fontWeight: '700',
   },
   bulkRow: {
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  footer: {
-    marginTop: spacing.md,
+  bulkButton: {
+    flex: 1,
+  },
+  footerSpacer: {
+    height: spacing.md,
+  },
+  stickyFooter: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderTopWidth: 1,
+    bottom: 0,
+    left: 0,
+    padding: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
 });
 

@@ -1,14 +1,15 @@
-import React, {useMemo} from 'react';
+import React, {useMemo, useState} from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState, Header, StudentListItem} from '../../components';
+import {EmptyState, Header, SearchBar, SkeletonLoader, StudentListItem} from '../../components';
 import studentService from '../../services/students/studentService';
 import teacherService from '../../services/teachers/teacherService';
 import {colors, spacing} from '../../theme';
 
 const StudentsListScreen = () => {
   const user = useSelector(state => state.auth.user);
+  const [query, setQuery] = useState('');
 
   const assignmentsQuery = useQuery({
     queryKey: ['teacherAssignments', user?.teacherId],
@@ -36,14 +37,28 @@ const StudentsListScreen = () => {
   });
 
   const students = useMemo(() => studentsQuery.data || [], [studentsQuery.data]);
+  const filteredStudents = useMemo(
+    () =>
+      students.filter(item =>
+        `${item.fullName} ${item.studentId} ${item.academicClass?.name || ''} ${item.section?.name || ''}`
+          .toLowerCase()
+          .includes(query.toLowerCase()),
+      ),
+    [query, students],
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Header title="Students" subtitle="Assigned section roster" />
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search assigned students"
+        />
       </View>
       <FlatList
-        data={students}
+        data={filteredStudents}
         keyExtractor={item => `${item.sectionId}-${item.id}`}
         contentContainerStyle={styles.list}
         renderItem={({item}) => (
@@ -59,10 +74,14 @@ const StudentsListScreen = () => {
           />
         )}
         ListEmptyComponent={
-          <EmptyState
-            title={assignmentsQuery.isLoading || studentsQuery.isLoading ? 'Loading students' : 'No students'}
-            message={assignmentsQuery.error?.message || studentsQuery.error?.message || 'No assigned section roster found.'}
-          />
+          assignmentsQuery.isLoading || studentsQuery.isLoading ? (
+            <SkeletonLoader rows={4} />
+          ) : (
+            <EmptyState
+              title="No students"
+              message={assignmentsQuery.error?.message || studentsQuery.error?.message || 'No assigned section roster found.'}
+            />
+          )
         }
       />
     </View>

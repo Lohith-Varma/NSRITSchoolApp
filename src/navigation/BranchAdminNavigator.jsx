@@ -7,6 +7,7 @@ import CreateStudentScreen from '../screens/branchAdmin/CreateStudentScreen';
 import BulkStudentUploadScreen from '../screens/branchAdmin/BulkStudentUploadScreen';
 import AttendanceOverviewScreen from '../screens/branchAdmin/AttendanceOverviewScreen';
 import BranchSettingsScreen from '../screens/branchAdmin/BranchSettingsScreen';
+import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
@@ -42,6 +43,11 @@ const BranchAdminNavigator = () => (
       name="AttendanceOverview"
       component={AttendanceOverviewScreen}
       options={{title: 'Attendance'}}
+    />
+    <Stack.Screen
+      name="AssignClassTeacher"
+      component={AssignClassTeacherScreen}
+      options={{title: 'Class Teachers'}}
     />
     <Stack.Screen
       name="BranchSettings"

@@ -96,7 +96,6 @@ const hydrateRoleProfile = async profile => {
     return {
       ...profile,
       teacherId: teacher?.id || null,
-      wing: teacher?.wing || null,
     };
   }
 

@@ -4,7 +4,7 @@ import {ProgressBar, Text, TouchableRipple} from 'react-native-paper';
 import StatusBadge from '../common/StatusBadge';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
-const money = value => `₹${Number(value || 0).toLocaleString('en-IN')}`;
+const money = value => `Rs ${Number(value || 0).toLocaleString('en-IN')}`;
 
 const FeeCard = ({student, onPress}) => {
   const paidRatio = student.totalFee
@@ -15,7 +15,7 @@ const FeeCard = ({student, onPress}) => {
     <TouchableRipple borderless onPress={onPress} style={styles.wrapper}>
       <View style={styles.card}>
         <View style={styles.row}>
-          <View>
+          <View style={styles.copy}>
             <Text style={styles.name}>{student.studentName}</Text>
             <Text style={styles.meta}>
               {student.className} - {student.sectionName}
@@ -55,6 +55,8 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.soft,
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.lg,
     padding: spacing.lg,
   },
@@ -62,6 +64,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: spacing.md,
   },
   name: {
     ...typography.sectionTitle,

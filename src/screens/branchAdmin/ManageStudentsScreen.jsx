@@ -1,7 +1,14 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import {CustomButton, EmptyState, ScreenContainer, SearchBar, SectionHeader} from '../../components';
+import {
+  DashboardCard,
+  EmptyState,
+  ScreenContainer,
+  SearchBar,
+  SectionHeader,
+  SkeletonLoader,
+} from '../../components';
 import {getAccessScope} from '../../services/rbacScope';
 import studentService from '../../services/students/studentService';
 import {fetchStudentsForRole} from '../../store/slices/studentSlice';
@@ -40,23 +47,39 @@ const ManageStudentsScreen = ({navigation}) => {
     <ScreenContainer>
       <SectionHeader title="Students" subtitle="Search by name, student ID, or parent phone" />
       <SearchBar value={query} onChangeText={setQuery} placeholder="Search students" />
-      <CustomButton mode="outlined" onPress={() => navigation.navigate('CreateStudent')}>
-        Create Student
-      </CustomButton>
-      <CustomButton mode="text" onPress={() => navigation.navigate('BulkStudentUpload')}>
-        Bulk CSV Upload
-      </CustomButton>
       <FlatList
         data={data}
         keyExtractor={item => item.id}
         scrollEnabled={false}
         refreshing={loading}
         renderItem={({item}) => (
-          <CustomButton mode="outlined">
-            {item.studentId} - {item.fullName}
-          </CustomButton>
+          <DashboardCard
+            title={item.fullName}
+            value={item.studentId}
+            description={`${item.academicClass?.name || '-'}-${item.section?.name || '-'} | ${item.status || 'ACTIVE'}`}
+            icon="account-school-outline"
+          />
         )}
-        ListEmptyComponent={<EmptyState title="No students" message="Create or upload students to see them here." />}
+        ListEmptyComponent={
+          loading ? (
+            <SkeletonLoader rows={4} />
+          ) : (
+            <EmptyState title="No students" message="Create or upload students to see them here." />
+          )
+        }
+      />
+      <SectionHeader title="More Actions" />
+      <DashboardCard
+        title="Create Student"
+        value="New"
+        icon="account-plus-outline"
+        onPress={() => navigation.navigate('CreateStudent')}
+      />
+      <DashboardCard
+        title="Bulk CSV Upload"
+        value="Upload"
+        icon="file-upload-outline"
+        onPress={() => navigation.navigate('BulkStudentUpload')}
       />
     </ScreenContainer>
   );

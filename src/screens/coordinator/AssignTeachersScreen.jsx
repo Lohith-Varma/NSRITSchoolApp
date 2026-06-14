@@ -14,7 +14,6 @@ const AssignTeachersScreen = () => {
     teacherName: '',
     classId: '',
     sectionId: '',
-    wing: '',
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +33,7 @@ const AssignTeachersScreen = () => {
     <ScreenContainer>
       <Header
         title="Assign Teachers"
-        subtitle="Map a teacher to a class, section, and wing"
+        subtitle="Map a branch teacher to a class and section"
       />
       <CustomInput
         label="Teacher ID"
@@ -55,11 +54,6 @@ const AssignTeachersScreen = () => {
         label="Section ID"
         value={form.sectionId}
         onChangeText={value => updateField('sectionId', value)}
-      />
-      <CustomInput
-        label="Wing"
-        value={form.wing}
-        onChangeText={value => updateField('wing', value)}
       />
       <HelperText type="info" visible={Boolean(message)}>
         {message}
