@@ -2,9 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {HelperText} from 'react-native-paper';
 import {useSelector} from 'react-redux';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CustomButton, CustomInput, ScreenContainer, SectionHeader, SelectField} from '../../components';
+import {CustomButton, CustomInput, DatePickerField, ScreenContainer, SectionHeader, SelectField} from '../../components';
 import accountantService from '../../services/accountants/accountantService';
 import {getAccessScope} from '../../services/rbacScope';
+import {toISODate} from '../../utils/helpers/dateHelpers';
 
 const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, value}));
 
@@ -55,7 +56,7 @@ const EditAccountantScreen = ({navigation, route}) => {
       <CustomInput label="Full Name" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
       <CustomInput label="Mobile Number" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
       <SelectField label="Gender" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
-      <CustomInput label="Joining Date (YYYY-MM-DD)" value={form.joiningDate} onChangeText={value => updateField('joiningDate', value)} />
+      <DatePickerField label="Joining Date" value={form.joiningDate} maximumDate={toISODate(new Date())} onChange={value => updateField('joiningDate', value)} />
       <CustomInput label="Designation" value={form.designation} onChangeText={value => updateField('designation', value)} />
       <CustomInput label="Email" value={form.email || ''} onChangeText={value => updateField('email', value)} />
       <SelectField

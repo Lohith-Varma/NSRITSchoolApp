@@ -2,13 +2,12 @@ import React, {useState} from 'react';
 import {HelperText} from 'react-native-paper';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useSelector} from 'react-redux';
-import {CustomButton, CustomInput, ScreenContainer, SectionHeader, SelectField} from '../../components';
-import {WINGS, WING_LABELS} from '../../config/academic';
+import {CustomButton, CustomInput, DatePickerField, ScreenContainer, SectionHeader, SelectField} from '../../components';
 import {STAFF_TYPE_LABELS, STAFF_TYPES} from '../../config/constants';
 import teacherService from '../../services/teachers/teacherService';
 import {getAccessScope} from '../../services/rbacScope';
+import {toISODate} from '../../utils/helpers/dateHelpers';
 
-const wingOptions = Object.values(WINGS).map(value => ({label: WING_LABELS[value], value}));
 const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, value}));
 const staffTypeOptions = [
   {label: STAFF_TYPE_LABELS[STAFF_TYPES.TEACHING], value: STAFF_TYPES.TEACHING},
@@ -21,7 +20,7 @@ const initialForm = {
   alternateMobileNumber: '',
   email: '',
   gender: '',
-  joiningDate: new Date().toISOString().slice(0, 10),
+  joiningDate: toISODate(new Date()),
   designation: '',
   staffType: STAFF_TYPES.TEACHING,
   dateOfBirth: '',
@@ -33,7 +32,6 @@ const initialForm = {
   pincode: '',
   emergencyContact: '',
   bloodGroup: '',
-  wing: WINGS.PRIMARY,
   countryCode: '+91',
 };
 
@@ -41,7 +39,7 @@ const CreateTeacherScreen = ({navigation}) => {
   const queryClient = useQueryClient();
   const user = useSelector(state => state.auth.user);
   const scope = getAccessScope(user);
-  const [form, setForm] = useState({...initialForm, wing: user?.wing || initialForm.wing});
+  const [form, setForm] = useState(initialForm);
   const [error, setError] = useState('');
 
   const updateField = (field, value) => setForm(current => ({...current, [field]: value}));
@@ -58,17 +56,16 @@ const CreateTeacherScreen = ({navigation}) => {
   return (
     <ScreenContainer>
       <SectionHeader title="Create Teacher" subtitle="Branch is inherited automatically" />
-      <CustomInput label="Full Name" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
-      <CustomInput label="Mobile Number" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
-      <SelectField label="Gender" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
-      <CustomInput label="Joining Date (YYYY-MM-DD)" value={form.joiningDate} onChangeText={value => updateField('joiningDate', value)} />
-      <CustomInput label="Designation" value={form.designation} onChangeText={value => updateField('designation', value)} />
-      <SelectField label="Staff Type" value={form.staffType} options={staffTypeOptions} onChange={value => updateField('staffType', value)} />
-      <SelectField label="Wing" value={form.wing} options={wingOptions} disabled={user?.role === 'COORDINATOR'} onChange={value => updateField('wing', value)} />
+      <CustomInput label="Full Name *" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
+      <CustomInput label="Mobile Number *" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
+      <SelectField label="Gender *" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
+      <DatePickerField label="Joining Date" value={form.joiningDate} maximumDate={toISODate(new Date())} required onChange={value => updateField('joiningDate', value)} />
+      <CustomInput label="Designation *" value={form.designation} onChangeText={value => updateField('designation', value)} />
+      <SelectField label="Staff Type *" value={form.staffType} options={staffTypeOptions} onChange={value => updateField('staffType', value)} />
       <SectionHeader title="Optional Information" />
       <CustomInput label="Alternate Mobile Number" keyboardType="phone-pad" value={form.alternateMobileNumber} onChangeText={value => updateField('alternateMobileNumber', value)} />
       <CustomInput label="Email" keyboardType="email-address" value={form.email} onChangeText={value => updateField('email', value)} />
-      <CustomInput label="Date of Birth (YYYY-MM-DD)" value={form.dateOfBirth} onChangeText={value => updateField('dateOfBirth', value)} />
+      <DatePickerField label="Date of Birth" value={form.dateOfBirth} maximumDate={toISODate(new Date())} onChange={value => updateField('dateOfBirth', value)} />
       <CustomInput label="Qualification" value={form.qualification} onChangeText={value => updateField('qualification', value)} />
       <CustomInput label="Experience" value={form.experience} onChangeText={value => updateField('experience', value)} />
       <CustomInput label="Address" value={form.address} multiline onChangeText={value => updateField('address', value)} />

@@ -13,8 +13,9 @@ import {
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
 import {colors, radius, spacing, typography} from '../../theme';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
-const formatDate = value => (value ? String(value).slice(0, 10) : 'Not set');
+const formatDate = value => formatDateForDisplay(value) || 'Not set';
 
 const BranchListScreen = ({navigation}) => {
   const [searchText, setSearchText] = useState('');

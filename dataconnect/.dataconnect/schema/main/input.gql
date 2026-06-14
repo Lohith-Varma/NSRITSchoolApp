@@ -14446,11 +14446,11 @@ input Teacher_Data {
   """
   updatedAt_update: [Timestamp_Update!] @fdc_forbiddenInVariables
   """
-  ✨ Generated from Field `Teacher`.`wing` of type `String!`
+  ✨ Generated from Field `Teacher`.`wing` of type `String`
   """
   wing: String
   """
-  ✨ `_expr` server value variant of `wing` (✨ Generated from Field `Teacher`.`wing` of type `String!`)
+  ✨ `_expr` server value variant of `wing` (✨ Generated from Field `Teacher`.`wing` of type `String`)
   """
   wing_expr: String_Expr @fdc_forbiddenInVariables
   """
@@ -14579,7 +14579,7 @@ input Teacher_Filter {
   """
   updatedAt: Timestamp_Filter
   """
-  ✨ Generated from Field `Teacher`.`wing` of type `String!`
+  ✨ Generated from Field `Teacher`.`wing` of type `String`
   """
   wing: String_Filter
   """
@@ -14884,7 +14884,7 @@ input Teacher_Order {
   """
   updatedAt: OrderDirection
   """
-  ✨ Generated from Field `Teacher`.`wing` of type `String!`
+  ✨ Generated from Field `Teacher`.`wing` of type `String`
   """
   wing: OrderDirection
   """
@@ -15061,11 +15061,11 @@ input TeacherAssignment_Data {
   """
   teacherId_expr: UUID_Expr @fdc_forbiddenInVariables
   """
-  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID!`
+  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID`
   """
   wingId: UUID
   """
-  ✨ `_expr` server value variant of `wingId` (✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID!`)
+  ✨ `_expr` server value variant of `wingId` (✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID`)
   """
   wingId_expr: UUID_Expr @fdc_forbiddenInVariables
   """
@@ -15085,7 +15085,7 @@ input TeacherAssignment_Data {
   """
   teacher: User_Key @fdc_forbiddenInVariables
   """
-  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing!`
+  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing`
   """
   wing: Wing_Key @fdc_forbiddenInVariables
   """
@@ -15182,7 +15182,7 @@ input TeacherAssignment_Filter {
   """
   teacherId: UUID_Filter
   """
-  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID!`
+  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID`
   """
   wingId: UUID_Filter
   """
@@ -15202,7 +15202,7 @@ input TeacherAssignment_Filter {
   """
   teacher: User_Filter
   """
-  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing!`
+  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing`
   """
   wing: Wing_Filter
   """
@@ -15375,7 +15375,7 @@ input TeacherAssignment_Order {
   """
   teacherId: OrderDirection
   """
-  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID!`
+  ✨ Generated from Field `TeacherAssignment`.`wingId` of type `UUID`
   """
   wingId: OrderDirection
   """
@@ -15395,7 +15395,7 @@ input TeacherAssignment_Order {
   """
   teacher: User_Order
   """
-  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing!`
+  ✨ Generated from Field `TeacherAssignment`.`wing` of type `Wing`
   """
   wing: Wing_Order
   """
@@ -15496,6 +15496,14 @@ input TeacherSectionAssignment_Data {
   """
   id_expr: UUID_Expr @fdc_forbiddenInVariables
   """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedById` of type `UUID`
+  """
+  assignedById: UUID
+  """
+  ✨ `_expr` server value variant of `assignedById` (✨ Generated from Field `TeacherSectionAssignment`.`assignedById` of type `UUID`)
+  """
+  assignedById_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
   ✨ Generated from Field `TeacherSectionAssignment`.`sectionId` of type `UUID!`
   """
   sectionId: UUID
@@ -15511,6 +15519,10 @@ input TeacherSectionAssignment_Data {
   ✨ `_expr` server value variant of `teacherId` (✨ Generated from Field `TeacherSectionAssignment`.`teacherId` of type `UUID!`)
   """
   teacherId_expr: UUID_Expr @fdc_forbiddenInVariables
+  """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedBy` of type `User`
+  """
+  assignedBy: User_Key @fdc_forbiddenInVariables
   """
   ✨ Generated from Field `TeacherSectionAssignment`.`section` of type `Section!`
   """
@@ -15589,6 +15601,10 @@ input TeacherSectionAssignment_Filter {
   """
   id: UUID_Filter
   """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedById` of type `UUID`
+  """
+  assignedById: UUID_Filter
+  """
   ✨ Generated from Field `TeacherSectionAssignment`.`sectionId` of type `UUID!`
   """
   sectionId: UUID_Filter
@@ -15596,6 +15612,10 @@ input TeacherSectionAssignment_Filter {
   ✨ Generated from Field `TeacherSectionAssignment`.`teacherId` of type `UUID!`
   """
   teacherId: UUID_Filter
+  """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedBy` of type `User`
+  """
+  assignedBy: User_Filter
   """
   ✨ Generated from Field `TeacherSectionAssignment`.`section` of type `Section!`
   """
@@ -15658,6 +15678,10 @@ input TeacherSectionAssignment_Having {
   ✨ Generated from Field `TeacherSectionAssignment`.`_count` of type `Int!`
   """
   _count: Int_Filter
+  """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedById_count` of type `Int!`
+  """
+  assignedById_count: Int_Filter
   """
   ✨ Generated from Field `TeacherSectionAssignment`.`createdAt_count` of type `Int!`
   """
@@ -15738,6 +15762,10 @@ input TeacherSectionAssignment_Order {
   """
   id: OrderDirection
   """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedById` of type `UUID`
+  """
+  assignedById: OrderDirection
+  """
   ✨ Generated from Field `TeacherSectionAssignment`.`sectionId` of type `UUID!`
   """
   sectionId: OrderDirection
@@ -15745,6 +15773,10 @@ input TeacherSectionAssignment_Order {
   ✨ Generated from Field `TeacherSectionAssignment`.`teacherId` of type `UUID!`
   """
   teacherId: OrderDirection
+  """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedBy` of type `User`
+  """
+  assignedBy: User_Order
   """
   ✨ Generated from Field `TeacherSectionAssignment`.`section` of type `Section!`
   """
@@ -15773,6 +15805,10 @@ input TeacherSectionAssignment_Order {
   ✨ Generated from Field `TeacherSectionAssignment`.`_count` of type `Int!`
   """
   _count: OrderDirection
+  """
+  ✨ Generated from Field `TeacherSectionAssignment`.`assignedById_count` of type `Int!`
+  """
+  assignedById_count: OrderDirection
   """
   ✨ Generated from Field `TeacherSectionAssignment`.`createdAt_count` of type `Int!`
   """
@@ -16549,6 +16585,10 @@ input User_Data {
   """
   teacherAssignments_on_teacher: [TeacherAssignment_Data!]
   """
+  ✨ Generated from Field `User`.`teacherSectionAssignments_on_assignedBy` of type `[TeacherSectionAssignment!]!`
+  """
+  teacherSectionAssignments_on_assignedBy: [TeacherSectionAssignment_Data!]
+  """
   ✨ Generated from Field `User`.`teacherTransferHistories_on_changedBy` of type `[TeacherTransferHistory!]!`
   """
   teacherTransferHistories_on_changedBy: [TeacherTransferHistory_Data!]
@@ -16701,6 +16741,10 @@ input User_Filter {
   ✨ Generated from Field `User`.`teacherAssignments_on_teacher` of type `[TeacherAssignment!]!`
   """
   teacherAssignments_on_teacher: TeacherAssignment_ListFilter
+  """
+  ✨ Generated from Field `User`.`teacherSectionAssignments_on_assignedBy` of type `[TeacherSectionAssignment!]!`
+  """
+  teacherSectionAssignments_on_assignedBy: TeacherSectionAssignment_ListFilter
   """
   ✨ Generated from Field `User`.`teacherTransferHistories_on_changedBy` of type `[TeacherTransferHistory!]!`
   """

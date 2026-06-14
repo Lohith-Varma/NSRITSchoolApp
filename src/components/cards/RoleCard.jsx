@@ -2,7 +2,7 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import {Card, Text} from 'react-native-paper';
 import {ROLE_LABELS} from '../../config/constants';
-import {colors, spacing, typography} from '../../theme';
+import {colors, radius, spacing, typography} from '../../theme';
 
 const RoleCard = ({role, description}) => (
   <Card mode="outlined" style={styles.card}>
@@ -18,7 +18,8 @@ const RoleCard = ({role, description}) => (
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
     marginBottom: spacing.md,
   },
   role: {

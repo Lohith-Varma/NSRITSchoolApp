@@ -1,10 +1,10 @@
 export const shadows = {
   soft: {
-    elevation: 2,
+    elevation: 1,
     shadowColor: '#0F172A',
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: 12,
   },
   medium: {
     elevation: 4,

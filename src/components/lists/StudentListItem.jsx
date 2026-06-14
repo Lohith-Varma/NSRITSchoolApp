@@ -23,13 +23,13 @@ const StudentListItem = ({
         </Text>
         <StatusBadge status={status} />
       </View>
-      {right || (
+      {right || (onToggle ? (
         <Checkbox
           status={checked ? 'checked' : 'unchecked'}
           onPress={onToggle}
           color={colors.success}
         />
-      )}
+      ) : null)}
     </View>
   </TouchableRipple>
 );
@@ -37,6 +37,8 @@ const StudentListItem = ({
 const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.lg,
     marginBottom: spacing.md,
   },

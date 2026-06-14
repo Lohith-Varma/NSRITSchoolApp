@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import {ATTENDANCE_STATUS} from '../../config/constants';
-import {colors, radius, spacing, typography} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -84,7 +84,10 @@ const CalendarAttendance = ({monthDate = new Date(), records = {}}) => {
 
 const styles = StyleSheet.create({
   card: {
+    ...shadows.soft,
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.xl,
     padding: spacing.md,
   },

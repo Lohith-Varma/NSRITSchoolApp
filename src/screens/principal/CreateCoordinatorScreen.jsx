@@ -38,11 +38,11 @@ const CreateCoordinatorScreen = ({navigation}) => {
   return (
     <ScreenContainer>
       <SectionHeader title="Create Coordinator" subtitle="Coordinator inherits your branch automatically" />
-      <CustomInput label="Full Name" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
-      <CustomInput label="Mobile Number" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
+      <CustomInput label="Full Name *" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
+      <CustomInput label="Mobile Number *" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
       <CustomInput label="Email" keyboardType="email-address" value={form.email} onChangeText={value => updateField('email', value)} />
-      <SelectField label="Gender" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
-      <SelectField label="Wing Assignment" value={form.wing} options={wingOptions} onChange={value => updateField('wing', value)} />
+      <SelectField label="Gender *" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
+      <SelectField label="Wing Assignment *" value={form.wing} options={wingOptions} onChange={value => updateField('wing', value)} />
       <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
       <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={() => mutation.mutate(form)}>
         Create Coordinator

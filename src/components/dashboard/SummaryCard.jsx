@@ -9,26 +9,36 @@ const SummaryCard = ({
   subtitle,
   progress = 0,
   tone = colors.primary,
-}) => (
-  <View style={styles.card}>
-    <View style={styles.row}>
-      <View>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.value}>{value}</Text>
+}) => {
+  const safeProgress = Math.min(Math.max(Number(progress) || 0, 0), 1);
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <View style={styles.copy}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.value}>{value}</Text>
+        </View>
+        <Text style={[styles.percent, {color: tone}]}>
+          {Math.round(safeProgress * 100)}%
+        </Text>
       </View>
-      <Text style={[styles.percent, {color: tone}]}>
-        {Math.round(progress * 100)}%
-      </Text>
+      <ProgressBar
+        progress={safeProgress}
+        color={tone}
+        style={styles.progress}
+      />
+      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
-    <ProgressBar progress={progress} color={tone} style={styles.progress} />
-    {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
     ...shadows.soft,
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.lg,
     marginBottom: spacing.md,
     padding: spacing.lg,
@@ -37,6 +47,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: spacing.md,
   },
   title: {
     ...typography.caption,

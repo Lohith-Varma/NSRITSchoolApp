@@ -6,7 +6,6 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {
   CustomButton,
   EmptyState,
-  ScreenContainer,
   SearchBar,
   SectionHeader,
   StudentListItem,
@@ -14,7 +13,7 @@ import {
 import {ATTENDANCE_STATUS, USER_ROLES} from '../../config/constants';
 import attendanceService from '../../services/attendance/attendanceService';
 import {getAccessScope} from '../../services/rbacScope';
-import {spacing} from '../../theme';
+import {colors, spacing} from '../../theme';
 
 const EditAttendanceScreen = () => {
   const user = useSelector(state => state.auth.user);
@@ -103,16 +102,24 @@ const EditAttendanceScreen = () => {
   });
 
   return (
-    <ScreenContainer>
-      <SectionHeader
-        title="Correct Attendance"
-        subtitle="Submitted records only"
-      />
-      <SearchBar value={query} onChangeText={handleSearch} placeholder="Search attendance record" />
+    <View style={styles.container}>
       <FlatList
         data={records}
         keyExtractor={item => item.id}
-        scrollEnabled={false}
+        contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <View>
+            <SectionHeader
+              title="Correct Attendance"
+              subtitle="Submitted records only"
+            />
+            <SearchBar
+              value={query}
+              onChangeText={handleSearch}
+              placeholder="Search attendance record"
+            />
+          </View>
+        }
         renderItem={({item}) => (
           <StudentListItem
             student={{
@@ -140,22 +147,41 @@ const EditAttendanceScreen = () => {
             message={attendanceQuery.error?.message || 'Submitted attendance records will appear here.'}
           />
         }
+        ListFooterComponent={<View style={styles.footerSpacer} />}
       />
-      <HelperText type="error" visible={Boolean(error)}>
-        {error}
-      </HelperText>
-      <View style={styles.footer}>
+      <View style={styles.stickyFooter}>
+        <HelperText type="error" visible={Boolean(error)}>
+          {error}
+        </HelperText>
         <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={() => mutation.mutate()}>
           Save Corrections
         </CustomButton>
       </View>
-    </ScreenContainer>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  footer: {
-    marginTop: spacing.md,
+  container: {
+    backgroundColor: colors.background,
+    flex: 1,
+  },
+  list: {
+    padding: spacing.lg,
+    paddingBottom: 148,
+  },
+  footerSpacer: {
+    height: spacing.md,
+  },
+  stickyFooter: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderTopWidth: 1,
+    bottom: 0,
+    left: 0,
+    padding: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
 });
 

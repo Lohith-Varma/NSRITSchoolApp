@@ -1,12 +1,9 @@
 import {STAFF_TYPES, USER_ROLES} from '../../config/constants';
-import {WINGS} from '../../config/academic';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
 import {assertBranchAccess} from '../academics/academicAccess';
 import StaffIdService from '../staff/StaffIdService';
 import {formatE164PhoneNumber, normalizePhoneNumber} from '../../utils/phone';
-
-const validWings = Object.values(WINGS);
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -25,10 +22,19 @@ const canViewTeachers = role =>
     normalizeRole(role),
   );
 
-const assertTeacherWingAccess = (scope, wing) => {
+const canManageClassTeacherAssignments = role =>
+  [USER_ROLES.PRINCIPAL, USER_ROLES.BRANCH_ADMIN, USER_ROLES.MAIN_ADMIN, USER_ROLES.COORDINATOR].includes(
+    normalizeRole(role),
+  );
+
+const assertCoordinatorSectionAccess = (scope, section) => {
   const role = normalizeRole(scope?.role);
-  if (role === USER_ROLES.COORDINATOR && scope?.wing !== wing) {
-    throw new Error('Coordinators can manage teachers only inside their assigned wing.');
+  if (role !== USER_ROLES.COORDINATOR) {
+    return;
+  }
+  const sectionWing = section?.academicClass?.wing?.code || section?.wing?.code || section?.wing;
+  if (!sectionWing || sectionWing !== scope?.wing) {
+    throw new Error('Coordinators can manage class teachers only within their assigned wing.');
   }
 };
 
@@ -51,16 +57,11 @@ const validateTeacher = payload => {
   if (![STAFF_TYPES.TEACHING, STAFF_TYPES.SUPPORTING].includes(payload.staffType)) {
     return 'Staff type is required.';
   }
-  if (!validWings.includes(payload.wing)) {
-    return 'Select a valid wing.';
-  }
   return '';
 };
 
 const normalizeTeacherPayload = (payload, scope) => {
-  const role = normalizeRole(scope?.role);
   const branchId = payload.branchId || scope?.branchId;
-  const wing = role === USER_ROLES.COORDINATOR ? scope?.wing : payload.wing;
   const countryCode = payload.countryCode || '+91';
   const phoneNumber = formatE164PhoneNumber({
     countryCode,
@@ -70,7 +71,6 @@ const normalizeTeacherPayload = (payload, scope) => {
   return {
     ...payload,
     branchId,
-    wing,
     countryCode,
     phoneNumber,
     joiningDate: payload.joiningDate || today(),
@@ -103,8 +103,19 @@ const flattenTeacher = teacher => ({
     [],
 });
 
+const flattenClassTeacherAssignment = assignment => ({
+  ...assignment,
+  teacherName: assignment.teacher?.user?.fullName || assignment.teacher?.fullName || '',
+  employeeId: assignment.teacher?.employeeId || assignment.teacher?.user?.employeeId || '',
+  teacherPhoneNumber: assignment.teacher?.user?.phoneNumber || '',
+  assignedByName: assignment.assignedBy?.fullName || '',
+  className: assignment.section?.academicClass?.name || '',
+  sectionName: assignment.section?.name || '',
+  wing: assignment.section?.academicClass?.wing?.code || '',
+});
+
 export const teacherService = {
-  async getTeachers({branchId, wing, limit = 50, offset = 0}, scope) {
+  async getTeachers({branchId, limit = 50, offset = 0}, scope) {
     if (!branchId) {
       return [];
     }
@@ -115,28 +126,27 @@ export const teacherService = {
 
     assertBranchAccess(scope, branchId);
 
-    const role = normalizeRole(scope?.role);
-    if (role === USER_ROLES.COORDINATOR) {
-      const coordinatorWing = scope?.wing;
-      const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_COORDINATOR_TEACHERS_BY_WING, {
-        branchId,
-        wing: coordinatorWing,
-        limit,
-        offset,
-      });
-      return (response.teachers || []).map(flattenTeacher);
-    }
-
-    const operationName = wing
-      ? DATA_CONNECT_QUERIES.GET_TEACHERS_BY_WING
-      : DATA_CONNECT_QUERIES.GET_TEACHERS;
-    const variables = wing ? {branchId, wing, limit, offset} : {branchId, limit, offset};
-    const response = await dataConnectClient.query(operationName, variables);
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_TEACHERS, {
+      branchId,
+      limit,
+      offset,
+    });
     return (response.teachers || []).map(flattenTeacher);
   },
 
   async getTeachersByBranch(branchId, scope) {
     return this.getTeachers({branchId}, scope);
+  },
+
+  async clearTeacherWingRestrictions(branchId, scope) {
+    if (!branchId) {
+      throw new Error('Branch is required.');
+    }
+    assertBranchAccess(scope, branchId);
+    await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CLEAR_TEACHER_WING_RESTRICTIONS, {
+      branchId,
+    });
+    return {branchId};
   },
 
   async getTeacherProfile(teacherId) {
@@ -222,6 +232,33 @@ export const teacherService = {
     };
   },
 
+  async getClassTeacherAssignments({branchId, academicYear = new Date().getFullYear(), limit = 500}, scope) {
+    if (!branchId) {
+      return {sections: [], assignments: [], students: [], coordinators: []};
+    }
+    assertBranchAccess(scope, branchId);
+
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_TEACHER_ASSIGNMENTS, {
+      branchId,
+      academicYear,
+      limit,
+    });
+
+    const sections =
+      normalizeRole(scope?.role) === USER_ROLES.COORDINATOR
+        ? (response.sections || []).filter(section => section.academicClass?.wing?.code === scope?.wing)
+        : response.sections || [];
+    const sectionIds = new Set(sections.map(section => section.id));
+    return {
+      sections,
+      assignments: (response.teacherSectionAssignments || [])
+        .filter(assignment => sectionIds.has(assignment.sectionId))
+        .map(flattenClassTeacherAssignment),
+      students: (response.students || []).filter(student => sectionIds.has(student.sectionId)),
+      coordinators: response.coordinators || [],
+    };
+  },
+
   async getAssignments(filters = {}) {
     if (!filters.teacherId) {
       return [];
@@ -232,7 +269,6 @@ export const teacherService = {
       id: item.id,
       teacherId: teacher.id,
       branchId: teacher.branchId,
-      wing: teacher.wing,
       sectionId: item.section?.id || item.sectionId,
       academicClassId: item.section?.academicClass?.id,
       isClassTeacher: item.isClassTeacher,
@@ -247,7 +283,6 @@ export const teacherService = {
 
     const normalized = normalizeTeacherPayload(payload, scope);
     assertBranchAccess(scope, normalized.branchId);
-    assertTeacherWingAccess(scope, normalized.wing);
 
     const error = validateTeacher(normalized);
     if (error) {
@@ -297,7 +332,6 @@ export const teacherService = {
       branchCode: staffId.branchCode,
       serialNumber: staffId.serialNumber,
       branchId: normalized.branchId,
-      wing: normalized.wing,
     });
 
     return {
@@ -313,50 +347,10 @@ export const teacherService = {
   async updateTeacher(payload, scope) {
     const normalized = normalizeTeacherPayload(payload, scope);
     assertBranchAccess(scope, normalized.branchId);
-    assertTeacherWingAccess(scope, normalized.wing);
 
     const error = validateTeacher(normalized);
     if (error) {
       throw new Error(error);
-    }
-
-    const oldWing = payload.currentWing || payload.oldWing;
-    if (oldWing && oldWing !== normalized.wing) {
-      await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_TEACHER, {
-        teacherId: normalized.teacherId,
-        userId: normalized.userId,
-        fullName: normalized.fullName,
-        countryCode: normalized.countryCode,
-        phoneNumber: normalized.phoneNumber,
-        alternateMobileNumber: normalized.alternateMobileNumber || null,
-        email: normalized.email || null,
-        dateOfBirth: normalized.dateOfBirth || null,
-        gender: normalized.gender,
-        joiningDate: normalized.joiningDate,
-        designation: normalized.designation,
-        qualification: normalized.qualification || null,
-        experience: normalized.experience || null,
-        address: normalized.address || null,
-        city: normalized.city || null,
-        state: normalized.state || null,
-        pincode: normalized.pincode || null,
-        emergencyContact: normalized.emergencyContact || null,
-        bloodGroup: normalized.bloodGroup || null,
-        branchId: normalized.branchId,
-        wing: oldWing,
-        isActive: normalized.isActive ?? true,
-      });
-
-      return this.transferTeacher(
-        {
-          teacherId: normalized.teacherId,
-          oldWing,
-          newWing: normalized.wing,
-          changedById: scope?.userId,
-          branchId: normalized.branchId,
-        },
-        scope,
-      );
     }
 
     const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_TEACHER, {
@@ -380,25 +374,10 @@ export const teacherService = {
       emergencyContact: normalized.emergencyContact || null,
       bloodGroup: normalized.bloodGroup || null,
       branchId: normalized.branchId,
-      wing: normalized.wing,
       isActive: normalized.isActive ?? true,
     });
 
     return {id: response.teacher_update?.id || response.teacher_update, ...normalized};
-  },
-
-  async transferTeacher(payload, scope) {
-    const role = normalizeRole(scope?.role);
-    if (![USER_ROLES.PRINCIPAL, USER_ROLES.MAIN_ADMIN].includes(role)) {
-      throw new Error('Only principals can transfer teachers across wings.');
-    }
-    assertBranchAccess(scope, payload.branchId);
-
-    const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.TRANSFER_TEACHER, {
-      ...payload,
-      changedById: payload.changedById || scope?.userId,
-    });
-    return {id: response.teacher_update?.id || payload.teacherId, ...payload};
   },
 
   async assignTeacherSubjects({teacher, teacherId, subjectIds = []}, scope) {
@@ -407,7 +386,6 @@ export const teacherService = {
       throw new Error('Select a teacher.');
     }
     assertBranchAccess(scope, teacher?.branchId || scope?.branchId);
-    assertTeacherWingAccess(scope, teacher?.wing);
 
     await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CLEAR_TEACHER_SUBJECTS, {
       teacherId: resolvedTeacherId,
@@ -427,7 +405,10 @@ export const teacherService = {
     return {teacherId: resolvedTeacherId, subjectIds};
   },
 
-  async assignClassTeacher({teacher, teacherId, sectionId, branchId}, scope) {
+  async assignClassTeacher({teacher, teacherId, sectionId, branchId, section}, scope) {
+    if (!canManageClassTeacherAssignments(scope?.role)) {
+      throw new Error('Class teacher assignment access denied.');
+    }
     const resolvedTeacher = teacher || {};
     const resolvedTeacherId = teacherId || resolvedTeacher.id;
     const teacherUserId = resolvedTeacher.userId || resolvedTeacher.user?.id;
@@ -437,16 +418,72 @@ export const teacherService = {
     }
 
     assertBranchAccess(scope, branchId || resolvedTeacher.branchId || scope?.branchId);
-    assertTeacherWingAccess(scope, resolvedTeacher.wing);
+    assertCoordinatorSectionAccess(scope, section);
 
     const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.ASSIGN_CLASS_TEACHER, {
       sectionId,
       teacherId: resolvedTeacherId,
       teacherUserId,
       branchId: branchId || resolvedTeacher.branchId || scope?.branchId,
+      sectionAuditId: String(sectionId),
+      teacherAuditId: String(resolvedTeacherId),
     });
 
     return {id: response.teacherSectionAssignment_insert?.id, sectionId, teacherId: resolvedTeacherId};
+  },
+
+  async updateClassTeacherAssignment(payload, scope) {
+    if (!canManageClassTeacherAssignments(scope?.role)) {
+      throw new Error('Class teacher assignment access denied.');
+    }
+    const resolvedTeacher = payload.teacher || {};
+    const teacherId = payload.teacherId || resolvedTeacher.id;
+    const teacherUserId = resolvedTeacher.userId || resolvedTeacher.user?.id;
+    if (!payload.assignmentId || !payload.oldSectionId || !payload.sectionId || !teacherId || !teacherUserId) {
+      throw new Error('Select an assignment, teacher, and section.');
+    }
+    assertBranchAccess(scope, payload.branchId || resolvedTeacher.branchId || scope?.branchId);
+    assertCoordinatorSectionAccess(scope, payload.section);
+    assertCoordinatorSectionAccess(scope, payload.oldSection);
+
+    const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.UPDATE_CLASS_TEACHER_ASSIGNMENT, {
+      assignmentId: payload.assignmentId,
+      oldSectionId: payload.oldSectionId,
+      sectionId: payload.sectionId,
+      teacherId,
+      teacherUserId,
+      branchId: payload.branchId || resolvedTeacher.branchId || scope?.branchId,
+      oldTeacherId: payload.oldTeacherId || null,
+      sectionAuditId: String(payload.sectionId),
+      teacherAuditId: String(teacherId),
+      oldTeacherAuditId: payload.oldTeacherId ? String(payload.oldTeacherId) : null,
+    });
+    return {
+      id: response.teacherSectionAssignment_insert?.id || payload.assignmentId,
+      sectionId: payload.sectionId,
+      teacherId,
+    };
+  },
+
+  async removeClassTeacherAssignment(payload, scope) {
+    if (!canManageClassTeacherAssignments(scope?.role)) {
+      throw new Error('Class teacher assignment access denied.');
+    }
+    if (!payload.assignmentId || !payload.sectionId || !payload.teacherId) {
+      throw new Error('Select an assignment to remove.');
+    }
+    assertBranchAccess(scope, payload.branchId || scope?.branchId);
+    assertCoordinatorSectionAccess(scope, payload.section);
+
+    await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.REMOVE_CLASS_TEACHER_ASSIGNMENT, {
+      assignmentId: payload.assignmentId,
+      sectionId: payload.sectionId,
+      teacherId: payload.teacherId,
+      branchId: payload.branchId || scope?.branchId,
+      sectionAuditId: String(payload.sectionId),
+      teacherAuditId: String(payload.teacherId),
+    });
+    return {id: payload.assignmentId, sectionId: payload.sectionId, teacherId: payload.teacherId};
   },
 };
 

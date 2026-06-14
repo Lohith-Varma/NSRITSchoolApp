@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {ATTENDANCE_STATUS, ROLE_LABELS} from '../../config/constants';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -8,9 +8,10 @@ import {fetchAttendance} from '../../store/slices/attendanceSlice';
 import {fetchFees} from '../../store/slices/feeSlice';
 import {colors, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
-import {ERPLayout} from '../index';
+import ScreenContainer from '../common/ScreenContainer';
 import SectionHeader from '../common/SectionHeader';
 import AttendanceCard from './AttendanceCard';
+import DashboardHeader from './DashboardHeader';
 import StatCard from './StatCard';
 import SummaryCard from './SummaryCard';
 
@@ -42,12 +43,35 @@ const RoleDashboard = ({
     0;
 
   return (
-    <ERPLayout
-      navigation={navigation}
-      activeRoute="Dashboard"
-      title={`${ROLE_LABELS[role]} Console`}
-      breadcrumbs={['Dashboard', ROLE_LABELS[role]]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 100, padding: spacing.md}}>
+    <ScreenContainer>
+      <DashboardHeader
+        name={user?.name}
+        role={role}
+        subtitle={subtitle || ROLE_LABELS[role]}
+        onLogout={() => dispatch(logoutUser())}
+      />
+
+      <SectionHeader
+        title="Priority Actions"
+        subtitle="Most-used workflows for this role"
+      />
+      <View style={styles.grid}>
+        {primaryActions.map(action => (
+          <StatCard
+            key={action.title}
+            title={action.title}
+            value={action.value}
+            icon={action.icon}
+            tone={action.tone}
+            onPress={() => navigation.navigate(action.route)}
+          />
+        ))}
+      </View>
+
+      <SectionHeader
+        title="Operational Snapshot"
+        subtitle="Attendance, fee, and role-specific metrics"
+      />
       <View style={styles.grid}>
         <StatCard
           title="Attendance"
@@ -64,23 +88,6 @@ const RoleDashboard = ({
         />
         {stats.map(item => (
           <StatCard key={item.title} {...item} />
-        ))}
-      </View>
-
-      <SectionHeader
-        title="Quick Actions"
-        subtitle="Common workflows for this role"
-      />
-      <View style={styles.grid}>
-        {primaryActions.map(action => (
-          <StatCard
-            key={action.title}
-            title={action.title}
-            value={action.value}
-            icon={action.icon}
-            tone={action.tone}
-            onPress={() => navigation.navigate(action.route)}
-          />
         ))}
       </View>
 
@@ -108,8 +115,7 @@ const RoleDashboard = ({
         progress={feeSummary.collectionRate}
         tone={colors.primary}
       />
-      </ScrollView>
-    </ERPLayout>
+    </ScreenContainer>
   );
 };
 

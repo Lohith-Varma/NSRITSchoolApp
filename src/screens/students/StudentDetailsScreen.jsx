@@ -5,6 +5,7 @@ import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from 
 import studentService from '../../services/students/studentService';
 import {getAccessScope} from '../../services/rbacScope';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const countStatus = (records, status) =>
   records.filter(item => String(item.status).toUpperCase() === status).length;
@@ -74,7 +75,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
       />
       <SectionHeader title="Personal Details" />
       <DashboardCard title="Gender" value={student.gender || '-'} icon="account-outline" />
-      <DashboardCard title="Date of Birth" value={student.dateOfBirth || '-'} icon="calendar-account-outline" />
+      <DashboardCard title="Date of Birth" value={formatDateForDisplay(student.dateOfBirth) || '-'} icon="calendar-account-outline" />
       <DashboardCard title="Blood Group" value={student.bloodGroup || '-'} icon="water-outline" />
       <DashboardCard title="Address" value={[student.address, student.city, student.state, student.pincode].filter(Boolean).join(', ') || '-'} icon="map-marker-outline" />
       <SectionHeader title="Parent Details" />
@@ -85,7 +86,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
       <DashboardCard title="Class" value={student.academicClass?.name || '-'} icon="book-education-outline" />
       <DashboardCard title="Section" value={student.section?.name || '-'} icon="google-classroom" />
       <DashboardCard title="Class Teacher" value={student.section?.classTeacher?.fullName || '-'} icon="account-tie-outline" />
-      <DashboardCard title="Admission Date" value={student.admissionDate || '-'} icon="calendar-start" />
+      <DashboardCard title="Admission Date" value={formatDateForDisplay(student.admissionDate) || '-'} icon="calendar-start" />
       <DashboardCard title="Status" value={student.status || '-'} icon="check-circle-outline" />
       <SectionHeader title="Attendance Summary" />
       <DashboardCard title="Attendance Percentage" value={`${attendancePercentage}%`} icon="chart-donut" />
@@ -117,7 +118,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
             key={payment.id}
             title={payment.receiptNumber || 'Receipt pending'}
             value={formatCurrency(payment.amount)}
-            description={`${payment.paymentDate || '-'} | ${payment.paymentMode || '-'}`}
+            description={`${formatDateForDisplay(payment.paymentDate) || '-'} | ${payment.paymentMode || '-'}`}
             icon="receipt"
           />
         ))
@@ -134,7 +135,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
           <DashboardCard
             key={item.id}
             title={`${item.oldSection?.academicClass?.name || ''}-${item.oldSection?.name || ''} to ${item.newSection?.academicClass?.name || ''}-${item.newSection?.name || ''}`}
-            value={item.changedAt}
+            value={formatDateForDisplay(item.changedAt) || '-'}
             description={item.changedBy?.fullName}
             icon="swap-horizontal"
           />
@@ -148,7 +149,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
           <DashboardCard
             key={item.id}
             title={`${item.fromClass?.name || ''} to ${item.toClass?.name || ''}`}
-            value={item.promotedAt}
+            value={formatDateForDisplay(item.promotedAt) || '-'}
             description={item.promotedBy?.fullName}
             icon="school-outline"
           />

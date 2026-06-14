@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {Text} from 'react-native-paper';
+import {Text, TouchableRipple} from 'react-native-paper';
 import StatusBadge from '../common/StatusBadge';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
@@ -13,37 +13,55 @@ const AttendanceCard = ({
   status,
   onPress,
 }) => (
-  <View style={styles.card} onTouchEnd={onPress}>
-    <View style={styles.row}>
-      <View>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.date}>{date}</Text>
+  <TouchableRipple borderless onPress={onPress} style={styles.wrapper}>
+    <View style={styles.card}>
+      <View style={styles.row}>
+        <View style={styles.copy}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.date}>{date}</Text>
+        </View>
+        <StatusBadge
+          status={status || 'info'}
+          label={status ? undefined : 'Today'}
+        />
       </View>
-      <StatusBadge
-        status={status || 'info'}
-        label={status ? undefined : 'Today'}
-      />
+      <View style={styles.metrics}>
+        <View style={[styles.metricPill, styles.present]}>
+          <Text style={styles.metric}>{present} Present</Text>
+        </View>
+        <View style={[styles.metricPill, styles.absent]}>
+          <Text style={styles.metric}>{absent} Absent</Text>
+        </View>
+        <View style={[styles.metricPill, styles.late]}>
+          <Text style={styles.metric}>{late} Late</Text>
+        </View>
+      </View>
     </View>
-    <View style={styles.metrics}>
-      <Text style={styles.metric}>{present} Present</Text>
-      <Text style={styles.metric}>{absent} Absent</Text>
-      <Text style={styles.metric}>{late} Late</Text>
-    </View>
-  </View>
+  </TouchableRipple>
 );
 
 const styles = StyleSheet.create({
+  wrapper: {
+    borderRadius: radius.lg,
+    marginBottom: spacing.md,
+  },
   card: {
     ...shadows.soft,
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
     borderRadius: radius.lg,
-    marginBottom: spacing.md,
     padding: spacing.lg,
   },
   row: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: spacing.md,
   },
   title: {
     ...typography.sectionTitle,
@@ -60,8 +78,22 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   metric: {
-    color: colors.textMuted,
+    color: colors.text,
     fontWeight: '700',
+  },
+  metricPill: {
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  present: {
+    backgroundColor: colors.successSoft,
+  },
+  absent: {
+    backgroundColor: colors.dangerSoft,
+  },
+  late: {
+    backgroundColor: colors.warningSoft,
   },
 });
 

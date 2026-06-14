@@ -6793,6 +6793,15 @@ extend type TeacherSectionAssignment {
   """
   _count: Int! @fdc_generated(from: "TeacherSectionAssignment.", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `TeacherSectionAssignment` table where the `assignedById` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  assignedById_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "TeacherSectionAssignment.assignedById", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `TeacherSectionAssignment` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   createdAt_count(
@@ -7623,6 +7632,40 @@ extend type User {
     """
     having: TeacherAssignment_Having
   ): [TeacherAssignment!]! @fdc_generated(from: "TeacherAssignment.teacher", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
+  ✨ List `TeacherSectionAssignment` objects in a one-to-many relationship (where `TeacherSectionAssignment`.`assignedBy` is this object).
+  """
+  teacherSectionAssignments_on_assignedBy(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: TeacherSectionAssignment_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [TeacherSectionAssignment_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: TeacherSectionAssignment_Having
+  ): [TeacherSectionAssignment!]! @fdc_generated(from: "TeacherSectionAssignment.assignedBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
   ✨ List `TeacherTransferHistory` objects in a one-to-many relationship (where `TeacherTransferHistory`.`changedBy` is this object).
   """

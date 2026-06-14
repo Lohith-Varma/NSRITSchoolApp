@@ -16,7 +16,9 @@ export const paperTheme = {
     surface: colors.surface,
     error: colors.danger,
     outline: colors.border,
+    outlineVariant: colors.border,
     onSurface: colors.text,
+    onSurfaceVariant: colors.textMuted,
   },
   roundness: radius.md,
 };

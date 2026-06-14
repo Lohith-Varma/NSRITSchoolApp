@@ -6,137 +6,64 @@ import {
     Animated,
     StatusBar,
     Image,
+    Dimensions,
 } from 'react-native';
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 const SplashScreen = ({ onFinish }) => {
-    // Animation Refs
     const logoScale = useRef(new Animated.Value(0.7)).current;
     const logoOpacity = useRef(new Animated.Value(0)).current;
-
     const titleOpacity = useRef(new Animated.Value(0)).current;
     const titleTranslateY = useRef(new Animated.Value(20)).current;
-
     const dividerScaleX = useRef(new Animated.Value(0)).current;
     const mottoOpacity = useRef(new Animated.Value(0)).current;
-
     const sanskritOpacity = useRef(new Animated.Value(0)).current;
     const taglineOpacity = useRef(new Animated.Value(0)).current;
-    
     const systemOpacity = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        // Run overlapping realistic animations
         Animated.parallel([
-            // 1. Logo scale & fade
             Animated.parallel([
-                Animated.spring(logoScale, {
-                    toValue: 1,
-                    tension: 50,
-                    friction: 8,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(logoOpacity, {
-                    toValue: 1,
-                    duration: 600,
-                    useNativeDriver: true,
-                }),
+                Animated.spring(logoScale, { toValue: 1, tension: 50, friction: 8, useNativeDriver: true }),
+                Animated.timing(logoOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
             ]),
-
-            // 2. Title fade & slide up (starts at t=250ms)
             Animated.sequence([
                 Animated.delay(250),
                 Animated.parallel([
-                    Animated.timing(titleOpacity, {
-                        toValue: 1,
-                        duration: 500,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(titleTranslateY, {
-                        toValue: 0,
-                        duration: 500,
-                        useNativeDriver: true,
-                    }),
+                    Animated.timing(titleOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+                    Animated.timing(titleTranslateY, { toValue: 0, duration: 500, useNativeDriver: true }),
                 ]),
             ]),
-
-            // 3. Motto & Dividers expand (starts at t=450ms)
             Animated.sequence([
                 Animated.delay(450),
                 Animated.parallel([
-                    Animated.timing(dividerScaleX, {
-                        toValue: 1,
-                        duration: 400,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(mottoOpacity, {
-                        toValue: 1,
-                        duration: 400,
-                        useNativeDriver: true,
-                    }),
+                    Animated.timing(dividerScaleX, { toValue: 1, duration: 400, useNativeDriver: true }),
+                    Animated.timing(mottoOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
                 ]),
             ]),
-
-            // 4. Sanskrit & Tagline fade (starts at t=650ms)
             Animated.sequence([
                 Animated.delay(650),
                 Animated.parallel([
-                    Animated.timing(sanskritOpacity, {
-                        toValue: 1,
-                        duration: 450,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(taglineOpacity, {
-                        toValue: 1,
-                        duration: 450,
-                        useNativeDriver: true,
-                    }),
+                    Animated.timing(sanskritOpacity, { toValue: 1, duration: 450, useNativeDriver: true }),
+                    Animated.timing(taglineOpacity, { toValue: 1, duration: 450, useNativeDriver: true }),
                 ]),
             ]),
-
-            // 5. System Footer & Loading dots fade (starts at t=850ms)
             Animated.sequence([
                 Animated.delay(850),
-                Animated.timing(systemOpacity, {
-                    toValue: 1,
-                    duration: 450,
-                    useNativeDriver: true,
-                }),
+                Animated.timing(systemOpacity, { toValue: 1, duration: 450, useNativeDriver: true }),
             ]),
         ]).start(() => {
-            // Short hold delay of 1200ms before transition (Total duration = 1300ms + 1200ms = 2.5 seconds)
-            setTimeout(() => {
-                onFinish?.();
-            }, 1500);
+            setTimeout(() => { onFinish?.(); }, 1500);
         });
-    }, [
-        logoScale,
-        logoOpacity,
-        titleOpacity,
-        titleTranslateY,
-        dividerScaleX,
-        mottoOpacity,
-        sanskritOpacity,
-        taglineOpacity,
-        systemOpacity,
-        onFinish
-    ]);
+    }, [logoScale, logoOpacity, titleOpacity, titleTranslateY, dividerScaleX, mottoOpacity, sanskritOpacity, taglineOpacity, systemOpacity, onFinish]);
 
     return (
         <View style={styles.container}>
-            <StatusBar
-                backgroundColor="#FFFFFF"
-                barStyle="dark-content"
-            />
+            <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
 
-            {/* Main Branding Content */}
             <View style={styles.content}>
-                {/* Crest Logo */}
-                <Animated.View
-                    style={{
-                        opacity: logoOpacity,
-                        transform: [{ scale: logoScale }],
-                    }}
-                >
+                <Animated.View style={{ opacity: logoOpacity, transform: [{ scale: logoScale }] }}>
                     <Image
                         source={require('../assets/logo.png')}
                         style={styles.logo}
@@ -144,61 +71,42 @@ const SplashScreen = ({ onFinish }) => {
                     />
                 </Animated.View>
 
-                {/* School Title Block */}
                 <Animated.View
                     style={[
                         styles.titleContainer,
-                        {
-                            opacity: titleOpacity,
-                            transform: [{ translateY: titleTranslateY }],
-                        }
+                        { opacity: titleOpacity, transform: [{ translateY: titleTranslateY }] }
                     ]}
                 >
-                    <Text 
-                        style={styles.schoolName}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                    >
+                    <Text style={styles.schoolName} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
                         NADIMPALLI SATYANARAYANA RAJU
                     </Text>
 
-                    {/* Divider Row 1 (Line with green dots) */}
                     <View style={styles.dividerRow}>
                         <View style={styles.greenDot} />
                         <Animated.View style={[styles.line, { transform: [{ scaleX: dividerScaleX }] }]} />
                         <View style={styles.greenDot} />
                     </View>
 
-                    <Text 
-                        style={styles.schoolSubName}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                    >
+                    <Text style={styles.schoolSubName} numberOfLines={1} adjustsFontSizeToFit>
                         INTERNATIONAL TECHNO SCHOOL
                     </Text>
                 </Animated.View>
 
-                {/* Motto & Taglines Block */}
                 <Animated.View style={[styles.mottoContainer, { opacity: mottoOpacity }]}>
-                    {/* Motto */}
                     <Text style={styles.motto}>
                         UNITY • LEARNING • GROWTH
                     </Text>
 
-                    {/* Sanskrit Row with lines on both sides and green dots */}
                     <View style={styles.sanskritRow}>
                         <View style={styles.greenDot} />
                         <Animated.View style={[styles.lineHalf, { transform: [{ scaleX: dividerScaleX }] }]} />
-                        
                         <Animated.Text style={[styles.sanskritText, { opacity: sanskritOpacity }]}>
                             ज्ज्ञानं परमं बलम्
                         </Animated.Text>
-                        
                         <Animated.View style={[styles.lineHalf, { transform: [{ scaleX: dividerScaleX }] }]} />
                         <View style={styles.greenDot} />
                     </View>
 
-                    {/* English Tagline */}
                     <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
                         Knowledge is the supreme strength
                     </Animated.Text>
@@ -214,36 +122,35 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 20,
     },
 
     content: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
+        width: SCREEN_WIDTH * 0.92,
     },
 
     titleContainer: {
         alignItems: 'center',
         width: '100%',
-        marginTop: 20,
+        marginTop: 28,
     },
 
     mottoContainer: {
         alignItems: 'center',
         width: '100%',
-        marginTop: 20,
+        marginTop: 18,
     },
 
     logo: {
-        width: 200,
-        height: 320,
-        marginBottom: 15,
+        width: SCREEN_WIDTH * 0.42,
+        height: SCREEN_WIDTH * 0.42 * 1.6,
+        marginBottom: 0,
     },
 
     schoolName: {
         color: '#1F3E66',
-        fontSize: 22,
+        fontSize: 26,
         fontWeight: 'bold',
         fontFamily: 'serif',
         letterSpacing: 0.5,
@@ -253,26 +160,27 @@ const styles = StyleSheet.create({
 
     schoolSubName: {
         color: '#1F3E66',
-        fontSize: 13.5,
+        fontSize: 14,
         fontWeight: 'bold',
-        letterSpacing: 2.2,
+        letterSpacing: 2.5,
         textAlign: 'center',
         width: '100%',
+        marginTop: 14,
     },
 
     dividerRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '90%',
-        marginTop: 10,
-        marginBottom: 10,
+        width: '100%',
+        marginTop: 12,
+        marginBottom: 12,
     },
 
     sanskritRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '90%',
-        marginTop: 12,
+        width: '100%',
+        marginTop: 14,
         marginBottom: 12,
     },
 
@@ -287,14 +195,14 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 1,
         backgroundColor: '#4A607A',
-        marginHorizontal: 10,
+        marginHorizontal: 8,
     },
 
     lineHalf: {
         flex: 1,
         height: 1,
         backgroundColor: '#4A607A',
-        marginHorizontal: 10,
+        marginHorizontal: 8,
     },
 
     motto: {
@@ -303,11 +211,12 @@ const styles = StyleSheet.create({
         letterSpacing: 3,
         fontWeight: 'bold',
         textAlign: 'center',
+        marginTop: 16,
     },
 
     sanskritText: {
         color: '#1F3E66',
-        fontSize: 16.5,
+        fontSize: 17,
         fontWeight: 'bold',
         textAlign: 'center',
         marginHorizontal: 10,
@@ -319,7 +228,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontStyle: 'italic',
         textAlign: 'center',
-        marginTop: 6,
+        marginTop: 8,
     },
 });
 

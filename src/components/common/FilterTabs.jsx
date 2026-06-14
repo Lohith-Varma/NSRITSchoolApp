@@ -1,7 +1,7 @@
 import React from 'react';
 import {ScrollView, StyleSheet} from 'react-native';
 import {Chip} from 'react-native-paper';
-import {colors, spacing} from '../../theme';
+import {colors, radius, spacing} from '../../theme';
 
 const FilterTabs = ({tabs, value, onChange}) => (
   <ScrollView
@@ -17,7 +17,7 @@ const FilterTabs = ({tabs, value, onChange}) => (
           selected={active}
           onPress={() => onChange(tab.value)}
           style={[styles.chip, active && styles.activeChip]}
-          textStyle={active && styles.activeText}>
+          textStyle={[styles.text, active && styles.activeText]}>
           {tab.label}
         </Chip>
       );
@@ -32,9 +32,17 @@ const styles = StyleSheet.create({
   },
   chip: {
     backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    borderWidth: 1,
   },
   activeChip: {
+    borderColor: colors.primary,
     backgroundColor: colors.primarySoft,
+  },
+  text: {
+    color: colors.textMuted,
+    fontWeight: '700',
   },
   activeText: {
     color: colors.primary,

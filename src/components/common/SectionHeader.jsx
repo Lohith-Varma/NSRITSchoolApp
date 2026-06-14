@@ -20,14 +20,16 @@ const SectionHeader = ({title, subtitle, actionLabel, onAction}) => (
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
+    gap: spacing.sm,
     justifyContent: 'space-between',
     marginBottom: spacing.md,
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
   },
   copy: {
     flex: 1,
+    minWidth: 0,
   },
   title: {
     ...typography.sectionTitle,

@@ -370,6 +370,42 @@ export function createAccountant(dcOrVars, vars) {
   return executeMutation(createAccountantRef(dcInstance, inputVars));
 }
 
+export const clearTeacherWingRestrictionsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'ClearTeacherWingRestrictions', inputVars);
+}
+clearTeacherWingRestrictionsRef.operationName = 'ClearTeacherWingRestrictions';
+
+export function clearTeacherWingRestrictions(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(clearTeacherWingRestrictionsRef(dcInstance, inputVars));
+}
+
+export const updateClassTeacherAssignmentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateClassTeacherAssignment', inputVars);
+}
+updateClassTeacherAssignmentRef.operationName = 'UpdateClassTeacherAssignment';
+
+export function updateClassTeacherAssignment(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateClassTeacherAssignmentRef(dcInstance, inputVars));
+}
+
+export const removeClassTeacherAssignmentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'RemoveClassTeacherAssignment', inputVars);
+}
+removeClassTeacherAssignmentRef.operationName = 'RemoveClassTeacherAssignment';
+
+export function removeClassTeacherAssignment(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(removeClassTeacherAssignmentRef(dcInstance, inputVars));
+}
+
 export const updateAccountantRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -1395,6 +1431,19 @@ export function getFeeCategories(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, false);
   return executeQuery(getFeeCategoriesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+}
+
+export const getClassTeacherAssignmentsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetClassTeacherAssignments', inputVars);
+}
+getClassTeacherAssignmentsRef.operationName = 'GetClassTeacherAssignments';
+
+export function getClassTeacherAssignments(dcOrVars, varsOrOptions, options) {
+  
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
+  return executeQuery(getClassTeacherAssignmentsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const getClassFeesRef = (dcOrVars, vars) => {

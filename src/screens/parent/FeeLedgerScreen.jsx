@@ -4,6 +4,7 @@ import {useQuery} from '@tanstack/react-query';
 import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
+import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const isActivePayment = payment =>
   !['REVERSED', 'CANCELLED'].includes(String(payment.status || 'RECORDED').toUpperCase());
@@ -53,7 +54,7 @@ const FeeLedgerScreen = () => {
                   key={payment.id}
                   title={payment.receiptNumber || 'Receipt pending'}
                   value={formatCurrency(payment.amount)}
-                  description={`${payment.paymentDate || '-'} | ${payment.paymentMode || '-'}`}
+                  description={`${formatDateForDisplay(payment.paymentDate) || '-'} | ${payment.paymentMode || '-'}`}
                   icon="receipt"
                 />
               ))}
