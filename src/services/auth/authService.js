@@ -8,7 +8,7 @@ import auth, {
 } from '@react-native-firebase/auth';
 import { Platform } from 'react-native';
 import {STORAGE_KEYS} from '../../config/constants';
-import {authConfig, USE_EMULATOR} from '../../config/env';
+import {authConfig, firebaseConfig, USE_EMULATOR} from '../../config/env';
 
 if (USE_EMULATOR) {
   const host = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
@@ -28,6 +28,13 @@ import {formatE164PhoneNumber} from '../../utils/phone';
 import {USER_ROLES} from '../../config/constants';
 import parentService from '../parents/parentService';
 import teacherService from '../teachers/teacherService';
+
+// ============================================================================
+// DEVELOPMENT ONLY: FEATURE FLAG FOR OTP BYPASS
+// If set to true, entering OTP '123456' will bypass Firebase Phone Verification
+// by signing in anonymously to the Firebase Auth Emulator/Service.
+// ============================================================================
+const DEV_BYPASS_OTP = true;
 
 const buildFullPhoneNumber = ({countryCode = '+91', phoneNumber}) => {
   return formatE164PhoneNumber({countryCode, phoneNumber});
@@ -160,11 +167,45 @@ export const authService = {
   async verifyOtp({verificationId, otp, countryCode, phoneNumber}) {
     try {
       console.log('authService: verifyOtp called with payload:', {verificationId, otp, countryCode, phoneNumber});
-      const credential = PhoneAuthProvider.credential(verificationId, otp);
       const authInstance = getAuth();
+      let result;
 
-      console.log('authService: signing in with credential...');
-      const result = await signInWithCredential(authInstance, credential);
+      // Check if DEV BYPASS is enabled and the entered OTP is the test code '123456'
+      if (DEV_BYPASS_OTP && otp === '123456') {
+        console.log('DEV OTP BYPASS ENABLED');
+        console.log('Using test OTP: 123456');
+
+        const fullPhoneNumber = buildFullPhoneNumber({countryCode, phoneNumber});
+        const host = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+        const project = firebaseConfig.projectId || 'nsrit-school-2b749';
+        const url = `http://${host}:9099/emulator/v1/projects/${project}/verificationCodes`;
+        
+        console.log(`authService: Fetching verification codes from emulator: ${url}`);
+        let actualCode = '123456';
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          // Find the latest generated code for this phone number
+          const record = [...(data.verificationCodes || [])].reverse().find(c => c.phoneNumber === fullPhoneNumber);
+          if (record?.code) {
+            actualCode = record.code;
+            console.log(`authService: Found latest emulator generated code: ${actualCode} for ${fullPhoneNumber}`);
+          } else {
+            console.warn(`authService: No generated code found in emulator for ${fullPhoneNumber}. Defaulting to 123456.`);
+          }
+        } catch (fetchErr) {
+          console.warn('authService: Failed to fetch verification codes from emulator:', fetchErr.message);
+        }
+
+        const credential = PhoneAuthProvider.credential(verificationId, actualCode);
+        console.log('authService: signing in with retrieved credential...');
+        result = await signInWithCredential(authInstance, credential);
+      } else {
+        const credential = PhoneAuthProvider.credential(verificationId, otp);
+        console.log('authService: signing in with credential...');
+        result = await signInWithCredential(authInstance, credential);
+      }
+
       const credentialUser = result.user;
       console.log('authService: sign in successful, user UID:', credentialUser?.uid);
 

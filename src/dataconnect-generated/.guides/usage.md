@@ -14,38 +14,38 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { getCurrentUser, getUserByPhone, getStudentsByBranch, getStudentsBySection, getParentChildren, getParentByUser, getParentByPhone, getBranches, getBranchDetails, getUsersByRole } from '@dataconnect/generated';
+import { createBranch, updateBranch, assignBranchAdmin, assignPrincipal, createClass, activateClass, deactivateClass, seedAcademicClass, createWing, createSection } from '@dataconnect/generated';
 
 
-// Operation GetCurrentUser:  For variables, look at type GetCurrentUserVars in ../index.d.ts
-const { data } = await GetCurrentUser(dataConnect, getCurrentUserVars);
+// Operation CreateBranch:  For variables, look at type CreateBranchVars in ../index.d.ts
+const { data } = await CreateBranch(dataConnect, createBranchVars);
 
-// Operation GetUserByPhone:  For variables, look at type GetUserByPhoneVars in ../index.d.ts
-const { data } = await GetUserByPhone(dataConnect, getUserByPhoneVars);
+// Operation UpdateBranch:  For variables, look at type UpdateBranchVars in ../index.d.ts
+const { data } = await UpdateBranch(dataConnect, updateBranchVars);
 
-// Operation GetStudentsByBranch:  For variables, look at type GetStudentsByBranchVars in ../index.d.ts
-const { data } = await GetStudentsByBranch(dataConnect, getStudentsByBranchVars);
+// Operation AssignBranchAdmin:  For variables, look at type AssignBranchAdminVars in ../index.d.ts
+const { data } = await AssignBranchAdmin(dataConnect, assignBranchAdminVars);
 
-// Operation GetStudentsBySection:  For variables, look at type GetStudentsBySectionVars in ../index.d.ts
-const { data } = await GetStudentsBySection(dataConnect, getStudentsBySectionVars);
+// Operation AssignPrincipal:  For variables, look at type AssignPrincipalVars in ../index.d.ts
+const { data } = await AssignPrincipal(dataConnect, assignPrincipalVars);
 
-// Operation GetParentChildren:  For variables, look at type GetParentChildrenVars in ../index.d.ts
-const { data } = await GetParentChildren(dataConnect, getParentChildrenVars);
+// Operation CreateClass:  For variables, look at type CreateClassVars in ../index.d.ts
+const { data } = await CreateClass(dataConnect, createClassVars);
 
-// Operation GetParentByUser:  For variables, look at type GetParentByUserVars in ../index.d.ts
-const { data } = await GetParentByUser(dataConnect, getParentByUserVars);
+// Operation ActivateClass:  For variables, look at type ActivateClassVars in ../index.d.ts
+const { data } = await ActivateClass(dataConnect, activateClassVars);
 
-// Operation GetParentByPhone:  For variables, look at type GetParentByPhoneVars in ../index.d.ts
-const { data } = await GetParentByPhone(dataConnect, getParentByPhoneVars);
+// Operation DeactivateClass:  For variables, look at type DeactivateClassVars in ../index.d.ts
+const { data } = await DeactivateClass(dataConnect, deactivateClassVars);
 
-// Operation GetBranches:  For variables, look at type GetBranchesVars in ../index.d.ts
-const { data } = await GetBranches(dataConnect, getBranchesVars);
+// Operation SeedAcademicClass:  For variables, look at type SeedAcademicClassVars in ../index.d.ts
+const { data } = await SeedAcademicClass(dataConnect, seedAcademicClassVars);
 
-// Operation GetBranchDetails:  For variables, look at type GetBranchDetailsVars in ../index.d.ts
-const { data } = await GetBranchDetails(dataConnect, getBranchDetailsVars);
+// Operation CreateWing:  For variables, look at type CreateWingVars in ../index.d.ts
+const { data } = await CreateWing(dataConnect, createWingVars);
 
-// Operation GetUsersByRole:  For variables, look at type GetUsersByRoleVars in ../index.d.ts
-const { data } = await GetUsersByRole(dataConnect, getUsersByRoleVars);
+// Operation CreateSection:  For variables, look at type CreateSectionVars in ../index.d.ts
+const { data } = await CreateSection(dataConnect, createSectionVars);
 
 
 ```

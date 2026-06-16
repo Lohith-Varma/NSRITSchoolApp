@@ -1,101 +1,196 @@
-I0614 16:08:23.801681   14376 load.go:31] Reloading schema and connectors...
-I0614 16:08:24.279714   14376 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 61b8] UpdateResources(): done
+I0617 01:00:25.966059   34080 load.go:31] Reloading schema and connectors...
+I0617 01:00:26.247812   34080 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service b98f] UpdateResources(): done
 Main schema: sources: schema\schema.gql [23750B] 
 Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0614 16:08:24.838556   14376 codegen.go:101] [connector "nsrit" javascriptSdk] Generating sources into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
-I0614 16:08:24.944189   14376 collector.go:107] schema extensions wrote into "D:\\NSRITSchoolApp\\dataconnect\\.dataconnect\\schema"
-Generated sources: prelude.gql [84995B] main\input.gql [556740B] main\relation.gql [291636B] main\query.gql [47389B] main\mutation.gql [129895B] 
-I0614 16:08:24.974220   14376 collector.go:107] connector "nsrit" javascriptSdk wrote into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
-Generated sources: esm\index.esm.js [75755B] package.json [613B] index.d.ts [184299B] esm\package.json [17B] index.cjs.js [84351B] README.md [677884B] .guides/usage.md [2339B] .guides/setup.md [584B] .guides/config.json [236B] 
-I0614 16:08:24.980464   14376 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
-I0614 16:08:24.980464   14376 load.go:109] Finished reloading
-I0614 16:08:24.982181   14376 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399
-I0614 16:08:24.982181   14376 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399
-I0614 16:08:35.662088   14376 migrate.go:24] Running migration SQL:
-Step 1: CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
-Step 2: CREATE TABLE "public"."academic_classes" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "activated_by_id" uuid NULL, "branch_id" uuid NOT NULL, "wing_id" uuid NOT NULL, "activated_at" timestamptz NULL, "class_code" character varying(20) NULL, "created_at" timestamptz NOT NULL, "display_order" integer NULL DEFAULT 0, "is_active" boolean NOT NULL DEFAULT true, "name" character varying(20) NOT NULL, "sort_order" integer NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 3: CREATE INDEX "academic_classes_wingId_sortOrder_idx" ON "public"."academic_classes" ("wing_id", "sort_order")
-Step 4: CREATE INDEX "academic_classes_activatedById_idx" ON "public"."academic_classes" ("activated_by_id")
-Step 5: CREATE INDEX "academic_classes_branchId_idx" ON "public"."academic_classes" ("branch_id")
-Step 6: CREATE INDEX "academic_classes_wingId_idx" ON "public"."academic_classes" ("wing_id")
-Step 7: CREATE UNIQUE INDEX "academic_classes_branchId_name_uidx" ON "public"."academic_classes" ("branch_id", "name")
-Step 8: CREATE TABLE "public"."academic_year_fee_templates" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "academic_class_id" uuid NOT NULL, "branch_id" uuid NOT NULL, "created_by_id" uuid NOT NULL, "academic_year" integer NOT NULL, "apply_to_future" boolean NOT NULL DEFAULT true, "created_at" timestamptz NOT NULL, "status" character varying(20) NOT NULL DEFAULT 'ACTIVE', "term1_fee" double precision NOT NULL DEFAULT 0::double precision, "term2_fee" double precision NOT NULL DEFAULT 0::double precision, "term3_fee" double precision NOT NULL DEFAULT 0::double precision, "total_tuition_fee" double precision NOT NULL DEFAULT 0::double precision, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 9: CREATE INDEX "academic_year_fee_templates_branchId_academicYear_idx" ON "public"."academic_year_fee_templates" ("branch_id", "academic_year")
-Step 10: CREATE INDEX "academic_year_fee_templates_academicClassId_idx" ON "public"."academic_year_fee_templates" ("academic_class_id")
-Step 11: CREATE INDEX "academic_year_fee_templates_branchId_idx" ON "public"."academic_year_fee_templates" ("branch_id")
-Step 12: CREATE INDEX "academic_year_fee_templates_createdById_idx" ON "public"."academic_year_fee_templates" ("created_by_id")
-Step 13: CREATE UNIQUE INDEX "academic_year_fee_templates_branchId_acaassId_academicYear_uidx" ON "public"."academic_year_fee_templates" ("branch_id", "academic_class_id", "academic_year")
-Step 14: CREATE TABLE "public"."accountants" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "branch_id" uuid NOT NULL, "user_id" uuid NOT NULL, "address" text NULL, "blood_group" character varying(10) NULL, "city" character varying(80) NULL, "created_at" timestamptz NOT NULL, "designation" character varying(80) NOT NULL, "email" character varying(140) NULL, "emergency_contact" character varying(20) NULL, "employee_id" character varying(40) NOT NULL, "experience" character varying(80) NULL, "gender" character varying(20) NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "joining_date" date NOT NULL, "pincode" character varying(12) NULL, "qualification" character varying(140) NULL, "staff_type" character varying(20) NOT NULL DEFAULT 'SUPPORTING', "state" character varying(80) NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 15: CREATE INDEX "accountants_branchId_idx" ON "public"."accountants" ("branch_id")
-Step 16: CREATE INDEX "accountants_userId_idx" ON "public"."accountants" ("user_id")
-Step 17: CREATE UNIQUE INDEX "accountants_userId_uidx" ON "public"."accountants" ("user_id")
-Step 18: CREATE UNIQUE INDEX "accountants_employeeId_uidx" ON "public"."accountants" ("employee_id")
-Step 19: CREATE TABLE "public"."attendance" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "academic_class_id" uuid NOT NULL, "edited_by_id" uuid NULL, "marked_by_id" uuid NOT NULL, "section_id" uuid NOT NULL, "student_id" uuid NOT NULL, "attendance_date" date NOT NULL, "created_at" timestamptz NOT NULL, "remarks" text NULL, "status" character varying(20) NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 20: CREATE INDEX "attendance_academicClassId_idx" ON "public"."attendance" ("academic_class_id")
-Step 21: CREATE INDEX "attendance_editedById_idx" ON "public"."attendance" ("edited_by_id")
-Step 22: CREATE INDEX "attendance_markedById_idx" ON "public"."attendance" ("marked_by_id")
-Step 23: CREATE INDEX "attendance_sectionId_idx" ON "public"."attendance" ("section_id")
-Step 24: CREATE INDEX "attendance_studentId_idx" ON "public"."attendance" ("student_id")
-Step 25: CREATE TABLE "public"."audit_logs" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "acting_as" character varying(30) NULL, "action" character varying(80) NOT NULL, "branch_id" uuid NULL, "created_at" timestamptz NOT NULL, "entity_id" character varying(120) NULL, "entity_type" character varying(80) NULL, "new_data" text NULL, "old_data" text NULL, "performed_by" character varying(128) NOT NULL, "performed_role" character varying(30) NOT NULL, PRIMARY KEY ("id"))
-Step 26: CREATE INDEX "audit_logs_branchId_createdAt_idx" ON "public"."audit_logs" ("branch_id", "created_at")
-Step 27: CREATE INDEX "audit_logs_performedBy_createdAt_idx" ON "public"."audit_logs" ("performed_by", "created_at")
-Step 28: CREATE TABLE "public"."branches" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "branch_admin_id" uuid NULL, "principal_id" uuid NULL, "address" text NULL, "branch_code" character varying(2) NOT NULL, "city" character varying(80) NULL, "created_at" timestamptz NOT NULL, "email" character varying(140) NULL, "is_active" boolean NOT NULL DEFAULT true, "name" character varying(120) NOT NULL, "phone" character varying(20) NULL, "pincode" character varying(12) NULL, "state" character varying(80) NULL, "status" character varying(20) NOT NULL DEFAULT 'ACTIVE', "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 29: CREATE INDEX "branches_branchAdminId_idx" ON "public"."branches" ("branch_admin_id")
-Step 30: CREATE INDEX "branches_principalId_idx" ON "public"."branches" ("principal_id")
-Step 31: CREATE UNIQUE INDEX "branches_branchCode_uidx" ON "public"."branches" ("branch_code")
-Step 32: CREATE TABLE "public"."coordinators" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "branch_id" uuid NOT NULL, "user_id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "email" character varying(140) NULL, "employee_id" character varying(40) NULL, "gender" character varying(20) NULL, "is_active" boolean NOT NULL DEFAULT true, "staff_type" character varying(20) NULL, "updated_at" timestamptz NOT NULL, "wing" character varying(20) NOT NULL, PRIMARY KEY ("id"))
-Step 33: CREATE INDEX "coordinators_branchId_wing_idx" ON "public"."coordinators" ("branch_id", "wing")
-Step 34: CREATE INDEX "coordinators_branchId_idx" ON "public"."coordinators" ("branch_id")
-Step 35: CREATE INDEX "coordinators_userId_idx" ON "public"."coordinators" ("user_id")
-Step 36: CREATE UNIQUE INDEX "coordinators_employeeId_uidx" ON "public"."coordinators" ("employee_id")
-Step 37: CREATE TABLE "public"."due_tracking" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "student_fee_id" uuid NOT NULL, "student_id" uuid NOT NULL, "created_at" timestamptz NOT NULL, "due_amount" double precision NOT NULL, "due_date" date NOT NULL, "last_reminder_at" timestamptz NULL, "status" character varying(20) NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 38: CREATE INDEX "due_tracking_studentId_idx" ON "public"."due_tracking" ("student_id")
-Step 39: CREATE INDEX "due_tracking_studentFeeId_idx" ON "public"."due_tracking" ("student_fee_id")
-Step 40: CREATE TABLE "public"."employee_sequences" ("year" integer NOT NULL, "branch_code" character varying(2) NOT NULL, "staff_type" character varying(20) NOT NULL, "last_sequence" integer NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("year", "branch_code", "staff_type"))
-Step 41: CREATE TABLE "public"."fee_audit_logs" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "student_id" uuid NOT NULL, "user_id" uuid NOT NULL, "action" character varying(40) NOT NULL, "created_at" timestamptz NOT NULL, "new_value" text NULL, "old_value" text NULL, "role" character varying(30) NULL, PRIMARY KEY ("id"))
-Step 42: CREATE INDEX "fee_audit_logs_studentId_createdAt_idx" ON "public"."fee_audit_logs" ("student_id", "created_at")
-Step 43: CREATE INDEX "fee_audit_logs_studentId_idx" ON "public"."fee_audit_logs" ("student_id")
-Step 44: CREATE INDEX "fee_audit_logs_userId_idx" ON "public"."fee_audit_logs" ("user_id")
-Step 45: CREATE TABLE "public"."fee_categories" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "created_at" timestamptz NOT NULL, "name" character varying(120) NOT NULL, "status" character varying(20) NOT NULL DEFAULT 'ACTIVE', "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 46: CREATE INDEX "fee_categories_status_idx" ON "public"."fee_categories" ("status")
-Step 47: CREATE UNIQUE INDEX "fee_categories_name_uidx" ON "public"."fee_categories" ("name")
-Step 48: CREATE TABLE "public"."fee_payments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "collected_by_id" uuid NOT NULL, "fee_plan_id" uuid NOT NULL, "reversed_by_id" uuid NULL, "student_id" uuid NOT NULL, "amount" double precision NOT NULL, "created_at" timestamptz NOT NULL, "payment_date" date NOT NULL, "payment_mode" character varying(30) NOT NULL, "receipt_number" character varying(80) NOT NULL, "reference_number" character varying(80) NULL, "remarks" text NULL, "reverse_reason" text NULL, "reversed_at" timestamptz NULL, "status" character varying(20) NOT NULL DEFAULT 'RECORDED', "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 49: CREATE INDEX "fee_payments_studentId_paymentDate_idx" ON "public"."fee_payments" ("student_id", "payment_date")
-Step 50: CREATE INDEX "fee_payments_collectedById_idx" ON "public"."fee_payments" ("collected_by_id")
-Step 51: CREATE INDEX "fee_payments_feePlanId_idx" ON "public"."fee_payments" ("fee_plan_id")
-Step 52: CREATE INDEX "fee_payments_reversedById_idx" ON "public"."fee_payments" ("reversed_by_id")
-Step 53: CREATE INDEX "fee_payments_studentId_idx" ON "public"."fee_payments" ("student_id")
-Step 54: CREATE UNIQUE INDEX "fee_payments_receiptNumber_uidx" ON "public"."fee_payments" ("receipt_number")
-Step 55: CREATE TABLE "public"."fee_structures" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "academic_class_id" uuid NOT NULL, "branch_id" uuid NOT NULL, "academic_year" integer NOT NULL, "created_at" timestamptz NOT NULL, "due_date" date NOT NULL, "fee_name" character varying(100) NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "total_amount" double precision NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 56: CREATE INDEX "fee_structures_academicClassId_idx" ON "public"."fee_structures" ("academic_class_id")
-Step 57: CREATE INDEX "fee_structures_branchId_idx" ON "public"."fee_structures" ("branch_id")
-Step 58: CREATE TABLE "public"."notifications" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "branch_id" uuid NULL, "user_id" uuid NULL, "audience_role" character varying(30) NULL, "created_at" timestamptz NOT NULL, "is_read" boolean NOT NULL DEFAULT false, "message" text NOT NULL, "title" character varying(140) NOT NULL, PRIMARY KEY ("id"))
-Step 59: CREATE INDEX "notifications_branchId_idx" ON "public"."notifications" ("branch_id")
-Step 60: CREATE INDEX "notifications_userId_idx" ON "public"."notifications" ("user_id")
-Step 61: CREATE TABLE "public"."parents" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "branch_id" uuid NOT NULL, "user_id" uuid NULL, "address" text NULL, "country_code" character varying(5) NOT NULL, "created_at" timestamptz NOT NULL, "email" character varying(140) NULL, "father_name" character varying(140) NULL, "full_name" character varying(140) NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "mother_name" character varying(140) NULL, "phone_number" character varying(20) NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 62: CREATE INDEX "parents_branchId_idx" ON "public"."parents" ("branch_id")
-Step 63: CREATE INDEX "parents_userId_idx" ON "public"."parents" ("user_id")
-Step 64: CREATE TABLE "public"."payments" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "student_fee_id" uuid NOT NULL, "student_id" uuid NOT NULL, "uploaded_by_id" uuid NOT NULL, "amount" double precision NOT NULL, "created_at" timestamptz NOT NULL, "paid_at" timestamptz NOT NULL, "payment_mode" character varying(30) NOT NULL, "receipt_number" character varying(80) NULL, "remarks" text NULL, PRIMARY KEY ("id"))
-Step 65: CREATE INDEX "payments_studentId_idx" ON "public"."payments" ("student_id")
-Step 66: CREATE INDEX "payments_studentFeeId_idx" ON "public"."payments" ("student_fee_id")
-Step 67: CREATE INDEX "payments_uploadedById_idx" ON "public"."payments" ("uploaded_by_id")
-Step 68: CREATE TABLE "public"."receipt_sequences" ("year" integer NOT NULL, "branch_code" character varying(2) NOT NULL, "last_sequence" integer NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("year", "branch_code"))
-Step 69: CREATE TABLE "public"."sections" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "academic_class_id" uuid NOT NULL, "branch_id" uuid NOT NULL, "class_teacher_id" uuid NULL, "wing_id" uuid NOT NULL, "academic_year" integer NOT NULL, "created_at" timestamptz NOT NULL, "is_active" boolean NOT NULL DEFAULT true, "name" character varying(1) NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 70: CREATE INDEX "sections_branchId_academicClassId_academicYear_idx" ON "public"."sections" ("branch_id", "academic_class_id", "academic_year")
-Step 71: CREATE INDEX "sections_academicClassId_idx" ON "public"."sections" ("academic_class_id")
-Step 72: CREATE INDEX "sections_branchId_idx" ON "public"."sections" ("branch_id")
-Step 73: CREATE INDEX "sections_classTeacherId_idx" ON "public"."sections" ("class_teacher_id")
-Step 74: CREATE INDEX "sections_wingId_idx" ON "public"."sections" ("wing_id")
-Step 75: CREATE UNIQUE INDEX "sections_branchId_academicClassId_name_academicYear_uidx" ON "public"."sections" ("branch_id", "academic_class_id", "name", "academic_year")
-Step 76: CREATE TABLE "public"."staff_id_sequences" ("joining_year" integer NOT NULL, "branch_code" character varying(2) NOT NULL, "staff_type" character varying(20) NOT NULL, "last_serial_number" integer NOT NULL DEFAULT 0, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("joining_year", "branch_code", "staff_type"))
-Step 77: CREATE TABLE "public"."student_fee_items" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "category_id" uuid NOT NULL, "fee_plan_id" uuid NOT NULL, "amount" double precision NOT NULL, "created_at" timestamptz NOT NULL, "updated_at" timestamptz NOT NULL, PRIMARY KEY ("id"))
-Step 78: CREATE INDEX "student_fee_items_feePlanId_idx" ON "public"."student_fee_item
-I0614 16:08:38.357435   14376 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 3a12] UpdateResources(): done
+I0617 01:00:26.735769   34080 codegen.go:101] [connector "nsrit" javascriptSdk] Generating sources into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+I0617 01:00:26.810642   34080 collector.go:107] schema extensions wrote into "D:\\NSRITSchoolApp\\dataconnect\\.dataconnect\\schema"
+Generated sources: main\relation.gql [291636B] main\query.gql [47389B] prelude.gql [84995B] main\mutation.gql [129895B] main\input.gql [556740B] 
+I0617 01:00:26.833227   34080 collector.go:107] connector "nsrit" javascriptSdk wrote into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+Generated sources: README.md [677884B] .guides/usage.md [2234B] .guides/setup.md [584B] .guides/config.json [236B] esm\index.esm.js [75755B] index.d.ts [184299B] esm\package.json [17B] index.cjs.js [84351B] package.json [613B] 
+I0617 01:00:26.834952   34080 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0617 01:00:26.834952   34080 load.go:109] Finished reloading
+I0617 01:00:26.837275   34080 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+I0617 01:00:26.837275   34080 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399
+I0617 01:00:30.209508   34080 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] UpdateResources(): done
 Main schema: sources: schema\schema.gql [23750B] 
 Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0614 16:08:38.782657   14376 configure_emulator.go:21] ConfigureEmulator successed
+I0617 01:00:30.427836   34080 configure_emulator.go:21] ConfigureEmulator successed
 Request: service_id: "nsrit-school-2b749-service"
 connection_string: "postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable"
 database: "nsrit-school-2b749-2-database"
 
 Response: 
+W0617 01:08:30.672046   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
+Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
+
+Variables Set: [firebaseUID]
+Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
+Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
+sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+W0617 01:08:57.480727   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
+Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
+
+Variables Set: [firebaseUID]
+Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
+Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
+sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+W0617 01:09:52.840092   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
+Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
+
+Variables Set: [firebaseUID]
+Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
+Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
+sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+I0617 01:10:34.417544   34080 execute.go:57] Database ping is quick (likely cached), took 4.5564ms
+I0617 01:10:34.511675   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:10:34.621080   34080 execute.go:57] Database ping is quick (likely cached), took 1.5304ms
+I0617 01:10:34.652629   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:10:34.762312   34080 execute.go:57] Database ping is quick (likely cached), took 2.1354ms
+I0617 01:10:34.830294   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:10:34.909061   34080 execute.go:57] Database ping is quick (likely cached), took 11.8073ms
+I0617 01:10:34.929809   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:10:36.040749   34080 engine.go:211] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: invalid request. Connector: nsrit
+Auth: user of {"UID":"6KWmOw0yB1ebWGS7VMV8HxW6Male","Token":{"aud":"nsrit-school-2b749","auth_time":1781638833,"exp":1781642433,"firebase":{"identities":{"phone":["+919999999999"]},"sign_in_provider":"phone"},"iat":1781638833,"iss":"https://securetoken.google.com/nsrit-school-2b749","phone_number":"+919999999999","sub":"6KWmOw0yB1ebWGS7VMV8HxW6Male","user_id":"6KWmOw0yB1ebWGS7VMV8HxW6Male"}}
+
+Variables Set: [limit offset]
+Errors: [message:"$branchId (UUID) is missing" extensions:{code:INVALID_ARGUMENT}]
+sources: connectors\nsrit\queries.gql [68377B] connectors\nsrit\mutations.gql [60486B] 
+I0617 01:10:36.051676   34080 execute.go:57] Database ping is quick (likely cached), took 574.2µs
+I0617 01:10:36.090427   34080 every.go:43] @check passed after running 1 checks
+I0617 01:10:36.092559   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
+I0617 01:24:49.561564   34080 execute.go:57] Database ping is quick (likely cached), took 600.6µs
+I0617 01:24:49.567528   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:24:49.859189   34080 execute.go:57] Database ping is quick (likely cached), took 1.4518ms
+I0617 01:24:49.881237   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:24:49.984536   34080 execute.go:57] Database ping is quick (likely cached), took 1.8659ms
+I0617 01:24:49.994176   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:24:50.091270   34080 execute.go:57] Database ping is quick (likely cached), took 1.8195ms
+I0617 01:24:50.099941   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:24:50.675850   34080 execute.go:57] Database ping is quick (likely cached), took 1.2014ms
+I0617 01:24:50.759299   34080 every.go:43] @check passed after running 1 checks
+I0617 01:24:50.759299   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:24:50.761482   34080 execute.go:57] Database ping is quick (likely cached), took 526.8µs
+I0617 01:24:50.800672   34080 every.go:43] @check passed after running 1 checks
+I0617 01:24:50.800672   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:24:50.801848   34080 execute.go:57] Database ping is quick (likely cached), took 570µs
+I0617 01:24:50.811620   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetWingsByBranch: succeeded. Connector: nsrit
+I0617 01:24:50.813814   34080 execute.go:57] Database ping is quick (likely cached), took 1.0956ms
+I0617 01:24:50.844014   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
+I0617 01:24:50.853279   34080 execute.go:57] Database ping is quick (likely cached), took 909.5µs
+I0617 01:24:50.894616   34080 every.go:43] @check passed after running 1 checks
+I0617 01:24:50.894616   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:24:50.897699   34080 execute.go:57] Database ping is quick (likely cached), took 1.4473ms
+I0617 01:24:50.913377   34080 every.go:43] @check passed after running 1 checks
+I0617 01:24:50.913377   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:26:37.359654   34080 execute.go:57] Database ping is quick (likely cached), took 2.1933ms
+I0617 01:26:37.366712   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:26:37.455344   34080 execute.go:57] Database ping is quick (likely cached), took 1.0829ms
+I0617 01:26:37.468344   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:26:37.526427   34080 execute.go:57] Database ping is quick (likely cached), took 995.1µs
+I0617 01:26:37.535568   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:26:37.605826   34080 execute.go:57] Database ping is quick (likely cached), took 997.9µs
+I0617 01:26:37.612187   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:26:38.282567   34080 execute.go:57] Database ping is quick (likely cached), took 1.0687ms
+I0617 01:26:38.359775   34080 every.go:43] @check passed after running 1 checks
+I0617 01:26:38.359775   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:26:38.361419   34080 execute.go:57] Database ping is quick (likely cached), took 549.2µs
+I0617 01:26:38.390308   34080 every.go:43] @check passed after running 1 checks
+I0617 01:26:38.390308   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:26:38.395117   34080 execute.go:57] Database ping is quick (likely cached), took 883µs
+I0617 01:26:38.424168   34080 every.go:43] @check passed after running 1 checks
+I0617 01:26:38.424688   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPrincipalDashboard: succeeded. Connector: nsrit
+I0617 01:26:38.426357   34080 execute.go:57] Database ping is quick (likely cached), took 533.1µs
+I0617 01:26:38.449759   34080 every.go:43] @check passed after running 1 checks
+I0617 01:26:38.449759   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:26:38.451547   34080 execute.go:57] Database ping is quick (likely cached), took 566.3µs
+I0617 01:26:38.462672   34080 every.go:43] @check passed after running 1 checks
+I0617 01:26:38.462672   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:27:06.706226   34080 execute.go:57] Database ping is quick (likely cached), took 1.5717ms
+I0617 01:27:06.711737   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:27:06.782876   34080 execute.go:57] Database ping is quick (likely cached), took 594.2µs
+I0617 01:27:06.789194   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:27:06.868249   34080 execute.go:57] Database ping is quick (likely cached), took 1.6375ms
+I0617 01:27:06.873861   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:27:06.924120   34080 execute.go:57] Database ping is quick (likely cached), took 568.6µs
+I0617 01:27:06.928461   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:27:06.989503   34080 execute.go:57] Database ping is quick (likely cached), took 1.6347ms
+I0617 01:27:07.003517   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:07.003517   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCoordinatorByUser: succeeded. Connector: nsrit
+I0617 01:27:07.684359   34080 execute.go:57] Database ping is quick (likely cached), took 1.0795ms
+I0617 01:27:07.764228   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:07.764228   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:27:07.766933   34080 execute.go:57] Database ping is quick (likely cached), took 1.0868ms
+I0617 01:27:07.788974   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:07.788974   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:27:07.824528   34080 execute.go:57] Database ping is quick (likely cached), took 556.9µs
+I0617 01:27:07.843200   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:07.843766   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:27:07.845254   34080 execute.go:57] Database ping is quick (likely cached), took 902.1µs
+I0617 01:27:07.851987   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:07.851987   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:27:34.942367   34080 execute.go:57] Database ping is quick (likely cached), took 2.3755ms
+I0617 01:27:34.949411   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:27:35.055377   34080 execute.go:57] Database ping is quick (likely cached), took 2.1479ms
+I0617 01:27:35.067846   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:27:35.239287   34080 execute.go:57] Database ping is quick (likely cached), took 2.558ms
+I0617 01:27:35.251221   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:27:35.378237   34080 execute.go:57] Database ping is quick (likely cached), took 1.3964ms
+I0617 01:27:35.386750   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:27:35.462921   34080 execute.go:57] Database ping is quick (likely cached), took 1.1939ms
+I0617 01:27:35.481325   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:35.481864   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetTeacherProfileByUser: succeeded. Connector: nsrit
+I0617 01:27:36.052679   34080 execute.go:57] Database ping is quick (likely cached), took 602.5µs
+I0617 01:27:36.162796   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:36.164060   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetTeacherDashboard: succeeded. Connector: nsrit
+I0617 01:27:36.165805   34080 execute.go:57] Database ping is quick (likely cached), took 1.179ms
+I0617 01:27:36.242676   34080 every.go:43] @check passed after running 1 checks
+I0617 01:27:36.243309   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:28:04.087168   34080 execute.go:57] Database ping is quick (likely cached), took 2.3599ms
+I0617 01:28:04.105444   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:28:04.216002   34080 execute.go:57] Database ping is quick (likely cached), took 2.8858ms
+I0617 01:28:04.226812   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:28:04.353682   34080 execute.go:57] Database ping is quick (likely cached), took 1.1213ms
+I0617 01:28:04.358274   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:28:04.423156   34080 execute.go:57] Database ping is quick (likely cached), took 703µs
+I0617 01:28:04.431176   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:28:04.505817   34080 execute.go:57] Database ping is quick (likely cached), took 967.1µs
+I0617 01:28:04.520174   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
+I0617 01:28:05.062814   34080 execute.go:57] Database ping is quick (likely cached), took 1.1391ms
+I0617 01:28:05.218197   34080 every.go:43] @check passed after running 1 checks
+I0617 01:28:05.218197   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+I0617 01:28:34.289263   34080 execute.go:57] Database ping is quick (likely cached), took 1.509ms
+I0617 01:28:34.296559   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:28:34.358212   34080 execute.go:57] Database ping is quick (likely cached), took 1.0888ms
+I0617 01:28:34.363805   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:28:34.419667   34080 execute.go:57] Database ping is quick (likely cached), took 551.1µs
+I0617 01:28:34.423257   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:28:34.471929   34080 execute.go:57] Database ping is quick (likely cached), took 1.4989ms
+I0617 01:28:34.476868   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:28:34.531907   34080 execute.go:57] Database ping is quick (likely cached), took 1.002ms
+I0617 01:28:34.566774   34080 every.go:43] @check passed after running 1 checks
+I0617 01:28:34.566774   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAccountantByUser: succeeded. Connector: nsrit
+I0617 01:29:04.782625   34080 execute.go:57] Database ping is quick (likely cached), took 1.1778ms
+I0617 01:29:04.810512   34080 every.go:43] @check passed after running 1 checks
+I0617 01:29:04.810512   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:29:04.890431   34080 execute.go:57] Database ping is quick (likely cached), took 1.1105ms
+I0617 01:29:04.916653   34080 every.go:43] @check passed after running 1 checks
+I0617 01:29:04.916653   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:29:23.564107   34080 execute.go:57] Database ping is quick (likely cached), took 1.0763ms
+I0617 01:29:23.569238   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:29:24.102141   34080 execute.go:57] Database ping is quick (likely cached), took 775.1µs
+I0617 01:29:24.109871   34080 every.go:43] @check passed after running 1 checks
+I0617 01:29:24.109871   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAccountantByUser: succeeded. Connector: nsrit
+I0617 01:29:25.085694   34080 execute.go:57] Database ping is quick (likely cached), took 2.6754ms
+I0617 01:29:25.120107   34080 every.go:43] @check passed after running 1 checks
+I0617 01:29:25.120107   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 01:29:25.270685   34080 execute.go:57] Database ping is quick (likely cached), took 634.2µs
+I0617 01:29:25.302968   34080 every.go:43] @check passed after running 1 checks
+I0617 01:29:25.302968   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 01:30:44.475140   34080 execute.go:57] Database ping is quick (likely cached), took 1.636ms
+I0617 01:30:44.479344   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 01:30:44.551654   34080 execute.go:57] Database ping is quick (likely cached), took 1.2565ms
+I0617 01:30:44.558602   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 01:30:44.662098   34080 execute.go:57] Database ping is quick (likely cached), took 1.5764ms
+I0617 01:30:44.665523   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 01:30:44.748202   34080 execute.go:57] Database ping is quick (likely cached), took 1.2071ms
+I0617 01:30:44.757631   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit

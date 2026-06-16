@@ -67,7 +67,6 @@ const AccountantNavigator = () => (
 
     {/* ── Alias routes so DashboardScreen navigate() calls work ── */}
     <Stack.Screen name="FeeDashboard" component={FeeDashboardScreen} />
-    <Stack.Screen name="ClassWiseFeeReport" component={ClassWiseFeeReportScreen} />
 
     {/* ── Accountant-specific push screens ── */}
     <Stack.Screen name="RecordPayment" component={RecordPaymentScreen} />
