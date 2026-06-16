@@ -1,4 +1,5 @@
 import {MD3LightTheme} from 'react-native-paper';
+import animations from './animations';
 import colors from './colors';
 import globalStyles from './globalStyles';
 import radius from './radius';
@@ -23,4 +24,4 @@ export const paperTheme = {
   roundness: radius.md,
 };
 
-export {colors, globalStyles, radius, shadows, spacing, typography};
+export {animations, colors, globalStyles, radius, shadows, spacing, typography};

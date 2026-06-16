@@ -516,3 +516,26 @@ I0617 01:29:25.302968   34080 engine.go:209] [projects/emulator/locations/emulat
 [debug] [2026-06-16T20:00:44.757Z] I0617 01:30:44.757631   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:30:44.757631   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
 [debug] [2026-06-16T20:01:49.436Z] Postgres client disconnected
+[info] i  To verify the phone number +919999999999, use the code 910783. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +919999999999, use the code 910783."}}
+[debug] [2026-06-16T20:13:02.875Z] I0617 01:43:02.875610   34080 execute.go:57] Database ping is quick (likely cached), took 3.2162ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:43:02.875610   34080 execute.go:57] Database ping is quick (likely cached), took 3.2162ms\n"}}
+[debug] [2026-06-16T20:13:02.890Z] I0617 01:43:02.890593   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:43:02.890593   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T20:13:04.055Z] I0617 01:43:04.056184   34080 engine.go:211] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: invalid request. Connector: nsrit
+Auth: user of {"UID":"6KWmOw0yB1ebWGS7VMV8HxW6Male","Token":{"aud":"nsrit-school-2b749","auth_time":1781640782,"exp":1781644382,"firebase":{"identities":{"phone":["+919999999999"]},"sign_in_provider":"phone"},"iat":1781640782,"iss":"https://securetoken.google.com/nsrit-school-2b749","phone_number":"+919999999999","sub":"6KWmOw0yB1ebWGS7VMV8HxW6Male","user_id":"6KWmOw0yB1ebWGS7VMV8HxW6Male"}}
+
+Variables Set: [limit offset]
+Errors: [message:"$branchId (UUID) is missing" extensions:{code:INVALID_ARGUMENT}]
+sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:43:04.056184   34080 engine.go:211] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: invalid request. Connector: nsrit\nAuth: user of {\"UID\":\"6KWmOw0yB1ebWGS7VMV8HxW6Male\",\"Token\":{\"aud\":\"nsrit-school-2b749\",\"auth_time\":1781640782,\"exp\":1781644382,\"firebase\":{\"identities\":{\"phone\":[\"+919999999999\"]},\"sign_in_provider\":\"phone\"},\"iat\":1781640782,\"iss\":\"https://securetoken.google.com/nsrit-school-2b749\",\"phone_number\":\"+919999999999\",\"sub\":\"6KWmOw0yB1ebWGS7VMV8HxW6Male\",\"user_id\":\"6KWmOw0yB1ebWGS7VMV8HxW6Male\"}}\n\nVariables Set: [limit offset]\nErrors: [message:\"$branchId (UUID) is missing\" extensions:{code:INVALID_ARGUMENT}]\nsources: connectors\\nsrit\\mutations.gql [60486B] connectors\\nsrit\\queries.gql [68377B] \n"}}
+[debug] [2026-06-16T20:13:04.095Z] I0617 01:43:04.096760   34080 execute.go:57] Database ping is quick (likely cached), took 931.6µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:43:04.096760   34080 execute.go:57] Database ping is quick (likely cached), took 931.6µs\n"}}
+[debug] [2026-06-16T20:13:04.114Z] I0617 01:43:04.112883   34080 every.go:43] @check passed after running 1 checks
+I0617 01:43:04.113393   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 01:43:04.112883   34080 every.go:43] @check passed after running 1 checks\nI0617 01:43:04.113393   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T20:36:59.128Z] I0617 02:06:59.127583   34080 execute.go:57] Database ping is quick (likely cached), took 2.7906ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 02:06:59.127583   34080 execute.go:57] Database ping is quick (likely cached), took 2.7906ms\n"}}
+[debug] [2026-06-16T20:36:59.253Z] I0617 02:06:59.252815   34080 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 02:06:59.252815   34080 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T20:36:59.255Z] I0617 02:06:59.255614   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 02:06:59.255614   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit\n"}}

@@ -4,79 +4,118 @@ import {Text} from 'react-native-paper';
 import {ATTENDANCE_STATUS} from '../../config/constants';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
-const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const getDayStyle = status => {
+const getToday = () => new Date().toISOString().slice(0, 10);
+
+const getDayCfg = (status, isToday) => {
+  if (isToday && !status) {
+    return {bg: 'transparent', fg: colors.primary, ring: true};
+  }
   if (status === ATTENDANCE_STATUS.PRESENT) {
-    return {backgroundColor: colors.success, color: colors.white};
+    return {bg: colors.success, fg: colors.white, ring: false};
   }
   if (status === ATTENDANCE_STATUS.ABSENT) {
-    return {backgroundColor: colors.danger, color: colors.white};
+    return {bg: colors.danger, fg: colors.white, ring: false};
   }
   if (status === 'holiday') {
-    return {backgroundColor: colors.surfaceAlt, color: colors.textMuted};
+    return {bg: colors.surfaceAlt, fg: colors.textSoft, ring: false};
   }
   if (status === 'future') {
-    return {backgroundColor: colors.white, color: colors.textSoft};
+    return {bg: 'transparent', fg: colors.border, ring: false};
   }
-  return {backgroundColor: colors.white, color: colors.text};
+  return {bg: 'transparent', fg: colors.textSoft, ring: false};
 };
 
+const LEGEND = [
+  {label: 'Present', color: colors.success},
+  {label: 'Absent', color: colors.danger},
+  {label: 'Holiday', color: colors.surfaceAlt},
+];
+
 const CalendarAttendance = ({monthDate = new Date(), records = {}}) => {
-  const days = useMemo(() => {
+  const todayStr = getToday();
+
+  const {cells, monthLabel} = useMemo(() => {
     const year = monthDate.getFullYear();
     const month = monthDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const dayCount = new Date(year, month + 1, 0).getDate();
     const today = new Date();
-    const cells = Array.from({length: firstDay}).map((_, index) => ({
-      key: `blank-${index}`,
+
+    const label = monthDate.toLocaleDateString('en-IN', {
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const built = Array.from({length: firstDay}).map((_, i) => ({
+      key: `blank-${i}`,
       blank: true,
     }));
 
-    for (let day = 1; day <= dayCount; day += 1) {
+    for (let day = 1; day <= dayCount; day++) {
       const current = new Date(year, month, day);
       const key = current.toISOString().slice(0, 10);
       const isFuture = current > today;
-      cells.push({
+      built.push({
         key,
         day,
+        isToday: key === todayStr,
         status: isFuture ? 'future' : records[key] || 'holiday',
       });
     }
 
-    return cells;
-  }, [monthDate, records]);
+    return {cells: built, monthLabel: label};
+  }, [monthDate, records, todayStr]);
 
   return (
     <View style={styles.card}>
+      {/* Month label */}
+      <View style={styles.monthRow}>
+        <Text style={styles.monthLabel}>{monthLabel}</Text>
+      </View>
+
+      {/* Day header */}
       <View style={styles.weekRow}>
-        {dayLabels.map((label, index) => (
-          <Text key={`${label}-${index}`} style={styles.weekLabel}>
-            {label}
+        {DAY_LABELS.map(label => (
+          <Text key={label} style={styles.weekLabel}>
+            {label.slice(0, 1)}
           </Text>
         ))}
       </View>
-      <View style={styles.grid}>
-        {days.map(day => {
-          const dayTheme = getDayStyle(day.status);
 
+      {/* Day grid */}
+      <View style={styles.grid}>
+        {cells.map(cell => {
+          if (cell.blank) {
+            return <View key={cell.key} style={styles.cell} />;
+          }
+          const cfg = getDayCfg(cell.status, cell.isToday);
           return (
-            <View key={day.key} style={styles.cell}>
-              {day.blank ? null : (
-                <View
-                  style={[
-                    styles.day,
-                    {backgroundColor: dayTheme.backgroundColor},
-                  ]}>
-                  <Text style={[styles.dayText, {color: dayTheme.color}]}>
-                    {day.day}
-                  </Text>
-                </View>
-              )}
+            <View key={cell.key} style={styles.cell}>
+              <View
+                style={[
+                  styles.day,
+                  {backgroundColor: cfg.bg},
+                  cfg.ring && styles.dayRing,
+                ]}>
+                <Text style={[styles.dayText, {color: cfg.fg}]}>
+                  {cell.day}
+                </Text>
+              </View>
             </View>
           );
         })}
+      </View>
+
+      {/* Legend */}
+      <View style={styles.legend}>
+        {LEGEND.map(item => (
+          <View key={item.label} style={styles.legendItem}>
+            <View style={[styles.legendDot, {backgroundColor: item.color}]} />
+            <Text style={styles.legendText}>{item.label}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -87,23 +126,36 @@ const styles = StyleSheet.create({
     ...shadows.soft,
     backgroundColor: colors.surface,
     borderColor: colors.border,
+    borderRadius: radius.card,
     borderWidth: 1,
-    borderRadius: radius.xl,
+    marginBottom: spacing.md,
     padding: spacing.md,
+  },
+  monthRow: {
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  monthLabel: {
+    ...typography.bodyBold,
+    color: colors.text,
+    fontSize: 15,
   },
   weekRow: {
     flexDirection: 'row',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   weekLabel: {
-    ...typography.caption,
     color: colors.textMuted,
     flex: 1,
+    fontWeight: '700',
+    fontSize: 10,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginBottom: spacing.md,
   },
   cell: {
     alignItems: 'center',
@@ -115,13 +167,31 @@ const styles = StyleSheet.create({
   day: {
     alignItems: 'center',
     borderRadius: radius.pill,
-    height: 34,
+    height: 32,
     justifyContent: 'center',
-    width: 34,
+    width: 32,
   },
-  dayText: {
-    fontWeight: '800',
+  dayRing: {
+    borderColor: colors.primary,
+    borderWidth: 1.5,
   },
+  dayText: {fontSize: 12, fontWeight: '700'},
+  legend: {
+    alignItems: 'center',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.lg,
+    justifyContent: 'center',
+    paddingTop: spacing.sm,
+  },
+  legendItem: {alignItems: 'center', flexDirection: 'row', gap: 5},
+  legendDot: {
+    borderRadius: radius.pill,
+    height: 9,
+    width: 9,
+  },
+  legendText: {color: colors.textMuted, fontSize: 11, fontWeight: '600'},
 });
 
 export default CalendarAttendance;

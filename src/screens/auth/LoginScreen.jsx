@@ -1,18 +1,38 @@
-import React, {useState, useEffect} from 'react';
-import {StyleSheet, View, TextInput, Pressable} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
 import {HelperText, Text} from 'react-native-paper';
-import {useDispatch, useSelector} from 'react-redux';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {CustomButton, ScreenContainer} from '../../components';
+import {useDispatch, useSelector} from 'react-redux';
+import {CustomButton} from '../../components';
 import {clearAuthError, sendOtp} from '../../store/slices/authSlice';
-import {colors, spacing, typography, radius, shadows} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {validatePhoneLogin} from '../../utils/validators';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const LoginScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const {loading, error} = useSelector(state => state.auth);
   const [form, setForm] = useState({countryCode: '+91', phoneNumber: ''});
   const [localError, setLocalError] = useState('');
+  const [focused, setFocused] = useState(null);
+
+  const btnScale = useSharedValue(1);
 
   useEffect(() => {
     if (error && __DEV__) {
@@ -21,11 +41,9 @@ const LoginScreen = ({navigation}) => {
   }, [error]);
 
   const updateField = (field, value) => {
-    if (error) {
-      dispatch(clearAuthError());
-    }
+    if (error) {dispatch(clearAuthError());}
     setLocalError('');
-    setForm(current => ({...current, [field]: value}));
+    setForm(c => ({...c, [field]: value}));
   };
 
   const handleSendOtp = async () => {
@@ -34,7 +52,6 @@ const LoginScreen = ({navigation}) => {
       setLocalError(validationError);
       return;
     }
-
     const action = await dispatch(sendOtp(form));
     if (sendOtp.fulfilled.match(action)) {
       navigation.navigate('OTPVerification', {
@@ -45,225 +62,351 @@ const LoginScreen = ({navigation}) => {
     }
   };
 
-  // Format connection error or validation error
+  const handleBtnPressIn = () => {
+    btnScale.value = withSpring(0.97, {damping: 20, stiffness: 300});
+  };
+  const handleBtnPressOut = () => {
+    btnScale.value = withSpring(1, {damping: 15, stiffness: 200});
+  };
+
+  const btnStyle = useAnimatedStyle(() => ({
+    transform: [{scale: btnScale.value}],
+  }));
+
   const displayError = localError || (error ? 'Unable to connect. Please try again.' : '');
 
   return (
-    <ScreenContainer scroll={true} style={styles.container}>
-      <View style={styles.innerContainer}>
-        {/* Top: Branding */}
-        <View style={styles.header}>
-          <View style={styles.logoBadge}>
-            <MaterialCommunityIcons name="school" size={42} color={colors.primary} />
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+
+        {/* Background decoration */}
+        <View style={styles.bgBlob1} />
+        <View style={styles.bgBlob2} />
+
+        {/* Brand header */}
+        <Animated.View
+          entering={FadeInDown.duration(400).springify()}
+          style={styles.brand}>
+          <View style={styles.logoWrap}>
+            <MaterialCommunityIcons name="school" size={36} color={colors.primary} />
           </View>
-          <Text style={styles.brandTitle}>NSRIT Connect</Text>
-          <Text style={styles.brandSubtitle}>Enterprise School Management System</Text>
-        </View>
+          <Text style={styles.brandName}>NSRIT Connect</Text>
+          <Text style={styles.brandTagline}>Enterprise School Management</Text>
+        </Animated.View>
 
-        {/* Middle: Login Card */}
-        <View style={styles.card}>
+        {/* Login card */}
+        <Animated.View
+          entering={FadeInDown.delay(120).duration(400).springify()}
+          style={styles.card}>
+
+          {/* Card header accent */}
+          <View style={styles.cardAccent} />
+
           <Text style={styles.cardTitle}>Sign In</Text>
-          <Text style={styles.cardSubtitle}>Enter your registered phone number to verify via OTP</Text>
+          <Text style={styles.cardSub}>
+            Enter your phone number to receive a verification code
+          </Text>
 
+          {/* Phone input */}
+          <Text style={styles.inputLabel}>Phone Number</Text>
           <View style={styles.phoneRow}>
-            <View style={styles.inputWrapperCode}>
-              <Text style={styles.inputLabel}>Code</Text>
+            {/* Country code */}
+            <View
+              style={[
+                styles.inputWrap,
+                styles.codeWrap,
+                focused === 'code' && styles.inputFocused,
+              ]}>
               <TextInput
                 keyboardType="phone-pad"
                 value={form.countryCode}
                 placeholder="+91"
                 placeholderTextColor={colors.textSoft}
-                style={styles.inputCode}
-                onChangeText={value => updateField('countryCode', value)}
+                style={styles.input}
+                onChangeText={v => updateField('countryCode', v)}
+                onFocus={() => setFocused('code')}
+                onBlur={() => setFocused(null)}
               />
             </View>
-            <View style={styles.inputWrapperPhone}>
-              <Text style={styles.inputLabel}>Phone number</Text>
+
+            {/* Phone number */}
+            <View
+              style={[
+                styles.inputWrap,
+                styles.phoneWrap,
+                focused === 'phone' && styles.inputFocused,
+              ]}>
+              <MaterialCommunityIcons
+                name="phone-outline"
+                size={16}
+                color={
+                  focused === 'phone' ? colors.primary : colors.textSoft
+                }
+                style={styles.inputIcon}
+              />
               <TextInput
                 keyboardType="phone-pad"
                 value={form.phoneNumber}
-                placeholder="Enter 10-digit number"
+                placeholder="10-digit number"
                 placeholderTextColor={colors.textSoft}
-                style={styles.inputPhone}
-                onChangeText={value => updateField('phoneNumber', value)}
+                style={styles.input}
+                onChangeText={v => updateField('phoneNumber', v)}
+                onFocus={() => setFocused('phone')}
+                onBlur={() => setFocused(null)}
+                maxLength={15}
               />
             </View>
           </View>
 
           {displayError ? (
-            <HelperText type="error" visible={true} style={styles.errorText}>
+            <HelperText type="error" visible style={styles.errorText}>
               {displayError}
             </HelperText>
           ) : null}
 
-          <CustomButton
-            loading={loading}
-            disabled={loading}
+          {/* OTP button */}
+          <AnimatedPressable
             onPress={handleSendOtp}
-            style={styles.submitBtn}
-            textStyle={styles.submitBtnText}>
-            Send OTP
-          </CustomButton>
-        </View>
+            onPressIn={handleBtnPressIn}
+            onPressOut={handleBtnPressOut}
+            disabled={loading}
+            style={[styles.submitBtn, btnStyle, loading && styles.submitBtnLoading]}>
+            {loading ? (
+              <MaterialCommunityIcons name="loading" size={20} color={colors.white} />
+            ) : (
+              <>
+                <MaterialCommunityIcons
+                  name="send"
+                  size={16}
+                  color={colors.white}
+                />
+                <Text style={styles.submitBtnText}>Send OTP</Text>
+              </>
+            )}
+          </AnimatedPressable>
 
-        {/* Bottom: Help / Support */}
-        <View style={styles.footer}>
-          <Text style={styles.helpText}>Need Help?</Text>
-          <Pressable onPress={() => {}} style={styles.supportLink}>
-            <Text style={styles.supportText}>Contact Administrator</Text>
+          {/* Dev bypass hint */}
+          {__DEV__ ? (
+            <View style={styles.devHint}>
+              <MaterialCommunityIcons
+                name="information-outline"
+                size={12}
+                color={colors.textSoft}
+              />
+              <Text style={styles.devText}>
+                Dev: Use OTP <Text style={{color: colors.primary}}>123456</Text>
+              </Text>
+            </View>
+          ) : null}
+        </Animated.View>
+
+        {/* Footer */}
+        <Animated.View
+          entering={FadeInUp.delay(200).duration(350)}
+          style={styles.footer}>
+          <Pressable
+            onPress={() => navigation.navigate('PhoneLoginHelp')}
+            hitSlop={8}>
+            <Text style={styles.helpLink}>
+              Having trouble?{' '}
+              <Text style={styles.helpLinkBold}>Contact Admin</Text>
+            </Text>
           </Pressable>
-        </View>
-      </View>
-    </ScreenContainer>
+        </Animated.View>
+
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
+    flex: 1,
     backgroundColor: colors.background,
   },
-  innerContainer: {
-    flex: 1,
+  scroll: {
+    flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
-    minHeight: 520,
+    minHeight: 560,
   },
-  header: {
+  // Background decorations
+  bgBlob1: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: 150,
+    height: 300,
+    opacity: 0.5,
+    position: 'absolute',
+    right: -80,
+    top: -60,
+    width: 300,
+  },
+  bgBlob2: {
+    backgroundColor: colors.secondarySoft,
+    borderRadius: 120,
+    bottom: -40,
+    height: 240,
+    left: -60,
+    opacity: 0.4,
+    position: 'absolute',
+    width: 240,
+  },
+  // Brand
+  brand: {
     alignItems: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.md,
+    marginBottom: spacing.xl,
   },
-  logoBadge: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+  logoWrap: {
+    alignItems: 'center',
     backgroundColor: colors.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    ...shadows.soft,
-    borderWidth: 1,
     borderColor: colors.border,
+    borderRadius: 22,
+    borderWidth: 1,
+    height: 80,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    width: 80,
+    ...shadows.medium,
   },
-  brandTitle: {
-    fontSize: 22,
-    fontWeight: '800',
+  brandName: {
+    ...typography.title,
     color: colors.primary,
     letterSpacing: -0.5,
   },
-  brandSubtitle: {
-    fontSize: 12,
-    fontWeight: '600',
+  brandTagline: {
+    ...typography.caption,
     color: colors.textMuted,
-    marginTop: spacing.xxs,
-    textAlign: 'center',
+    marginTop: 3,
   },
+  // Card
   card: {
+    ...shadows.medium,
     backgroundColor: colors.white,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xl,
-    borderWidth: 1,
     borderColor: colors.border,
-    ...shadows.soft,
-    width: '100%',
-    alignSelf: 'center',
-    maxWidth: 420,
+    borderRadius: radius.card,
+    borderWidth: 1,
     marginBottom: spacing.xl,
+    overflow: 'hidden',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+  },
+  cardAccent: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    height: 3,
+    marginBottom: spacing.lg,
+    width: 40,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '800',
+    ...typography.subtitle,
     color: colors.text,
-    marginBottom: spacing.xxs,
+    marginBottom: spacing.xs,
   },
-  cardSubtitle: {
-    fontSize: 11,
+  cardSub: {
+    ...typography.caption,
     color: colors.textMuted,
-    lineHeight: 16,
-    marginBottom: spacing.md,
+    lineHeight: 18,
+    marginBottom: spacing.xl,
+  },
+  // Inputs
+  inputLabel: {
+    ...typography.label,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   phoneRow: {
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
-  inputWrapperCode: {
-    flex: 0.28,
+  inputWrap: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    height: 50,
+    paddingHorizontal: spacing.md,
   },
-  inputWrapperPhone: {
+  inputFocused: {
+    borderColor: colors.primary,
+    backgroundColor: colors.white,
+  },
+  codeWrap: {
+    flex: 0.28,
+    justifyContent: 'center',
+  },
+  phoneWrap: {
     flex: 0.72,
   },
-  inputLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
+  inputIcon: {
+    marginRight: spacing.xs,
   },
-  inputCode: {
-    height: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.background,
+  input: {
     color: colors.text,
-    paddingHorizontal: spacing.sm,
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  inputPhone: {
-    height: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    backgroundColor: colors.background,
-    color: colors.text,
-    paddingHorizontal: spacing.sm,
-    fontSize: 13,
+    flex: 1,
+    fontSize: 14,
     fontWeight: '700',
   },
   errorText: {
-    paddingHorizontal: 0,
-    marginTop: spacing.xxs,
-    marginBottom: spacing.xxs,
     color: colors.danger,
     fontSize: 11,
     fontWeight: '700',
+    paddingHorizontal: 0,
   },
+  // Button
   submitBtn: {
+    alignItems: 'center',
     backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    height: 44,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 52,
     justifyContent: 'center',
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
+  },
+  submitBtnLoading: {
+    opacity: 0.8,
   },
   submitBtnText: {
-    fontSize: 13,
-    fontWeight: '800',
     color: colors.white,
+    fontSize: 15,
+    fontWeight: '800',
   },
-  footer: {
+  // Dev hint
+  devHint: {
     alignItems: 'center',
+    backgroundColor: colors.neutralSoft,
+    borderRadius: radius.md,
+    flexDirection: 'row',
+    gap: 5,
+    justifyContent: 'center',
     marginTop: spacing.md,
-    gap: 4,
+    padding: spacing.sm,
   },
-  helpText: {
-    fontSize: 11,
+  devText: {
     color: colors.textSoft,
+    fontSize: 11,
     fontWeight: '600',
   },
-  supportLink: {
-    paddingVertical: 2,
+  // Footer
+  footer: {
+    alignItems: 'center',
   },
-  supportText: {
-    fontSize: 11,
+  helpLink: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
+  helpLinkBold: {
+    ...typography.captionBold,
     color: colors.primary,
-    fontWeight: '800',
-    textDecorationLine: 'underline',
   },
 });
 

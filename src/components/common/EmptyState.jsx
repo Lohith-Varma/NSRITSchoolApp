@@ -1,8 +1,8 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Pressable, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
+import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomButton from '../buttons/CustomButton';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const EmptyState = ({
@@ -11,19 +11,26 @@ const EmptyState = ({
   icon = 'inbox-outline',
   actionLabel,
   onAction,
+  compact = false,
 }) => (
-  <View style={styles.container}>
-    <View style={styles.icon}>
-      <MaterialCommunityIcons name={icon} size={28} color={colors.primary} />
+  <Animated.View
+    entering={FadeInDown.duration(300).springify()}
+    style={[styles.container, compact && styles.compact]}>
+    <View style={styles.iconRing}>
+      <View style={styles.iconInner}>
+        <MaterialCommunityIcons name={icon} size={28} color={colors.primary} />
+      </View>
     </View>
+
     <Text style={styles.title}>{title}</Text>
     {message ? <Text style={styles.message}>{message}</Text> : null}
+
     {actionLabel ? (
-      <CustomButton mode="outlined" style={styles.action} onPress={onAction}>
-        {actionLabel}
-      </CustomButton>
+      <Pressable onPress={onAction} style={styles.actionBtn}>
+        <Text style={styles.actionText}>{actionLabel}</Text>
+      </Pressable>
     ) : null}
-  </View>
+  </Animated.View>
 );
 
 const styles = StyleSheet.create({
@@ -32,31 +39,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.border,
+    borderRadius: radius.card,
     borderWidth: 1,
-    borderRadius: radius.xl,
+    padding: spacing.xxl,
+  },
+  compact: {
     padding: spacing.xl,
   },
-  icon: {
+  iconRing: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryFaint,
+    borderColor: colors.primarySoft,
+    borderRadius: radius.pill,
+    borderWidth: 6,
+    height: 76,
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    width: 76,
+  },
+  iconInner: {
     alignItems: 'center',
     backgroundColor: colors.primarySoft,
     borderRadius: radius.pill,
-    height: 56,
+    height: 52,
     justifyContent: 'center',
-    marginBottom: spacing.md,
-    width: 56,
+    width: 52,
   },
   title: {
-    ...typography.subtitle,
+    ...typography.heading,
     color: colors.text,
     textAlign: 'center',
   },
   message: {
+    ...typography.caption,
     color: colors.textMuted,
     marginTop: spacing.sm,
     textAlign: 'center',
   },
-  action: {
+  actionBtn: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
     marginTop: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  actionText: {
+    ...typography.captionBold,
+    color: colors.white,
+    fontSize: 13,
   },
 });
 

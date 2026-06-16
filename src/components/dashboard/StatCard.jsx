@@ -1,8 +1,16 @@
-import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Text, TouchableRipple} from 'react-native-paper';
+import React, {useEffect} from 'react';
+import {Pressable, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AnimatedMetric from '../animated/AnimatedMetric';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const StatCard = ({
   title,
@@ -11,71 +19,102 @@ const StatCard = ({
   tone = colors.primary,
   description,
   onPress,
-}) => (
-  <TouchableRipple borderless onPress={onPress} style={styles.wrapper}>
-    <View style={styles.card}>
-      <View style={styles.topRow}>
-        <View style={[styles.icon, {backgroundColor: `${tone}14`}]}>
-          <MaterialCommunityIcons name={icon} size={22} color={tone} />
+}) => {
+  const scale = useSharedValue(1);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{scale: scale.value}],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.96, {damping: 20, stiffness: 300});
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1, {damping: 15, stiffness: 200});
+  };
+
+  // Determine if value looks numeric for AnimatedMetric
+  const isNumeric = !isNaN(parseFloat(String(value))) && String(value).trim() !== '';
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={onPress ? handlePressIn : undefined}
+      onPressOut={onPress ? handlePressOut : undefined}
+      style={[styles.wrapper, animStyle]}>
+      {/* Tinted top bar */}
+      <View style={[styles.topBar, {backgroundColor: `${tone}18`}]}>
+        <View style={[styles.iconWrap, {backgroundColor: `${tone}22`}]}>
+          <MaterialCommunityIcons name={icon} size={20} color={tone} />
         </View>
         {onPress ? (
           <MaterialCommunityIcons
-            name="chevron-right"
-            size={20}
-            color={colors.textSoft}
+            name="arrow-right"
+            size={14}
+            color={`${tone}99`}
           />
         ) : null}
       </View>
-      <Text style={styles.value}>{value}</Text>
-      <Text style={styles.title}>{title}</Text>
-      {description ? (
-        <Text style={styles.description}>{description}</Text>
-      ) : null}
-    </View>
-  </TouchableRipple>
-);
+
+      <View style={styles.body}>
+        <AnimatedMetric
+          value={value}
+          isNumeric={isNumeric}
+          style={[typography.metric, {color: colors.text}]}
+        />
+        <Text style={styles.title} numberOfLines={2}>
+          {title}
+        </Text>
+        {description ? (
+          <Text style={styles.description} numberOfLines={2}>
+            {description}
+          </Text>
+        ) : null}
+      </View>
+    </AnimatedPressable>
+  );
+};
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderRadius: radius.lg,
-    flex: 1,
-    minWidth: '47%',
-  },
-  card: {
     ...shadows.soft,
     backgroundColor: colors.surface,
     borderColor: colors.border,
+    borderRadius: radius.card,
     borderWidth: 1,
-    borderRadius: radius.lg,
-    minHeight: 128,
-    padding: spacing.lg,
+    flex: 1,
+    minWidth: '47%',
+    overflow: 'hidden',
   },
-  topRow: {
+  topBar: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.md,
+    padding: spacing.md,
+    paddingBottom: spacing.sm,
   },
-  icon: {
+  iconWrap: {
     alignItems: 'center',
     borderRadius: radius.md,
-    height: 42,
+    height: 38,
     justifyContent: 'center',
-    width: 42,
+    width: 38,
   },
-  value: {
-    ...typography.metric,
-    color: colors.text,
+  body: {
+    padding: spacing.md,
+    paddingTop: spacing.xs,
   },
   title: {
-    ...typography.caption,
+    ...typography.captionBold,
     color: colors.textMuted,
     marginTop: spacing.xs,
     textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   description: {
-    color: colors.textMuted,
-    marginTop: spacing.sm,
+    ...typography.caption,
+    color: colors.textSoft,
+    marginTop: 2,
   },
 });
 
