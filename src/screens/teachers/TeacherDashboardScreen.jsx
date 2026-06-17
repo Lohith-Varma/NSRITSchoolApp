@@ -410,6 +410,7 @@ const TeacherDashboardScreen = ({navigation}) => {
       profileRoute="TeacherProfile"
       profileParams={{teacherId: user?.teacherId || user?.id}}
     />
+    </>
   );
 };
 

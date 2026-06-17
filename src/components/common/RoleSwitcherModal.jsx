@@ -3,8 +3,7 @@ import { Modal, StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeIn, FadeOut } from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { switchRole } from '../../store/slices/authSlice';
-import authService from '../../services/auth/authService';
+import { switchActiveRole } from '../../store/slices/authSlice';
 import { USER_ROLES, ROLE_LABELS } from '../../config/constants';
 import { colors, radius, shadows, spacing, typography } from '../../theme';
 import { authConfig } from '../../config/env';
@@ -24,6 +23,7 @@ export const RoleSwitcherModal = ({ visible, onClose }) => {
     } else {
       scale.value = 0.9;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const loadAvailableRoles = async () => {
@@ -38,33 +38,24 @@ export const RoleSwitcherModal = ({ visible, onClose }) => {
       return;
     }
 
-    if (!user?.phoneNumber) return;
-
-    setLoading(true);
-    try {
-      const profiles = await authService.fetchUsersByPhone(user.phoneNumber);
-      setAvailableProfiles(profiles.map(p => ({
-        role: p.role,
-        fullName: p.fullName,
-        profileData: p,
-        isMock: false
-      })));
-    } catch (e) {
-      console.warn('Failed to load other roles:', e);
-    } finally {
-      setLoading(false);
+    if (!user?.roles) {
+      setAvailableProfiles([]);
+      return;
     }
+
+    // Map user.roles to format expected by list
+    const rolesList = user.roles.map(r => ({
+      role: r,
+      fullName: user?.fullName || 'User',
+      isMock: false
+    }));
+    setAvailableProfiles(rolesList);
   };
 
   const handleRoleSelect = async (item) => {
     setLoading(true);
     try {
-      await dispatch(switchRole({
-        role: item.role,
-        profileData: item.profileData,
-        phoneNumber: user?.phoneNumber,
-        countryCode: user?.countryCode
-      })).unwrap();
+      await dispatch(switchActiveRole(item.role)).unwrap();
       onClose();
     } catch (e) {
       console.warn('Role switch failed:', e);
