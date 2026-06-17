@@ -4,8 +4,9 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState} from '../../components';
+import {EmptyState, StatusBadge} from '../../components';
 import {WING_LABELS} from '../../config/academic';
+import {ROLE_LABELS} from '../../config/constants';
 import coordinatorService from '../../services/coordinators/coordinatorService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
@@ -31,6 +32,9 @@ const InfoRow = ({icon, label, value}) => (
   </View>
 );
 
+const normalizeRole = role => String(role || '').toUpperCase();
+const uniqueRoles = roles => [...new Set((roles || []).map(item => normalizeRole(item?.role || item)).filter(Boolean))];
+
 const CoordinatorDetailsScreen = ({navigation, route}) => {
   const coordinatorId = route.params?.coordinatorId;
   const {data} = useQuery({
@@ -49,6 +53,7 @@ const CoordinatorDetailsScreen = ({navigation, route}) => {
       </View>
     );
   }
+  const roles = uniqueRoles([...(data.user?.roles || []), data.user?.role]);
 
   const isActive = data.isActive !== false;
   const name = data.user?.fullName || 'Coordinator';
@@ -87,6 +92,15 @@ const CoordinatorDetailsScreen = ({navigation, route}) => {
           </Pressable>
         </View>
       </Animated.View>
+
+      {/* ── Roles ── */}
+      {roles.length ? (
+        <View style={styles.roleRow}>
+          {roles.map(role => (
+            <StatusBadge key={role} status="info" label={ROLE_LABELS[role] || role} />
+          ))}
+        </View>
+      ) : null}
 
       {/* ── Info card ── */}
       <Animated.View entering={FadeInDown.delay(60).duration(260).springify()} style={styles.infoCard}>
@@ -189,6 +203,12 @@ const styles = StyleSheet.create({
   infoBody: {flex: 1, minWidth: 0},
   infoLabel: {color: colors.textMuted, fontSize: 9, fontWeight: '700', textTransform: 'uppercase'},
   infoValue: {...typography.bodyBold, color: colors.text, fontSize: 13, marginTop: 1},
+  roleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
 });
 
 export default CoordinatorDetailsScreen;

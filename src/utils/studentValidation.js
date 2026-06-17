@@ -18,16 +18,18 @@ export const validateStudentPayload = payload => {
     return 'Admission date is required';
   }
 
-  if (!payload.fatherName?.trim()) {
-    return 'Father name is required';
-  }
+  const parentPhones = [
+    payload.fatherMobile,
+    payload.fatherPhoneNumber,
+    payload.parentPhoneNumber,
+    payload.motherMobile,
+    payload.motherPhoneNumber,
+    payload.guardianMobile,
+    payload.guardianPhoneNumber,
+  ].filter(Boolean);
 
-  if (!payload.motherName?.trim()) {
-    return 'Mother name is required';
-  }
-
-  if (normalizePhoneNumber(payload.parentPhoneNumber).length < 10) {
-    return 'Valid parent phone number is required';
+  if (!parentPhones.some(phone => normalizePhoneNumber(phone).length >= 10)) {
+    return 'At least one valid parent or guardian mobile number is required';
   }
 
   if (!isValidPredefinedClass(payload.className)) {

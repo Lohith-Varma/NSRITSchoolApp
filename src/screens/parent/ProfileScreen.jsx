@@ -5,7 +5,8 @@ import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState} from '../../components';
+import {EmptyState, StatusBadge} from '../../components';
+import {ROLE_LABELS} from '../../config/constants';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
@@ -33,6 +34,9 @@ const InfoRow = ({icon, label, value, color = colors.text}) => (
     </View>
   </View>
 );
+
+const normalizeRole = role => String(role || '').toUpperCase();
+const uniqueRoles = roles => [...new Set((roles || []).map(item => normalizeRole(item?.role || item)).filter(Boolean))];
 
 const ChildCard = ({child, index}) => {
   const attendancePct = child.attendanceSummary?.percentage || 0;
@@ -120,6 +124,7 @@ const ProfileScreen = () => {
   const parent = children[0]?.parent;
   const displayName = parent?.fullName || user?.fullName || user?.name || 'Parent';
   const phone = parent?.phoneNumber || user?.phoneNumber || '';
+  const roles = uniqueRoles([...(user?.roles || []), user?.role]);
 
   return (
     <ScrollView
@@ -148,6 +153,15 @@ const ProfileScreen = () => {
           <Text style={styles.roleChipText}>PARENT ACCOUNT</Text>
         </View>
       </Animated.View>
+
+      {/* ── Roles ── */}
+      {roles.length ? (
+        <View style={styles.roleRow}>
+          {roles.map(role => (
+            <StatusBadge key={role} status="info" label={ROLE_LABELS[role] || role} />
+          ))}
+        </View>
+      ) : null}
 
       {/* ── Parent details ── */}
       {(parent?.fatherName || parent?.motherName || parent?.email) ? (
@@ -387,6 +401,12 @@ const styles = StyleSheet.create({
     padding: spacing.xxl,
   },
   loadingText: {color: colors.textMuted, fontSize: 13, fontWeight: '600'},
+  roleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
 });
 
 export default ProfileScreen;

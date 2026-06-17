@@ -52,7 +52,7 @@ const SummaryPill = ({label, value, color}) => (
   </View>
 );
 
-const FeeReportsScreen = () => {
+const FeeReportsScreen = ({navigation}) => {
   const access = useFeeAccess();
   const canViewReports = feeService.canViewReports(access.role);
   const [query, setQuery] = useState('');
@@ -103,20 +103,22 @@ const FeeReportsScreen = () => {
               <Text style={styles.heroOverline}>Fee</Text>
               <Text style={styles.heroTitle}>Reports</Text>
               <Text style={styles.heroSub}>{isLoading ? 'Loading reports…' : 'Branch fee analytics'}</Text>
-              <View style={styles.exportRow}>
-                <Pressable
-                  onPress={() => exportReport(filtered, 'csv')}
-                  style={({pressed}) => [styles.exportBtn, pressed && {opacity: 0.85}]}>
-                  <MaterialCommunityIcons name="file-delimited-outline" size={13} color={colors.secondary} />
-                  <Text style={styles.exportBtnText}>CSV</Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => exportReport(filtered, 'xlsx')}
-                  style={({pressed}) => [styles.exportBtn, pressed && {opacity: 0.85}]}>
-                  <MaterialCommunityIcons name="microsoft-excel" size={13} color={colors.secondary} />
-                  <Text style={styles.exportBtnText}>Excel</Text>
-                </Pressable>
-              </View>
+              {!['TEACHER', 'CLASS_TEACHER'].includes(String(access.role).toUpperCase()) ? (
+                <View style={styles.exportRow}>
+                  <Pressable
+                    onPress={() => exportReport(filtered, 'csv')}
+                    style={({pressed}) => [styles.exportBtn, pressed && {opacity: 0.85}]}>
+                    <MaterialCommunityIcons name="file-delimited-outline" size={13} color={colors.secondary} />
+                    <Text style={styles.exportBtnText}>CSV</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => exportReport(filtered, 'xlsx')}
+                    style={({pressed}) => [styles.exportBtn, pressed && {opacity: 0.85}]}>
+                    <MaterialCommunityIcons name="microsoft-excel" size={13} color={colors.secondary} />
+                    <Text style={styles.exportBtnText}>Excel</Text>
+                  </Pressable>
+                </View>
+              ) : null}
             </Animated.View>
 
             {/* ── Summary ── */}
@@ -129,30 +131,31 @@ const FeeReportsScreen = () => {
 
             <SearchBar value={query} onChangeText={setQuery} placeholder="Filter by student, class" />
             <FilterTabs tabs={statusTabs} value={status} onChange={setStatus} />
-
             {/* Class-wise report */}
             {(data?.classWise || []).length > 0 ? (
               <>
                 <Text style={styles.sectionLabel}>Class-wise Report</Text>
                 {data.classWise.map((item, index) => (
                   <Animated.View key={item.className} entering={FadeInRight.delay(index * 25).duration(200).springify()}>
-                    <View style={styles.classRow}>
-                      <View style={styles.classIcon}>
-                        <MaterialCommunityIcons name="file-chart-outline" size={14} color={colors.secondary} />
+                    <Pressable onPress={() => navigation.navigate('ClassWiseFeeReport', { className: item.className })}>
+                      <View style={styles.classRow}>
+                        <View style={styles.classIcon}>
+                          <MaterialCommunityIcons name="file-chart-outline" size={14} color={colors.secondary} />
+                        </View>
+                        <View style={styles.classBody}>
+                          <Text style={styles.classTitle}>{item.className}</Text>
+                          <Text style={styles.classMeta}>
+                            {item.students} students · Collected {formatCurrency(item.paidAmount)}
+                          </Text>
+                        </View>
+                        <View style={styles.classRight}>
+                          <Text style={[styles.classDue, {color: item.dueAmount > 0 ? colors.danger : colors.success}]}>
+                            {formatCurrency(item.dueAmount)}
+                          </Text>
+                          <Text style={styles.classDueLabel}>pending</Text>
+                        </View>
                       </View>
-                      <View style={styles.classBody}>
-                        <Text style={styles.classTitle}>{item.className}</Text>
-                        <Text style={styles.classMeta}>
-                          {item.students} students · Collected {formatCurrency(item.paidAmount)}
-                        </Text>
-                      </View>
-                      <View style={styles.classRight}>
-                        <Text style={[styles.classDue, {color: item.dueAmount > 0 ? colors.danger : colors.success}]}>
-                          {formatCurrency(item.dueAmount)}
-                        </Text>
-                        <Text style={styles.classDueLabel}>pending</Text>
-                      </View>
-                    </View>
+                    </Pressable>
                   </Animated.View>
                 ))}
               </>

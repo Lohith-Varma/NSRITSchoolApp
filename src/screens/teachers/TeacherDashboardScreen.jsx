@@ -18,18 +18,23 @@ import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {logoutUser} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import {ROLE_LABELS, USER_ROLES} from '../../config/constants';
 
 const TeacherDashboardScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const access = useFeeAccess();
   const teacherId = user?.teacherId;
+  const role = String(user?.role || '').toUpperCase();
+  const roleLabel = ROLE_LABELS[role] || 'Teacher';
+  const isClassTeacherRole = role === USER_ROLES.CLASS_TEACHER;
 
   const {data, isLoading} = useQuery({
-    queryKey: ['teacherDashboard', teacherId],
+    queryKey: ['teacherDashboard', teacherId, role],
     queryFn: () => teacherService.getTeacherDashboard(teacherId),
     enabled: Boolean(teacherId),
   });
+
   const {data: feeData} = useQuery({
     queryKey: ['teacherFeeStatus', access.branchId],
     queryFn: () => feeService.getFeeReports(access),
@@ -54,9 +59,62 @@ const TeacherDashboardScreen = ({navigation}) => {
     );
   }
 
-  const sections = data?.assignedSections || [];
+  const allSections = data?.assignedSections || [];
   const subjects = data?.assignedSubjects || [];
   const classTeacherSections = data?.classTeacherAssignments || [];
+  const sections = isClassTeacherRole
+    ? classTeacherSections.map(item => item.section).filter(Boolean)
+    : allSections;
+  const sectionLabel = sections.map(item => `${item.academicClass?.name || '-'}-${item.name || '-'}`).join(', ');
+  const totalStudents = sections.reduce(
+    (sum, section) =>
+      sum +
+      (
+        section.dashboardActiveStudents ||
+        section.profileActiveStudents ||
+        section.activeStudents ||
+        section.students_on_section ||
+        []
+      ).filter(student => ['ACTIVE', undefined, null].includes(student.status)).length,
+    0,
+  );
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const pendingAttendance = isClassTeacherRole
+    ? sections.filter(section => {
+        const students =
+          section.dashboardActiveStudents ||
+          section.profileActiveStudents ||
+          section.activeStudents ||
+          section.students_on_section ||
+          [];
+        const markedIds = new Set(
+          (
+            section.dashboardSectionAttendance ||
+            section.profileSectionAttendance ||
+            section.sectionAttendance ||
+            section.attendances_on_section ||
+            []
+          )
+            .filter(item => item.attendanceDate === todayDate)
+            .map(item => item.studentId),
+        );
+        return students.some(student => !markedIds.has(student.id));
+      }).length
+    : data?.pendingAttendance || 0;
+  const todaysAttendance = isClassTeacherRole
+    ? sections.reduce(
+        (sum, section) =>
+          sum +
+          (
+            section.dashboardSectionAttendance ||
+            section.profileSectionAttendance ||
+            section.sectionAttendance ||
+            section.attendances_on_section ||
+            []
+          ).filter(item => item.attendanceDate === todayDate).length,
+        0,
+      )
+    : data?.todaysAttendance || 0;
   const attendancePct = data?.todayAttendancePct || 0;
   const feeCollectionRate = Math.round((feeSummary.collectionRate || 0) * 100);
 
@@ -130,10 +188,10 @@ const TeacherDashboardScreen = ({navigation}) => {
             />
           </View>
           <View>
-            <Text style={styles.ctaLabel}>Mark Attendance</Text>
+            <Text style={styles.ctaLabel}>{isClassTeacherRole ? 'Attendance' : 'Mark Attendance'}</Text>
             <Text style={styles.ctaSub}>
-              {data?.pendingAttendance
-                ? `${data.pendingAttendance} session(s) pending`
+              {pendingAttendance
+                ? `${pendingAttendance} session${pendingAttendance !== 1 ? 's' : ''} pending`
                 : "Today's roll call"}
             </Text>
           </View>
@@ -159,7 +217,7 @@ const TeacherDashboardScreen = ({navigation}) => {
         <View style={styles.statBox}>
           <MaterialCommunityIcons name="account-school" size={20} color={colors.primary} />
           <AnimatedMetric
-            value={data?.totalStudents || 0}
+            value={isClassTeacherRole ? totalStudents : data?.totalStudents || 0}
             style={[typography.metricSm, {color: colors.text}]}
           />
           <Text style={styles.statLabel}>Students</Text>
@@ -181,7 +239,7 @@ const TeacherDashboardScreen = ({navigation}) => {
         <View style={styles.statBox}>
           <MaterialCommunityIcons name="clipboard-check" size={20} color={colors.success} />
           <AnimatedMetric
-            value={data?.todaysAttendance || 0}
+            value={todaysAttendance}
             style={[typography.metricSm, {color: colors.text}]}
           />
           <Text style={styles.statLabel}>Marked</Text>
@@ -258,11 +316,35 @@ const TeacherDashboardScreen = ({navigation}) => {
       <DashboardCard
         title="Students List"
         value="View"
-        description="Full roster of your assigned sections"
+        description={isClassTeacherRole ? "Assigned class teacher section roster" : "Full roster of your assigned sections"}
         icon="account-group-outline"
         tone={colors.secondary}
         onPress={() => navigation.navigate('StudentsList')}
       />
+      {isClassTeacherRole ? (
+        <>
+          <DashboardCard
+            title="Homework"
+            value="Class"
+            description="Assigned section homework"
+            icon="book-check-outline"
+            tone={colors.secondary}
+          />
+          <DashboardCard
+            title="Parent Information"
+            value="View"
+            description="Open student profiles for parent contacts"
+            icon="account-child-outline"
+            onPress={() => navigation.navigate('StudentsList')}
+          />
+          <DashboardCard
+            title="Class Reports"
+            value="View"
+            description="Attendance and fee reports for assigned section"
+            icon="chart-box-outline"
+          />
+        </>
+      ) : null}
       <DashboardCard
         title="Teacher Profile"
         value="View"

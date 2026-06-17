@@ -13,6 +13,48 @@ import {parseCsv} from '../../utils/csvParser';
 
 const currentYear = () => new Date().getFullYear();
 const normalizeRole = role => String(role || '').toUpperCase();
+const RELATIONSHIP_ORDER = ['FATHER', 'MOTHER', 'GUARDIAN'];
+
+const formatOptionalPhone = ({countryCode = '+91', phoneNumber}) =>
+  phoneNumber ? formatE164PhoneNumber({countryCode, phoneNumber}) : '';
+
+const buildParentContacts = payload => {
+  const countryCode = payload.countryCode || '+91';
+  const contacts = [
+    {
+      relationship: 'FATHER',
+      name: payload.fatherName,
+      phoneNumber: payload.fatherMobile || payload.fatherPhoneNumber || payload.parentPhoneNumber,
+    },
+    {
+      relationship: 'MOTHER',
+      name: payload.motherName,
+      phoneNumber: payload.motherMobile || payload.motherPhoneNumber,
+    },
+    {
+      relationship: 'GUARDIAN',
+      name: payload.guardianName,
+      phoneNumber: payload.guardianMobile || payload.guardianPhoneNumber,
+    },
+  ];
+  const seen = new Set();
+
+  return contacts
+    .map(contact => ({
+      ...contact,
+      countryCode,
+      phoneNumber: formatOptionalPhone({countryCode, phoneNumber: contact.phoneNumber}),
+    }))
+    .filter(contact => contact.phoneNumber)
+    .filter(contact => {
+      const key = `${contact.relationship}:${contact.phoneNumber}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+};
 
 const resolveBranchCode = async (scope, branchId) => {
   if (scope?.branchCode) {
@@ -33,18 +75,17 @@ const normalizeStudentPayload = (payload, scope = {}) => {
   const branchId = payload.branchId || scope.branchId;
   const branchCode = payload.branchCode || scope.branchCode;
   const countryCode = payload.countryCode || '+91';
-  const parentPhoneNumber = payload.parentPhoneNumber || payload.phoneNumber || '';
-  const phoneNumber = parentPhoneNumber
-    ? formatE164PhoneNumber({countryCode, phoneNumber: parentPhoneNumber})
-    : '';
+  const parentContacts = buildParentContacts({...payload, countryCode});
+  const primaryParent = parentContacts[0] || {};
 
   return {
     ...payload,
     branchId,
     branchCode,
     countryCode,
-    phoneNumber,
-    parentPhoneNumber: phoneNumber,
+    phoneNumber: primaryParent.phoneNumber || '',
+    parentPhoneNumber: primaryParent.phoneNumber || '',
+    parentContacts,
     admissionYear: Number(payload.admissionYear || currentYear()),
     admissionDate: payload.admissionDate || new Date().toISOString().slice(0, 10),
     parentName: payload.fatherName || payload.parentName,
@@ -85,6 +126,35 @@ const toStudentMutationPayload = payload => ({
   transportRequired: Boolean(payload.transportRequired),
   admissionDate: payload.admissionDate,
 });
+
+const resolveParentLinks = async normalized => {
+  const contacts = (normalized.parentContacts || []).sort(
+    (a, b) => RELATIONSHIP_ORDER.indexOf(a.relationship) - RELATIONSHIP_ORDER.indexOf(b.relationship),
+  );
+  const links = [];
+
+  for (const contact of contacts) {
+    const parent = await parentService.createParent({
+      branchId: normalized.branchId,
+      fullName: contact.name || `${contact.relationship} Parent`,
+      fatherName: normalized.fatherName || null,
+      motherName: normalized.motherName || null,
+      countryCode: contact.countryCode || normalized.countryCode || '+91',
+      phoneNumber: contact.phoneNumber,
+      address: normalized.address || null,
+    });
+
+    links.push({
+      relationship: contact.relationship,
+      userId: parent.userId,
+      parentId: parent.id,
+      phoneNumber: contact.phoneNumber,
+      name: contact.name,
+    });
+  }
+
+  return links;
+};
 
 const assertStudentRecordAccess = (scope, student) => {
   assertBranchAccess(scope, student?.branchId || scope?.branchId);
@@ -160,17 +230,34 @@ const assignFutureClassFee = async ({student, scope}) => {
   }
 };
 
+const parseDateString = dateStr => {
+  if (!dateStr) return null;
+  const str = String(dateStr).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const parts = str.split(/[-/]/);
+  if (parts.length === 3) {
+    const [day, month, year] = parts;
+    if (year.length === 4) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+  }
+  return str;
+};
+
 const mapCsvRow = row => ({
   rowNumber: row.rowNumber,
   fullName: row['Full Name'] || row['Student Name'],
   gender: row.Gender,
-  dateOfBirth: row.DOB || row['Date of Birth'],
+  dateOfBirth: parseDateString(row.DOB || row['Date of Birth']),
   fatherName: row['Father Name'],
   motherName: row['Mother Name'],
-  parentPhoneNumber: row['Parent Mobile'] || row['Parent Phone'],
+  guardianName: row['Guardian Name'],
+  fatherMobile: row['Father Mobile'] || row['Father Phone'] || row['Parent Mobile'] || row['Parent Phone'],
+  motherMobile: row['Mother Mobile'] || row['Mother Phone'],
+  guardianMobile: row['Guardian Mobile'] || row['Guardian Phone'],
   className: row.Class,
   sectionName: row.Section,
-  admissionDate: row['Admission Date'] || new Date().toISOString().slice(0, 10),
+  admissionDate: parseDateString(row['Admission Date']) || new Date().toISOString().slice(0, 10),
 });
 
 export const studentService = {
@@ -317,21 +404,17 @@ export const studentService = {
       serialNumber: idPayload.serialNumber,
     });
 
-    const parentId =
-      normalized.parentId ||
-      (
-        await parentService.createParent({
-          branchId: normalized.branchId,
-          fullName: normalized.fatherName,
-          fatherName: normalized.fatherName,
-          motherName: normalized.motherName,
-          countryCode: normalized.countryCode || '+91',
-          phoneNumber: normalized.parentPhoneNumber,
-          address: normalized.address || null,
-        })
-      ).id;
+    const parentLinks = await resolveParentLinks(normalized);
+    const primaryParent = parentLinks[0];
+    const parentId = normalized.parentId || primaryParent?.parentId;
 
-    console.log('[StudentCreate] Parent link resolved:', {parentId});
+    console.log('[StudentCreate] Parent links resolved:', {
+      parentId,
+      links: parentLinks.map(link => ({
+        relationship: link.relationship,
+        userId: link.userId,
+      })),
+    });
 
     const mutationPayload = toStudentMutationPayload({
       ...normalized,
@@ -353,9 +436,22 @@ export const studentService = {
       ...normalized,
       ...idPayload,
       parentId,
+      linkedParents: parentLinks,
       status: 'ACTIVE',
       isActive: true,
     };
+
+    for (const link of parentLinks) {
+      if (createdStudent.id && link.userId) {
+        await parentService.linkStudentParent({
+          studentId: createdStudent.id,
+          userId: link.userId,
+          relationship: link.relationship,
+          branchId: normalized.branchId,
+        });
+      }
+    }
+
     await assignFutureClassFee({student: createdStudent, scope});
     return createdStudent;
   },
@@ -465,7 +561,9 @@ export const studentService = {
             branchCode: scope.branchCode,
             academicClassId: academicClass.id,
             className: academicClass.name,
+            academicClass: academicClass,
             sectionId: section.id,
+            section: section,
           },
           scope,
         );

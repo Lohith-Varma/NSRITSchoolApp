@@ -4,7 +4,8 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState} from '../../components';
+import {EmptyState, StatusBadge} from '../../components';
+import {ROLE_LABELS} from '../../config/constants';
 import teacherService from '../../services/teachers/teacherService';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
@@ -37,6 +38,9 @@ const SectionCard = ({title, children}) => (
     {children}
   </Animated.View>
 );
+
+const normalizeRole = role => String(role || '').toUpperCase();
+const uniqueRoles = roles => [...new Set((roles || []).map(item => normalizeRole(item?.role || item)).filter(Boolean))];
 
 const TeacherProfileScreen = ({route}) => {
   const teacherId = route.params?.teacherId;
@@ -75,6 +79,7 @@ const TeacherProfileScreen = ({route}) => {
   const attendanceRecordsMarked = teacher.attendanceMarked?.length || 0;
   const name = teacher.fullName || teacher.user?.fullName || 'Teacher';
   const isActive = teacher.isActive !== false;
+  const roles = uniqueRoles([...(teacher.roles || teacher.user?.roles || []), teacher.user?.role, teacher.role]);
 
   return (
     <ScrollView
@@ -115,6 +120,15 @@ const TeacherProfileScreen = ({route}) => {
           </Text>
         </View>
       </Animated.View>
+
+      {/* ── Roles ── */}
+      {roles.length ? (
+        <View style={styles.roleRow}>
+          {roles.map(role => (
+            <StatusBadge key={role} status="info" label={ROLE_LABELS[role] || role} />
+          ))}
+        </View>
+      ) : null}
 
       <SectionCard title="Personal Information">
         <InfoRow icon="phone" label="Mobile" value={teacher.phoneNumber || teacher.user?.phoneNumber} />
@@ -251,6 +265,12 @@ const styles = StyleSheet.create({
   infoBody: {flex: 1, minWidth: 0},
   infoLabel: {color: colors.textMuted, fontSize: 9, fontWeight: '700', textTransform: 'uppercase'},
   infoValue: {...typography.bodyBold, color: colors.text, fontSize: 13, marginTop: 1},
+  roleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
 });
 
 export default TeacherProfileScreen;

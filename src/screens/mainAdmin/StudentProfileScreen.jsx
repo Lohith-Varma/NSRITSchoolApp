@@ -39,6 +39,11 @@ const SectionCard = ({title, delay = 0, children}) => (
   </Animated.View>
 );
 
+const getRoleList = user => {
+  const roles = [...(user?.roles || []).map(item => item.role), user?.role].filter(Boolean);
+  return [...new Set(roles.map(role => String(role).toUpperCase()))].join(', ');
+};
+
 const StudentProfileScreen = ({route}) => {
   const {studentId} = route.params || {};
   const {data, loading, error} = useAsyncResource(
@@ -85,6 +90,7 @@ const StudentProfileScreen = ({route}) => {
       : (summary?.attendancePercent || 0) >= 60
       ? colors.warning
       : colors.danger;
+  const linkedParents = student.linkedParents || [];
 
   return (
     <ScrollView
@@ -135,10 +141,27 @@ const StudentProfileScreen = ({route}) => {
       </SectionCard>
 
       <SectionCard title="Parent Details" delay={60}>
-        <InfoRow label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
-        <InfoRow label="Mother" value={student.parent?.motherName} />
-        <InfoRow label="Phone" value={student.parent?.phoneNumber} />
-        <InfoRow label="Email" value={student.parent?.email} />
+        {linkedParents.length > 0 ? (
+          linkedParents.map((link, idx) => (
+            <React.Fragment key={link.id || idx}>
+              <InfoRow
+                label={link.relationship || 'Parent'}
+                value={`${link.user?.fullName || '—'}${getRoleList(link.user) ? ` (${getRoleList(link.user)})` : ''}`}
+              />
+              <InfoRow
+                label={`${link.relationship || 'Parent'} Mobile`}
+                value={link.user?.phoneNumber}
+              />
+            </React.Fragment>
+          ))
+        ) : (
+          <>
+            <InfoRow label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
+            <InfoRow label="Mother" value={student.parent?.motherName} />
+            <InfoRow label="Phone" value={student.parent?.phoneNumber} />
+            <InfoRow label="Email" value={student.parent?.email} />
+          </>
+        )}
       </SectionCard>
 
       <SectionCard title="Academic Details" delay={80}>

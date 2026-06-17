@@ -1,9 +1,17 @@
 import {FEE_STATUS, USER_ROLES} from '../../config/constants';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
+import parentService from '../parents/parentService';
 import studentService from '../students/studentService';
 
 const normalizeRole = role => String(role || '').toUpperCase();
+const roleVariables = role => {
+  const actorRole = normalizeRole(role);
+  return {
+    actorRole,
+    actorRoleAlias: actorRole.toLowerCase(),
+  };
+};
 const currentYear = () => new Date().getFullYear();
 const today = () => new Date().toISOString().slice(0, 10);
 const toAmount = value => Math.max(Number(value || 0), 0);
@@ -50,6 +58,8 @@ const canViewReports = role =>
     USER_ROLES.BRANCH_ADMIN,
     USER_ROLES.MAIN_ADMIN,
     USER_ROLES.ACCOUNTANT,
+    USER_ROLES.TEACHER,
+    USER_ROLES.CLASS_TEACHER,
   ].includes(normalizeRole(role));
 
 const canViewPaymentTimeline = role =>
@@ -63,23 +73,35 @@ const canViewPaymentTimeline = role =>
   ].includes(normalizeRole(role));
 
 const isCoordinator = role => normalizeRole(role) === USER_ROLES.COORDINATOR;
-const isTeacher = role => normalizeRole(role) === USER_ROLES.TEACHER;
+const isClassTeacher = role => normalizeRole(role) === USER_ROLES.CLASS_TEACHER;
+const isTeacher = role => [USER_ROLES.TEACHER, USER_ROLES.CLASS_TEACHER].includes(normalizeRole(role));
+const isParent = role => normalizeRole(role) === USER_ROLES.PARENT;
 const isActivePayment = payment => !['REVERSED', 'CANCELLED'].includes(String(payment?.status || 'RECORDED').toUpperCase());
 
 const getStudentWing = student =>
   student?.academicClass?.wing?.code || student?.academicClass?.wing || student?.wing?.code || student?.wing;
 
 const getStudentFeePlans = student =>
+  (student?.feePlan ? [student.feePlan] : null) ||
   student?.feePlans ||
   student?.parentFeePlans ||
+  student?.linkedParentFeePlans ||
+  student?.legacyParentFeePlans ||
   student?.studentDetailFeePlans ||
   student?.profileFeePlans ||
   student?.reportFeePlans ||
+  student?.classFeePlans ||
+  student?.classReportFeePlans ||
+  student?.classStatusFeePlans ||
+  student?.classCollectionFeePlans ||
+  student?.classOutstandingFeePlans ||
   [];
 
 const getPlanItems = plan =>
   plan?.items ||
   plan?.parentFeeItems ||
+  plan?.linkedParentFeeItems ||
+  plan?.legacyParentFeeItems ||
   plan?.detailFeeItems ||
   plan?.profileFeeItems ||
   plan?.reportFeeItems ||
@@ -89,11 +111,19 @@ const getPlanItems = plan =>
 const getPlanPayments = plan =>
   plan?.payments ||
   plan?.parentFeePayments ||
+  plan?.linkedParentFeePayments ||
+  plan?.legacyParentFeePayments ||
   plan?.detailFeePayments ||
   plan?.profileFeePayments ||
   plan?.reportFeePayments ||
+  plan?.classFeePayments ||
+  plan?.classReportFeePayments ||
+  plan?.classStatusFeePayments ||
+  plan?.classCollectionFeePayments ||
+  plan?.classOutstandingFeePayments ||
   plan?.feePayments_on_feePlan ||
   [];
+
 
 const categoryName = item => String(item?.categoryName || item?.category?.name || '').trim().toLowerCase();
 const categoryAmount = (plan, names = []) => {
@@ -221,6 +251,7 @@ const buildFeeRecord = (student, plan = null, options = {}) => {
     academicClassId: student?.academicClass?.id || student?.academicClassId,
     wing: getStudentWing(student),
     sectionName: student?.section?.name || '',
+    sectionId: student?.section?.id || student?.sectionId,
     branchId: student?.branchId || student?.branch?.id,
     branchCode: student?.branch?.branchCode,
     branchName: student?.branch?.name,
@@ -271,7 +302,57 @@ const assertCoordinatorWingAccess = (access = {}, feeRecordOrStudent = {}) => {
 const filterRecordsByAccess = (records, access = {}) =>
   isCoordinator(access.role)
     ? records.filter(record => record.wing === access.wing)
-    : records;
+    : isClassTeacher(access.role)
+      ? records.filter(record => !access.sectionId || record.sectionId === access.sectionId)
+      : records;
+
+const getParentUserId = access => access.parentId || access.userId;
+
+const buildPaymentHistoryEntry = (payment, record) => ({
+  ...payment,
+  studentId: record.studentId,
+  studentName: record.studentName,
+  className: record.className,
+  sectionName: record.sectionName,
+  admissionNumber: record.admissionNumber,
+  mode: payment.paymentMode || payment.mode,
+  date: payment.paymentDate || payment.date,
+  receiptNo: payment.receiptNumber || payment.receiptNo,
+  collectedByName: payment.collectedBy?.fullName || payment.collectedByName,
+});
+
+const getParentLinkedFeeRecords = async access => {
+  const userId = getParentUserId(access);
+  if (!userId) {
+    return [];
+  }
+  const children = await parentService.getParentChildren(userId);
+  return children.map(child => buildFeeRecord(child, child.feePlan || null, {includePayments: true}));
+};
+
+const assertParentStudentAccess = async (studentId, access = {}) => {
+  const records = await getParentLinkedFeeRecords(access);
+  const targetId = String(studentId || '');
+  const record = records.find(
+    item =>
+      String(item.studentId || '') === targetId ||
+      String(item.rawStudent?.id || '') === targetId ||
+      String(item.id || '') === targetId,
+  );
+  if (!record) {
+    throw new Error('You can access fee details only for your linked children.');
+  }
+  return record;
+};
+
+const getParentPaymentHistory = async access => {
+  if (access.studentId) {
+    const record = await assertParentStudentAccess(access.studentId, access);
+    return (record.payments || []).map(payment => buildPaymentHistoryEntry(payment, record));
+  }
+  const records = await getParentLinkedFeeRecords(access);
+  return records.flatMap(record => (record.payments || []).map(payment => buildPaymentHistoryEntry(payment, record)));
+};
 
 const buildStandardItems = (categories, amounts) => {
   const byName = new Map(categories.map(category => [String(category.name || '').toLowerCase(), category]));
@@ -296,6 +377,14 @@ export const feeService = {
   canViewPaymentTimeline,
 
   async getFeeRecords(access = {}) {
+    if (isParent(access.role)) {
+      if (access.studentId) {
+        const profile = await assertParentStudentAccess(access.studentId, access);
+        return profile ? [profile] : [];
+      }
+      return getParentLinkedFeeRecords(access);
+    }
+
     if (access.studentId) {
       const profile = await this.getStudentFeeProfile(access.studentId, access);
       return profile ? [profile] : [];
@@ -321,8 +410,13 @@ export const feeService = {
       return null;
     }
 
+    if (isParent(access.role)) {
+      return assertParentStudentAccess(studentId, access);
+    }
+
     const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_STUDENT_FEE_PROFILE, {
       studentId,
+      ...roleVariables(access.role),
     });
     if (!response.student) {
       return null;
@@ -334,6 +428,10 @@ export const feeService = {
   },
 
   async getClassFees(access = {}, filters = {}) {
+    if (isParent(access.role)) {
+      return [];
+    }
+
     if (!access.branchId && normalizeRole(access.role) !== USER_ROLES.MAIN_ADMIN) {
       return [];
     }
@@ -429,6 +527,10 @@ export const feeService = {
   },
 
   async getPaymentHistory(access = {}) {
+    if (isParent(access.role)) {
+      return getParentPaymentHistory(access);
+    }
+
     if (access.studentId) {
       const profile = await this.getStudentFeeProfile(access.studentId, access);
       return profile?.payments || [];
@@ -764,6 +866,10 @@ export const feeService = {
   },
 
   async getFeeReports(access = {}) {
+    if (isParent(access.role)) {
+      throw new Error('Fee reports access denied.');
+    }
+
     const records = await this.getFeeRecords(access);
     const payments = canViewReports(access.role) ? await this.getPaymentHistory(access) : [];
     return {
@@ -782,6 +888,120 @@ export const feeService = {
           return acc;
         }, {}),
       ),
+    };
+  },
+
+  async getClassFeeReport(params, access = {}) {
+    const targetBranchId = params.branchId || access.branchId;
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_FEE_REPORT, {
+      branchId: targetBranchId,
+      academicClassId: params.academicClassId,
+      sectionId: params.sectionId || null,
+      academicYear: Number(params.academicYear),
+      limit: params.limit || 200,
+      offset: params.offset || 0,
+    });
+    return this.processClassQueryResponse(response, access);
+  },
+
+  async getClassStudentsFeeStatus(params, access = {}) {
+    const targetBranchId = params.branchId || access.branchId;
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_STUDENTS_FEE_STATUS, {
+      branchId: targetBranchId,
+      academicClassId: params.academicClassId,
+      sectionId: params.sectionId || null,
+      academicYear: Number(params.academicYear),
+      limit: params.limit || 200,
+      offset: params.offset || 0,
+    });
+    return this.processClassQueryResponse(response, access);
+  },
+
+  async getClassCollectionSummary(params, access = {}) {
+    const targetBranchId = params.branchId || access.branchId;
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_COLLECTION_SUMMARY, {
+      branchId: targetBranchId,
+      academicClassId: params.academicClassId,
+      sectionId: params.sectionId || null,
+      academicYear: Number(params.academicYear),
+      limit: params.limit || 200,
+      offset: params.offset || 0,
+    });
+    return this.processClassQueryResponse(response, access);
+  },
+
+  async getClassOutstandingSummary(params, access = {}) {
+    const targetBranchId = params.branchId || access.branchId;
+    const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_OUTSTANDING_SUMMARY, {
+      branchId: targetBranchId,
+      academicClassId: params.academicClassId,
+      sectionId: params.sectionId || null,
+      academicYear: Number(params.academicYear),
+      limit: params.limit || 200,
+      offset: params.offset || 0,
+    });
+    return this.processClassQueryResponse(response, access);
+  },
+
+  processClassQueryResponse(response, access) {
+    const studentRecords = (response.students || []).map(student => {
+      const activePlan = getStudentFeePlans(student).find(plan => plan.isActive !== false) || null;
+      const allPayments = getPlanPayments(activePlan);
+      const activePayments = allPayments.filter(payment => 
+        !['REVERSED', 'CANCELLED'].includes(String(payment.status || 'RECORDED').toUpperCase())
+      );
+      
+      const totalFee = activePlan?.totalAmount || 0;
+      const paidAmount = activePayments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+      const dueAmount = Math.max(totalFee - paidAmount, 0);
+      const concessionAmount = activePlan?.concessionAmount || 0;
+      
+      let status = FEE_STATUS.DUE;
+      if (activePlan) {
+        if (dueAmount <= 0) {
+          status = FEE_STATUS.PAID;
+        } else if (paidAmount > 0) {
+          status = FEE_STATUS.PARTIAL;
+        }
+      }
+      
+      return {
+        id: student.id,
+        studentId: student.id,
+        admissionNumber: student.studentId,
+        studentName: student.fullName,
+        className: student.academicClass?.name || '',
+        sectionName: student.section?.name || '',
+        totalFee,
+        paidAmount,
+        dueAmount,
+        concessionAmount,
+        status,
+        wing: student.academicClass?.wing?.code || '',
+        rawStudent: student,
+        rawPlan: activePlan,
+      };
+    });
+
+    const filteredRecords = filterRecordsByAccess(studentRecords, access);
+    
+    const totalStudents = filteredRecords.length;
+    const totalFeeAssigned = filteredRecords.reduce((sum, r) => sum + r.totalFee, 0);
+    const totalFeeCollected = filteredRecords.reduce((sum, r) => sum + r.paidAmount, 0);
+    const totalOutstanding = filteredRecords.reduce((sum, r) => sum + r.dueAmount, 0);
+    const totalConcessions = filteredRecords.reduce((sum, r) => sum + r.concessionAmount, 0);
+    const collectionPercentage = totalFeeAssigned > 0 ? (totalFeeCollected / totalFeeAssigned) * 100 : 0;
+    
+    return {
+      records: filteredRecords,
+      summary: {
+        totalStudents,
+        totalFeeAssigned,
+        totalFeeCollected,
+        totalOutstanding,
+        totalConcessions,
+        collectionPercentage,
+      }
     };
   },
 };

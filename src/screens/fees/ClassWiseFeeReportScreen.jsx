@@ -1,122 +1,466 @@
-import React, {useMemo} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
-import {Text} from 'react-native-paper';
-import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
-import {EmptyState} from '../../components';
-import {colors, radius, shadows, spacing} from '../../theme';
+import React, {useMemo, useState, useEffect} from 'react';
+import {StyleSheet, View, FlatList} from 'react-native';
+import {Text, ActivityIndicator} from 'react-native-paper';
+import {useQuery} from '@tanstack/react-query';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
+import XLSX from 'xlsx';
+import {
+  CustomButton,
+  DashboardCard,
+  EmptyState,
+  FilterTabs,
+  ScreenContainer,
+  SectionHeader,
+  SelectField,
+  StatusBadge,
+} from '../../components';
+import feeService from '../../services/fees/feeService';
+import sectionService from '../../services/sections/sectionService';
+import useFeeAccess from '../../hooks/useFeeAccess';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
+import dataConnectClient from '../../services/dataconnect/dataConnectClient';
+import {DATA_CONNECT_QUERIES} from '../../services/dataconnect/operations';
 
-const ClassWiseFeeReportScreen = () => {
-  const records = useSelector(state => state.fees.records);
+const currentYear = new Date().getFullYear();
+const yearOptions = [
+  {label: String(currentYear), value: String(currentYear)},
+  {label: String(currentYear + 1), value: String(currentYear + 1)},
+  {label: String(currentYear - 1), value: String(currentYear - 1)},
+];
 
-  const reports = useMemo(() => {
-    const grouped = records.reduce((acc, item) => {
-      const key = `${item.className}-${item.sectionName}`;
-      const current = acc[key] || {
-        id: key,
-        title: `${item.className} - Section ${item.sectionName}`,
-        total: 0,
-        paid: 0,
-        due: 0,
-      };
-      current.total += item.totalFee;
-      current.paid += item.paidAmount;
-      current.due += item.dueAmount;
-      acc[key] = current;
-      return acc;
-    }, {});
-    return Object.values(grouped);
-  }, [records]);
+const statusTabs = [
+  {label: 'All', value: 'ALL'},
+  {label: 'Paid', value: 'PAID'},
+  {label: 'Partial', value: 'PARTIAL'},
+  {label: 'Due', value: 'DUE'},
+  {label: 'Concession', value: 'CONCESSION'},
+];
+
+const exportReport = async (records, className, format = 'csv') => {
+  try {
+    const headers = ['Student Name', 'Admission Number', 'Section', 'Total Fee', 'Paid Amount', 'Due Amount', 'Concession', 'Status'];
+    const rows = records.map(item => [
+      item.studentName,
+      item.admissionNumber,
+      item.sectionName,
+      item.totalFee,
+      item.paidAmount,
+      item.dueAmount,
+      item.concessionAmount,
+      item.status,
+    ]);
+    
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ClassReport");
+    
+    const bookType = format === 'csv' ? 'csv' : 'xlsx';
+    const wbout = XLSX.write(wb, {type: 'base64', bookType});
+    
+    const ext = format === 'csv' ? 'csv' : 'xlsx';
+    const mimeType = format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const filePath = `${RNFS.CachesDirectoryPath}/${className}_FeeReport.${ext}`;
+    
+    await RNFS.writeFile(filePath, wbout, 'base64');
+    
+    await Share.open({
+      title: `${className} Fee Report`,
+      url: `file://${filePath}`,
+      type: mimeType,
+      failOnCancel: false,
+    });
+  } catch (err) {
+    console.error("Export error:", err);
+  }
+};
+
+const StudentReportCard = ({record, onPress}) => (
+  <View style={styles.studentCard}>
+    <View style={styles.cardHeader}>
+      <View style={{flex: 1}}>
+        <Text style={styles.studentName}>{record.studentName}</Text>
+        <Text style={styles.studentAdmission}>{record.admissionNumber} | Section {record.sectionName}</Text>
+      </View>
+      <StatusBadge status={record.status} />
+    </View>
+    <View style={styles.divider} />
+    <View style={styles.amountsGrid}>
+      <View style={styles.amountItem}>
+        <Text style={styles.amountLabel}>Total Fee</Text>
+        <Text style={styles.amountValue}>{formatCurrency(record.totalFee)}</Text>
+      </View>
+      <View style={styles.amountItem}>
+        <Text style={styles.amountLabel}>Paid</Text>
+        <Text style={[styles.amountValue, styles.successText]}>{formatCurrency(record.paidAmount)}</Text>
+      </View>
+      <View style={styles.amountItem}>
+        <Text style={styles.amountLabel}>Due</Text>
+        <Text style={[styles.amountValue, styles.dangerText]}>{formatCurrency(record.dueAmount)}</Text>
+      </View>
+    </View>
+    {Number(record.concessionAmount || 0) > 0 && (
+      <View style={styles.concessionRow}>
+        <StatusBadge status="info" label="Concession Applied" />
+        <Text style={styles.concessionValue}>-{formatCurrency(record.concessionAmount)}</Text>
+      </View>
+    )}
+    <CustomButton mode="text" compact onPress={onPress} style={styles.viewProfileBtn}>
+      View Fee Profile
+    </CustomButton>
+  </View>
+);
+
+const ClassWiseFeeReportScreen = ({navigation, route}) => {
+  const access = useFeeAccess();
+  const initialClassName = route.params?.className;
+  
+  const [selectedClassId, setSelectedClassId] = useState('');
+  const [selectedSectionId, setSelectedSectionId] = useState('ALL');
+  const [selectedYear, setSelectedYear] = useState(String(currentYear));
+  const [selectedStatus, setSelectedStatus] = useState('ALL');
+
+  // Fetch active academic classes
+  const classesQuery = useQuery({
+    queryKey: ['activeAcademicClasses'],
+    queryFn: () => dataConnectClient.query(DATA_CONNECT_QUERIES.GET_ACTIVE_ACADEMIC_CLASSES),
+  });
+  const classes = useMemo(() => classesQuery.data?.academicClasses || [], [classesQuery.data]);
+
+  // Filter classes based on coordinator wing if applicable
+  const coordinatorClasses = useMemo(() => {
+    if (access.role === 'COORDINATOR' || access.role === 'coordinator') {
+      return classes.filter(cls => cls.wing?.code === access.wing);
+    }
+    return classes;
+  }, [classes, access]);
+
+  const classOptions = useMemo(() => {
+    return coordinatorClasses.map(cls => ({label: cls.name, value: cls.id}));
+  }, [coordinatorClasses]);
+
+  // Set initial class from parameters or default to first class in list
+  useEffect(() => {
+    if (initialClassName && coordinatorClasses.length) {
+      const matched = coordinatorClasses.find(cls => cls.name === initialClassName || cls.classCode === initialClassName);
+      if (matched) {
+        setSelectedClassId(matched.id);
+      }
+    } else if (coordinatorClasses.length && !selectedClassId) {
+      setSelectedClassId(coordinatorClasses[0].id);
+    }
+  }, [initialClassName, coordinatorClasses, selectedClassId]);
+
+  // Fetch sections of selected class
+  const sectionsQuery = useQuery({
+    queryKey: ['sectionsByClass', selectedClassId],
+    queryFn: () => sectionService.getSectionsByClass(selectedClassId),
+    enabled: Boolean(selectedClassId),
+  });
+  const sections = useMemo(() => sectionsQuery.data || [], [sectionsQuery.data]);
+
+  const sectionOptions = useMemo(() => {
+    const matchedClass = coordinatorClasses.find(c => c.id === selectedClassId);
+    const className = matchedClass ? matchedClass.name : '';
+    const baseOptions = [{label: 'All Sections', value: 'ALL'}];
+    const fetchedOptions = sections.map(sec => ({
+      label: `${className}-${sec.name}`,
+      value: sec.id,
+    }));
+    return [...baseOptions, ...fetchedOptions];
+  }, [sections, selectedClassId, coordinatorClasses]);
+
+  // Reset section when class changes
+  useEffect(() => {
+    setSelectedSectionId('ALL');
+  }, [selectedClassId]);
+
+  // Fetch Class Fee Report
+  const reportQuery = useQuery({
+    queryKey: ['classFeeReport', access.branchId, selectedClassId, selectedSectionId, selectedYear],
+    queryFn: () => feeService.getClassFeeReport({
+      academicClassId: selectedClassId,
+      sectionId: selectedSectionId === 'ALL' ? null : selectedSectionId,
+      academicYear: Number(selectedYear),
+    }, access),
+    enabled: Boolean(access.branchId && selectedClassId && selectedYear),
+  });
+
+  const report = reportQuery.data || {records: [], summary: {}};
+  const isTeacher = ['TEACHER', 'CLASS_TEACHER'].includes(String(access.role).toUpperCase());
+
+  // Filter records locally by status tab
+  const filteredRecords = useMemo(() => {
+    return (report.records || []).filter(record => {
+      if (selectedStatus === 'ALL') return true;
+      if (selectedStatus === 'CONCESSION') return Number(record.concessionAmount || 0) > 0;
+      return record.status === selectedStatus;
+    });
+  }, [report.records, selectedStatus]);
+
+  const activeClassName = useMemo(() => {
+    const matched = coordinatorClasses.find(c => c.id === selectedClassId);
+    return matched ? matched.name : 'Class';
+  }, [selectedClassId, coordinatorClasses]);
 
   return (
-    <FlatList
-      data={reports}
-      keyExtractor={item => item.id}
-      style={styles.root}
-      contentContainerStyle={styles.list}
-      showsVerticalScrollIndicator={false}
-      ListHeaderComponent={
-        <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
-          <View style={styles.heroDecor} />
-          <Text style={styles.heroOverline}>Reports</Text>
-          <Text style={styles.heroTitle}>Class-wise Due Report</Text>
-          <Text style={styles.heroSub}>Fee collection grouped by class and section</Text>
-        </Animated.View>
-      }
-      renderItem={({item, index}) => (
-        <Animated.View entering={FadeInRight.delay(index * 30).duration(220).springify()} style={styles.reportRow}>
-          <View style={styles.reportLeft}>
-            <MaterialCommunityIcons name="google-classroom" size={18} color={colors.secondary} />
+    <ScreenContainer scroll={false}>
+      <View style={styles.headerContainer}>
+        <SectionHeader
+          title={`${activeClassName} Fee Report`}
+          subtitle={`Academic Year ${selectedYear}`}
+        />
+
+      {/* Filter Options */}
+      <View style={styles.filterContainer}>
+        <View style={styles.dropdownRow}>
+          <View style={{flex: 1, marginRight: spacing.sm}}>
+            <SelectField
+              label="Class"
+              value={selectedClassId}
+              options={classOptions}
+              onChange={setSelectedClassId}
+            />
           </View>
-          <View style={styles.reportBody}>
-            <Text style={styles.reportTitle}>{item.title}</Text>
-            <Text style={styles.reportMeta}>{formatCurrency(item.paid)} collected of {formatCurrency(item.total)}</Text>
+          <View style={{flex: 1, marginRight: spacing.sm}}>
+            <SelectField
+              label="Section"
+              value={selectedSectionId}
+              options={sectionOptions}
+              onChange={setSelectedSectionId}
+              disabled={sections.length === 0}
+            />
           </View>
-          <View style={styles.reportRight}>
-            <Text style={styles.dueLabel}>Due</Text>
-            <Text style={styles.dueAmount}>{formatCurrency(item.due)}</Text>
+          <View style={{flex: 0.8}}>
+            <SelectField
+              label="Year"
+              value={selectedYear}
+              options={yearOptions}
+              onChange={setSelectedYear}
+            />
           </View>
-        </Animated.View>
+        </View>
+        <FilterTabs
+          tabs={statusTabs}
+          value={selectedStatus}
+          onChange={setSelectedStatus}
+        />
+      </View>
+
+      {/* Export Options (Staff Only) */}
+      {!isTeacher && filteredRecords.length > 0 ? (
+        <View style={styles.exportRow}>
+          <CustomButton
+            mode="outlined"
+            compact
+            onPress={() => exportReport(filteredRecords, activeClassName, 'csv')}
+            style={styles.exportBtn}
+          >
+            Export CSV
+          </CustomButton>
+          <CustomButton
+            mode="outlined"
+            compact
+            onPress={() => exportReport(filteredRecords, activeClassName, 'xlsx')}
+            style={styles.exportBtn}
+          >
+            Export Excel
+          </CustomButton>
+        </View>
+      ) : null}
+      </View>
+
+      {reportQuery.isLoading ? (
+        <ActivityIndicator animating={true} color={colors.primary} style={{marginVertical: spacing.xxl}} />
+      ) : (
+        <FlatList
+          data={filteredRecords}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <>
+              {/* Summary Cards */}
+              <View style={styles.summaryGrid}>
+                <View style={styles.summaryRow}>
+                  <DashboardCard
+                    title="Students"
+                    value={String(report.summary?.totalStudents || 0)}
+                    icon="account-group-outline"
+                    style={styles.summaryCard}
+                  />
+                  <DashboardCard
+                    title="Assigned"
+                    value={formatCurrency(report.summary?.totalFeeAssigned || 0)}
+                    icon="cash-multiple"
+                    style={styles.summaryCard}
+                  />
+                </View>
+                <View style={styles.summaryRow}>
+                  <DashboardCard
+                    title="Collected"
+                    value={formatCurrency(report.summary?.totalFeeCollected || 0)}
+                    icon="cash-check"
+                    style={styles.summaryCard}
+                    tone={colors.success}
+                  />
+                  <DashboardCard
+                    title="Outstanding"
+                    value={formatCurrency(report.summary?.totalOutstanding || 0)}
+                    icon="cash-clock"
+                    style={styles.summaryCard}
+                    tone={colors.danger}
+                  />
+                </View>
+                <View style={styles.summaryRow}>
+                  <DashboardCard
+                    title="Concessions"
+                    value={formatCurrency(report.summary?.totalConcessions || 0)}
+                    icon="sale-outline"
+                    style={styles.summaryCard}
+                    tone={colors.info}
+                  />
+                  <DashboardCard
+                    title="Collection %"
+                    value={`${(report.summary?.collectionPercentage || 0).toFixed(1)}%`}
+                    icon="percent"
+                    style={styles.summaryCard}
+                  />
+                </View>
+              </View>
+              <SectionHeader title="Students List" />
+            </>
+          }
+          renderItem={({item}) => (
+            <StudentReportCard
+              record={item}
+              onPress={() => navigation.navigate('StudentFeeProfile', {studentId: item.id})}
+            />
+          )}
+          ListEmptyComponent={
+            <EmptyState
+              title="No records found"
+              message="No student fees match the selected filters."
+            />
+          }
+          contentContainerStyle={styles.listContent}
+        />
       )}
-      ListEmptyComponent={
-        <EmptyState title="No report data" message="Fee records are needed for reports." />
-      }
-    />
+    </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
-  root: {backgroundColor: colors.background, flex: 1},
-  list: {padding: spacing.lg},
-  hero: {
-    backgroundColor: colors.secondary,
-    borderRadius: radius.card,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-    ...shadows.medium,
+  headerContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
   },
-  heroDecor: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 80,
-    height: 120,
-    position: 'absolute',
-    right: -20,
-    top: -35,
-    width: 120,
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
-  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
-  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
-  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
-  reportRow: {
-    alignItems: 'center',
+  filterContainer: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.card,
-    borderWidth: 1,
+    padding: spacing.md,
+    borderRadius: radius.lg,
+    ...shadows.soft,
+    marginBottom: spacing.md,
+  },
+  dropdownRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.xs,
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  exportRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  exportBtn: {
+    flex: 1,
+  },
+  summaryGrid: {
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  summaryCard: {
+    flex: 1,
+  },
+  studentCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
     padding: spacing.md,
     ...shadows.soft,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.md,
   },
-  reportLeft: {
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  studentName: {
+    ...typography.subtitle,
+    color: colors.text,
+    fontWeight: 'bold',
+  },
+  studentAdmission: {
+    ...typography.caption,
+    color: colors.textMuted,
+    marginTop: spacing.xxs,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.md,
+  },
+  amountsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  amountItem: {
     alignItems: 'center',
-    backgroundColor: colors.secondarySoft,
-    borderRadius: radius.pill,
-    height: 38,
-    justifyContent: 'center',
-    width: 38,
+    flex: 1,
   },
-  reportBody: {flex: 1},
-  reportTitle: {color: colors.text, fontSize: 13, fontWeight: '700'},
-  reportMeta: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
-  reportRight: {alignItems: 'flex-end'},
-  dueLabel: {color: colors.textMuted, fontSize: 9, fontWeight: '700', textTransform: 'uppercase'},
-  dueAmount: {color: colors.danger, fontSize: 13, fontWeight: '800', marginTop: 1},
+  amountLabel: {
+    ...typography.caption,
+    color: colors.textSoft,
+    fontWeight: '600',
+  },
+  amountValue: {
+    ...typography.sectionTitle,
+    color: colors.text,
+    marginTop: spacing.xxs,
+  },
+  successText: {
+    color: colors.success,
+  },
+  dangerText: {
+    color: colors.danger,
+  },
+  concessionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.infoSoft,
+    padding: spacing.sm,
+    borderRadius: radius.md,
+    marginTop: spacing.md,
+  },
+  concessionValue: {
+    ...typography.subtitle,
+    color: colors.info,
+    fontWeight: 'bold',
+  },
+  viewProfileBtn: {
+    marginTop: spacing.md,
+    alignSelf: 'center',
+  },
 });
 
 export default ClassWiseFeeReportScreen;

@@ -1,4 +1,4 @@
-import {getAuth, getIdToken} from '@react-native-firebase/auth';
+import {getAuth, getIdToken, onAuthStateChanged} from '@react-native-firebase/auth';
 import {STORAGE_KEYS, USER_ROLES} from '../../config/constants';
 import {dataConnectConfig, firebaseConfig} from '../../config/env';
 import {getJSON, storage} from '../storage/mmkvStorage';
@@ -7,12 +7,42 @@ import {getMainAdminBranchContext} from '../mainAdmin/mainAdminContextService';
 const buildConnectorName = () =>
   `projects/${dataConnectConfig.projectId}/locations/${dataConnectConfig.location}/services/${dataConnectConfig.serviceId}/connectors/${dataConnectConfig.connectorId}`;
 
+const AUTH_STATE_WAIT_MS = 3000;
+
+const waitForCurrentUser = authInstance => {
+  if (authInstance.currentUser) {
+    return Promise.resolve(authInstance.currentUser);
+  }
+
+  return new Promise(resolve => {
+    let timeoutId;
+    let settled = false;
+    let unsubscribe = () => {};
+
+    const finish = user => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      unsubscribe();
+      resolve(user || authInstance.currentUser || null);
+    };
+
+    unsubscribe = onAuthStateChanged(authInstance, finish);
+    timeoutId = setTimeout(() => finish(authInstance.currentUser || null), AUTH_STATE_WAIT_MS);
+  });
+};
+
 const getAuthToken = async () => {
   const authInstance = getAuth();
-  const currentUser = authInstance.currentUser;
+  const currentUser = await waitForCurrentUser(authInstance);
 
   if (!currentUser) {
-    return storage.getString(STORAGE_KEYS.AUTH_TOKEN) || null;
+    storage.delete(STORAGE_KEYS.AUTH_TOKEN);
+    return null;
   }
 
   const token = await getIdToken(currentUser);
@@ -32,6 +62,7 @@ const ACTING_AS_BY_MUTATION = {
   CreateTeacher: USER_ROLES.PRINCIPAL,
   UpdateTeacher: USER_ROLES.PRINCIPAL,
   ClearTeacherWingRestrictions: USER_ROLES.PRINCIPAL,
+  EnsureCoordinatorTeacherProfile: USER_ROLES.PRINCIPAL,
   CreateAccountant: USER_ROLES.PRINCIPAL,
   UpdateAccountant: USER_ROLES.PRINCIPAL,
   CreateSection: USER_ROLES.PRINCIPAL,
@@ -40,6 +71,7 @@ const ACTING_AS_BY_MUTATION = {
   AssignTeacherClassTeacher: USER_ROLES.PRINCIPAL,
   UpdateClassTeacherAssignment: USER_ROLES.PRINCIPAL,
   RemoveClassTeacherAssignment: USER_ROLES.PRINCIPAL,
+  RemoveLegacyClassTeacherAssignment: USER_ROLES.PRINCIPAL,
   TransferTeacher: USER_ROLES.PRINCIPAL,
   ActivateClass: USER_ROLES.PRINCIPAL,
   DeactivateClass: USER_ROLES.PRINCIPAL,
@@ -85,6 +117,31 @@ const compactJSON = value => {
   }
   const serialized = JSON.stringify(value);
   return serialized.length > 6000 ? `${serialized.slice(0, 6000)}...` : serialized;
+};
+
+// Data Connect REST API returns UUIDs as 32-char hex strings without hyphens.
+// Postgres stores them with hyphens (8-4-4-4-12). Normalise every UUID-shaped
+// string so outbound variables and inbound IDs always use the hyphenated form,
+// preventing @check failures caused by branchId / userId comparison mismatches.
+const UUID_BARE_RE = /^[0-9a-f]{32}$/i;
+const toHyphenatedUuid = str =>
+  `${str.slice(0, 8)}-${str.slice(8, 12)}-${str.slice(12, 16)}-${str.slice(16, 20)}-${str.slice(20)}`;
+
+const normalizeUuids = value => {
+  if (typeof value === 'string') {
+    return UUID_BARE_RE.test(value) ? toHyphenatedUuid(value) : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(normalizeUuids);
+  }
+  if (value !== null && typeof value === 'object') {
+    const result = {};
+    for (const key of Object.keys(value)) {
+      result[key] = normalizeUuids(value[key]);
+    }
+    return result;
+  }
+  return value;
 };
 
 const maybeRecordMainAdminAudit = async ({operationName, variables, data, token}) => {
@@ -151,7 +208,8 @@ const executeConnectorOperation = async ({
       body: JSON.stringify({
         name: connectorName,
         operationName,
-        variables,
+        // Normalise any bare 32-char hex UUIDs to hyphenated form before sending.
+        variables: normalizeUuids(variables),
       }),
     },
   );
@@ -165,7 +223,8 @@ const executeConnectorOperation = async ({
     throw new Error(message);
   }
 
-  const data = payload.data || {};
+  // Normalise UUIDs in response data so stored IDs are always hyphenated.
+  const data = normalizeUuids(payload.data || {});
 
   if (!skipAudit && type === 'mutation') {
     await maybeRecordMainAdminAudit({operationName, variables, data, token});

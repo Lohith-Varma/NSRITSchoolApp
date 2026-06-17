@@ -72,7 +72,9 @@ const BulkStudentImportScreen = () => {
 
       <View style={styles.infoCard}>
         <MaterialCommunityIcons name="information-outline" size={14} color={colors.primary} />
-        <Text style={styles.infoText}>Required columns: Full Name, Gender, DOB, Father Name, Mother Name, Parent Mobile, Class, Section.</Text>
+        <Text style={styles.infoText}>
+          Required columns: Full Name, Gender, DOB, Class, Section, and at least one of Father Mobile, Mother Mobile, or Guardian Mobile.
+        </Text>
       </View>
 
       <View style={styles.csvCard}>
@@ -100,7 +102,6 @@ const BulkStudentImportScreen = () => {
           </View>
         </View>
       ) : null}
-
       {result ? (
         <View style={styles.resultCard}>
           <View style={styles.resultRow}>

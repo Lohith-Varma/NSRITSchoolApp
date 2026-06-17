@@ -19,6 +19,10 @@ const getFeeItems = plan => plan?.items || plan?.detailFeeItems || [];
 const getFeePayments = plan => plan?.payments || plan?.detailFeePayments || [];
 const isActivePayment = payment =>
   !['REVERSED', 'CANCELLED'].includes(String(payment.status || 'RECORDED').toUpperCase());
+const getRoleList = user => {
+  const roles = [...(user?.roles || []).map(item => item.role), user?.role].filter(Boolean);
+  return [...new Set(roles.map(role => String(role).toUpperCase()))].join(', ');
+};
 
 const getInitials = name =>
   name
@@ -89,6 +93,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
   }, [activeFeeItems, activeFeePayments, activeFeePlan, data]);
 
   const student = data?.student;
+  const linkedParents = student?.linkedParents || [];
   if (!student) {
     return (
       <View style={styles.root}>
@@ -158,9 +163,28 @@ const StudentDetailsScreen = ({navigation, route}) => {
       </SectionCard>
 
       <SectionCard title="Parent Details">
-        <InfoRow icon="account-outline" label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
-        <InfoRow icon="account-outline" label="Mother" value={student.parent?.motherName} />
-        <InfoRow icon="phone-outline" label="Parent Mobile" value={student.parent?.phoneNumber || student.phoneNumber} />
+        {linkedParents.length > 0 ? (
+          linkedParents.map((link, idx) => (
+            <React.Fragment key={link.id || idx}>
+              <InfoRow
+                icon="account-outline"
+                label={link.relationship || 'Parent'}
+                value={`${link.user?.fullName || '—'}${getRoleList(link.user) ? ` (${getRoleList(link.user)})` : ''}`}
+              />
+              <InfoRow
+                icon="phone-outline"
+                label={`${link.relationship || 'Parent'} Mobile`}
+                value={link.user?.phoneNumber}
+              />
+            </React.Fragment>
+          ))
+        ) : (
+          <>
+            <InfoRow icon="account-outline" label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
+            <InfoRow icon="account-outline" label="Mother" value={student.parent?.motherName} />
+            <InfoRow icon="phone-outline" label="Parent Mobile" value={student.parent?.phoneNumber || student.phoneNumber} />
+          </>
+        )}
       </SectionCard>
 
       <SectionCard title="Academic Details">

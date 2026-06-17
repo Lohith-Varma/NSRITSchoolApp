@@ -26,6 +26,7 @@ const getRoleNavigator = role => {
     case USER_ROLES.COORDINATOR:
       return <CoordinatorNavigator />;
     case USER_ROLES.TEACHER:
+    case USER_ROLES.CLASS_TEACHER:
       return <TeacherNavigator />;
     case USER_ROLES.PARENT:
       return <ParentNavigator />;

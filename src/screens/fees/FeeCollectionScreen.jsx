@@ -70,6 +70,18 @@ const PaymentHistoryRow = ({payment, onEdit, delay = 0}) => (
   </Animated.View>
 );
 
+const installmentOptions = [
+  {label: '1st Term Tuition', value: '1st Term Tuition'},
+  {label: '2nd Term Tuition', value: '2nd Term Tuition'},
+  {label: '3rd Term Tuition', value: '3rd Term Tuition'},
+  {label: 'Books Fee', value: 'Books Fee'},
+  {label: 'Transport Fee', value: 'Transport Fee'},
+  {label: 'Admission Fee', value: 'Admission Fee'},
+  {label: 'Uniform Fee', value: 'Uniform Fee'},
+  {label: 'Exam Fee', value: 'Exam Fee'},
+  {label: 'Other / Combined', value: 'Other / Combined'},
+];
+
 const FeeCollectionScreen = ({navigation, route}) => {
   const access = useFeeAccess();
   const queryClient = useQueryClient();
@@ -83,6 +95,9 @@ const FeeCollectionScreen = ({navigation, route}) => {
     paymentMode: 'Cash',
     referenceNumber: '',
     remarks: '',
+    receiptNumber: '',
+    installment: '1st Term Tuition',
+    paidBy: '',
   });
   const [error, setError] = useState('');
 
@@ -113,13 +128,29 @@ const FeeCollectionScreen = ({navigation, route}) => {
 
   const searchResults = useMemo(() => studentsQuery.data || [], [studentsQuery.data]);
 
+  React.useEffect(() => {
+    if (profile) {
+      setForm(prev => ({
+        ...prev,
+        paidBy: prev.paidBy || profile.studentName || '',
+      }));
+    }
+  }, [profile]);
+
   const mutation = useMutation({
-    mutationFn: () =>
-      editingPayment
+    mutationFn: () => {
+      const remarksPayload = JSON.stringify({
+        installment: form.installment,
+        paidBy: form.paidBy,
+        remarks: form.remarks,
+      });
+
+      return editingPayment
         ? feeService.updatePayment(
             {
               ...editingPayment,
               ...form,
+              remarks: remarksPayload,
               paymentId: editingPayment.id,
               studentId: profile.studentId,
               feePlanId: profile.feePlanId,
@@ -132,6 +163,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
         : feeService.recordPayment(
             {
               ...form,
+              remarks: remarksPayload,
               studentId: profile.studentId,
               feePlanId: profile.feePlanId,
               branchId: profile.branchId,
@@ -139,7 +171,8 @@ const FeeCollectionScreen = ({navigation, route}) => {
               amount: Number(form.amount),
             },
             access,
-          ),
+          );
+    },
     onSuccess: payment => {
       queryClient.invalidateQueries({queryKey: ['feeRecords']});
       queryClient.invalidateQueries({queryKey: ['studentFeeProfile', selectedStudentId]});
@@ -158,6 +191,9 @@ const FeeCollectionScreen = ({navigation, route}) => {
         paymentMode: 'Cash',
         referenceNumber: '',
         remarks: '',
+        receiptNumber: '',
+        installment: '1st Term Tuition',
+        paidBy: profile?.studentName || '',
       });
       navigation.navigate('StudentFeeProfile', {
         studentId: selectedStudentId,
@@ -196,12 +232,38 @@ const FeeCollectionScreen = ({navigation, route}) => {
       return;
     }
     setEditingPayment(payment);
+    
+    let parsedRemarks = { installment: '1st Term Tuition', paidBy: profile?.studentName || '', remarks: '' };
+    try {
+      if (payment.remarks && payment.remarks.trim().startsWith('{')) {
+        const parsed = JSON.parse(payment.remarks);
+        parsedRemarks = {
+          installment: parsed.installment || '1st Term Tuition',
+          paidBy: parsed.paidBy || profile?.studentName || '',
+          remarks: parsed.remarks || '',
+        };
+      } else if (payment.remarks) {
+        parsedRemarks = {
+          installment: payment.remarks,
+          paidBy: profile?.studentName || '',
+          remarks: '',
+        };
+      }
+    } catch (e) {
+      if (payment.remarks) {
+        parsedRemarks.installment = payment.remarks;
+      }
+    }
+
     setForm({
       paymentDate: payment.paymentDate || today(),
       amount: String(payment.amount || ''),
       paymentMode: payment.paymentMode || 'Cash',
       referenceNumber: payment.referenceNumber || '',
-      remarks: payment.remarks || '',
+      remarks: parsedRemarks.remarks,
+      receiptNumber: payment.receiptNumber || '',
+      installment: parsedRemarks.installment,
+      paidBy: parsedRemarks.paidBy,
     });
     setError('');
   };
@@ -358,6 +420,22 @@ const FeeCollectionScreen = ({navigation, route}) => {
             options={paymentModes}
             onChange={value => updateField('paymentMode', value)}
           />
+          <SelectField
+            label="Installment"
+            value={form.installment}
+            options={installmentOptions}
+            onChange={value => updateField('installment', value)}
+          />
+          <View style={styles.inputWrap}>
+            <MaterialCommunityIcons name="account" size={14} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Received From / Paid By"
+              placeholderTextColor={colors.textSoft}
+              value={form.paidBy}
+              onChangeText={value => updateField('paidBy', value)}
+            />
+          </View>
           <View style={styles.inputWrap}>
             <MaterialCommunityIcons name="pound" size={14} color={colors.textMuted} style={styles.inputIcon} />
             <TextInput

@@ -4,7 +4,7 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState, PaymentCard} from '../../components';
+import {EmptyState, PaymentCard, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
@@ -169,16 +169,25 @@ const StudentFeeProfileScreen = ({navigation, route}) => {
 
       {/* ── Payment timeline ── */}
       {canViewTimeline ? (
-        profile.payments?.length > 0 ? (
-          <View style={styles.infoCard}>
-            <Text style={styles.cardSection}>Payment Timeline</Text>
-            {profile.payments.map(payment => (
-              <PaymentCard key={payment.id} payment={payment} />
-            ))}
-          </View>
-        ) : (
-          <EmptyState title="No payments" message="Recorded payments will appear here." />
-        )
+        <>
+          <SectionHeader title="Payment Timeline" />
+          {profile.payments.length ? (
+            profile.payments.map(payment => (
+              <PaymentCard
+                key={payment.id}
+                payment={{
+                  ...payment,
+                  studentName: profile.studentName,
+                  className: profile.className,
+                  sectionName: profile.sectionName,
+                  admissionNumber: profile.admissionNumber,
+                }}
+              />
+            ))
+          ) : (
+            <EmptyState title="No payments" message="Recorded payments will appear here." />
+          )}
+        </>
       ) : null}
 
       <View style={{height: spacing.xxxl}} />

@@ -1,31 +1,44 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {Text} from 'react-native-paper';
+import {IconButton, Text} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
+import {generateAndShareReceipt} from '../../utils/pdf/receiptGenerator';
 
-const PaymentCard = ({payment}) => (
-  <View style={styles.card}>
-    <View style={styles.icon}>
-      <MaterialCommunityIcons
-        name="receipt-text-check-outline"
-        size={22}
-        color={colors.success}
+const PaymentCard = ({payment}) => {
+  const handleShare = () => {
+    generateAndShareReceipt(payment);
+  };
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.icon}>
+        <MaterialCommunityIcons
+          name="receipt-text-check-outline"
+          size={22}
+          color={colors.success}
+        />
+      </View>
+      <View style={styles.copy}>
+        <Text style={styles.title}>{formatCurrency(payment.amount)}</Text>
+        <Text style={styles.meta}>
+          {payment.studentName || payment.student?.fullName || 'Student'} - {payment.mode || payment.paymentMode || '-'}
+        </Text>
+        <Text style={styles.date}>
+          {formatDateForDisplay(payment.date || payment.paymentDate) || '-'} {payment.receiptNo || payment.receiptNumber ? `| ${payment.receiptNo || payment.receiptNumber}` : ''}
+        </Text>
+      </View>
+      <IconButton
+        icon="share-variant"
+        iconColor={colors.primary}
+        size={20}
+        onPress={handleShare}
       />
     </View>
-    <View style={styles.copy}>
-      <Text style={styles.title}>{formatCurrency(payment.amount)}</Text>
-      <Text style={styles.meta}>
-        {payment.studentName || payment.student?.fullName || 'Student'} - {payment.mode || payment.paymentMode || '-'}
-      </Text>
-      <Text style={styles.date}>
-        {formatDateForDisplay(payment.date || payment.paymentDate) || '-'} {payment.receiptNumber ? `| ${payment.receiptNumber}` : ''}
-      </Text>
-    </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

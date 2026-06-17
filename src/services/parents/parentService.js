@@ -7,10 +7,20 @@ import {summarizeAttendance} from '../attendance/attendanceService';
 const buildPendingFirebaseUID = ({branchId, phoneNumber}) =>
   `pending:parent:${branchId}:${normalizePhoneNumber(phoneNumber)}`;
 
-const normalizeRole = role => String(role || '').toUpperCase();
-const getFeePlans = student => student?.feePlans || student?.parentFeePlans || [];
-const getFeeItems = plan => plan?.items || plan?.parentFeeItems || [];
-const getFeePayments = plan => plan?.payments || plan?.parentFeePayments || [];
+const getFeePlans = student =>
+  student?.feePlans ||
+  student?.parentFeePlans ||
+  student?.linkedParentFeePlans ||
+  student?.legacyParentFeePlans ||
+  [];
+const getFeeItems = plan =>
+  plan?.items || plan?.parentFeeItems || plan?.linkedParentFeeItems || plan?.legacyParentFeeItems || [];
+const getFeePayments = plan =>
+  plan?.payments ||
+  plan?.parentFeePayments ||
+  plan?.linkedParentFeePayments ||
+  plan?.legacyParentFeePayments ||
+  [];
 const isActivePayment = payment => !['REVERSED', 'CANCELLED'].includes(String(payment?.status || 'RECORDED').toUpperCase());
 const toAmount = value => Math.max(Number(value || 0), 0);
 const calculateConcessionAmount = plan => {
@@ -25,19 +35,36 @@ const calculateConcessionAmount = plan => {
   }
   return toAmount(plan?.concessionAmount);
 };
+const hasParentRole = user =>
+  [user?.role, ...(user?.roles || []).map(item => item.role || item)]
+    .map(role => String(role || '').toUpperCase())
+    .includes(USER_ROLES.PARENT);
 
 export const parentService = {
-  async getParentChildren(parentId) {
-    if (!parentId) {
+  async getParentChildren(userId) {
+    if (!userId) {
       return [];
     }
 
     try {
-      const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_PARENT_CHILDREN, {
-        parentId,
+      const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_PARENT_CHILDREN_BY_USER, {
+        userId,
       });
-      return (response.students || []).map(student => {
-        const attendance = student.attendance || [];
+      const linkedStudents = (response.studentParents || [])
+        .map(link => ({
+          ...(link.student || {}),
+          parentRelationship: link.relationship,
+        }))
+        .filter(student => student.id);
+      const studentsById = new Map();
+      [...linkedStudents, ...(response.legacyStudents || [])].forEach(student => {
+        if (!studentsById.has(student.id)) {
+          studentsById.set(student.id, student);
+        }
+      });
+
+      return [...studentsById.values()].map(student => {
+        const attendance = student.attendance || student.linkedAttendance || student.legacyAttendance || [];
         const feePlans = getFeePlans(student);
         const activePlan = feePlans.find(plan => plan.isActive !== false) || feePlans[0];
         const planItems = getFeeItems(activePlan);
@@ -49,7 +76,7 @@ export const parentService = {
         const gross = toAmount(activePlan?.grossAmount || tuition + extras || planItems.reduce((sum, item) => sum + Number(item.amount || 0), 0));
         const concession = calculateConcessionAmount(activePlan);
         const total = toAmount(activePlan?.totalAmount || gross - concession);
-        const legacyFees = student.fees || [];
+        const legacyFees = student.fees || student.linkedFees || student.legacyFees || [];
         const legacyFeeSummary = legacyFees.reduce(
           (summary, fee) => ({
             total: summary.total + Number(fee.totalFee || 0),
@@ -67,17 +94,18 @@ export const parentService = {
           feeSummary,
           feePlan: activePlan ? {...activePlan, items: planItems, payments: planPayments} : null,
           payments: planPayments,
-          recentAttendance: student.recentAttendance || [],
+          recentAttendance:
+            student.recentAttendance || student.linkedRecentAttendance || student.legacyRecentAttendance || [],
         };
       });
     } catch (error) {
-      console.log('[ParentPortal] Failed to load linked children:', {parentId, error});
+      console.log('[ParentPortal] Failed to load linked children:', {userId, error});
       throw error;
     }
   },
 
-  async getParentDashboard(parentId) {
-    const children = await this.getParentChildren(parentId);
+  async getParentDashboard(userId) {
+    const children = await this.getParentChildren(userId);
     const selectedChild = children[0] || null;
     const totalDue = children.reduce((sum, child) => sum + Number(child.feeSummary?.due || 0), 0);
     return {
@@ -97,12 +125,24 @@ export const parentService = {
       branchId: payload.branchId,
       phoneNumber: payload.phoneNumber,
     });
-    if (existingParent) {
+    if (existingParent?.userId) {
+      if (existingParent.userId) {
+        await this.addParentRole({
+          userId: existingParent.userId,
+          branchId: payload.branchId,
+        });
+      }
       console.log('[StudentCreate] Existing parent linked:', {
         parentId: existingParent.id,
         phoneNumber: payload.phoneNumber,
       });
       return existingParent;
+    }
+    if (existingParent && !existingParent.userId) {
+      console.log('[StudentCreate] Existing parent profile has no user link; creating a user-backed parent:', {
+        parentId: existingParent.id,
+        phoneNumber: payload.phoneNumber,
+      });
     }
 
     const existingUserResponse = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_USER_BY_PHONE, {
@@ -110,12 +150,11 @@ export const parentService = {
     });
     const existingUser = existingUserResponse.users?.[0];
 
-    if (existingUser && normalizeRole(existingUser.role) !== USER_ROLES.PARENT) {
-      throw new Error('Parent mobile number is already registered to another role.');
-    }
-
-    if (existingUser?.branchId && existingUser.branchId !== payload.branchId) {
-      throw new Error('Parent mobile number is already registered in another branch.');
+    if (existingUser && !hasParentRole(existingUser)) {
+      await this.addParentRole({
+        userId: existingUser.id,
+        branchId: payload.branchId,
+      });
     }
 
     const mutationPayload = {
@@ -156,6 +195,32 @@ export const parentService = {
       ...mutationPayload,
       isActive: true,
     };
+  },
+
+  async addParentRole({userId, branchId}) {
+    if (!userId) {
+      return null;
+    }
+
+    await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.ADD_PARENT_ROLE, {
+      userId,
+      branchId: branchId || null,
+    });
+    return {userId, role: USER_ROLES.PARENT};
+  },
+
+  async linkStudentParent({studentId, userId, relationship, branchId}) {
+    if (!studentId || !userId || !relationship || !branchId) {
+      throw new Error('Student, parent user, relationship, and branch are required.');
+    }
+
+    const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.LINK_STUDENT_PARENT, {
+      studentId,
+      userId,
+      relationship,
+      branchId,
+    });
+    return response.studentParent_upsert || response.studentParent_insert || {studentId, userId, relationship};
   },
 
   async getParentByUser(userId) {

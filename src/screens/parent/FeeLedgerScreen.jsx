@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View, ActivityIndicator} from 'react-native';
-import {Text} from 'react-native-paper';
+import {IconButton, Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
@@ -9,6 +9,7 @@ import {AnimatedProgressBar, EmptyState} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
+import {generateAndShareReceipt} from '../../utils/pdf/receiptGenerator';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const isActivePayment = payment =>
@@ -34,10 +35,23 @@ const FeeBreakdownRow = ({label, value, icon, color = colors.text}) => (
   </View>
 );
 
-const ReceiptItem = ({payment, index}) => {
+const ReceiptItem = ({payment, child, index}) => {
   const isActive = isActivePayment(payment);
   const statusColor = isActive ? colors.success : colors.danger;
   const statusBg = isActive ? colors.successSoft : colors.dangerSoft;
+
+  const handleShare = () => {
+    generateAndShareReceipt({
+      ...payment,
+      studentName: child.fullName,
+      className: child.academicClass?.name,
+      sectionName: child.section?.name,
+      admissionNumber: child.studentId,
+      mode: payment.paymentMode,
+      date: payment.paymentDate,
+      receiptNo: payment.receiptNumber,
+    });
+  };
 
   return (
     <Animated.View
@@ -61,16 +75,27 @@ const ReceiptItem = ({payment, index}) => {
           </View>
           <Text style={styles.receiptAmount}>{formatCurrency(payment.amount)}</Text>
         </View>
-        <View style={styles.receiptMeta}>
-          <Text style={styles.receiptDate}>
-            {formatDateForDisplay(payment.paymentDate) || '—'}
-          </Text>
-          <Text style={styles.receiptMode}>{payment.paymentMode || '—'}</Text>
-          <View style={[styles.receiptStatus, {backgroundColor: statusBg}]}>
-            <Text style={[styles.receiptStatusText, {color: statusColor}]}>
-              {payment.status || 'RECORDED'}
+        <View style={styles.receiptMetaRow}>
+          <View style={styles.receiptMetaCopy}>
+            <Text style={styles.receiptDate}>
+              {formatDateForDisplay(payment.paymentDate) || '—'}
             </Text>
+            <Text style={styles.receiptMode}>{payment.paymentMode || '—'}</Text>
+            <View style={[styles.receiptStatus, {backgroundColor: statusBg}]}>
+              <Text style={[styles.receiptStatusText, {color: statusColor}]}>
+                {payment.status || 'RECORDED'}
+              </Text>
+            </View>
           </View>
+          {isActive ? (
+            <IconButton
+              icon="share-variant"
+              iconColor={colors.primary}
+              size={18}
+              style={styles.receiptShareBtn}
+              onPress={handleShare}
+            />
+          ) : null}
         </View>
       </View>
     </Animated.View>
@@ -232,7 +257,7 @@ const ChildFeeSection = ({child}) => {
         <View style={styles.receiptsSection}>
           <Text style={styles.sectionLabel}>Receipt History</Text>
           {payments.slice(0, 6).map((payment, i) => (
-            <ReceiptItem key={payment.id} payment={payment} index={i} />
+            <ReceiptItem key={payment.id} payment={payment} child={child} index={i} />
           ))}
           {payments.length > 6 ? (
             <Text style={styles.moreText}>
@@ -463,10 +488,17 @@ const styles = StyleSheet.create({
   },
   receiptNo: {color: colors.primary, fontSize: 9, fontWeight: '800'},
   receiptAmount: {color: colors.text, fontSize: 14, fontWeight: '800'},
-  receiptMeta: {
-    alignItems: 'center',
+  receiptMetaRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  receiptMetaCopy: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: spacing.sm,
+    flex: 1,
   },
   receiptDate: {color: colors.textMuted, fontSize: 11, fontWeight: '600'},
   receiptMode: {color: colors.textSoft, fontSize: 11, fontWeight: '600'},
@@ -476,6 +508,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   receiptStatusText: {fontSize: 9, fontWeight: '800'},
+  receiptShareBtn: {margin: 0, padding: 0},
   moreText: {
     ...typography.caption,
     color: colors.primary,

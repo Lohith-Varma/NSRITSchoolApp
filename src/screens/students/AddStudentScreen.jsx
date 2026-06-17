@@ -20,7 +20,10 @@ const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, v
 const blankForm = {
   academicClassId: '', sectionId: '', className: '', wingId: '', wingCode: '',
   fullName: '', gender: '', dateOfBirth: '', admissionDate: toISODate(new Date()),
-  fatherName: '', motherName: '', parentPhoneNumber: '',
+  fatherName: '', fatherMobile: '',
+  motherName: '', motherMobile: '',
+  guardianName: '', guardianMobile: '',
+  parentPhoneNumber: '',
   photoUrl: '', aadhaarNumber: '', bloodGroup: '',
   address: '', city: '', state: '', pincode: '', emergencyContact: '',
   transportRequired: false, countryCode: '+91',
@@ -167,9 +170,13 @@ const AddStudentScreen = ({navigation}) => {
 
       <Animated.View entering={FadeInDown.delay(100).duration(260).springify()} style={styles.formCard}>
         <Text style={styles.formSection}>Parent Info</Text>
-        <InputRow icon="account-tie-outline" label="Father Name *" value={form.fatherName} onChangeText={v => updateField('fatherName', v)} />
+        <InputRow icon="account-tie-outline" label="Father Name" value={form.fatherName} onChangeText={v => updateField('fatherName', v)} />
+        <InputRow icon="phone-outline" label="Father Mobile" keyboardType="phone-pad" value={form.fatherMobile} onChangeText={v => updateField('fatherMobile', v)} />
         <InputRow icon="account-heart-outline" label="Mother Name" value={form.motherName} onChangeText={v => updateField('motherName', v)} />
-        <InputRow icon="phone-outline" label="Parent Mobile Number *" keyboardType="phone-pad" value={form.parentPhoneNumber} onChangeText={v => updateField('parentPhoneNumber', v)} />
+        <InputRow icon="phone-outline" label="Mother Mobile" keyboardType="phone-pad" value={form.motherMobile} onChangeText={v => updateField('motherMobile', v)} />
+        <InputRow icon="account-outline" label="Guardian Name" value={form.guardianName} onChangeText={v => updateField('guardianName', v)} />
+        <InputRow icon="phone-outline" label="Guardian Mobile" keyboardType="phone-pad" value={form.guardianMobile} onChangeText={v => updateField('guardianMobile', v)} />
+        <InputRow icon="phone-outline" label="Default Parent Mobile Number *" keyboardType="phone-pad" value={form.parentPhoneNumber} onChangeText={v => updateField('parentPhoneNumber', v)} />
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(120).duration(260).springify()} style={styles.formCard}>
