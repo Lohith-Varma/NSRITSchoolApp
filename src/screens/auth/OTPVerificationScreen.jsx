@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {HelperText, Text} from 'react-native-paper';
+import {Text} from 'react-native-paper';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -171,9 +171,10 @@ const OTPVerificationScreen = ({route, navigation}) => {
           </Pressable>
 
           {displayError ? (
-            <HelperText type="error" visible style={styles.errorText}>
-              {displayError}
-            </HelperText>
+            <View style={styles.errorBox}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+              <Text style={styles.errorText}>{displayError}</Text>
+            </View>
           ) : null}
 
           {/* Verify button */}
@@ -369,11 +370,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 0,
   },
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
   errorText: {
     color: colors.danger,
+    flex: 1,
     fontSize: 12,
-    fontWeight: '700',
-    paddingHorizontal: 0,
+    fontWeight: '600',
     textAlign: 'center',
   },
   // Verify button

@@ -1,10 +1,13 @@
 import React, {useMemo, useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Pressable, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {DashboardCard, EmptyState, Header, SearchBar, SummaryCard} from '../../components';
+import {EmptyState, SearchBar} from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
-import {colors, spacing} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 const FeePlanManagementScreen = ({navigation}) => {
@@ -27,50 +30,174 @@ const FeePlanManagementScreen = ({navigation}) => {
     [query, records],
   );
 
+  const collectionRate = summary?.collectionRate || 0;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Header
-          title="Fee Plans"
-          subtitle="Assign and review student fee plans"
-          actionLabel={canManagePlans ? 'Class Fees' : undefined}
-          onAction={canManagePlans ? () => navigation.navigate('ClassFeeManagement') : undefined}
-        />
-        {canManagePlans ? (
-          <DashboardCard title="Student Fee Plan" value="Create/Edit" icon="book-edit-outline" onPress={() => navigation.navigate('CreateFeePlan')} />
-        ) : null}
-        <SummaryCard
-          title="Assigned Fees"
-          value={formatCurrency(summary.totalFee)}
-          subtitle={`${formatCurrency(summary.dueAmount)} pending`}
-          progress={summary.collectionRate}
-          tone={colors.primary}
-        />
-        <SearchBar value={query} onChangeText={setQuery} placeholder="Search student, admission no, class" />
-      </View>
+    <View style={styles.root}>
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
-        renderItem={({item}) => (
-          <DashboardCard
-            title={item.studentName}
-            value={formatCurrency(item.totalFee)}
-            description={`${item.className}-${item.sectionName} | Paid ${formatCurrency(item.paidAmount)} | Pending ${formatCurrency(item.dueAmount)}`}
-            icon="book-open-variant"
-            onPress={() => navigation.navigate('StudentFeeProfile', {studentId: item.studentId})}
-          />
+        ListHeaderComponent={
+          <View>
+            {/* ── Hero ── */}
+            <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+              <View style={styles.heroDecor} />
+              <Text style={styles.heroOverline}>Fee</Text>
+              <Text style={styles.heroTitle}>Fee Plans</Text>
+              <Text style={styles.heroSub}>Assign and review student fee plans</Text>
+              <View style={styles.heroStats}>
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>{formatCurrency(summary?.totalFee || 0)}</Text>
+                  <Text style={styles.heroStatLabel}>Assigned</Text>
+                </View>
+                <View style={styles.statSep} />
+                <View style={styles.heroStat}>
+                  <Text style={[styles.heroStatValue, {color: '#86efac'}]}>{formatCurrency(summary?.paidAmount || 0)}</Text>
+                  <Text style={styles.heroStatLabel}>Collected</Text>
+                </View>
+                <View style={styles.statSep} />
+                <View style={styles.heroStat}>
+                  <Text style={[styles.heroStatValue, {color: summary?.dueAmount > 0 ? '#fca5a5' : '#86efac'}]}>
+                    {formatCurrency(summary?.dueAmount || 0)}
+                  </Text>
+                  <Text style={styles.heroStatLabel}>Pending</Text>
+                </View>
+              </View>
+              {/* progress bar */}
+              <View style={styles.progressTrack}>
+                <View style={[styles.progressFill, {width: `${collectionRate}%`}]} />
+              </View>
+              <Text style={styles.progressLabel}>{collectionRate}% collected</Text>
+            </Animated.View>
+
+            {/* ── Quick actions ── */}
+            {canManagePlans ? (
+              <View style={styles.actionsRow}>
+                <Pressable
+                  onPress={() => navigation.navigate('CreateFeePlan')}
+                  style={styles.actionBtn}>
+                  <MaterialCommunityIcons name="book-edit-outline" size={15} color={colors.secondary} />
+                  <Text style={styles.actionBtnText}>Create Fee Plan</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate('ClassFeeManagement')}
+                  style={styles.actionBtn}>
+                  <MaterialCommunityIcons name="google-classroom" size={15} color={colors.secondary} />
+                  <Text style={styles.actionBtnText}>Class Fees</Text>
+                </Pressable>
+              </View>
+            ) : null}
+
+            <SearchBar value={query} onChangeText={setQuery} placeholder="Search student, admission no, class" />
+          </View>
+        }
+        renderItem={({item, index}) => (
+          <Animated.View entering={FadeInRight.delay(index * 25).duration(200).springify()}>
+            <Pressable
+              onPress={() => navigation.navigate('StudentFeeProfile', {studentId: item.studentId})}
+              style={({pressed}) => [styles.planCard, pressed && {opacity: 0.88}]}>
+              <View style={styles.planInfo}>
+                <Text style={styles.planName} numberOfLines={1}>{item.studentName}</Text>
+                <Text style={styles.planMeta}>
+                  {item.className}-{item.sectionName} · #{item.admissionNumber}
+                </Text>
+                <Text style={styles.planPayment}>
+                  Paid {formatCurrency(item.paidAmount)} · Pending {formatCurrency(item.dueAmount)}
+                </Text>
+              </View>
+              <View style={styles.planRight}>
+                <Text style={styles.planTotal}>{formatCurrency(item.totalFee)}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={14} color={colors.textMuted} />
+              </View>
+            </Pressable>
+          </Animated.View>
         )}
-        ListEmptyComponent={<EmptyState title={isLoading ? 'Loading fee plans' : 'No fee plans'} message={error?.message || 'Create fee plans for students.'} />}
+        ListEmptyComponent={
+          <EmptyState
+            title={isLoading ? 'Loading fee plans' : 'No fee plans'}
+            message={error?.message || 'Create fee plans for students.'}
+          />
+        }
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: colors.background, flex: 1},
-  header: {padding: spacing.lg, paddingBottom: 0},
-  list: {padding: spacing.lg, paddingTop: spacing.sm},
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  hero: {
+    backgroundColor: colors.secondary,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginBottom: spacing.md, marginTop: 4},
+  heroStats: {borderTopColor: 'rgba(255,255,255,0.12)', borderTopWidth: 1, flexDirection: 'row', paddingTop: spacing.md, marginBottom: spacing.sm},
+  heroStat: {alignItems: 'center', flex: 1},
+  heroStatValue: {color: colors.white, fontSize: 13, fontWeight: '800'},
+  heroStatLabel: {color: 'rgba(255,255,255,0.55)', fontSize: 9, fontWeight: '700', marginTop: 2, textTransform: 'uppercase'},
+  statSep: {backgroundColor: 'rgba(255,255,255,0.12)', width: 1},
+  progressTrack: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: radius.pill,
+    height: 5,
+    overflow: 'hidden',
+    marginBottom: 4,
+  },
+  progressFill: {backgroundColor: '#86efac', borderRadius: radius.pill, height: '100%'},
+  progressLabel: {color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '600'},
+
+  actionsRow: {flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md},
+  actionBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    ...shadows.soft,
+  },
+  actionBtnText: {color: colors.secondary, fontSize: 13, fontWeight: '700'},
+
+  planCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
+  planInfo: {flex: 1, minWidth: 0},
+  planName: {...typography.bodyBold, color: colors.text},
+  planMeta: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  planPayment: {color: colors.textSoft, fontSize: 10, fontWeight: '500', marginTop: 2},
+  planRight: {alignItems: 'flex-end', flexDirection: 'row', gap: spacing.xs},
+  planTotal: {color: colors.text, fontSize: 13, fontWeight: '800'},
 });
 
 export default FeePlanManagementScreen;

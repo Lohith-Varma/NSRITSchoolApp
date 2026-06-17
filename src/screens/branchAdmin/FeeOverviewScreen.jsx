@@ -1,13 +1,19 @@
 import React from 'react';
-import {EmptyState, ScreenContainer} from '../../components';
+import {View, StyleSheet} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
 const FeeOverviewScreen = () => (
-  <ScreenContainer>
+  <View style={styles.root}>
     <EmptyState
       title="Fees are out of scope"
       message="Fee payment and gateway integrations are intentionally not implemented."
     />
-  </ScreenContainer>
+  </View>
 );
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+});
 
 export default FeeOverviewScreen;

@@ -1,13 +1,19 @@
 import React from 'react';
-import {EmptyState, ScreenContainer} from '../../components';
+import {View, StyleSheet} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
 const HomeworkScreen = () => (
-  <ScreenContainer>
+  <View style={styles.root}>
     <EmptyState
       title="Homework is out of scope"
       message="Homework workflows are reserved for a later phase."
     />
-  </ScreenContainer>
+  </View>
 );
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+});
 
 export default HomeworkScreen;

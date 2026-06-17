@@ -1,33 +1,19 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {ERPLayout} from '../../components';
-import {colors, spacing, typography} from '../../theme';
+import {View, StyleSheet} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
-const EventsScreen = ({navigation}) => {
-  return (
-    <ERPLayout
-      navigation={navigation}
-      activeRoute="Events"
-      title="Events"
-      breadcrumbs={['Dashboard', 'Events']}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Events (Coming Soon)</Text>
-      </View>
-    </ERPLayout>
-  );
-};
+const EventsScreen = () => (
+  <View style={styles.root}>
+    <EmptyState
+      title="Events (Coming Soon)"
+      message="Event management is planned for a future phase."
+    />
+  </View>
+);
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: spacing.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    ...typography.title,
-    color: colors.textSoft,
-  },
+  root: {backgroundColor: colors.background, flex: 1},
 });
 
 export default EventsScreen;

@@ -1,21 +1,14 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Pressable, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  EmptyState,
-  FeeCard,
-  FilterTabs,
-  ScreenContainer,
-  SearchBar,
-  SectionHeader,
-  SkeletonLoader,
-  StatCard,
-  SummaryCard,
-} from '../../components';
+import {AnimatedProgressBar, EmptyState, FeeCard, FilterTabs, SearchBar, SkeletonLoader} from '../../components';
 import {FEE_STATUS} from '../../config/constants';
 import useFeeAccess from '../../hooks/useFeeAccess';
-import {colors, spacing} from '../../theme';
+import {colors, radius, shadows, spacing} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {fetchFees, setSelectedStudentFee} from '../../store/slices/feeSlice';
 import feeService from '../../services/fees/feeService';
@@ -27,6 +20,18 @@ const tabs = [
   {label: 'Due', value: FEE_STATUS.DUE},
   {label: 'Overdue', value: FEE_STATUS.OVERDUE},
 ];
+
+const QuickAction = ({icon, label, sub, onPress}) => (
+  <Pressable
+    onPress={onPress}
+    style={({pressed}) => [styles.quickBtn, pressed && {opacity: 0.88}]}>
+    <View style={styles.quickIcon}>
+      <MaterialCommunityIcons name={icon} size={20} color={colors.secondary} />
+    </View>
+    <Text style={styles.quickLabel}>{label}</Text>
+    <Text style={styles.quickSub}>{sub}</Text>
+  </Pressable>
+);
 
 const FeeDashboardScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -52,9 +57,7 @@ const FeeDashboardScreen = ({navigation}) => {
     () =>
       records.filter(item => {
         const matchesStatus = status === 'all' || item.status === status;
-        const matchesQuery = item.studentName
-          .toLowerCase()
-          .includes(query.toLowerCase());
+        const matchesQuery = item.studentName.toLowerCase().includes(query.toLowerCase());
         return matchesStatus && matchesQuery;
       }),
     [query, records, status],
@@ -65,133 +68,181 @@ const FeeDashboardScreen = ({navigation}) => {
     navigation.navigate('StudentFeeDetails');
   };
 
-  return (
-    <ScreenContainer>
-      <SectionHeader
-        title="Fee Dashboard"
-        subtitle="Collection, dues, and student ledger overview"
-      />
-      <SectionHeader title="Fee Summary" />
-      <View style={styles.grid}>
-        <StatCard
-          title="Total Fee"
-          value={formatCurrency(summary.totalFee)}
-          icon="cash-multiple"
-          tone={colors.primary}
+  const collectionRatePct = Math.round((summary.collectionRate || 0) * 100);
+  const rateColor = collectionRatePct >= 80 ? colors.success : collectionRatePct >= 50 ? colors.warning : colors.danger;
+
+  const renderHeader = () => (
+    <View>
+      <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+        <View style={styles.heroDecor} />
+        <Text style={styles.heroOverline}>Fee Desk</Text>
+        <Text style={styles.heroTitle}>Fee Dashboard</Text>
+        <Text style={styles.heroSub}>Collection, dues, and student ledger overview</Text>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(50).duration(260).springify()} style={styles.summaryCard}>
+        <View style={styles.summaryTop}>
+          <View>
+            <Text style={styles.summaryLabel}>Collection Rate</Text>
+            <Text style={styles.summarySub}>
+              {summary.paidStudents || 0} paid · {summary.dueStudents || 0} pending
+            </Text>
+          </View>
+          <Text style={[styles.summaryPct, {color: rateColor}]}>{collectionRatePct}%</Text>
+        </View>
+        <AnimatedProgressBar
+          progress={collectionRatePct}
+          color={rateColor}
+          trackColor={colors.border}
+          height={8}
         />
-        <StatCard
-          title="Paid Fee"
-          value={formatCurrency(summary.paidAmount)}
-          icon="cash-check"
-          tone={colors.success}
-        />
-        <StatCard
-          title="Due Fee"
-          value={formatCurrency(summary.dueAmount)}
-          icon="cash-clock"
-          tone={colors.danger}
-          onPress={() => navigation.navigate('DueStudents')}
-        />
-      </View>
-      <SummaryCard
-        title="Collection Rate"
-        value={formatCurrency(summary.totalFee)}
-        subtitle={`${summary.paidStudents} paid - ${summary.dueStudents} pending`}
-        progress={summary.collectionRate}
-        tone={colors.primary}
-      />
-      <SectionHeader title="Priority Actions" />
-      <View style={styles.quickActions}>
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <Text style={styles.statVal}>{formatCurrency(summary.totalFee)}</Text>
+            <Text style={styles.statLabel}>Total</Text>
+          </View>
+          <View style={styles.statSep} />
+          <View style={styles.statBox}>
+            <Text style={[styles.statVal, {color: colors.success}]}>{formatCurrency(summary.paidAmount)}</Text>
+            <Text style={styles.statLabel}>Paid</Text>
+          </View>
+          <View style={styles.statSep} />
+          <Pressable style={styles.statBox} onPress={() => navigation.navigate('DueStudents')}>
+            <Text style={[styles.statVal, {color: colors.danger}]}>{formatCurrency(summary.dueAmount)}</Text>
+            <Text style={styles.statLabel}>Due ↗</Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(80).duration(260).springify()} style={styles.quickGrid}>
         {canManagePlans ? (
-          <StatCard
-            title="Class Fees"
-            value="Setup"
-            icon="google-classroom"
-            onPress={() => navigation.navigate('ClassFeeManagement')}
-          />
+          <QuickAction icon="google-classroom" label="Class Fees" sub="Setup" onPress={() => navigation.navigate('ClassFeeManagement')} />
         ) : null}
         {canManagePlans ? (
-          <StatCard
-            title="Fee Plans"
-            value="Manage"
-            icon="book-edit-outline"
-            onPress={() => navigation.navigate('FeePlanManagement')}
-          />
+          <QuickAction icon="book-edit-outline" label="Fee Plans" sub="Manage" onPress={() => navigation.navigate('FeePlanManagement')} />
         ) : null}
         {canRecordPayments ? (
-          <StatCard
-            title="Collection"
-            value="Record"
-            icon="cash-plus"
-            onPress={() => navigation.navigate('FeeCollection')}
-          />
+          <QuickAction icon="cash-plus" label="Collection" sub="Record" onPress={() => navigation.navigate('FeeCollection')} />
         ) : null}
         {canRecordPayments ? (
-          <StatCard
-            title="History"
-            value="View"
-            icon="history"
-            onPress={() => navigation.navigate('PaymentHistory')}
-          />
+          <QuickAction icon="history" label="History" sub="View" onPress={() => navigation.navigate('PaymentHistory')} />
         ) : null}
-        <StatCard
-          title="Ledger"
-          value="Open"
-          icon="book-open-variant"
-          onPress={() => navigation.navigate('FeeLedger')}
-        />
+        <QuickAction icon="book-open-variant" label="Ledger" sub="Open" onPress={() => navigation.navigate('FeeLedger')} />
         {canViewReports ? (
-          <StatCard
-            title="Reports"
-            value="View"
-            icon="file-chart-outline"
-            onPress={() => navigation.navigate('FeeReports')}
-          />
+          <QuickAction icon="file-chart-outline" label="Reports" sub="View" onPress={() => navigation.navigate('FeeReports')} />
         ) : null}
+      </Animated.View>
+
+      <View style={styles.listHeader}>
+        <Text style={styles.listHeaderText}>Student Ledgers</Text>
       </View>
-      <SectionHeader title="Student Ledgers" subtitle="Search first, filter second, then open a record" />
-      <SearchBar
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Search student fees"
-      />
+      <SearchBar value={query} onChangeText={setQuery} placeholder="Search student fees" />
       <FilterTabs tabs={tabs} value={status} onChange={setStatus} />
-      <FlatList
-        data={filteredRecords}
-        keyExtractor={item => item.id}
-        scrollEnabled={false}
-        refreshing={loading}
-        renderItem={({item}) => (
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={filteredRecords}
+      keyExtractor={item => item.id}
+      style={styles.root}
+      contentContainerStyle={styles.list}
+      showsVerticalScrollIndicator={false}
+      refreshing={loading}
+      ListHeaderComponent={renderHeader}
+      renderItem={({item, index}) => (
+        <Animated.View entering={FadeInRight.delay(index * 20).duration(200).springify()}>
           <FeeCard student={item} onPress={() => openDetails(item)} />
-        )}
-        ListEmptyComponent={
-          loading ? (
-            <SkeletonLoader rows={4} />
-          ) : (
-            <EmptyState
-              title="No fee records"
-              message="Try another filter or search term."
-            />
-          )
-        }
-      />
-    </ScreenContainer>
+        </Animated.View>
+      )}
+      ListEmptyComponent={
+        loading ? (
+          <SkeletonLoader rows={4} />
+        ) : (
+          <EmptyState title="No fee records" message="Try another filter or search term." />
+        )
+      }
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  grid: {
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  hero: {
+    backgroundColor: colors.secondary,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
+
+  summaryCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    marginBottom: spacing.md,
+    padding: spacing.lg,
+    ...shadows.soft,
+  },
+  summaryTop: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md},
+  summaryLabel: {color: colors.text, fontSize: 14, fontWeight: '700'},
+  summarySub: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  summaryPct: {fontSize: 28, fontWeight: '900'},
+
+  statsRow: {flexDirection: 'row', justifyContent: 'space-around', marginTop: spacing.lg},
+  statBox: {alignItems: 'center', flex: 1},
+  statVal: {color: colors.text, fontSize: 14, fontWeight: '800'},
+  statLabel: {color: colors.textMuted, fontSize: 10, fontWeight: '600', marginTop: 2},
+  statSep: {backgroundColor: colors.border, width: 1},
+
+  quickGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.md,
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-    marginBottom: spacing.md,
+  quickBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    gap: 4,
+    minWidth: 90,
+    padding: spacing.md,
+    ...shadows.soft,
   },
+  quickIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.secondarySoft,
+    borderRadius: radius.pill,
+    height: 40,
+    justifyContent: 'center',
+    marginBottom: 2,
+    width: 40,
+  },
+  quickLabel: {color: colors.text, fontSize: 12, fontWeight: '700', textAlign: 'center'},
+  quickSub: {color: colors.textMuted, fontSize: 10, fontWeight: '500', textAlign: 'center'},
+
+  listHeader: {marginBottom: spacing.sm},
+  listHeaderText: {color: colors.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase'},
 });
 
 export default FeeDashboardScreen;

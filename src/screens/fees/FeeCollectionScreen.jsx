@@ -4,15 +4,7 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {
-  CustomButton,
-  CustomInput,
-  DatePickerField,
-  EmptyState,
-  SelectField,
-  SectionHeader,
-  SkeletonLoader,
-} from '../../components';
+import {DatePickerField, EmptyState, SelectField, SkeletonLoader} from '../../components';
 import feeService from '../../services/fees/feeService';
 import studentService from '../../services/students/studentService';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -246,7 +238,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
         <Animated.View
           entering={FadeInDown.delay(60).duration(280).springify()}
           style={styles.searchCard}>
-          <SectionHeader title="Find Student" icon="account-search-outline" />
+          <Text style={styles.subheading}>Find Student</Text>
           <View style={styles.searchRow}>
             <MaterialCommunityIcons
               name="magnify"
@@ -349,29 +341,44 @@ const FeeCollectionScreen = ({navigation, route}) => {
             maximumDate={toISODate(new Date())}
             onChange={value => updateField('paymentDate', value)}
           />
-          <CustomInput
-            label="Amount (₹)"
-            keyboardType="numeric"
-            value={form.amount}
-            onChangeText={value => updateField('amount', value)}
-          />
+          <View style={styles.inputWrap}>
+            <MaterialCommunityIcons name="currency-inr" size={14} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Amount (₹)"
+              placeholderTextColor={colors.textSoft}
+              keyboardType="numeric"
+              value={form.amount}
+              onChangeText={value => updateField('amount', value)}
+            />
+          </View>
           <SelectField
             label="Payment Mode"
             value={form.paymentMode}
             options={paymentModes}
             onChange={value => updateField('paymentMode', value)}
           />
-          <CustomInput
-            label="Reference Number"
-            value={form.referenceNumber}
-            onChangeText={value => updateField('referenceNumber', value)}
-          />
-          <CustomInput
-            label="Remarks (optional)"
-            value={form.remarks}
-            multiline
-            onChangeText={value => updateField('remarks', value)}
-          />
+          <View style={styles.inputWrap}>
+            <MaterialCommunityIcons name="pound" size={14} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Reference Number"
+              placeholderTextColor={colors.textSoft}
+              value={form.referenceNumber}
+              onChangeText={value => updateField('referenceNumber', value)}
+            />
+          </View>
+          <View style={styles.inputWrap}>
+            <MaterialCommunityIcons name="note-outline" size={14} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Remarks (optional)"
+              placeholderTextColor={colors.textSoft}
+              value={form.remarks}
+              multiline
+              onChangeText={value => updateField('remarks', value)}
+            />
+          </View>
 
           {Boolean(error) ? (
             <View style={styles.errorBox}>
@@ -381,12 +388,15 @@ const FeeCollectionScreen = ({navigation, route}) => {
           ) : null}
 
           {feeService.canReversePayments(access.role) && editingPayment ? (
-            <CustomButton
-              mode="outlined"
-              loading={reverseMutation.isPending}
-              onPress={() => reverseMutation.mutate(editingPayment)}>
-              Reverse Payment
-            </CustomButton>
+            <Pressable
+              onPress={() => reverseMutation.mutate(editingPayment)}
+              disabled={reverseMutation.isPending}
+              style={({pressed}) => [styles.reverseBtn, reverseMutation.isPending && {opacity: 0.5}, pressed && {opacity: 0.88}]}>
+              <MaterialCommunityIcons name="undo-variant" size={15} color={colors.danger} />
+              <Text style={styles.reverseBtnText}>
+                {reverseMutation.isPending ? 'Reversing…' : 'Reverse Payment'}
+              </Text>
+            </Pressable>
           ) : null}
 
           <Pressable
@@ -409,10 +419,9 @@ const FeeCollectionScreen = ({navigation, route}) => {
         </Animated.View>
       ) : null}
 
-      {/* ── Payment history ── */}
       {activePayments.length > 0 ? (
         <View style={styles.historySection}>
-          <SectionHeader title="Receipt History" icon="receipt-text-outline" />
+          <Text style={styles.subheading}>Receipt History</Text>
         </View>
       ) : null}
     </View>
@@ -643,6 +652,33 @@ const styles = StyleSheet.create({
   },
   submitBtnDisabled: {backgroundColor: colors.border},
   submitBtnText: {color: colors.white, fontSize: 15, fontWeight: '700'},
+
+  subheading: {color: colors.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 0.4, marginBottom: spacing.sm, textTransform: 'uppercase'},
+
+  // Native inputs inside form card
+  inputWrap: {
+    alignItems: 'center',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+  },
+  inputIcon: {marginRight: spacing.sm},
+  input: {color: colors.text, flex: 1, fontSize: 14, fontWeight: '500', minHeight: 46},
+
+  // Reverse button
+  reverseBtn: {
+    alignItems: 'center',
+    borderColor: colors.danger,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 44,
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  reverseBtnText: {color: colors.danger, fontSize: 13, fontWeight: '700'},
 
   // History
   historySection: {marginBottom: spacing.sm},

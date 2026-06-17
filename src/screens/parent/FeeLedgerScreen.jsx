@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
-import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {Pressable, ScrollView, StyleSheet, View, ActivityIndicator} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {AnimatedProgressBar, EmptyState, ScreenContainer} from '../../components';
+import {AnimatedProgressBar, EmptyState} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
@@ -256,7 +256,10 @@ const FeeLedgerScreen = () => {
   });
 
   return (
-    <ScreenContainer>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}>
       <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.pageHeader}>
         <View style={styles.pageHeaderDecor} />
         <Text style={styles.pageHeaderOverline}>Parent Portal</Text>
@@ -267,7 +270,9 @@ const FeeLedgerScreen = () => {
       {error ? (
         <EmptyState title="Unable to load fees" message={error.message} />
       ) : isLoading ? (
-        <EmptyState title="Loading fee records…" message="" />
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
       ) : children.length ? (
         children.map(child => (
           <ChildFeeSection key={child.id} child={child} />
@@ -278,11 +283,15 @@ const FeeLedgerScreen = () => {
           message="Fee records linked to your children will appear here."
         />
       )}
-    </ScreenContainer>
+      <View style={{height: spacing.xxxl}} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+  scroll: {padding: spacing.lg},
+  loadingWrap: {alignItems: 'center', paddingVertical: spacing.xxl},
   // Page header
   pageHeader: {
     backgroundColor: colors.secondary,

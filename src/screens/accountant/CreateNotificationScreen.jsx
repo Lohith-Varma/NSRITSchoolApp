@@ -1,16 +1,19 @@
 import React, {useState} from 'react';
 import {
-  StyleSheet,
-  View,
-  ScrollView,
-  Text,
-  Pressable,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
-import {IconButton, TextInput, Button, Switch, HelperText, Portal, Dialog} from 'react-native-paper';
-import {colors, spacing, radius, shadows} from '../../theme';
+import {Modal, Portal} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {colors, radius, shadows, spacing} from '../../theme';
 
 const TARGETS = [
   {id: 'all', label: 'All Recipients', icon: 'account-group-outline'},
@@ -37,11 +40,8 @@ const CreateNotificationScreen = ({navigation}) => {
       setValidationError('Please type your notification message.');
       return;
     }
-
     setValidationError('');
     setLoading(true);
-
-    // Mock API request delay
     setTimeout(() => {
       setLoading(false);
       setSuccessVisible(true);
@@ -57,25 +57,17 @@ const CreateNotificationScreen = ({navigation}) => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <IconButton
-            icon="arrow-left"
-            iconColor={colors.text}
-            size={24}
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          />
-          <View>
-            <Text style={styles.headerTitle}>Compose Notification</Text>
-            <Text style={styles.headerSubtitle}>Broadcast financial alerts & system news</Text>
-          </View>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
+          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+        </Pressable>
+        <View>
+          <Text style={styles.headerTitle}>Compose Notification</Text>
+          <Text style={styles.headerSubtitle}>Broadcast financial alerts & system news</Text>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Audience Target Section */}
         <Text style={styles.sectionLabel}>Broadcast Target</Text>
         <View style={styles.targetGrid}>
           {TARGETS.map(target => {
@@ -83,9 +75,10 @@ const CreateNotificationScreen = ({navigation}) => {
             return (
               <Pressable
                 key={target.id}
-                style={[
+                style={({pressed}) => [
                   styles.targetCard,
                   isSelected && styles.targetCardSelected,
+                  pressed && {opacity: 0.85},
                 ]}
                 onPress={() => setSelectedTarget(target.id)}>
                 <MaterialCommunityIcons
@@ -93,11 +86,7 @@ const CreateNotificationScreen = ({navigation}) => {
                   size={20}
                   color={isSelected ? colors.secondary : colors.textMuted}
                 />
-                <Text
-                  style={[
-                    styles.targetLabel,
-                    isSelected && styles.targetLabelSelected,
-                  ]}>
+                <Text style={[styles.targetLabel, isSelected && styles.targetLabelSelected]}>
                   {target.label}
                 </Text>
               </Pressable>
@@ -105,36 +94,30 @@ const CreateNotificationScreen = ({navigation}) => {
           })}
         </View>
 
-        {/* Input Fields */}
         <Text style={styles.sectionLabel}>Alert Details</Text>
-        <View style={styles.formContainer}>
+        <View style={styles.inputWrap}>
+          <MaterialCommunityIcons name="lead-pencil" size={14} color={colors.textMuted} style={styles.inputIcon} />
           <TextInput
-            label="Notification Title"
-            mode="outlined"
+            style={styles.input}
+            placeholder="Notification Title"
+            placeholderTextColor={colors.textSoft}
             value={title}
             onChangeText={setTitle}
-            placeholder="e.g. Pending Fee Reminder - Term II"
-            left={<TextInput.Icon icon="lead-pencil" color={colors.textSoft} />}
-            style={styles.input}
-            outlineColor={colors.border}
-            activeOutlineColor={colors.secondary}
           />
-
+        </View>
+        <View style={[styles.inputWrap, styles.textAreaWrap]}>
           <TextInput
-            label="Message Body"
-            mode="outlined"
+            style={[styles.input, styles.textArea]}
+            placeholder="Type your message details here..."
+            placeholderTextColor={colors.textSoft}
             value={message}
             onChangeText={setMessage}
-            placeholder="Type your message details here..."
             multiline
             numberOfLines={6}
-            style={[styles.input, styles.textArea]}
-            outlineColor={colors.border}
-            activeOutlineColor={colors.secondary}
+            textAlignVertical="top"
           />
         </View>
 
-        {/* Priority Toggle */}
         <View style={styles.priorityCard}>
           <View style={styles.priorityLeft}>
             <View style={[styles.priorityIconCircle, isPriority && styles.priorityIconCircleActive]}>
@@ -144,7 +127,7 @@ const CreateNotificationScreen = ({navigation}) => {
                 color={isPriority ? colors.danger : colors.textMuted}
               />
             </View>
-            <View style={styles.priorityTextContainer}>
+            <View style={styles.priorityCopy}>
               <Text style={styles.priorityTitle}>Mark as High Priority</Text>
               <Text style={styles.prioritySubtitle}>Pin to the top of user screens & send push alerts</Text>
             </View>
@@ -152,272 +135,198 @@ const CreateNotificationScreen = ({navigation}) => {
           <Switch
             value={isPriority}
             onValueChange={setIsPriority}
-            color={colors.danger}
+            trackColor={{false: colors.border, true: '#FECACA'}}
+            thumbColor={isPriority ? colors.danger : colors.textSoft}
           />
         </View>
 
-        {/* Audit/Voucher Info Card */}
         <View style={styles.infoCard}>
-          <MaterialCommunityIcons
-            name="information-outline"
-            size={18}
-            color={colors.info}
-            style={styles.infoIcon}
-          />
+          <MaterialCommunityIcons name="information-outline" size={18} color={colors.primary} style={{marginTop: 2}} />
           <Text style={styles.infoText}>
             Notifications are immediately processed by the notification dispatcher. Users with active push notification subscriptions will receive background banner alerts within 60 seconds.
           </Text>
         </View>
 
-        {/* Error Messaging */}
-        {Boolean(validationError) && (
-          <HelperText type="error" visible style={styles.errorText}>
-            {validationError}
-          </HelperText>
-        )}
+        {validationError ? (
+          <View style={styles.errorBox}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+            <Text style={styles.errorText}>{validationError}</Text>
+          </View>
+        ) : null}
       </ScrollView>
 
-      {/* Fixed Bottom Action Panel */}
       <View style={styles.actionPanel}>
-        <Button
-          mode="contained"
-          loading={loading}
-          disabled={loading}
+        <Pressable
           onPress={handleBroadcast}
-          style={styles.submitButton}
-          labelStyle={styles.submitButtonLabel}
-          buttonColor={colors.secondary}>
-          Broadcast Alert
-        </Button>
+          disabled={loading}
+          style={({pressed}) => [styles.submitBtn, loading && {opacity: 0.7}, pressed && !loading && {opacity: 0.88}]}>
+          {loading ? <ActivityIndicator size="small" color={colors.white} /> : null}
+          <Text style={styles.submitBtnText}>{loading ? 'Broadcasting…' : 'Broadcast Alert'}</Text>
+        </Pressable>
       </View>
 
-      {/* Success Dialog */}
       <Portal>
-        <Dialog visible={successVisible} onDismiss={handleSuccessConfirm} style={styles.dialog}>
-          <Dialog.Icon icon="check-circle" size={48} color={colors.success} />
-          <Dialog.Title style={styles.dialogTitle}>Broadcast Dispatched</Dialog.Title>
-          <Dialog.Content>
-            <Text style={styles.dialogText}>
-              Your notification alert has been queued and successfully dispatched to the target recipient stream.
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions style={styles.dialogActions}>
-            <Button
-              mode="contained"
-              buttonColor={colors.secondary}
-              textColor={colors.white}
-              style={{borderRadius: radius.md, paddingHorizontal: spacing.md}}
-              onPress={handleSuccessConfirm}>
-              Acknowledge
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+        <Modal visible={successVisible} onDismiss={handleSuccessConfirm} contentContainerStyle={styles.successModal}>
+          <View style={styles.successIcon}>
+            <MaterialCommunityIcons name="check-circle" size={48} color={colors.success} />
+          </View>
+          <Text style={styles.successTitle}>Broadcast Dispatched</Text>
+          <Text style={styles.successText}>
+            Your notification alert has been queued and successfully dispatched to the target recipient stream.
+          </Text>
+          <Pressable
+            onPress={handleSuccessConfirm}
+            style={({pressed}) => [styles.acknowledgeBtn, pressed && {opacity: 0.88}]}>
+            <Text style={styles.acknowledgeBtnText}>Acknowledge</Text>
+          </Pressable>
+        </Modal>
       </Portal>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: {backgroundColor: colors.background, flex: 1},
   header: {
+    alignItems: 'center',
     backgroundColor: colors.white,
-    paddingTop: Platform.OS === 'ios' ? spacing.xl : spacing.sm,
-    paddingBottom: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    elevation: 2,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: Platform.OS === 'ios' ? spacing.xl : spacing.sm,
     ...shadows.soft,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    margin: 0,
-    marginRight: spacing.xs,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.primary,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
+  backBtn: {alignItems: 'center', height: 36, justifyContent: 'center', width: 36},
+  headerTitle: {color: colors.primary, fontSize: 16, fontWeight: '800'},
+  headerSubtitle: {color: colors.textMuted, fontSize: 11, fontWeight: '500'},
+  scroll: {flex: 1},
+  scrollContent: {padding: spacing.lg, paddingBottom: spacing.xxl},
   sectionLabel: {
+    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.sm,
+    textTransform: 'uppercase',
   },
-  targetGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
+  targetGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, marginBottom: spacing.lg},
   targetCard: {
-    flexDirection: 'row',
     alignItems: 'center',
-    width: '47%',
     backgroundColor: colors.white,
-    padding: spacing.md,
+    borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    flexDirection: 'row',
     gap: spacing.xs,
-    elevation: 1,
+    padding: spacing.md,
+    width: '47%',
     ...shadows.soft,
   },
-  targetCardSelected: {
-    borderColor: colors.secondary,
-    backgroundColor: colors.secondarySoft,
-  },
-  targetLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  targetLabelSelected: {
-    color: colors.secondary,
-    fontWeight: '700',
-  },
-  formContainer: {
-    marginBottom: spacing.md,
-  },
-  input: {
-    backgroundColor: colors.white,
-    marginBottom: spacing.md,
-  },
-  textArea: {
-    textAlignVertical: 'top',
-  },
-  priorityCard: {
-    flexDirection: 'row',
+  targetCardSelected: {backgroundColor: colors.secondarySoft, borderColor: colors.secondary},
+  targetLabel: {color: colors.text, fontSize: 12, fontWeight: '600'},
+  targetLabelSelected: {color: colors.secondary, fontWeight: '700'},
+  inputWrap: {
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
-    padding: spacing.md,
-    borderRadius: radius.lg,
-    borderWidth: 1,
     borderColor: colors.border,
-    marginBottom: spacing.lg,
-    elevation: 1,
-    ...shadows.soft,
-  },
-  priorityLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  priorityIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
-  },
-  priorityIconCircleActive: {
-    backgroundColor: colors.dangerSoft,
-  },
-  priorityTextContainer: {
-    flex: 1,
-  },
-  priorityTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  prioritySubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    marginTop: 2,
-    fontWeight: '500',
-  },
-  infoCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: colors.infoSoft,
-    padding: spacing.md,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
-    marginBottom: spacing.lg,
-  },
-  infoIcon: {
-    marginRight: spacing.sm,
-    marginTop: 2,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.textMuted,
-    lineHeight: 18,
-    fontWeight: '500',
-  },
-  errorText: {
-    fontSize: 13,
-    color: colors.danger,
-    textAlign: 'center',
+    flexDirection: 'row',
     marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
   },
+  textAreaWrap: {alignItems: 'flex-start', paddingTop: spacing.sm},
+  inputIcon: {marginRight: spacing.sm},
+  input: {color: colors.text, flex: 1, fontSize: 14, fontWeight: '500', minHeight: 44},
+  textArea: {minHeight: 120},
+  priorityCard: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
+  priorityLeft: {alignItems: 'center', flex: 1, flexDirection: 'row'},
+  priorityIconCircle: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderRadius: 18,
+    height: 36,
+    justifyContent: 'center',
+    marginRight: spacing.md,
+    width: 36,
+  },
+  priorityIconCircleActive: {backgroundColor: '#FEE2E2'},
+  priorityCopy: {flex: 1},
+  priorityTitle: {color: colors.text, fontSize: 14, fontWeight: '700'},
+  prioritySubtitle: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  infoCard: {
+    alignItems: 'flex-start',
+    backgroundColor: colors.primarySoft,
+    borderColor: 'rgba(21,94,239,0.2)',
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  infoText: {color: colors.textMuted, flex: 1, fontSize: 12, fontWeight: '500', lineHeight: 18},
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
+  errorText: {color: colors.danger, flex: 1, fontSize: 13, fontWeight: '600'},
   actionPanel: {
     backgroundColor: colors.white,
-    borderTopWidth: 1,
     borderTopColor: colors.border,
+    borderTopWidth: 1,
     padding: spacing.md,
     paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.md,
   },
-  submitButton: {
-    height: 48,
+  submitBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
     borderRadius: radius.md,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 48,
     justifyContent: 'center',
   },
-  submitButtonLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  dialog: {
+  submitBtnText: {color: colors.white, fontSize: 15, fontWeight: '700'},
+  successModal: {
+    alignItems: 'center',
     backgroundColor: colors.white,
     borderRadius: radius.lg,
+    margin: spacing.lg,
+    padding: spacing.xl,
+    ...shadows.medium,
+  },
+  successIcon: {marginBottom: spacing.md},
+  successTitle: {color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: spacing.sm, textAlign: 'center'},
+  successText: {color: colors.textMuted, fontSize: 14, lineHeight: 20, marginBottom: spacing.lg, textAlign: 'center'},
+  acknowledgeBtn: {
     alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  dialogTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.primary,
-    textAlign: 'center',
-  },
-  dialogText: {
-    fontSize: 14,
-    color: colors.textMuted,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  dialogActions: {
-    justifyContent: 'center',
+    backgroundColor: colors.secondary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: 12,
     width: '100%',
-    paddingHorizontal: spacing.lg,
   },
+  acknowledgeBtnText: {color: colors.white, fontSize: 14, fontWeight: '700'},
 });
 
 export default CreateNotificationScreen;

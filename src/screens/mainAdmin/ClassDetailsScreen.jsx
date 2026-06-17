@@ -1,16 +1,29 @@
 import React, {useMemo, useState} from 'react';
-import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
-import {Card, List, SegmentedButtons, Text} from 'react-native-paper';
-import {
-  EmptyState,
-  Header,
-  LoadingScreen,
-  ERPLayout,
-} from '../../components';
+import {ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {EmptyState} from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
-import {colors, radius, spacing, typography} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
+
+const TABS = ['students', 'attendance', 'fees'];
+const TAB_LABELS = {students: 'Students', attendance: 'Attendance', fees: 'Fees'};
+const TAB_ICONS = {students: 'account-school', attendance: 'calendar-check', fees: 'cash-multiple'};
+
+const StatusChip = ({status}) => {
+  const color =
+    status === 'PRESENT' ? colors.success
+    : status === 'ABSENT' ? colors.danger
+    : colors.warning;
+  return (
+    <View style={[styles.chip, {backgroundColor: `${color}22`}]}>
+      <Text style={[styles.chipText, {color}]}>{status}</Text>
+    </View>
+  );
+};
 
 const ClassDetailsScreen = ({navigation, route}) => {
   const {sectionId} = route.params || {};
@@ -26,142 +39,218 @@ const ClassDetailsScreen = ({navigation, route}) => {
   );
 
   if (loading && !data) {
-    return <LoadingScreen message="Loading class details" />;
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator color={colors.primaryDark} size="large" />
+        <Text style={styles.loadingText}>Loading class details…</Text>
+      </View>
+    );
   }
 
   if (!data?.section) {
     return (
-      <ERPLayout
-        navigation={navigation}
-        activeRoute="Dashboard"
-        title="Class Details"
-        breadcrumbs={['Dashboard', 'Academics', 'Details']}>
+      <View style={styles.root}>
         <EmptyState title="Class unavailable" message={error || 'Unable to load class details.'} />
-      </ERPLayout>
+      </View>
     );
   }
 
   const classInfo = data.classInfo;
+  const listData =
+    tab === 'students' ? data.students
+    : tab === 'attendance' ? data.attendances
+    : data.studentFees;
 
   return (
-    <ERPLayout
-      navigation={navigation}
-      activeRoute="Dashboard"
-      title="Class Details"
-      breadcrumbs={['Dashboard', 'Academics', 'Details']}>
-      <View style={styles.content}>
-        <Header
-          title={`${classInfo?.className || 'Class'} ${classInfo?.section || ''}`}
-          subtitle={classInfo?.branchName}
-        />
-        <Card mode="outlined" style={styles.card}>
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Class Information</Text>
-            <Info label="Branch" value={classInfo?.branchName} />
-            <Info label="Class" value={classInfo?.className} />
-            <Info label="Section" value={classInfo?.section} />
-            <Info label="Class Teacher" value={classTeacher?.fullName || 'Unassigned'} />
-            <Info label="Students" value={data.students?.length || 0} />
-          </Card.Content>
-        </Card>
-        <SegmentedButtons
-          value={tab}
-          onValueChange={setTab}
-          buttons={[
-            {value: 'students', label: 'Students'},
-            {value: 'attendance', label: 'Attendance'},
-            {value: 'fees', label: 'Fees'},
-          ]}
-        />
-      </View>
+    <View style={styles.root}>
       <FlatList
-        data={tab === 'students' ? data.students : tab === 'attendance' ? data.attendances : data.studentFees}
+        data={listData || []}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
-        ListEmptyComponent={<EmptyState title="No records" message="Records will appear after entry." />}
-        renderItem={({item}) => {
+        ListHeaderComponent={
+          <View>
+            <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+              <View style={styles.heroDecor} />
+              <Text style={styles.heroOverline}>{classInfo?.branchName || '—'}</Text>
+              <Text style={styles.heroTitle}>
+                {classInfo?.className || 'Class'} {classInfo?.section || ''}
+              </Text>
+              <View style={styles.heroStats}>
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>{data.students?.length || 0}</Text>
+                  <Text style={styles.heroStatLabel}>Students</Text>
+                </View>
+                <View style={styles.statSep} />
+                <View style={styles.heroStat}>
+                  <Text style={styles.heroStatValue}>{classTeacher?.fullName || 'Unassigned'}</Text>
+                  <Text style={styles.heroStatLabel}>Class Teacher</Text>
+                </View>
+              </View>
+            </Animated.View>
+
+            {/* ── Tab bar ── */}
+            <View style={styles.tabBar}>
+              {TABS.map(t => (
+                <Pressable
+                  key={t}
+                  onPress={() => setTab(t)}
+                  style={[styles.tab, tab === t && styles.tabActive]}>
+                  <MaterialCommunityIcons
+                    name={TAB_ICONS[t]}
+                    size={14}
+                    color={tab === t ? colors.primaryDark : colors.textMuted}
+                  />
+                  <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
+                    {TAB_LABELS[t]}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        }
+        renderItem={({item, index}) => {
           if (tab === 'students') {
             return (
-              <List.Item
-                title={item.fullName}
-                description={`${item.studentId} - Roll ${item.rollNumber || '-'}`}
-                left={props => <List.Icon {...props} icon="account-school" />}
-                onPress={() => navigation.navigate('StudentProfile', {studentId: item.id})}
-              />
+              <Animated.View entering={FadeInRight.delay(index * 25).duration(200).springify()}>
+                <Pressable
+                  onPress={() => navigation.navigate('StudentProfile', {studentId: item.id})}
+                  style={({pressed}) => [styles.rowCard, pressed && {opacity: 0.88}]}>
+                  <View style={styles.rowIcon}>
+                    <MaterialCommunityIcons name="account-school" size={14} color={colors.primaryDark} />
+                  </View>
+                  <View style={styles.rowBody}>
+                    <Text style={styles.rowTitle}>{item.fullName}</Text>
+                    <Text style={styles.rowSub}>{item.studentId} · Roll {item.rollNumber || '—'}</Text>
+                  </View>
+                  <MaterialCommunityIcons name="chevron-right" size={14} color={colors.textMuted} />
+                </Pressable>
+              </Animated.View>
             );
           }
-
           if (tab === 'attendance') {
             return (
-              <List.Item
-                title={item.attendanceDate}
-                description={item.remarks || item.status}
-                left={props => <List.Icon {...props} icon="calendar-check" />}
-                right={() => <Text style={styles.status}>{item.status}</Text>}
-              />
+              <Animated.View entering={FadeInRight.delay(index * 25).duration(200).springify()}>
+                <View style={styles.rowCard}>
+                  <View style={[styles.rowIcon, {backgroundColor: colors.primarySoft}]}>
+                    <MaterialCommunityIcons name="calendar-check" size={14} color={colors.primaryDark} />
+                  </View>
+                  <View style={styles.rowBody}>
+                    <Text style={styles.rowTitle}>{item.attendanceDate}</Text>
+                    {item.remarks ? <Text style={styles.rowSub}>{item.remarks}</Text> : null}
+                  </View>
+                  <StatusChip status={item.status} />
+                </View>
+              </Animated.View>
             );
           }
-
           return (
-            <List.Item
-              title={formatCurrency(item.totalFee)}
-              description={`${formatCurrency(item.paidAmount)} paid - ${formatCurrency(item.remainingAmount)} pending`}
-              left={props => <List.Icon {...props} icon="cash-multiple" />}
-              right={() => <Text style={styles.status}>{item.status}</Text>}
-            />
+            <Animated.View entering={FadeInRight.delay(index * 25).duration(200).springify()}>
+              <View style={styles.rowCard}>
+                <View style={[styles.rowIcon, {backgroundColor: colors.secondarySoft}]}>
+                  <MaterialCommunityIcons name="cash-multiple" size={14} color={colors.secondary} />
+                </View>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowTitle}>{formatCurrency(item.totalFee)}</Text>
+                  <Text style={styles.rowSub}>{formatCurrency(item.paidAmount)} paid · {formatCurrency(item.remainingAmount)} pending</Text>
+                </View>
+                <StatusChip status={item.status} />
+              </View>
+            </Animated.View>
           );
         }}
+        ListEmptyComponent={<EmptyState title="No records" message="Records will appear after entry." />}
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
-    </ERPLayout>
+    </View>
   );
 };
 
-const Info = ({label, value}) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value || 'Not set'}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  content: {
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+  loadingWrap: {alignItems: 'center', backgroundColor: colors.background, flex: 1, gap: spacing.md, justifyContent: 'center'},
+  loadingText: {color: colors.textMuted, fontSize: 13, fontWeight: '600'},
+
+  hero: {
+    backgroundColor: colors.primaryDark,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
     padding: spacing.lg,
-    paddingBottom: spacing.md,
+    ...shadows.medium,
   },
-  list: {
-    flexGrow: 1,
-    padding: spacing.lg,
-    paddingTop: 0,
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
   },
-  card: {
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroTitle: {color: colors.white, fontSize: 24, fontWeight: '800', marginBottom: spacing.md},
+  heroStats: {
+    borderTopColor: 'rgba(255,255,255,0.12)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    paddingTop: spacing.md,
+  },
+  heroStat: {alignItems: 'center', flex: 1},
+  heroStatValue: {color: colors.white, fontSize: 15, fontWeight: '800'},
+  heroStatLabel: {color: 'rgba(255,255,255,0.55)', fontSize: 9, fontWeight: '700', marginTop: 2, textTransform: 'uppercase'},
+  statSep: {backgroundColor: 'rgba(255,255,255,0.12)', width: 1},
+
+  tabBar: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.lg,
-    marginBottom: spacing.md,
-  },
-  sectionTitle: {
-    ...typography.subtitle,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  infoRow: {
+    borderRadius: radius.card,
+    borderWidth: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.xs,
+    marginBottom: spacing.md,
+    padding: 4,
+    ...shadows.soft,
   },
-  infoLabel: {
-    color: colors.textMuted,
-  },
-  infoValue: {
-    color: colors.text,
+  tab: {
+    alignItems: 'center',
+    borderRadius: radius.lg,
     flex: 1,
-    textAlign: 'right',
+    flexDirection: 'row',
+    gap: 5,
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
   },
-  status: {
-    color: colors.primary,
-    fontWeight: '700',
+  tabActive: {backgroundColor: colors.primarySoft},
+  tabText: {color: colors.textMuted, fontSize: 12, fontWeight: '600'},
+  tabTextActive: {color: colors.primaryDark, fontWeight: '700'},
+
+  rowCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.xs,
+    padding: spacing.md,
+    ...shadows.soft,
   },
+  rowIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+  },
+  rowBody: {flex: 1, minWidth: 0},
+  rowTitle: {...typography.bodyBold, color: colors.text, fontSize: 13},
+  rowSub: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  chip: {borderRadius: radius.pill, paddingHorizontal: spacing.sm, paddingVertical: 2},
+  chipText: {fontSize: 10, fontWeight: '800'},
 });
 
 export default ClassDetailsScreen;

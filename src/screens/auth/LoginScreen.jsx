@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import {HelperText, Text} from 'react-native-paper';
+import {Text} from 'react-native-paper';
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -18,7 +18,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch, useSelector} from 'react-redux';
-import {CustomButton} from '../../components';
 import {clearAuthError, sendOtp} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {validatePhoneLogin} from '../../utils/validators';
@@ -164,9 +163,10 @@ const LoginScreen = ({navigation}) => {
           </View>
 
           {displayError ? (
-            <HelperText type="error" visible style={styles.errorText}>
-              {displayError}
-            </HelperText>
+            <View style={styles.errorBox}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+              <Text style={styles.errorText}>{displayError}</Text>
+            </View>
           ) : null}
 
           {/* OTP button */}
@@ -355,11 +355,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
   errorText: {
     color: colors.danger,
-    fontSize: 11,
-    fontWeight: '700',
-    paddingHorizontal: 0,
+    flex: 1,
+    fontSize: 12,
+    fontWeight: '600',
   },
   // Button
   submitBtn: {

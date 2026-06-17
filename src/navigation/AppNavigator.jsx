@@ -8,7 +8,7 @@ import AccountantNavigator from './AccountantNavigator';
 import AuthNavigator from './AuthNavigator';
 import BranchAdminNavigator from './BranchAdminNavigator';
 import CoordinatorNavigator from './CoordinatorNavigator';
-import FrontDeskNavigator from './FrontDeskNavigator';
+
 import MainAdminNavigator from './MainAdminNavigator';
 import ParentNavigator from './ParentNavigator';
 import PrincipalNavigator from './PrincipalNavigator';
@@ -31,8 +31,7 @@ const getRoleNavigator = role => {
       return <ParentNavigator />;
     case USER_ROLES.ACCOUNTANT:
       return <AccountantNavigator />;
-    case USER_ROLES.FRONT_DESK:
-      return <FrontDeskNavigator />;
+
     default:
       return <AuthNavigator />;
   }

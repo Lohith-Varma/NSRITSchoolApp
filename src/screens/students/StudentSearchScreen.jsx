@@ -1,17 +1,49 @@
 import React, {useMemo, useState} from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, Pressable, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {CustomButton, DashboardCard, EmptyState, SearchBar, SelectField} from '../../components';
+import {EmptyState, SearchBar, SelectField} from '../../components';
 import {STUDENT_STATUS} from '../../config/academic';
 import academicRepository from '../../repositories/academicRepository';
 import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
 import {getAccessScope} from '../../services/rbacScope';
-import {colors, spacing} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const statusOptions = [{label: 'Any', value: ''}].concat(
   Object.values(STUDENT_STATUS).map(value => ({label: value, value})),
+);
+
+const getInitials = name =>
+  name
+    ? name
+        .split(' ')
+        .slice(0, 2)
+        .map(w => w[0])
+        .join('')
+        .toUpperCase()
+    : '?';
+
+const StudentCard = ({item, index, onPress}) => (
+  <Animated.View entering={FadeInRight.delay(index * 30).duration(200).springify()}>
+    <Pressable
+      onPress={onPress}
+      style={({pressed}) => [styles.studentCard, pressed && {opacity: 0.88}]}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{getInitials(item.fullName)}</Text>
+      </View>
+      <View style={styles.studentInfo}>
+        <Text style={styles.studentName} numberOfLines={1}>{item.fullName}</Text>
+        <Text style={styles.studentMeta}>
+          #{item.studentId} · {item.academicClass?.name || '—'}–{item.section?.name || '—'}
+        </Text>
+      </View>
+      <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textMuted} />
+    </Pressable>
+  </Animated.View>
 );
 
 const StudentSearchScreen = ({navigation}) => {
@@ -65,59 +97,138 @@ const StudentSearchScreen = ({navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.root}>
       <FlatList
         data={resultsQuery.data || []}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View>
-            <SearchBar value={query} onChangeText={setQuery} placeholder="Name, admission number, or parent mobile" />
-            <SelectField
-              label="Class"
-              value={filters.classId}
-              options={[{label: 'Any', value: ''}].concat(classes.map(item => ({label: item.name, value: item.id})))}
-              onChange={value => setFilters(current => ({...current, classId: value, sectionId: ''}))}
-            />
-            <SelectField
-              label="Section"
-              value={filters.sectionId}
-              options={[{label: 'Any', value: ''}].concat(sections.map(item => ({label: `${item.academicClass?.name}-${item.name}`, value: item.id})))}
-              onChange={value => setFilters(current => ({...current, sectionId: value}))}
-            />
-            <SelectField label="Status" value={filters.status} options={statusOptions} onChange={value => setFilters(current => ({...current, status: value}))} />
-            <CustomButton style={styles.button} onPress={() => setSubmittedQuery(query.trim())}>Search</CustomButton>
+            <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.filterCard}>
+              <SearchBar
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Name, admission number, or parent mobile"
+              />
+              <SelectField
+                label="Class"
+                value={filters.classId}
+                options={[{label: 'Any', value: ''}].concat(classes.map(item => ({label: item.name, value: item.id})))}
+                onChange={value => setFilters(current => ({...current, classId: value, sectionId: ''}))}
+              />
+              <SelectField
+                label="Section"
+                value={filters.sectionId}
+                options={[{label: 'Any', value: ''}].concat(
+                  sections.map(item => ({
+                    label: `${item.academicClass?.name}-${item.name}`,
+                    value: item.id,
+                  })),
+                )}
+                onChange={value => setFilters(current => ({...current, sectionId: value}))}
+              />
+              <SelectField
+                label="Status"
+                value={filters.status}
+                options={statusOptions}
+                onChange={value => setFilters(current => ({...current, status: value}))}
+              />
+              <Pressable
+                onPress={() => setSubmittedQuery(query.trim())}
+                style={({pressed}) => [styles.searchBtn, pressed && {opacity: 0.88}]}>
+                <MaterialCommunityIcons name="magnify" size={17} color={colors.white} />
+                <Text style={styles.searchBtnText}>Search</Text>
+              </Pressable>
+            </Animated.View>
+            {(resultsQuery.data?.length || 0) > 0 ? (
+              <Text style={styles.resultsLabel}>
+                {resultsQuery.data.length} result{resultsQuery.data.length !== 1 ? 's' : ''}
+              </Text>
+            ) : null}
           </View>
         }
-        renderItem={({item}) => (
-          <DashboardCard
-            title={item.fullName}
-            value={item.studentId}
-            description={`${item.academicClass?.name || ''}-${item.section?.name || ''}`}
-            icon="account-school-outline"
+        renderItem={({item, index}) => (
+          <StudentCard
+            item={item}
+            index={index}
             onPress={() => navigation.navigate('StudentDetails', {studentId: item.id})}
           />
         )}
         ListEmptyComponent={
-          <EmptyState title="No results" message={submittedQuery ? 'Try another search or filter.' : 'Search students by name, admission number, or parent mobile.'} />
+          <EmptyState
+            title="No results"
+            message={
+              submittedQuery
+                ? 'Try another search or filter.'
+                : 'Search students by name, admission number, or parent mobile.'
+            }
+          />
         }
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.background,
-    flex: 1,
-  },
-  list: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxxl,
-  },
-  button: {
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  filterCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
     marginBottom: spacing.md,
+    padding: spacing.md,
+    ...shadows.soft,
   },
+  searchBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 46,
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+    ...shadows.medium,
+  },
+  searchBtnText: {color: colors.white, fontSize: 14, fontWeight: '700'},
+  resultsLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    textTransform: 'uppercase',
+  },
+
+  studentCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.xs,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
+  avatar: {
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.pill,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  avatarText: {color: colors.primary, fontSize: 13, fontWeight: '800'},
+  studentInfo: {flex: 1, minWidth: 0},
+  studentName: {...typography.bodyBold, color: colors.text},
+  studentMeta: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
 });
 
 export default StudentSearchScreen;

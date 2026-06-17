@@ -8,7 +8,7 @@ export const USER_ROLES = {
   TEACHER: 'TEACHER',
   PARENT: 'PARENT',
   ACCOUNTANT: 'ACCOUNTANT',
-  FRONT_DESK: 'FRONT_DESK',
+
 };
 
 export const STAFF_TYPES = {
@@ -29,7 +29,7 @@ export const ROLE_LABELS = {
   [USER_ROLES.TEACHER]: 'Teacher',
   [USER_ROLES.PARENT]: 'Parent',
   [USER_ROLES.ACCOUNTANT]: 'Accountant',
-  [USER_ROLES.FRONT_DESK]: 'Front Desk',
+
 };
 
 export const STORAGE_KEYS = {

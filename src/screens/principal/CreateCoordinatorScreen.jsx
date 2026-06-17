@@ -1,14 +1,25 @@
 import React, {useState} from 'react';
-import {HelperText} from 'react-native-paper';
+import {Pressable, ScrollView, StyleSheet, TextInput, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useSelector} from 'react-redux';
-import {CustomButton, CustomInput, ScreenContainer, SectionHeader, SelectField} from '../../components';
+import {SelectField} from '../../components';
 import {WINGS, WING_LABELS} from '../../config/academic';
 import coordinatorService from '../../services/coordinators/coordinatorService';
 import {getAccessScope} from '../../services/rbacScope';
+import {colors, radius, shadows, spacing} from '../../theme';
 
 const wingOptions = Object.values(WINGS).map(value => ({label: WING_LABELS[value], value}));
 const genderOptions = ['Female', 'Male', 'Other'].map(value => ({label: value, value}));
+
+const InputRow = ({icon, label, ...props}) => (
+  <View style={styles.inputWrap}>
+    <MaterialCommunityIcons name={icon} size={14} color={colors.textMuted} style={styles.inputIcon} />
+    <TextInput style={styles.input} placeholder={label} placeholderTextColor={colors.textSoft} {...props} />
+  </View>
+);
 
 const CreateCoordinatorScreen = ({navigation}) => {
   const queryClient = useQueryClient();
@@ -16,13 +27,10 @@ const CreateCoordinatorScreen = ({navigation}) => {
   const scope = getAccessScope(user);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    fullName: '',
-    phoneNumber: '',
-    email: '',
-    gender: '',
-    wing: WINGS.PRE_PRIMARY,
-    countryCode: '+91',
+    fullName: '', phoneNumber: '', email: '', gender: '',
+    wing: WINGS.PRE_PRIMARY, countryCode: '+91',
   });
+  const updateField = (field, value) => setForm(current => ({...current, [field]: value}));
 
   const mutation = useMutation({
     mutationFn: payload => coordinatorService.createCoordinator(payload, scope),
@@ -33,22 +41,135 @@ const CreateCoordinatorScreen = ({navigation}) => {
     onError: err => setError(err.message),
   });
 
-  const updateField = (field, value) => setForm(current => ({...current, [field]: value}));
-
   return (
-    <ScreenContainer>
-      <SectionHeader title="Create Coordinator" subtitle="Coordinator inherits your branch automatically" />
-      <CustomInput label="Full Name *" value={form.fullName} onChangeText={value => updateField('fullName', value)} />
-      <CustomInput label="Mobile Number *" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={value => updateField('phoneNumber', value)} />
-      <CustomInput label="Email" keyboardType="email-address" value={form.email} onChangeText={value => updateField('email', value)} />
-      <SelectField label="Gender *" value={form.gender} options={genderOptions} onChange={value => updateField('gender', value)} />
-      <SelectField label="Wing Assignment *" value={form.wing} options={wingOptions} onChange={value => updateField('wing', value)} />
-      <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
-      <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={() => mutation.mutate(form)}>
-        Create Coordinator
-      </CustomButton>
-    </ScreenContainer>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled">
+
+      <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+        <View style={styles.heroDecor} />
+        <Text style={styles.heroOverline}>Principal</Text>
+        <Text style={styles.heroTitle}>Create Coordinator</Text>
+        <Text style={styles.heroSub}>Coordinator inherits your branch automatically</Text>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(60).duration(260).springify()} style={styles.formCard}>
+        <Text style={styles.formSection}>Personal Info</Text>
+        <InputRow icon="account-outline" label="Full Name *" value={form.fullName} onChangeText={v => updateField('fullName', v)} />
+        <InputRow icon="phone-outline" label="Mobile Number *" keyboardType="phone-pad" value={form.phoneNumber} onChangeText={v => updateField('phoneNumber', v)} />
+        <InputRow icon="email-outline" label="Email" keyboardType="email-address" autoCapitalize="none" value={form.email} onChangeText={v => updateField('email', v)} />
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(80).duration(260).springify()} style={styles.formCard}>
+        <Text style={styles.formSection}>Assignment</Text>
+        <View style={styles.selectWrap}>
+          <SelectField label="Gender *" value={form.gender} options={genderOptions} onChange={v => updateField('gender', v)} />
+        </View>
+        <View style={styles.selectWrap}>
+          <SelectField label="Wing Assignment *" value={form.wing} options={wingOptions} onChange={v => updateField('wing', v)} />
+        </View>
+      </Animated.View>
+
+      {error ? (
+        <View style={styles.errorBox}>
+          <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
+
+      <Pressable
+        onPress={() => mutation.mutate(form)}
+        disabled={!form.fullName || !form.phoneNumber || mutation.isPending}
+        style={({pressed}) => [
+          styles.submitBtn,
+          (!form.fullName || !form.phoneNumber || mutation.isPending) && {opacity: 0.5},
+          pressed && form.fullName && form.phoneNumber && {opacity: 0.88},
+        ]}>
+        <MaterialCommunityIcons name="account-plus-outline" size={18} color={colors.white} />
+        <Text style={styles.submitBtnText}>{mutation.isPending ? 'Creating…' : 'Create Coordinator'}</Text>
+      </Pressable>
+
+      <View style={{height: spacing.xxxl}} />
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+  scroll: {padding: spacing.lg},
+  hero: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
+  formCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    ...shadows.soft,
+  },
+  formSection: {
+    backgroundColor: colors.background,
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    padding: spacing.md,
+    paddingBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  inputWrap: {
+    alignItems: 'center',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+  },
+  inputIcon: {marginRight: spacing.sm},
+  input: {color: colors.text, flex: 1, fontSize: 14, fontWeight: '500', minHeight: 46},
+  selectWrap: {borderTopColor: colors.border, borderTopWidth: 1, padding: spacing.sm},
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  errorText: {color: colors.danger, flex: 1, fontSize: 12, fontWeight: '600'},
+  submitBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 50,
+    justifyContent: 'center',
+    ...shadows.medium,
+  },
+  submitBtnText: {color: colors.white, fontSize: 14, fontWeight: '700'},
+});
 
 export default CreateCoordinatorScreen;

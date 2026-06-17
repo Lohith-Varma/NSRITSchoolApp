@@ -1,18 +1,19 @@
 import React from 'react';
-import {EmptyState, Header, ERPLayout} from '../../components';
+import {View, StyleSheet} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
-const SettingsScreen = ({navigation}) => (
-  <ERPLayout
-    navigation={navigation}
-    activeRoute="Profile"
-    title="Settings"
-    breadcrumbs={['Dashboard', 'System', 'Settings']}>
-    <Header title="Settings" subtitle="Global app configuration" />
+const SettingsScreen = () => (
+  <View style={styles.root}>
     <EmptyState
       title="No settings yet"
       message="Configuration screens can be expanded after core operations stabilize."
     />
-  </ERPLayout>
+  </View>
 );
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+});
 
 export default SettingsScreen;

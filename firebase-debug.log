@@ -539,3 +539,221 @@ I0617 01:43:04.113393   34080 engine.go:209] [projects/emulator/locations/emulat
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 02:06:59.252815   34080 every.go:43] @check passed after running 1 checks\n"}}
 [debug] [2026-06-16T20:36:59.255Z] I0617 02:06:59.255614   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 02:06:59.255614   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:16:44.472Z] ----------------------------------------------------------------------
+[debug] [2026-06-16T22:16:44.479Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\CHAITANYA REDDY\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2026-06-16T22:16:44.480Z] CLI Version:   15.20.0
+[debug] [2026-06-16T22:16:44.480Z] Platform:      win32
+[debug] [2026-06-16T22:16:44.480Z] Node Version:  v24.15.0
+[debug] [2026-06-16T22:16:44.480Z] Time:          Wed Jun 17 2026 03:46:44 GMT+0530 (India Standard Time)
+[debug] [2026-06-16T22:16:44.481Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-16T22:16:51.949Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-16T22:16:51.949Z] > authorizing via signed-in user (nsritaialgo@gmail.com)
+[info] i  emulators: Starting emulators: auth, dataconnect {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, dataconnect"}}
+[debug] [2026-06-16T22:16:51.968Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-16T22:16:51.969Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-16T22:16:51.969Z] [dataconnect.postgres] postgres server for dataconnect only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-16T22:16:51.969Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"dataconnect":[{"address":"127.0.0.1","family":"IPv4","port":9399},{"address":"::1","family":"IPv6","port":9399}],"dataconnect.postgres":[{"address":"127.0.0.1","family":"IPv4","port":5432}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-06-16T22:16:51.975Z] Found emulator hub locator: {"version":"15.20.0","origins":["http://127.0.0.1:4400","http://[::1]:4400"],"pid":27292}
+[debug] [2026-06-16T22:16:51.975Z] Write emulator hub locator at C:\Users\CHAITA~1\AppData\Local\Temp\hub-nsrit-school-2b749.json
+[debug] [2026-06-16T22:16:59.361Z] defaultcredentials: writing to file C:\Users\CHAITANYA REDDY\AppData\Roaming\firebase\nsritaialgo_gmail_com_application_default_credentials.json
+[debug] [2026-06-16T22:17:01.061Z] I0617 03:47:00.843716   30356 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 9866] UpdateResources(): done
+Main schema: sources: schema\schema.gql [23750B] 
+Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:00.843716   30356 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 9866] UpdateResources(): done\nMain schema: sources: schema\\schema.gql [23750B] \nConnector \"nsrit\": sources: connectors\\nsrit\\mutations.gql [60486B] connectors\\nsrit\\queries.gql [68377B] \n"}}
+[debug] [2026-06-16T22:17:01.064Z] defaultcredentials: writing to file C:\Users\CHAITANYA REDDY\AppData\Roaming\firebase\nsritaialgo_gmail_com_application_default_credentials.json
+[debug] [2026-06-16T22:17:01.071Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-06-16T22:17:01.071Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-06-16T22:17:01.071Z] Starting SQL Connect Emulator with command {"binary":"C:\\Users\\CHAITANYA REDDY\\.cache\\firebase\\emulators\\dataconnect-emulator-3.4.10.exe","args":["--logtostderr","-v=2","dev","--listen=127.0.0.1:9399,[::1]:9399","--config_dir=D:\\NSRITSchoolApp\\dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting SQL Connect Emulator with command {\"binary\":\"C:\\\\Users\\\\CHAITANYA REDDY\\\\.cache\\\\firebase\\\\emulators\\\\dataconnect-emulator-3.4.10.exe\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=127.0.0.1:9399,[::1]:9399\",\"--config_dir=D:\\\\NSRITSchoolApp\\\\dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: SQL Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"SQL Connect Emulator logging to \u001b[1mdataconnect-debug.log\u001b[22m"}}
+[info] i  dataconnect: Started up Postgres server, listening on {"address":"127.0.0.1","family":"IPv4","port":5432} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Started up Postgres server, listening on {\"address\":\"127.0.0.1\",\"family\":\"IPv4\",\"port\":5432}"}}
+[debug] [2026-06-16T22:17:02.122Z] [SQL Connect] Connecting to postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable}...
+[debug] [2026-06-16T22:17:02.124Z] >>> [apiv2][query] POST http://127.0.0.1:9399/emulator/configure [none]
+[debug] [2026-06-16T22:17:02.124Z] >>> [apiv2][body] POST http://127.0.0.1:9399/emulator/configure {"connectionString":"postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable","database":"nsrit-school-2b749-2-database","serviceId":"nsrit-school-2b749-service"}
+[debug] [2026-06-16T22:17:02.128Z] *** [apiv2] error from fetch(http://127.0.0.1:9399/emulator/configure, {"headers":{},"method":"POST","body":"{\"connectionString\":\"postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable\",\"database\":\"nsrit-school-2b749-2-database\",\"serviceId\":\"nsrit-school-2b749-service\"}"}): FetchError: request to http://127.0.0.1:9399/emulator/configure failed, reason: connect ECONNREFUSED 127.0.0.1:9399
+[debug] [2026-06-16T22:17:02.128Z] [SQL Connect] Retrying connectToPostgress call (1 of 3 attempts): SQL Connect emulator: FirebaseError: Failed to make request to http://127.0.0.1:9399/emulator/configure
+[debug] [2026-06-16T22:17:02.133Z] I0617 03:47:02.133134   30032 load.go:31] Reloading schema and connectors...
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.133134   30032 load.go:31] Reloading schema and connectors...\n"}}
+[debug] [2026-06-16T22:17:02.380Z] I0617 03:47:02.380096   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 1167] UpdateResources(): done
+Main schema: sources: schema\schema.gql [23750B] 
+Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.380096   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 1167] UpdateResources(): done\nMain schema: sources: schema\\schema.gql [23750B] \nConnector \"nsrit\": sources: connectors\\nsrit\\mutations.gql [60486B] connectors\\nsrit\\queries.gql [68377B] \n"}}
+[debug] [2026-06-16T22:17:02.799Z] I0617 03:47:02.799673   30032 codegen.go:101] [connector "nsrit" javascriptSdk] Generating sources into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.799673   30032 codegen.go:101] [connector \"nsrit\" javascriptSdk] Generating sources into \"D:\\\\NSRITSchoolApp\\\\src\\\\dataconnect-generated\"\n"}}
+[debug] [2026-06-16T22:17:02.877Z] I0617 03:47:02.877519   30032 collector.go:107] schema extensions wrote into "D:\\NSRITSchoolApp\\dataconnect\\.dataconnect\\schema"
+Generated sources: main\relation.gql [291636B] main\query.gql [47389B] main\mutation.gql [129895B] prelude.gql [84995B] main\input.gql [556740B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.877519   30032 collector.go:107] schema extensions wrote into \"D:\\\\NSRITSchoolApp\\\\dataconnect\\\\.dataconnect\\\\schema\"\nGenerated sources: main\\relation.gql [291636B] main\\query.gql [47389B] main\\mutation.gql [129895B] prelude.gql [84995B] main\\input.gql [556740B] \n"}}
+[debug] [2026-06-16T22:17:02.895Z] I0617 03:47:02.894907   30032 collector.go:107] connector "nsrit" javascriptSdk wrote into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+Generated sources: .guides/setup.md [584B] .guides/config.json [236B] esm\index.esm.js [75755B] esm\package.json [17B] index.cjs.js [84351B] .guides/usage.md [2234B] index.d.ts [184299B] package.json [613B] README.md [677884B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.894907   30032 collector.go:107] connector \"nsrit\" javascriptSdk wrote into \"D:\\\\NSRITSchoolApp\\\\src\\\\dataconnect-generated\"\nGenerated sources: .guides/setup.md [584B] .guides/config.json [236B] esm\\index.esm.js [75755B] esm\\package.json [17B] index.cjs.js [84351B] .guides/usage.md [2234B] index.d.ts [184299B] package.json [613B] README.md [677884B] \n"}}
+[debug] [2026-06-16T22:17:02.901Z] I0617 03:47:02.901497   30032 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0617 03:47:02.902189   30032 load.go:109] Finished reloading
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.901497   30032 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\nI0617 03:47:02.902189   30032 load.go:109] Finished reloading\n"}}
+[debug] [2026-06-16T22:17:02.903Z] I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399\n"}}
+[debug] [2026-06-16T22:17:02.903Z] I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399\n"}}
+[debug] [2026-06-16T22:17:04.133Z] [SQL Connect] Connecting to postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable}...
+[debug] [2026-06-16T22:17:04.133Z] >>> [apiv2][query] POST http://127.0.0.1:9399/emulator/configure [none]
+[debug] [2026-06-16T22:17:04.133Z] >>> [apiv2][body] POST http://127.0.0.1:9399/emulator/configure {"connectionString":"postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable","database":"nsrit-school-2b749-2-database","serviceId":"nsrit-school-2b749-service"}
+[debug] [2026-06-16T22:17:06.902Z] I0617 03:47:06.901940   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] UpdateResources(): done
+Main schema: sources: schema\schema.gql [23750B] 
+Connector "nsrit": sources: connectors\nsrit\queries.gql [68377B] connectors\nsrit\mutations.gql [60486B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:06.901940   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] UpdateResources(): done\nMain schema: sources: schema\\schema.gql [23750B] \nConnector \"nsrit\": sources: connectors\\nsrit\\queries.gql [68377B] connectors\\nsrit\\mutations.gql [60486B] \n"}}
+[debug] [2026-06-16T22:17:07.168Z] I0617 03:47:07.168484   30032 configure_emulator.go:21] ConfigureEmulator successed
+Request: service_id: "nsrit-school-2b749-service"
+connection_string: "postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable"
+database: "nsrit-school-2b749-2-database"
+
+Response: 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 03:47:07.168484   30032 configure_emulator.go:21] ConfigureEmulator successed\nRequest: service_id: \"nsrit-school-2b749-service\"\nconnection_string: \"postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable\"\ndatabase: \"nsrit-school-2b749-2-database\"\n\nResponse: \n"}}
+[debug] [2026-06-16T22:17:07.171Z] <<< [apiv2][status] POST http://127.0.0.1:9399/emulator/configure 200
+[debug] [2026-06-16T22:17:07.171Z] <<< [apiv2][body] POST http://127.0.0.1:9399/emulator/configure {}
+[debug] [2026-06-16T22:17:07.171Z] [SQL Connect] Successfully connected to postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable}
+[debug] [2026-06-16T22:17:07.183Z] >>> [apiv2][query] GET http://127.0.0.1:9399/emulator/info [none]
+[debug] [2026-06-16T22:17:07.187Z] <<< [apiv2][status] GET http://127.0.0.1:9399/emulator/info 200
+[debug] [2026-06-16T22:17:07.187Z] <<< [apiv2][body] GET http://127.0.0.1:9399/emulator/info {"version":"","services":[{"serviceId":"nsrit-school-2b749-service","connectionString":"dbname='nsrit-school-2b749-2-database' host='127.0.0.1' port='5432' sslmode='disable' dbname='nsrit-school-2b749-2-database'"}]}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI        │
+├────────────────┼────────────────┼────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth │
+├────────────────┼────────────────┼────────────────────────────┤
+│ SQL Connect    │ 127.0.0.1:9399 │ n/a                        │
+└────────────────┴────────────────┴────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[info] i  To verify the phone number +913333333333, use the code 847646. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +913333333333, use the code 847646."}}
+[debug] [2026-06-16T22:30:44.825Z] W0617 04:00:44.821359   30032 execute.go:51] Database ping is slow 23.4121ms
+stats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+stats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"W0617 04:00:44.821359   30032 execute.go:51] Database ping is slow 23.4121ms\nstats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}\nstats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}\n"}}
+[debug] [2026-06-16T22:30:44.913Z] I0617 04:00:44.913523   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:44.913523   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.287Z] I0617 04:00:45.287260   30032 execute.go:57] Database ping is quick (likely cached), took 530.1µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.287260   30032 execute.go:57] Database ping is quick (likely cached), took 530.1µs\n"}}
+[debug] [2026-06-16T22:30:45.299Z] I0617 04:00:45.298734   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.298734   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.377Z] I0617 04:00:45.376621   30032 execute.go:57] Database ping is quick (likely cached), took 583.6µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.376621   30032 execute.go:57] Database ping is quick (likely cached), took 583.6µs\n"}}
+[debug] [2026-06-16T22:30:45.412Z] I0617 04:00:45.411418   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.411418   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.459Z] I0617 04:00:45.459772   30032 execute.go:57] Database ping is quick (likely cached), took 539.1µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.459772   30032 execute.go:57] Database ping is quick (likely cached), took 539.1µs\n"}}
+[debug] [2026-06-16T22:30:45.462Z] I0617 04:00:45.462276   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.462276   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.802Z] I0617 04:00:45.802227   30032 execute.go:57] Database ping is quick (likely cached), took 540.4µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.802227   30032 execute.go:57] Database ping is quick (likely cached), took 540.4µs\n"}}
+[debug] [2026-06-16T22:30:45.891Z] I0617 04:00:45.890737   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.890737   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T22:30:45.892Z] I0617 04:00:45.891934   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.891934   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.913Z] I0617 04:00:45.913870   30032 execute.go:57] Database ping is quick (likely cached), took 1.0208ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.913870   30032 execute.go:57] Database ping is quick (likely cached), took 1.0208ms\n"}}
+[debug] [2026-06-16T22:30:45.929Z] I0617 04:00:45.929041   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.929041   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.930Z] I0617 04:00:45.930124   30032 execute.go:57] Database ping is quick (likely cached), took 532.9µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.930124   30032 execute.go:57] Database ping is quick (likely cached), took 532.9µs\n"}}
+[debug] [2026-06-16T22:30:45.934Z] I0617 04:00:45.934920   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetWingsByBranch: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.934920   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetWingsByBranch: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:45.969Z] I0617 04:00:45.969090   30032 execute.go:57] Database ping is quick (likely cached), took 522.8µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:45.969090   30032 execute.go:57] Database ping is quick (likely cached), took 522.8µs\n"}}
+[debug] [2026-06-16T22:30:46.010Z] I0617 04:00:46.010084   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:46.010084   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T22:30:46.010Z] I0617 04:00:46.010084   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:46.010084   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:57.141Z] I0617 04:00:57.141336   30032 execute.go:57] Database ping is quick (likely cached), took 575.6µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:57.141336   30032 execute.go:57] Database ping is quick (likely cached), took 575.6µs\n"}}
+[debug] [2026-06-16T22:30:57.146Z] I0617 04:00:57.146687   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetActiveAcademicClasses: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:57.146687   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetActiveAcademicClasses: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:30:57.150Z] I0617 04:00:57.150225   30032 execute.go:57] Database ping is quick (likely cached), took 585.2µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:57.150225   30032 execute.go:57] Database ping is quick (likely cached), took 585.2µs\n"}}
+[debug] [2026-06-16T22:30:57.191Z] I0617 04:00:57.191804   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:57.191804   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T22:30:57.192Z] I0617 04:00:57.191804   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:00:57.191804   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:31:46.200Z] I0617 04:01:46.199183   30032 execute.go:57] Database ping is quick (likely cached), took 1.578ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:01:46.199183   30032 execute.go:57] Database ping is quick (likely cached), took 1.578ms\n"}}
+[debug] [2026-06-16T22:31:46.215Z] I0617 04:01:46.215275   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:01:46.215275   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:31:46.216Z] I0617 04:01:46.216973   30032 execute.go:57] Database ping is quick (likely cached), took 1.1411ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:01:46.216973   30032 execute.go:57] Database ping is quick (likely cached), took 1.1411ms\n"}}
+[debug] [2026-06-16T22:31:46.252Z] I0617 04:01:46.249522   30032 every.go:43] @check passed after running 1 checks
+I0617 04:01:46.249522   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:01:46.249522   30032 every.go:43] @check passed after running 1 checks\nI0617 04:01:46.249522   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:32:07.542Z] I0617 04:02:07.542730   30032 execute.go:57] Database ping is quick (likely cached), took 1.1241ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:02:07.542730   30032 execute.go:57] Database ping is quick (likely cached), took 1.1241ms\n"}}
+[debug] [2026-06-16T22:32:07.585Z] I0617 04:02:07.584677   30032 every.go:43] @check passed after running 1 checks
+I0617 04:02:07.585281   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetStudents: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:02:07.584677   30032 every.go:43] @check passed after running 1 checks\nI0617 04:02:07.585281   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetStudents: succeeded. Connector: nsrit\n"}}
+[info] i  To verify the phone number +914444444444, use the code 093284. {"metadata":{"emulator":{"name":"auth"},"message":"To verify the phone number +914444444444, use the code 093284."}}
+[debug] [2026-06-16T22:34:18.360Z] I0617 04:04:18.360725   30032 execute.go:57] Database ping is quick (likely cached), took 539.6µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.360725   30032 execute.go:57] Database ping is quick (likely cached), took 539.6µs\n"}}
+[debug] [2026-06-16T22:34:18.405Z] I0617 04:04:18.405319   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.405319   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:34:18.470Z] I0617 04:04:18.470389   30032 execute.go:57] Database ping is quick (likely cached), took 1.3669ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.470389   30032 execute.go:57] Database ping is quick (likely cached), took 1.3669ms\n"}}
+[debug] [2026-06-16T22:34:18.472Z] I0617 04:04:18.473138   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.473138   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:34:18.530Z] I0617 04:04:18.530599   30032 execute.go:57] Database ping is quick (likely cached), took 599.9µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.530599   30032 execute.go:57] Database ping is quick (likely cached), took 599.9µs\n"}}
+[debug] [2026-06-16T22:34:18.532Z] I0617 04:04:18.532696   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.532696   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:34:18.580Z] I0617 04:04:18.580880   30032 execute.go:57] Database ping is quick (likely cached), took 552.1µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.580880   30032 execute.go:57] Database ping is quick (likely cached), took 552.1µs\n"}}
+[debug] [2026-06-16T22:34:18.583Z] I0617 04:04:18.583822   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.583822   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:34:18.656Z] I0617 04:04:18.654451   30032 execute.go:57] Database ping is quick (likely cached), took 536.5µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.654451   30032 execute.go:57] Database ping is quick (likely cached), took 536.5µs\n"}}
+[debug] [2026-06-16T22:34:18.660Z] I0617 04:04:18.660719   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.660719   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:34:18.967Z] I0617 04:04:18.967577   30032 execute.go:57] Database ping is quick (likely cached), took 1.392ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:18.967577   30032 execute.go:57] Database ping is quick (likely cached), took 1.392ms\n"}}
+[debug] [2026-06-16T22:34:19.035Z] I0617 04:04:19.033880   30032 every.go:43] @check passed after running 1 checks
+I0617 04:04:19.033880   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:04:19.033880   30032 every.go:43] @check passed after running 1 checks\nI0617 04:04:19.033880   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:35:00.922Z] I0617 04:05:00.923144   30032 execute.go:57] Database ping is quick (likely cached), took 916.3µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:00.923144   30032 execute.go:57] Database ping is quick (likely cached), took 916.3µs\n"}}
+[debug] [2026-06-16T22:35:01.010Z] I0617 04:05:01.008495   30032 every.go:43] @check passed after running 1 checks
+I0617 04:05:01.008495   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:01.008495   30032 every.go:43] @check passed after running 1 checks\nI0617 04:05:01.008495   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:35:01.200Z] I0617 04:05:01.200482   30032 execute.go:57] Database ping is quick (likely cached), took 2.0984ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:01.200482   30032 execute.go:57] Database ping is quick (likely cached), took 2.0984ms\n"}}
+[debug] [2026-06-16T22:35:01.216Z] I0617 04:05:01.215973   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAttendanceByMonth: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:01.215973   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAttendanceByMonth: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:35:08.728Z] I0617 04:05:08.728616   30032 execute.go:57] Database ping is quick (likely cached), took 1.1296ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:08.728616   30032 execute.go:57] Database ping is quick (likely cached), took 1.1296ms\n"}}
+[debug] [2026-06-16T22:35:08.793Z] I0617 04:05:08.793726   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:08.793726   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T22:35:08.793Z] I0617 04:05:08.793726   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:08.793726   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-16T22:35:15.456Z] I0617 04:05:15.455506   30032 execute.go:57] Database ping is quick (likely cached), took 567.6µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:15.455506   30032 execute.go:57] Database ping is quick (likely cached), took 567.6µs\n"}}
+[debug] [2026-06-16T22:35:15.510Z] I0617 04:05:15.509886   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:15.509886   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-16T22:35:15.510Z] I0617 04:05:15.510493   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 04:05:15.510493   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-17T05:07:31.596Z] W0617 10:37:31.591860   30032 execute.go:51] Database ping is slow 37.1738ms
+stats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+stats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"W0617 10:37:31.591860   30032 execute.go:51] Database ping is slow 37.1738ms\nstats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}\nstats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}\n"}}
+[debug] [2026-06-17T05:07:31.640Z] I0617 10:37:31.640534   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:31.640534   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-17T05:07:32.060Z] I0617 10:37:32.060229   30032 execute.go:57] Database ping is quick (likely cached), took 613.5µs
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:32.060229   30032 execute.go:57] Database ping is quick (likely cached), took 613.5µs\n"}}
+[debug] [2026-06-17T05:07:32.072Z] I0617 10:37:32.072786   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:32.072786   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit\n"}}
+[debug] [2026-06-17T05:07:33.691Z] I0617 10:37:33.692193   30032 execute.go:57] Database ping is quick (likely cached), took 1.4498ms
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:33.692193   30032 execute.go:57] Database ping is quick (likely cached), took 1.4498ms\n"}}
+[debug] [2026-06-17T05:07:33.831Z] I0617 10:37:33.830332   30032 every.go:43] @check passed after running 1 checks
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:33.830332   30032 every.go:43] @check passed after running 1 checks\n"}}
+[debug] [2026-06-17T05:07:33.832Z] I0617 10:37:33.831990   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0617 10:37:33.831990   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit\n"}}

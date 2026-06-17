@@ -1,13 +1,19 @@
 import React from 'react';
-import {EmptyState, ScreenContainer} from '../../components';
+import {StyleSheet, View} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
 const PhoneLoginHelpScreen = () => (
-  <ScreenContainer>
+  <View style={styles.root}>
     <EmptyState
       title="OTP login help"
       message="Users sign in with phone OTP. Contact the school office if the registered phone number must be changed."
     />
-  </ScreenContainer>
+  </View>
 );
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+});
 
 export default PhoneLoginHelpScreen;

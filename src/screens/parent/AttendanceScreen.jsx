@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,7 +9,6 @@ import {
   AttendanceRing,
   CalendarAttendance,
   EmptyState,
-  ScreenContainer,
   SelectField,
 } from '../../components';
 import {ATTENDANCE_STATUS} from '../../config/constants';
@@ -95,17 +94,20 @@ const AttendanceScreen = ({route}) => {
 
   if (childrenQuery.error || attendanceQuery.error) {
     return (
-      <ScreenContainer>
+      <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
         <EmptyState
           title="Unable to load attendance"
           message={childrenQuery.error?.message || attendanceQuery.error?.message}
         />
-      </ScreenContainer>
+      </ScrollView>
     );
   }
 
   return (
-    <ScreenContainer>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}>
       {/* ── Child selector ── */}
       {children.length > 1 ? (
         <SelectField
@@ -126,15 +128,13 @@ const AttendanceScreen = ({route}) => {
         <View style={styles.heroDecor} />
 
         <View style={styles.heroTop}>
-          <View style={styles.heroChildInfo}>
-            <Text style={styles.heroChildName} numberOfLines={1}>
-              {selectedChild?.fullName || 'Child'}
-            </Text>
-            <Text style={styles.heroChildMeta}>
-              {selectedChild?.academicClass?.name || '-'}–
-              {selectedChild?.section?.name || '-'} · {MONTH_LABEL(monthDate)}
-            </Text>
-          </View>
+          <Text style={styles.heroChildName} numberOfLines={1}>
+            {selectedChild?.fullName || 'Child'}
+          </Text>
+          <Text style={styles.heroChildMeta}>
+            {selectedChild?.academicClass?.name || '-'}–
+            {selectedChild?.section?.name || '-'} · {MONTH_LABEL(monthDate)}
+          </Text>
         </View>
 
         <View style={styles.ringRow}>
@@ -188,11 +188,14 @@ const AttendanceScreen = ({route}) => {
       <Animated.View entering={FadeInDown.delay(80).duration(280).springify()}>
         <CalendarAttendance monthDate={monthDate} records={attendanceMap} />
       </Animated.View>
-    </ScreenContainer>
+      <View style={{height: spacing.xxxl}} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+  scroll: {padding: spacing.lg},
   heroCard: {
     backgroundColor: colors.primary,
     borderRadius: radius.card,

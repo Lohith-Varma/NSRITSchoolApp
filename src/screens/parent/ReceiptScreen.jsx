@@ -5,7 +5,7 @@ import Animated, {FadeInDown} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState, ScreenContainer} from '../../components';
+import {EmptyState} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
@@ -145,25 +145,28 @@ const ReceiptScreen = ({route}) => {
 
   if (isLoading) {
     return (
-      <ScreenContainer>
+      <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
         <EmptyState title="Loading receipts…" message="" />
-      </ScreenContainer>
+      </ScrollView>
     );
   }
 
   if (!allPayments.length) {
     return (
-      <ScreenContainer>
+      <ScrollView style={styles.root} contentContainerStyle={styles.scroll}>
         <EmptyState
           title="No receipts yet"
           message="Payment receipts for your children will appear here once fee payments are recorded."
         />
-      </ScreenContainer>
+      </ScrollView>
     );
   }
 
   return (
-    <ScreenContainer>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}>
       <Animated.View
         entering={FadeInDown.duration(260).springify()}
         style={styles.pageHeader}>
@@ -182,11 +185,14 @@ const ReceiptScreen = ({route}) => {
           student={payment.student}
         />
       ))}
-    </ScreenContainer>
+      <View style={{height: spacing.xxxl}} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+  scroll: {padding: spacing.lg},
   // Page header
   pageHeader: {
     backgroundColor: colors.secondary,

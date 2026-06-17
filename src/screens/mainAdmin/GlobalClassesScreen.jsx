@@ -1,16 +1,49 @@
 import React, {useMemo, useState} from 'react';
-import {FlatList, RefreshControl, StyleSheet, View} from 'react-native';
-import {Card, Chip, Text} from 'react-native-paper';
-import {
-  EmptyState,
-  Header,
-  LoadingScreen,
-  ERPLayout,
-  SearchBar,
-} from '../../components';
+import {FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {EmptyState, SearchBar} from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
-import {colors, radius, spacing, typography} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
+
+const FilterChip = ({label, selected, onPress}) => (
+  <Pressable
+    onPress={onPress}
+    style={[styles.filterChip, selected && styles.filterChipSelected]}>
+    <Text style={[styles.filterChipText, selected && styles.filterChipTextSelected]}>{label}</Text>
+  </Pressable>
+);
+
+const MetricCell = ({label, value}) => (
+  <View style={styles.metricCell}>
+    <Text style={styles.metricCellValue} numberOfLines={1}>{value ?? 0}</Text>
+    <Text style={styles.metricCellLabel}>{label}</Text>
+  </View>
+);
+
+const ClassCard = ({item, index, onPress}) => (
+  <Animated.View entering={FadeInRight.delay(index * 30).duration(200).springify()}>
+    <Pressable
+      onPress={onPress}
+      style={({pressed}) => [styles.classCard, pressed && {opacity: 0.88}]}>
+      <View style={styles.classCardTop}>
+        <View style={styles.classTitleWrap}>
+          <Text style={styles.classTitle}>{item.className} {item.section}</Text>
+          <Text style={styles.classBranch}>{item.branchName}</Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textMuted} />
+      </View>
+      <View style={styles.metricsRow}>
+        <MetricCell label="Teacher" value={item.classTeacher || '—'} />
+        <MetricCell label="Students" value={item.totalStudents} />
+        <MetricCell label="Attendance" value={`${item.attendancePercent || 0}%`} />
+        <MetricCell label="Fees" value={`${item.feeCollectionPercent || 0}%`} />
+      </View>
+    </Pressable>
+  </Animated.View>
+);
 
 const GlobalClassesScreen = ({navigation}) => {
   const [searchText, setSearchText] = useState('');
@@ -27,162 +60,176 @@ const GlobalClassesScreen = ({navigation}) => {
   const grades = useMemo(() => [...new Set((data || []).map(item => item.className))], [data]);
   const sections = useMemo(() => [...new Set((data || []).map(item => item.section))], [data]);
 
-  const classes = useMemo(() => {
-    return (data || []).filter(item => {
-      const matchesFilters =
-        (!filters.branchId || item.branchId === filters.branchId) &&
-        (!filters.grade || item.className === filters.grade) &&
-        (!filters.section || item.section === filters.section);
-      const needle = searchText.trim().toLowerCase();
-      const matchesSearch =
-        !needle ||
-        [item.branchName, item.className, item.section, item.classTeacher]
-          .some(value => String(value || '').toLowerCase().includes(needle));
-      return matchesFilters && matchesSearch;
-    });
-  }, [data, filters, searchText]);
-
-  if (loading && !data) {
-    return <LoadingScreen message="Loading classes" />;
-  }
+  const classes = useMemo(
+    () =>
+      (data || []).filter(item => {
+        const matchesFilters =
+          (!filters.branchId || item.branchId === filters.branchId) &&
+          (!filters.grade || item.className === filters.grade) &&
+          (!filters.section || item.section === filters.section);
+        const needle = searchText.trim().toLowerCase();
+        const matchesSearch =
+          !needle ||
+          [item.branchName, item.className, item.section, item.classTeacher].some(value =>
+            String(value || '').toLowerCase().includes(needle),
+          );
+        return matchesFilters && matchesSearch;
+      }),
+    [data, filters, searchText],
+  );
 
   return (
-    <ERPLayout
-      navigation={navigation}
-      activeRoute="Dashboard"
-      title="Global Classes"
-      breadcrumbs={['Dashboard', 'Academics', 'Global Classes']}>
-      <View style={styles.content}>
-        <Header title="Global Classes" subtitle="Classes across all active branches" />
-        <SearchBar value={searchText} onChangeText={setSearchText} placeholder="Search classes" />
-        <FilterRow
-          items={branches}
-          selected={filters.branchId}
-          onSelect={branchId => setFilters(current => ({...current, branchId}))}
-        />
-        <FilterRow
-          items={grades.map(item => [item, item])}
-          selected={filters.grade}
-          onSelect={grade => setFilters(current => ({...current, grade}))}
-        />
-        <FilterRow
-          items={sections.map(item => [item, item])}
-          selected={filters.section}
-          onSelect={section => setFilters(current => ({...current, section}))}
-        />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-      </View>
+    <View style={styles.root}>
       <FlatList
         data={classes}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
-        ListEmptyComponent={<EmptyState title="No classes" message="Adjust filters or add classes." />}
-        renderItem={({item}) => (
-          <Card
-            mode="outlined"
-            style={styles.card}
-            onPress={() => navigation.navigate('ClassDetails', {sectionId: item.id})}>
-            <Card.Content>
-              <Text style={styles.title}>
-                {item.className} {item.section}
-              </Text>
-              <Text style={styles.subtitle}>{item.branchName}</Text>
-              <View style={styles.metrics}>
-                <Metric label="Teacher" value={item.classTeacher} />
-                <Metric label="Students" value={item.totalStudents} />
-                <Metric label="Attendance" value={`${item.attendancePercent}%`} />
-                <Metric label="Fees" value={`${item.feeCollectionPercent}%`} />
+        ListHeaderComponent={
+          <View>
+            <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+              <View style={styles.heroDecor} />
+              <Text style={styles.heroOverline}>Main Admin</Text>
+              <View style={styles.heroRow}>
+                <Text style={styles.heroTitle}>Global Classes</Text>
+                {classes.length > 0 ? (
+                  <View style={styles.countBadge}>
+                    <Text style={styles.countBadgeText}>{classes.length}</Text>
+                  </View>
+                ) : null}
               </View>
-            </Card.Content>
-          </Card>
+              <Text style={styles.heroSub}>Classes across all active branches</Text>
+            </Animated.View>
+
+            <View style={styles.searchWrap}>
+              <SearchBar value={searchText} onChangeText={setSearchText} placeholder="Search classes" />
+            </View>
+
+            {/* Branch filter */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow} contentContainerStyle={styles.filtersContent}>
+              <FilterChip label="All Branches" selected={!filters.branchId} onPress={() => setFilters(f => ({...f, branchId: null}))} />
+              {branches.slice(0, 8).map(([id, name]) => (
+                <FilterChip
+                  key={id}
+                  label={name}
+                  selected={filters.branchId === id}
+                  onPress={() => setFilters(f => ({...f, branchId: f.branchId === id ? null : id}))}
+                />
+              ))}
+            </ScrollView>
+
+            {/* Grade filter */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersRow} contentContainerStyle={styles.filtersContent}>
+              <FilterChip label="All Grades" selected={!filters.grade} onPress={() => setFilters(f => ({...f, grade: null}))} />
+              {grades.slice(0, 14).map(grade => (
+                <FilterChip
+                  key={grade}
+                  label={grade}
+                  selected={filters.grade === grade}
+                  onPress={() => setFilters(f => ({...f, grade: f.grade === grade ? null : grade}))}
+                />
+              ))}
+            </ScrollView>
+
+            {error ? (
+              <View style={styles.errorBox}>
+                <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
+          </View>
+        }
+        renderItem={({item, index}) => (
+          <ClassCard
+            item={item}
+            index={index}
+            onPress={() => navigation.navigate('ClassDetails', {sectionId: item.id})}
+          />
         )}
+        ListEmptyComponent={
+          loading && !data ? null : (
+            <EmptyState title="No classes" message="Adjust filters or add classes." />
+          )
+        }
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
-    </ERPLayout>
+    </View>
   );
 };
 
-const FilterRow = ({items, selected, onSelect}) => (
-  <View style={styles.filters}>
-    <Chip selected={!selected} onPress={() => onSelect(null)} compact>
-      All
-    </Chip>
-    {items.slice(0, 8).map(([value, label]) => (
-      <Chip
-        key={value}
-        selected={selected === value}
-        onPress={() => onSelect(selected === value ? null : value)}
-        compact>
-        {label}
-      </Chip>
-    ))}
-  </View>
-);
-
-const Metric = ({label, value}) => (
-  <View style={styles.metric}>
-    <Text numberOfLines={1} style={styles.metricValue}>
-      {value || 0}
-    </Text>
-    <Text style={styles.metricLabel}>{label}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  content: {
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  hero: {
+    backgroundColor: colors.primaryDark,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
     padding: spacing.lg,
-    paddingBottom: 0,
+    paddingBottom: spacing.xl,
+    ...shadows.medium,
   },
-  list: {
-    flexGrow: 1,
-    padding: spacing.lg,
-    paddingTop: spacing.sm,
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
   },
-  filters: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  card: {
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm},
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  countBadge: {backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: 2},
+  countBadgeText: {color: colors.white, fontSize: 12, fontWeight: '800'},
+  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
+
+  searchWrap: {marginBottom: spacing.sm},
+  filtersRow: {marginBottom: spacing.sm},
+  filtersContent: {gap: spacing.xs, paddingVertical: 2},
+  filterChip: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  filterChipSelected: {backgroundColor: colors.primaryDark, borderColor: colors.primaryDark},
+  filterChipText: {color: colors.text, fontSize: 12, fontWeight: '600'},
+  filterChipTextSelected: {color: colors.white},
+
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
     borderRadius: radius.lg,
-    marginBottom: spacing.md,
-  },
-  title: {
-    ...typography.subtitle,
-    color: colors.text,
-  },
-  subtitle: {
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  metrics: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: spacing.sm,
-    marginTop: spacing.md,
-  },
-  metric: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    flexBasis: '47%',
-    flexGrow: 1,
+    marginBottom: spacing.sm,
     padding: spacing.sm,
   },
-  metricValue: {
-    color: colors.text,
-    fontWeight: '700',
-  },
-  metricLabel: {
-    color: colors.textMuted,
-    marginTop: 2,
-  },
-  error: {
-    color: colors.danger,
+  errorText: {color: colors.danger, flex: 1, fontSize: 12, fontWeight: '600'},
+
+  classCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
     marginBottom: spacing.sm,
+    padding: spacing.md,
+    ...shadows.soft,
   },
+  classCardTop: {alignItems: 'center', flexDirection: 'row', marginBottom: spacing.md},
+  classTitleWrap: {flex: 1},
+  classTitle: {...typography.bodyBold, color: colors.text, fontSize: 15},
+  classBranch: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  metricsRow: {borderTopColor: colors.border, borderTopWidth: 1, flexDirection: 'row', paddingTop: spacing.sm},
+  metricCell: {alignItems: 'center', flex: 1},
+  metricCellValue: {color: colors.primaryDark, fontSize: 13, fontWeight: '700'},
+  metricCellLabel: {color: colors.textMuted, fontSize: 9, fontWeight: '700', marginTop: 1, textTransform: 'uppercase'},
 });
 
 export default GlobalClassesScreen;

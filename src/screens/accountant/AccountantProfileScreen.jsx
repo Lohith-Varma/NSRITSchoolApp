@@ -1,23 +1,33 @@
 import React, {useState} from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  Pressable,
   Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
 } from 'react-native';
-import {IconButton, Avatar, Switch, Button, List} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
-import {colors, spacing, radius, shadows} from '../../theme';
-import {logoutUser} from '../../store/slices/authSlice';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {colors, radius, shadows, spacing} from '../../theme';
+import {logoutUser} from '../../store/slices/authSlice';
+
+const InfoRow = ({icon, title, description}) => (
+  <View style={styles.infoRow}>
+    <View style={styles.infoIcon}>
+      <MaterialCommunityIcons name={icon} size={16} color={colors.textSoft} />
+    </View>
+    <View style={styles.infoCopy}>
+      <Text style={styles.infoTitle}>{title}</Text>
+      <Text style={styles.infoDesc}>{description}</Text>
+    </View>
+  </View>
+);
 
 const AccountantProfileScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const {user} = useSelector(state => state.auth);
-
-  // Preference switches
   const [offlineCache, setOfflineCache] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState(true);
   const [biometricAuth, setBiometricAuth] = useState(false);
@@ -27,151 +37,99 @@ const AccountantProfileScreen = ({navigation}) => {
     navigation.replace('Login');
   };
 
+  const initials = user?.fullName
+    ? user.fullName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()
+    : 'AC';
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <IconButton
-            icon="arrow-left"
-            iconColor={colors.text}
-            size={24}
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          />
-          <View>
-            <Text style={styles.headerTitle}>Account Settings</Text>
-            <Text style={styles.headerSubtitle}>Manage credentials & portal configurations</Text>
-          </View>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={8}>
+          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+        </Pressable>
+        <View>
+          <Text style={styles.headerTitle}>Account Settings</Text>
+          <Text style={styles.headerSubtitle}>Manage credentials & portal configurations</Text>
         </View>
       </View>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Profile Card */}
         <View style={styles.profileCard}>
-          <Avatar.Text
-            size={72}
-            label={user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'JD'}
-            style={styles.avatar}
-            labelStyle={styles.avatarLabel}
-          />
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </View>
           <Text style={styles.nameText}>{user?.fullName || 'Jane Doe, CPA'}</Text>
           <Text style={styles.roleText}>Lead Finance Officer / Auditor</Text>
-          <View style={styles.badgeRow}>
-            <View style={styles.verifiedBadge}>
-              <MaterialCommunityIcons name="check-decagram" size={14} color={colors.white} />
-              <Text style={styles.verifiedBadgeText}>CPA Verified</Text>
-            </View>
+          <View style={styles.verifiedBadge}>
+            <MaterialCommunityIcons name="check-decagram" size={14} color={colors.white} />
+            <Text style={styles.verifiedBadgeText}>CPA Verified</Text>
           </View>
         </View>
 
-        {/* Identity Details */}
         <Text style={styles.sectionLabel}>Personal Information</Text>
         <View style={styles.infoGroup}>
-          <List.Item
-            title="Registered Phone"
-            description={user?.phoneNumber || '+91 99887 76655'}
-            left={props => <List.Icon {...props} icon="phone-outline" color={colors.textSoft} />}
-            style={styles.listItem}
-            titleStyle={styles.listTitle}
-            descriptionStyle={styles.listDesc}
-          />
-          <View style={styles.itemDivider} />
-          <List.Item
-            title="Designation Role"
-            description="Accountant (Role ID: ACC-99)"
-            left={props => <List.Icon {...props} icon="account-tie-outline" color={colors.textSoft} />}
-            style={styles.listItem}
-            titleStyle={styles.listTitle}
-            descriptionStyle={styles.listDesc}
-          />
-          <View style={styles.itemDivider} />
-          <List.Item
-            title="Allocated Branch"
-            description="NSRIT Central Campus"
-            left={props => <List.Icon {...props} icon="office-building" color={colors.textSoft} />}
-            style={styles.listItem}
-            titleStyle={styles.listTitle}
-            descriptionStyle={styles.listDesc}
-          />
+          <InfoRow icon="phone-outline" title="Registered Phone" description={user?.phoneNumber || '+91 99887 76655'} />
+          <View style={styles.divider} />
+          <InfoRow icon="account-tie-outline" title="Designation Role" description="Accountant (Role ID: ACC-99)" />
+          <View style={styles.divider} />
+          <InfoRow icon="office-building" title="Allocated Branch" description="NSRIT Central Campus" />
         </View>
 
-        {/* Licensure Details */}
         <Text style={styles.sectionLabel}>Credentials & Compliance</Text>
         <View style={styles.infoGroup}>
-          <List.Item
-            title="License Code"
-            description="CPA-IN-2026-89412"
-            left={props => <List.Icon {...props} icon="certificate-outline" color={colors.textSoft} />}
-            style={styles.listItem}
-            titleStyle={styles.listTitle}
-            descriptionStyle={styles.listDesc}
-          />
-          <View style={styles.itemDivider} />
-          <List.Item
-            title="Signing Authority"
-            description="Authorized (Level II Voucher Approver)"
-            left={props => <List.Icon {...props} icon="draw" color={colors.textSoft} />}
-            style={styles.listItem}
-            titleStyle={styles.listTitle}
-            descriptionStyle={styles.listDesc}
-          />
+          <InfoRow icon="certificate-outline" title="License Code" description="CPA-IN-2026-89412" />
+          <View style={styles.divider} />
+          <InfoRow icon="draw" title="Signing Authority" description="Authorized (Level II Voucher Approver)" />
         </View>
 
-        {/* Settings & Security */}
         <Text style={styles.sectionLabel}>Portal Preferences</Text>
         <View style={styles.infoGroup}>
           <View style={styles.switchRow}>
-            <View style={styles.switchTextContainer}>
+            <View style={styles.switchCopy}>
               <Text style={styles.switchTitle}>Offline Ledger Cache</Text>
               <Text style={styles.switchDesc}>Keep fee registries available offline</Text>
             </View>
             <Switch
               value={offlineCache}
               onValueChange={setOfflineCache}
-              color={colors.secondary}
+              trackColor={{false: colors.border, true: colors.secondarySoft}}
+              thumbColor={offlineCache ? colors.secondary : colors.textSoft}
             />
           </View>
-
-          <View style={styles.itemDivider} />
-
+          <View style={styles.divider} />
           <View style={styles.switchRow}>
-            <View style={styles.switchTextContainer}>
+            <View style={styles.switchCopy}>
               <Text style={styles.switchTitle}>Automatic Session Timeout</Text>
               <Text style={styles.switchDesc}>Log out after 15 minutes of idle state</Text>
             </View>
             <Switch
               value={sessionTimeout}
               onValueChange={setSessionTimeout}
-              color={colors.secondary}
+              trackColor={{false: colors.border, true: colors.secondarySoft}}
+              thumbColor={sessionTimeout ? colors.secondary : colors.textSoft}
             />
           </View>
-
-          <View style={styles.itemDivider} />
-
+          <View style={styles.divider} />
           <View style={styles.switchRow}>
-            <View style={styles.switchTextContainer}>
+            <View style={styles.switchCopy}>
               <Text style={styles.switchTitle}>Biometric Verification</Text>
               <Text style={styles.switchDesc}>Verify fingerprints on payments upload</Text>
             </View>
             <Switch
               value={biometricAuth}
               onValueChange={setBiometricAuth}
-              color={colors.secondary}
+              trackColor={{false: colors.border, true: colors.secondarySoft}}
+              thumbColor={biometricAuth ? colors.secondary : colors.textSoft}
             />
           </View>
         </View>
 
-        {/* Safety log out button */}
-        <Button
-          mode="outlined"
-          textColor={colors.danger}
-          style={styles.logoutButton}
-          labelStyle={styles.logoutButtonLabel}
+        <Pressable
           onPress={handleLogout}
-          icon="logout">
-          Sign Out of Account
-        </Button>
+          style={({pressed}) => [styles.logoutBtn, pressed && {opacity: 0.88}]}>
+          <MaterialCommunityIcons name="logout" size={16} color={colors.danger} />
+          <Text style={styles.logoutBtnText}>Sign Out of Account</Text>
+        </Pressable>
 
         <Text style={styles.versionText}>System Portal Version 2.4.1 (Build 108)</Text>
       </ScrollView>
@@ -180,173 +138,126 @@ const AccountantProfileScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
+  container: {backgroundColor: colors.background, flex: 1},
   header: {
+    alignItems: 'center',
     backgroundColor: colors.white,
-    paddingTop: Platform.OS === 'ios' ? spacing.xl : spacing.sm,
-    paddingBottom: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    elevation: 2,
-    ...shadows.soft,
-  },
-  headerLeft: {
+    borderBottomWidth: 1,
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButton: {
-    margin: 0,
-    marginRight: spacing.xs,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.primary,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  profileCard: {
-    backgroundColor: colors.white,
-    borderRadius: radius.xl,
-    paddingVertical: spacing.xl,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    elevation: 1,
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: Platform.OS === 'ios' ? spacing.xl : spacing.sm,
     ...shadows.soft,
+  },
+  backBtn: {
+    alignItems: 'center',
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  headerTitle: {color: colors.primary, fontSize: 16, fontWeight: '800'},
+  headerSubtitle: {color: colors.textMuted, fontSize: 11, fontWeight: '500'},
+  scroll: {flex: 1},
+  scrollContent: {padding: spacing.lg, paddingBottom: spacing.xxl},
+
+  profileCard: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: radius.xl,
+    borderWidth: 1,
     marginBottom: spacing.lg,
+    paddingVertical: spacing.xl,
+    ...shadows.soft,
   },
   avatar: {
+    alignItems: 'center',
     backgroundColor: colors.primarySoft,
+    borderRadius: 36,
+    height: 72,
+    justifyContent: 'center',
     marginBottom: spacing.sm,
+    width: 72,
   },
-  avatarLabel: {
-    color: colors.primary,
-    fontWeight: '800',
-    fontSize: 24,
-  },
-  nameText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  roleText: {
-    fontSize: 13,
-    color: colors.textMuted,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    marginTop: spacing.sm,
-  },
+  avatarText: {color: colors.primary, fontSize: 26, fontWeight: '800'},
+  nameText: {color: colors.text, fontSize: 18, fontWeight: '800'},
+  roleText: {color: colors.textMuted, fontSize: 13, fontWeight: '600', marginTop: 2},
   verifiedBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.secondary,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: spacing.sm,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: radius.pill,
-    gap: 4,
   },
-  verifiedBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: colors.white,
-  },
+  verifiedBadgeText: {color: colors.white, fontSize: 11, fontWeight: '700'},
+
   sectionLabel: {
+    color: colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: spacing.xs,
     marginTop: spacing.md,
+    textTransform: 'uppercase',
   },
   infoGroup: {
     backgroundColor: colors.white,
+    borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
     marginBottom: spacing.md,
-    elevation: 1,
+    overflow: 'hidden',
     ...shadows.soft,
   },
-  listItem: {
-    paddingVertical: spacing.xs,
-  },
-  listTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  listDesc: {
-    fontSize: 13,
-    color: colors.textMuted,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  itemDivider: {
-    height: 1,
-    backgroundColor: colors.background,
-    marginHorizontal: spacing.md,
-  },
-  switchRow: {
-    flexDirection: 'row',
+  infoRow: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
+    flexDirection: 'row',
+    gap: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
-  switchTextContainer: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  switchTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  switchDesc: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  logoutButton: {
-    marginTop: spacing.lg,
-    borderColor: colors.danger,
-    borderWidth: 1,
+  infoIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
     borderRadius: radius.md,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  infoCopy: {flex: 1},
+  infoTitle: {color: colors.text, fontSize: 14, fontWeight: '700'},
+  infoDesc: {color: colors.textMuted, fontSize: 13, fontWeight: '500', marginTop: 2},
+  divider: {backgroundColor: colors.background, height: 1, marginHorizontal: spacing.md},
+
+  switchRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  switchCopy: {flex: 1, marginRight: spacing.md},
+  switchTitle: {color: colors.text, fontSize: 14, fontWeight: '700'},
+  switchDesc: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+
+  logoutBtn: {
+    alignItems: 'center',
+    borderColor: colors.danger,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
     height: 48,
     justifyContent: 'center',
+    marginTop: spacing.lg,
   },
-  logoutButtonLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  versionText: {
-    fontSize: 10,
-    color: colors.textSoft,
-    textAlign: 'center',
-    marginTop: spacing.xl,
-    fontWeight: '700',
-  },
+  logoutBtnText: {color: colors.danger, fontSize: 14, fontWeight: '700'},
+  versionText: {color: colors.textSoft, fontSize: 10, fontWeight: '700', marginTop: spacing.xl, textAlign: 'center'},
 });
 
 export default AccountantProfileScreen;

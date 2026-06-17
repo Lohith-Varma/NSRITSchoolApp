@@ -1,14 +1,69 @@
 import React, {useState} from 'react';
-import {Alert, View, FlatList, StyleSheet} from 'react-native';
-import {Text, Switch, ActivityIndicator} from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Switch,
+  View,
+} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {ScreenContainer, Header, DashboardCard, EmptyState, CustomButton} from '../../components';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {EmptyState, SkeletonLoader} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import academicRepository from '../../repositories/academicRepository';
 import dataConnectClient from '../../services/dataconnect/dataConnectClient';
 import {DATA_CONNECT_QUERIES} from '../../services/dataconnect/operations';
 import {seedAcademicClasses} from '../../utils/SeedAcademicClasses';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
+
+const ClassCard = ({item, index, onToggle, isPending}) => {
+  const isActive = item.isActive;
+
+  return (
+    <Animated.View
+      entering={FadeInRight.delay(index * 40).duration(240).springify()}
+      style={[styles.classCard, isActive && styles.classCardActive]}>
+      <View style={[styles.cardAccent, {backgroundColor: isActive ? colors.success : colors.border}]} />
+      <View style={styles.cardBody}>
+        <View style={styles.cardRow}>
+          <View style={styles.cardIconWrap}>
+            <MaterialCommunityIcons
+              name="school-outline"
+              size={18}
+              color={isActive ? colors.primary : colors.textMuted}
+            />
+          </View>
+          <View style={styles.cardInfo}>
+            <Text style={styles.cardName}>
+              {item.name}
+              {item.classCode ? (
+                <Text style={styles.cardCode}> ({item.classCode})</Text>
+              ) : null}
+            </Text>
+            <Text style={styles.cardWing}>
+              {item.wing?.name || item.wing?.code || 'Wing not set'}
+            </Text>
+          </View>
+          {isPending ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : (
+            <Switch
+              value={isActive}
+              onValueChange={() => onToggle(item)}
+              trackColor={{false: colors.border, true: `${colors.success}50`}}
+              thumbColor={isActive ? colors.success : colors.textSoft}
+            />
+          )}
+        </View>
+      </View>
+    </Animated.View>
+  );
+};
 
 const ClassManagementScreen = ({navigation}) => {
   const user = useSelector(state => state.auth.user);
@@ -27,42 +82,39 @@ const ClassManagementScreen = ({navigation}) => {
       queryClient.invalidateQueries({queryKey: ['academicClasses', 'all']});
       queryClient.invalidateQueries({queryKey: ['activeAcademicClasses']});
     },
-    onError: err => {
-      Alert.alert('Activation Failed', err.message);
-    },
+    onError: err => Alert.alert('Activation Failed', err.message),
   });
 
   const deactivateMutation = useMutation({
-    mutationFn: async (classItem) => {
-      // Validation 1: Sections
-      const sectionsRes = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_SECTIONS_BY_CLASS, {
-        academicClassId: classItem.id,
-      });
+    mutationFn: async classItem => {
+      const sectionsRes = await dataConnectClient.query(
+        DATA_CONNECT_QUERIES.GET_SECTIONS_BY_CLASS,
+        {academicClassId: classItem.id},
+      );
       if (sectionsRes.sections?.length > 0) {
-        throw new Error(`Cannot deactivate: ${sectionsRes.sections.length} active section(s) exist.`);
+        throw new Error(
+          `Cannot deactivate: ${sectionsRes.sections.length} active section(s) exist.`,
+        );
       }
-
-      // Validation 2: Students (using class analytics or just fetching students)
-      const analyticsRes = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_ANALYTICS, {
-        academicClassId: classItem.id,
-      });
+      const analyticsRes = await dataConnectClient.query(
+        DATA_CONNECT_QUERIES.GET_CLASS_ANALYTICS,
+        {academicClassId: classItem.id},
+      );
       if (analyticsRes.students?.length > 0) {
-        throw new Error(`Cannot deactivate: ${analyticsRes.students.length} active student(s) exist.`);
+        throw new Error(
+          `Cannot deactivate: ${analyticsRes.students.length} active student(s) exist.`,
+        );
       }
-
-      // If no sections, there can be no class teachers assigned to active sections of this class.
       return academicRepository.deactivateClass(classItem.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['academicClasses', 'all']});
       queryClient.invalidateQueries({queryKey: ['activeAcademicClasses']});
     },
-    onError: err => {
-      Alert.alert('Validation Failed', err.message);
-    },
+    onError: err => Alert.alert('Validation Failed', err.message),
   });
 
-  const handleToggle = (classItem) => {
+  const handleToggle = classItem => {
     if (classItem.isActive) {
       deactivateMutation.mutate(classItem);
     } else {
@@ -86,47 +138,202 @@ const ClassManagementScreen = ({navigation}) => {
     item => !user?.branchId || item.branchId === user.branchId,
   );
 
+  const isPending = activateMutation.isPending || deactivateMutation.isPending;
+
   return (
-    <ScreenContainer>
-      <Header
-        title="Class Management"
-        subtitle="Manage master academic classes"
-        actionLabel={!isMainAdmin && classes.length === 0 ? "Seed Classes" : undefined}
-        onAction={!isMainAdmin && classes.length === 0 ? handleSeed : undefined}
-      />
+    <View style={styles.root}>
+      <FlatList
+        data={classes}
+        keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <View>
+            <Animated.View
+              entering={FadeInDown.duration(280).springify()}
+              style={styles.header}>
+              <View style={styles.headerDecor} />
+              <Text style={styles.headerOverline}>Principal</Text>
+              <View style={styles.headerRow}>
+                <Text style={styles.headerTitle}>Class Management</Text>
+                {classes.length > 0 ? (
+                  <View style={styles.countBadge}>
+                    <Text style={styles.countBadgeText}>{classes.length}</Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text style={styles.headerSub}>
+                Activate or deactivate master academic classes
+              </Text>
+            </Animated.View>
 
-      {seeding && <ActivityIndicator style={{marginVertical: 10}} />}
+            {seeding ? (
+              <View style={styles.seedingRow}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.seedingText}>Seeding class catalog…</Text>
+              </View>
+            ) : null}
 
-      {classes.length === 0 && !classesQuery.isLoading && !seeding && !isMainAdmin ? (
-        <View style={{padding: 16, alignItems: 'center'}}>
-          <Text style={{textAlign: 'center', marginBottom: 16}}>No master classes found in the database. You need to seed the initial data.</Text>
-          <CustomButton onPress={handleSeed} loading={seeding}>Run Seed Script</CustomButton>
-        </View>
-      ) : (
-        <FlatList
-          data={classes}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <DashboardCard
-              title={`${item.name} (${item.classCode || 'N/A'})`}
-              value={item.isActive ? 'ACTIVE' : 'INACTIVE'}
-              description={`Wing: ${item.wing?.name || item.wing?.code || 'Unknown'}`}
-              icon="school"
-              onPress={() => {}}
-              rightElement={
-                <Switch
-                  value={item.isActive}
-                  onValueChange={() => handleToggle(item)}
-                  disabled={activateMutation.isPending || deactivateMutation.isPending}
+            {classes.length === 0 &&
+            !classesQuery.isLoading &&
+            !seeding &&
+            !isMainAdmin ? (
+              <Animated.View
+                entering={FadeInDown.delay(60).duration(260).springify()}
+                style={styles.seedCard}>
+                <MaterialCommunityIcons
+                  name="database-plus-outline"
+                  size={32}
+                  color={colors.primary}
                 />
-              }
+                <Text style={styles.seedTitle}>No class catalog found</Text>
+                <Text style={styles.seedDesc}>
+                  Seed the initial class data to get started with sections and
+                  teacher assignments.
+                </Text>
+                <Pressable onPress={handleSeed} style={styles.seedBtn}>
+                  <MaterialCommunityIcons
+                    name="play-circle-outline"
+                    size={16}
+                    color={colors.white}
+                  />
+                  <Text style={styles.seedBtnText}>Run Seed Script</Text>
+                </Pressable>
+              </Animated.View>
+            ) : null}
+          </View>
+        }
+        renderItem={({item, index}) => (
+          <ClassCard
+            item={item}
+            index={Math.min(index, 15)}
+            onToggle={handleToggle}
+            isPending={isPending}
+          />
+        )}
+        ListEmptyComponent={
+          classesQuery.isLoading ? (
+            <SkeletonLoader rows={5} />
+          ) : classes.length === 0 && (seeding || isMainAdmin) ? (
+            <EmptyState
+              title="No classes"
+              message="Academic classes will appear after seeding."
             />
-          )}
-          contentContainerStyle={{paddingBottom: 20}}
-        />
-      )}
-    </ScreenContainer>
+          ) : null
+        }
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  header: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.card,
+    marginBottom: spacing.lg,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    ...shadows.medium,
+  },
+  headerDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  headerOverline: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  headerRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm},
+  headerTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  countBadge: {
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 2,
+  },
+  countBadgeText: {color: colors.white, fontSize: 12, fontWeight: '800'},
+  headerSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
+
+  seedingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  seedingText: {color: colors.primary, fontSize: 13, fontWeight: '600'},
+
+  seedCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.xxl,
+    ...shadows.soft,
+  },
+  seedTitle: {...typography.bodyBold, color: colors.text, textAlign: 'center'},
+  seedDesc: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '500',
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  seedBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  seedBtnText: {color: colors.white, fontSize: 14, fontWeight: '700'},
+
+  classCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    ...shadows.soft,
+  },
+  classCardActive: {borderColor: `${colors.success}30`},
+  cardAccent: {width: 4},
+  cardBody: {flex: 1, padding: spacing.md},
+  cardRow: {alignItems: 'center', flexDirection: 'row', gap: spacing.md},
+  cardIconWrap: {
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  cardInfo: {flex: 1},
+  cardName: {...typography.bodyBold, color: colors.text},
+  cardCode: {color: colors.textMuted, fontSize: 12, fontWeight: '500'},
+  cardWing: {color: colors.textMuted, fontSize: 12, fontWeight: '500', marginTop: 2},
+});
 
 export default ClassManagementScreen;

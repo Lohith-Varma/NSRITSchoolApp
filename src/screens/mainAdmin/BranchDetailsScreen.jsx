@@ -1,23 +1,30 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Button, Card, List, Text} from 'react-native-paper';
+import {ActivityIndicator, Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useFocusEffect} from '@react-navigation/native';
-import {
-  EmptyState,
-  Header,
-  LoadingScreen,
-  ERPLayout,
-  SectionHeader,
-  StatusBadge,
-} from '../../components';
+import {EmptyState} from '../../components';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
-import {colors, radius, spacing, typography} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 import AssignBranchAdminModal from './components/AssignBranchAdminModal';
 import AssignPrincipalModal from './components/AssignPrincipalModal';
 
-const renderClassIcon = props => <List.Icon {...props} icon="google-classroom" />;
+const InfoRow = ({label, value}) => (
+  <View style={styles.infoRow}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text style={styles.infoValue}>{value || 'Not set'}</Text>
+  </View>
+);
+
+const MetricPill = ({label, value}) => (
+  <View style={styles.metricPill}>
+    <Text style={styles.metricPillValue}>{value}</Text>
+    <Text style={styles.metricPillLabel}>{label}</Text>
+  </View>
+);
 
 const BranchDetailsScreen = ({navigation, route}) => {
   const {branchId} = route.params || {};
@@ -28,7 +35,7 @@ const BranchDetailsScreen = ({navigation, route}) => {
     [branchId],
   );
 
-  const classes = useMemo(() => data?.sections || [], [data]);
+  const sections = useMemo(() => data?.sections || [], [data]);
 
   useFocusEffect(
     useCallback(() => {
@@ -37,120 +44,173 @@ const BranchDetailsScreen = ({navigation, route}) => {
   );
 
   if (loading && !data) {
-    return <LoadingScreen message="Loading branch details" />;
+    return (
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={styles.loadingText}>Loading branch details…</Text>
+      </View>
+    );
   }
 
   if (!data?.branch) {
     return (
-      <ERPLayout
-        navigation={navigation}
-        activeRoute="Branches"
-        title="Branch Details"
-        breadcrumbs={['Dashboard', 'Branch Management', 'Details']}>
+      <View style={styles.root}>
         <EmptyState title="Branch unavailable" message={error || 'Unable to load this branch.'} />
-      </ERPLayout>
+      </View>
     );
   }
 
   const {branch, summary} = data;
+  const isActive = branch.isActive !== false;
 
   return (
-    <ERPLayout
-      navigation={navigation}
-      activeRoute="Branches"
-      title="Branch Details"
-      breadcrumbs={['Dashboard', 'Branch Management', 'Details']}>
-      <Header
-        title={branch.name}
-        subtitle={`${branch.branchCode} - ${branch.city || 'City not set'}`}
-        actionLabel="Edit"
-        onAction={() => navigation.navigate('EditBranch', {branch})}
-      />
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}>
 
-      <View style={styles.actions}>
-        <Button
-          icon="view-dashboard-outline"
-          mode="contained"
-          onPress={() => navigation.navigate('BranchOperationsDashboard', {branchId: branch.id})}>
-          Enter Operations
-        </Button>
-        <Button
-          icon="account-tie"
-          mode="outlined"
-          onPress={() => setShowAdminModal(true)}>
-          Create Admin
-        </Button>
-        <Button icon="school" mode="outlined" onPress={() => setShowPrincipalModal(true)}>
-          Create Principal
-        </Button>
-      </View>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {refreshing ? <Text style={styles.refreshing}>Refreshing...</Text> : null}
-
-      <Card mode="outlined" style={styles.card}>
-        <Card.Content>
-          <View style={styles.cardHeader}>
-            <Text style={styles.sectionTitle}>Branch Information</Text>
-            <StatusBadge
-              status={branch.isActive ? 'info' : 'holiday'}
-              label={branch.isActive ? 'Active' : 'Inactive'}
-            />
+      {/* ── Hero ── */}
+      <Animated.View entering={FadeInDown.duration(280).springify()} style={styles.hero}>
+        <View style={styles.heroDecor} />
+        <View style={styles.heroTop}>
+          <View style={styles.heroCopy}>
+            <Text style={styles.heroOverline}>{branch.branchCode}</Text>
+            <Text style={styles.heroName} numberOfLines={2}>{branch.name}</Text>
+            <Text style={styles.heroMeta}>{branch.city || 'City not set'}</Text>
           </View>
-          <Info label="Address" value={branch.address} />
-          <Info label="City" value={branch.city} />
-          <Info label="State" value={branch.state} />
-          <Info label="Pincode" value={branch.pincode} />
-          <Info label="Phone" value={branch.phone} />
-          <Info label="Email" value={branch.email} />
-        </Card.Content>
-      </Card>
+          <View style={[styles.statusBadge, {backgroundColor: isActive ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}]}>
+            <View style={[styles.statusDot, {backgroundColor: isActive ? colors.success : colors.danger}]} />
+            <Text style={[styles.statusText, {color: isActive ? '#86efac' : '#fca5a5'}]}>
+              {isActive ? 'Active' : 'Inactive'}
+            </Text>
+          </View>
+        </View>
 
-      <View style={styles.metricGrid}>
-        <Metric label="Classes" value={summary.totalClasses} />
-        <Metric label="Students" value={summary.totalStudents} />
-        <Metric label="Teachers" value={summary.totalTeachers} />
-        <Metric label="Coordinators" value={summary.totalCoordinators} />
-        <Metric label="Accountants" value={summary.totalAccountants} />
-        <Metric label="Attendance" value={`${summary.attendancePercent}%`} />
-      </View>
+        {/* stats row */}
+        <View style={styles.statsRow}>
+          {[
+            {label: 'Students', value: summary?.totalStudents || 0},
+            {label: 'Teachers', value: summary?.totalTeachers || 0},
+            {label: 'Attendance', value: `${summary?.attendancePercent || 0}%`},
+            {label: 'Collection', value: `${summary?.feeCollectionPercent || 0}%`},
+          ].map((stat, i) => (
+            <React.Fragment key={stat.label}>
+              {i > 0 ? <View style={styles.statSep} /> : null}
+              <View style={styles.stat}>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            </React.Fragment>
+          ))}
+        </View>
 
-      <Card mode="outlined" style={styles.card}>
-        <Card.Content>
-          <Text style={styles.sectionTitle}>Leadership</Text>
-          <Info label="Principal" value={branch.principal?.fullName || 'Unassigned'} />
-          <Info label="Branch Admin" value={branch.branchAdmin?.fullName || 'Unassigned'} />
-        </Card.Content>
-      </Card>
+        {/* action buttons */}
+        <View style={styles.actionRow}>
+          <Pressable
+            onPress={() => navigation.navigate('BranchOperationsDashboard', {branchId: branch.id})}
+            style={styles.primaryAction}>
+            <MaterialCommunityIcons name="view-dashboard-outline" size={14} color={colors.primaryDark} />
+            <Text style={styles.primaryActionText}>Enter Operations</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => navigation.navigate('EditBranch', {branch})}
+            style={styles.secondaryAction}>
+            <MaterialCommunityIcons name="pencil-outline" size={14} color={colors.white} />
+          </Pressable>
+          <Pressable onPress={refresh} style={styles.secondaryAction}>
+            <MaterialCommunityIcons name="refresh" size={14} color={colors.white} />
+          </Pressable>
+        </View>
+      </Animated.View>
 
-      <Card mode="outlined" style={styles.card}>
-        <Card.Content>
-          <Text style={styles.sectionTitle}>Fee Collection Summary</Text>
-          <Info label="Total Fees" value={formatCurrency(summary.totalFees)} />
-          <Info label="Collected" value={formatCurrency(summary.paidFees)} />
-          <Info label="Pending" value={formatCurrency(summary.pendingFees)} />
-          <Info label="Collection" value={`${summary.feeCollectionPercent}%`} />
-        </Card.Content>
-      </Card>
+      {refreshing ? (
+        <View style={styles.refreshingBar}>
+          <ActivityIndicator color={colors.primary} size="small" />
+          <Text style={styles.refreshingText}>Refreshing…</Text>
+        </View>
+      ) : null}
 
-      <SectionHeader title="Classes in Branch" subtitle="Class sections under this branch" />
-      {classes.length ? (
-        classes.map(section => (
-          <List.Item
-            key={section.id}
-            title={`${section.academicClass?.name || 'Class'} ${section.name}`}
-            description={section.isActive ? 'Active' : 'Inactive'}
-            left={renderClassIcon}
-            onPress={() => navigation.navigate('ClassDetails', {sectionId: section.id})}
-          />
+      {/* ── Branch info ── */}
+      <Animated.View entering={FadeInDown.delay(60).duration(260).springify()} style={styles.infoCard}>
+        <Text style={styles.cardSection}>Branch Information</Text>
+        <InfoRow label="Address" value={branch.address} />
+        <InfoRow label="City" value={branch.city} />
+        <InfoRow label="State" value={branch.state} />
+        <InfoRow label="Pincode" value={branch.pincode} />
+        <InfoRow label="Phone" value={branch.phone} />
+        <InfoRow label="Email" value={branch.email} />
+      </Animated.View>
+
+      {/* ── Metrics grid ── */}
+      <Animated.View entering={FadeInDown.delay(80).duration(260).springify()} style={styles.metricsGrid}>
+        {[
+          {label: 'Classes', value: summary?.totalClasses || 0},
+          {label: 'Students', value: summary?.totalStudents || 0},
+          {label: 'Teachers', value: summary?.totalTeachers || 0},
+          {label: 'Coordinators', value: summary?.totalCoordinators || 0},
+          {label: 'Accountants', value: summary?.totalAccountants || 0},
+          {label: 'Attendance', value: `${summary?.attendancePercent || 0}%`},
+        ].map(item => (
+          <MetricPill key={item.label} label={item.label} value={item.value} />
+        ))}
+      </Animated.View>
+
+      {/* ── Leadership ── */}
+      <Animated.View entering={FadeInDown.delay(100).duration(260).springify()} style={styles.infoCard}>
+        <Text style={styles.cardSection}>Leadership</Text>
+        <InfoRow label="Principal" value={branch.principal?.fullName || 'Unassigned'} />
+        <InfoRow label="Branch Admin" value={branch.branchAdmin?.fullName || 'Unassigned'} />
+        <View style={styles.assignBtnsRow}>
+          <Pressable
+            onPress={() => setShowAdminModal(true)}
+            style={styles.assignBtn}>
+            <MaterialCommunityIcons name="account-tie" size={13} color={colors.primary} />
+            <Text style={styles.assignBtnText}>Assign Admin</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setShowPrincipalModal(true)}
+            style={styles.assignBtn}>
+            <MaterialCommunityIcons name="school" size={13} color={colors.primary} />
+            <Text style={styles.assignBtnText}>Assign Principal</Text>
+          </Pressable>
+        </View>
+      </Animated.View>
+
+      {/* ── Fees ── */}
+      <Animated.View entering={FadeInDown.delay(120).duration(260).springify()} style={styles.infoCard}>
+        <Text style={styles.cardSection}>Fee Collection</Text>
+        <InfoRow label="Total Fees" value={formatCurrency(summary?.totalFees)} />
+        <InfoRow label="Collected" value={formatCurrency(summary?.paidFees)} />
+        <InfoRow label="Pending" value={formatCurrency(summary?.pendingFees)} />
+        <InfoRow label="Collection Rate" value={`${summary?.feeCollectionPercent || 0}%`} />
+      </Animated.View>
+
+      {/* ── Classes ── */}
+      <Text style={styles.listLabel}>Classes in Branch</Text>
+      {sections.length ? (
+        sections.map((section, index) => (
+          <Animated.View key={section.id} entering={FadeInRight.delay(index * 25).duration(200).springify()}>
+            <Pressable
+              onPress={() => navigation.navigate('ClassDetails', {sectionId: section.id})}
+              style={({pressed}) => [styles.sectionItem, pressed && {opacity: 0.88}]}>
+              <View style={styles.sectionIcon}>
+                <MaterialCommunityIcons name="google-classroom" size={14} color={colors.primaryDark} />
+              </View>
+              <Text style={styles.sectionText}>
+                {section.academicClass?.name || 'Class'} {section.name}
+              </Text>
+              <Text style={[styles.sectionStatus, {color: section.isActive ? colors.success : colors.textMuted}]}>
+                {section.isActive ? 'Active' : 'Inactive'}
+              </Text>
+              <MaterialCommunityIcons name="chevron-right" size={14} color={colors.textMuted} />
+            </Pressable>
+          </Animated.View>
         ))
       ) : (
         <EmptyState title="No classes" message="Classes for this branch will appear here." />
       )}
 
-      <Button mode="text" icon="refresh" onPress={refresh} style={styles.refreshButton}>
-        Refresh
-      </Button>
+      <View style={{height: spacing.xxxl}} />
 
       <AssignBranchAdminModal
         branchId={branch.id}
@@ -164,99 +224,169 @@ const BranchDetailsScreen = ({navigation, route}) => {
         onDismiss={() => setShowPrincipalModal(false)}
         onAssigned={refresh}
       />
-    </ERPLayout>
+    </ScrollView>
   );
 };
 
-const Info = ({label, value}) => (
-  <View style={styles.infoRow}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value || 'Not set'}</Text>
-  </View>
-);
-
-const Metric = ({label, value}) => (
-  <Card mode="outlined" style={styles.metricCard}>
-    <Card.Content>
-      <Text style={styles.metricValue}>{value}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
-    </Card.Content>
-  </Card>
-);
-
 const styles = StyleSheet.create({
-  actions: {
+  root: {backgroundColor: colors.background, flex: 1},
+  scroll: {padding: spacing.lg},
+  loadingWrap: {alignItems: 'center', backgroundColor: colors.background, flex: 1, gap: spacing.md, justifyContent: 'center'},
+  loadingText: {color: colors.textMuted, fontSize: 13, fontWeight: '600'},
+
+  hero: {
+    backgroundColor: colors.primaryDark,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  heroTop: {alignItems: 'flex-start', flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md},
+  heroCopy: {flex: 1},
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase'},
+  heroName: {color: colors.white, fontSize: 20, fontWeight: '800', marginTop: 2},
+  heroMeta: {color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: '500', marginTop: 2},
+  statusBadge: {alignItems: 'center', borderRadius: radius.pill, flexDirection: 'row', gap: 5, paddingHorizontal: spacing.sm, paddingVertical: 4},
+  statusDot: {borderRadius: radius.pill, height: 6, width: 6},
+  statusText: {fontSize: 10, fontWeight: '700'},
+  statsRow: {
+    borderTopColor: 'rgba(255,255,255,0.12)',
+    borderTopWidth: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
     marginBottom: spacing.md,
+    paddingTop: spacing.md,
   },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    marginBottom: spacing.md,
-  },
-  cardHeader: {
+  stat: {alignItems: 'center', flex: 1},
+  statValue: {color: colors.white, fontSize: 15, fontWeight: '800'},
+  statLabel: {color: 'rgba(255,255,255,0.55)', fontSize: 9, fontWeight: '700', marginTop: 1, textTransform: 'uppercase'},
+  statSep: {backgroundColor: 'rgba(255,255,255,0.12)', width: 1},
+  actionRow: {flexDirection: 'row', gap: spacing.sm},
+  primaryAction: {
     alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: radius.pill,
+    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  sectionTitle: {
-    ...typography.subtitle,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  infoRow: {
-    borderBottomColor: colors.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'space-between',
+    gap: 5,
+    justifyContent: 'center',
     paddingVertical: spacing.sm,
   },
-  infoLabel: {
+  primaryActionText: {color: colors.primaryDark, fontSize: 12, fontWeight: '700'},
+  secondaryAction: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: radius.pill,
+    height: 34,
+    justifyContent: 'center',
+    width: 34,
+  },
+
+  refreshingBar: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm},
+  refreshingText: {color: colors.textMuted, fontSize: 11, fontWeight: '600'},
+
+  infoCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    ...shadows.soft,
+  },
+  cardSection: {
+    backgroundColor: colors.background,
     color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    padding: spacing.md,
+    paddingBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  infoRow: {
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  infoLabel: {color: colors.textMuted, flex: 1, fontSize: 12, fontWeight: '500'},
+  infoValue: {...typography.bodyBold, color: colors.text, flex: 1.4, fontSize: 12, textAlign: 'right'},
+  assignBtnsRow: {borderTopColor: colors.border, borderTopWidth: 1, flexDirection: 'row', gap: spacing.sm, padding: spacing.md},
+  assignBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.lg,
     flex: 1,
+    flexDirection: 'row',
+    gap: 5,
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
   },
-  infoValue: {
-    color: colors.text,
-    flex: 1.4,
-    textAlign: 'right',
-  },
-  metricGrid: {
+  assignBtnText: {color: colors.primary, fontSize: 12, fontWeight: '700'},
+
+  metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
-  metricCard: {
+  metricPill: {
+    alignItems: 'center',
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    flexBasis: '48%',
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexBasis: '31%',
     flexGrow: 1,
+    padding: spacing.md,
+    ...shadows.soft,
   },
-  metricValue: {
-    ...typography.title,
-    color: colors.primary,
-  },
-  metricLabel: {
+  metricPillValue: {color: colors.primaryDark, fontSize: 18, fontWeight: '800'},
+  metricPillLabel: {color: colors.textMuted, fontSize: 9, fontWeight: '700', marginTop: 2, textTransform: 'uppercase'},
+
+  listLabel: {
     color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
-  error: {
-    color: colors.danger,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
     marginBottom: spacing.sm,
-  },
-  refreshing: {
-    color: colors.textMuted,
-    marginBottom: spacing.sm,
-  },
-  refreshButton: {
     marginTop: spacing.sm,
+    textTransform: 'uppercase',
   },
+  sectionItem: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.xs,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
+  sectionIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    height: 30,
+    justifyContent: 'center',
+    width: 30,
+  },
+  sectionText: {...typography.bodyBold, color: colors.text, flex: 1},
+  sectionStatus: {fontSize: 10, fontWeight: '700'},
 });
 
 export default BranchDetailsScreen;

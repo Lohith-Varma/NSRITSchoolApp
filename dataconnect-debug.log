@@ -1,210 +1,88 @@
-I0617 01:00:25.966059   34080 load.go:31] Reloading schema and connectors...
-I0617 01:00:26.247812   34080 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service b98f] UpdateResources(): done
+I0617 03:47:02.133134   30032 load.go:31] Reloading schema and connectors...
+I0617 03:47:02.380096   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service 1167] UpdateResources(): done
 Main schema: sources: schema\schema.gql [23750B] 
 Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0617 01:00:26.735769   34080 codegen.go:101] [connector "nsrit" javascriptSdk] Generating sources into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
-I0617 01:00:26.810642   34080 collector.go:107] schema extensions wrote into "D:\\NSRITSchoolApp\\dataconnect\\.dataconnect\\schema"
-Generated sources: main\relation.gql [291636B] main\query.gql [47389B] prelude.gql [84995B] main\mutation.gql [129895B] main\input.gql [556740B] 
-I0617 01:00:26.833227   34080 collector.go:107] connector "nsrit" javascriptSdk wrote into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
-Generated sources: README.md [677884B] .guides/usage.md [2234B] .guides/setup.md [584B] .guides/config.json [236B] esm\index.esm.js [75755B] index.d.ts [184299B] esm\package.json [17B] index.cjs.js [84351B] package.json [613B] 
-I0617 01:00:26.834952   34080 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
-I0617 01:00:26.834952   34080 load.go:109] Finished reloading
-I0617 01:00:26.837275   34080 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399
-I0617 01:00:26.837275   34080 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399
-I0617 01:00:30.209508   34080 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] UpdateResources(): done
+I0617 03:47:02.799673   30032 codegen.go:101] [connector "nsrit" javascriptSdk] Generating sources into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+I0617 03:47:02.877519   30032 collector.go:107] schema extensions wrote into "D:\\NSRITSchoolApp\\dataconnect\\.dataconnect\\schema"
+Generated sources: main\relation.gql [291636B] main\query.gql [47389B] main\mutation.gql [129895B] prelude.gql [84995B] main\input.gql [556740B] 
+I0617 03:47:02.894907   30032 collector.go:107] connector "nsrit" javascriptSdk wrote into "D:\\NSRITSchoolApp\\src\\dataconnect-generated"
+Generated sources: .guides/setup.md [584B] .guides/config.json [236B] esm\index.esm.js [75755B] esm\package.json [17B] index.cjs.js [84351B] .guides/usage.md [2234B] index.d.ts [184299B] package.json [613B] README.md [677884B] 
+I0617 03:47:02.901497   30032 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0617 03:47:02.902189   30032 load.go:109] Finished reloading
+I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+I0617 03:47:02.903264   30032 dev.go:104] Listening on address (HTTP + gRPC): [::1]:9399
+I0617 03:47:06.901940   30032 control.go:100] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] UpdateResources(): done
 Main schema: sources: schema\schema.gql [23750B] 
-Connector "nsrit": sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0617 01:00:30.427836   34080 configure_emulator.go:21] ConfigureEmulator successed
+Connector "nsrit": sources: connectors\nsrit\queries.gql [68377B] connectors\nsrit\mutations.gql [60486B] 
+I0617 03:47:07.168484   30032 configure_emulator.go:21] ConfigureEmulator successed
 Request: service_id: "nsrit-school-2b749-service"
 connection_string: "postgres://127.0.0.1:5432/nsrit-school-2b749-2-database?sslmode=disable"
 database: "nsrit-school-2b749-2-database"
 
 Response: 
-W0617 01:08:30.672046   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
-Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
-
-Variables Set: [firebaseUID]
-Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
-Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
-sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-W0617 01:08:57.480727   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
-Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
-
-Variables Set: [firebaseUID]
-Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
-Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
-sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-W0617 01:09:52.840092   34080 engine.go:207] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: failed with explicit status error: rpc error: code = Unauthenticated desc = unauthenticated: this operation requires a signed-in user. Connector: nsrit
-Auth: user of {"UID":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","Token":{"aud":"nsrit-school-2b749","auth_time":1781638710,"exp":1781642310,"firebase":{"identities":{},"sign_in_provider":"anonymous"},"iat":1781638710,"iss":"https://securetoken.google.com/nsrit-school-2b749","provider_id":"anonymous","sub":"CvlaL6XLghVhmvUPCNzDOHLw30Y0","user_id":"CvlaL6XLghVhmvUPCNzDOHLw30Y0"}}
-
-Variables Set: [firebaseUID]
-Status: code:16 message:"unauthenticated: this operation requires a signed-in user"
-Errors: [message:"@auth rejected the request" extensions:{code:UNAUTHENTICATED debug_details:"@auth(level: USER) doesn't allow anonymous users"}]
-sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0617 01:10:34.417544   34080 execute.go:57] Database ping is quick (likely cached), took 4.5564ms
-I0617 01:10:34.511675   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:10:34.621080   34080 execute.go:57] Database ping is quick (likely cached), took 1.5304ms
-I0617 01:10:34.652629   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:10:34.762312   34080 execute.go:57] Database ping is quick (likely cached), took 2.1354ms
-I0617 01:10:34.830294   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:10:34.909061   34080 execute.go:57] Database ping is quick (likely cached), took 11.8073ms
-I0617 01:10:34.929809   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:10:36.040749   34080 engine.go:211] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: invalid request. Connector: nsrit
-Auth: user of {"UID":"6KWmOw0yB1ebWGS7VMV8HxW6Male","Token":{"aud":"nsrit-school-2b749","auth_time":1781638833,"exp":1781642433,"firebase":{"identities":{"phone":["+919999999999"]},"sign_in_provider":"phone"},"iat":1781638833,"iss":"https://securetoken.google.com/nsrit-school-2b749","phone_number":"+919999999999","sub":"6KWmOw0yB1ebWGS7VMV8HxW6Male","user_id":"6KWmOw0yB1ebWGS7VMV8HxW6Male"}}
-
-Variables Set: [limit offset]
-Errors: [message:"$branchId (UUID) is missing" extensions:{code:INVALID_ARGUMENT}]
-sources: connectors\nsrit\queries.gql [68377B] connectors\nsrit\mutations.gql [60486B] 
-I0617 01:10:36.051676   34080 execute.go:57] Database ping is quick (likely cached), took 574.2µs
-I0617 01:10:36.090427   34080 every.go:43] @check passed after running 1 checks
-I0617 01:10:36.092559   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
-I0617 01:24:49.561564   34080 execute.go:57] Database ping is quick (likely cached), took 600.6µs
-I0617 01:24:49.567528   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:24:49.859189   34080 execute.go:57] Database ping is quick (likely cached), took 1.4518ms
-I0617 01:24:49.881237   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:24:49.984536   34080 execute.go:57] Database ping is quick (likely cached), took 1.8659ms
-I0617 01:24:49.994176   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:24:50.091270   34080 execute.go:57] Database ping is quick (likely cached), took 1.8195ms
-I0617 01:24:50.099941   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:24:50.675850   34080 execute.go:57] Database ping is quick (likely cached), took 1.2014ms
-I0617 01:24:50.759299   34080 every.go:43] @check passed after running 1 checks
-I0617 01:24:50.759299   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:24:50.761482   34080 execute.go:57] Database ping is quick (likely cached), took 526.8µs
-I0617 01:24:50.800672   34080 every.go:43] @check passed after running 1 checks
-I0617 01:24:50.800672   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:24:50.801848   34080 execute.go:57] Database ping is quick (likely cached), took 570µs
-I0617 01:24:50.811620   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetWingsByBranch: succeeded. Connector: nsrit
-I0617 01:24:50.813814   34080 execute.go:57] Database ping is quick (likely cached), took 1.0956ms
-I0617 01:24:50.844014   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
-I0617 01:24:50.853279   34080 execute.go:57] Database ping is quick (likely cached), took 909.5µs
-I0617 01:24:50.894616   34080 every.go:43] @check passed after running 1 checks
-I0617 01:24:50.894616   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:24:50.897699   34080 execute.go:57] Database ping is quick (likely cached), took 1.4473ms
-I0617 01:24:50.913377   34080 every.go:43] @check passed after running 1 checks
-I0617 01:24:50.913377   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:26:37.359654   34080 execute.go:57] Database ping is quick (likely cached), took 2.1933ms
-I0617 01:26:37.366712   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:26:37.455344   34080 execute.go:57] Database ping is quick (likely cached), took 1.0829ms
-I0617 01:26:37.468344   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:26:37.526427   34080 execute.go:57] Database ping is quick (likely cached), took 995.1µs
-I0617 01:26:37.535568   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:26:37.605826   34080 execute.go:57] Database ping is quick (likely cached), took 997.9µs
-I0617 01:26:37.612187   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:26:38.282567   34080 execute.go:57] Database ping is quick (likely cached), took 1.0687ms
-I0617 01:26:38.359775   34080 every.go:43] @check passed after running 1 checks
-I0617 01:26:38.359775   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:26:38.361419   34080 execute.go:57] Database ping is quick (likely cached), took 549.2µs
-I0617 01:26:38.390308   34080 every.go:43] @check passed after running 1 checks
-I0617 01:26:38.390308   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:26:38.395117   34080 execute.go:57] Database ping is quick (likely cached), took 883µs
-I0617 01:26:38.424168   34080 every.go:43] @check passed after running 1 checks
-I0617 01:26:38.424688   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPrincipalDashboard: succeeded. Connector: nsrit
-I0617 01:26:38.426357   34080 execute.go:57] Database ping is quick (likely cached), took 533.1µs
-I0617 01:26:38.449759   34080 every.go:43] @check passed after running 1 checks
-I0617 01:26:38.449759   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:26:38.451547   34080 execute.go:57] Database ping is quick (likely cached), took 566.3µs
-I0617 01:26:38.462672   34080 every.go:43] @check passed after running 1 checks
-I0617 01:26:38.462672   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:27:06.706226   34080 execute.go:57] Database ping is quick (likely cached), took 1.5717ms
-I0617 01:27:06.711737   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:27:06.782876   34080 execute.go:57] Database ping is quick (likely cached), took 594.2µs
-I0617 01:27:06.789194   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:27:06.868249   34080 execute.go:57] Database ping is quick (likely cached), took 1.6375ms
-I0617 01:27:06.873861   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:27:06.924120   34080 execute.go:57] Database ping is quick (likely cached), took 568.6µs
-I0617 01:27:06.928461   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:27:06.989503   34080 execute.go:57] Database ping is quick (likely cached), took 1.6347ms
-I0617 01:27:07.003517   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:07.003517   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCoordinatorByUser: succeeded. Connector: nsrit
-I0617 01:27:07.684359   34080 execute.go:57] Database ping is quick (likely cached), took 1.0795ms
-I0617 01:27:07.764228   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:07.764228   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:27:07.766933   34080 execute.go:57] Database ping is quick (likely cached), took 1.0868ms
-I0617 01:27:07.788974   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:07.788974   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:27:07.824528   34080 execute.go:57] Database ping is quick (likely cached), took 556.9µs
-I0617 01:27:07.843200   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:07.843766   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:27:07.845254   34080 execute.go:57] Database ping is quick (likely cached), took 902.1µs
-I0617 01:27:07.851987   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:07.851987   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:27:34.942367   34080 execute.go:57] Database ping is quick (likely cached), took 2.3755ms
-I0617 01:27:34.949411   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:27:35.055377   34080 execute.go:57] Database ping is quick (likely cached), took 2.1479ms
-I0617 01:27:35.067846   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:27:35.239287   34080 execute.go:57] Database ping is quick (likely cached), took 2.558ms
-I0617 01:27:35.251221   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:27:35.378237   34080 execute.go:57] Database ping is quick (likely cached), took 1.3964ms
-I0617 01:27:35.386750   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:27:35.462921   34080 execute.go:57] Database ping is quick (likely cached), took 1.1939ms
-I0617 01:27:35.481325   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:35.481864   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetTeacherProfileByUser: succeeded. Connector: nsrit
-I0617 01:27:36.052679   34080 execute.go:57] Database ping is quick (likely cached), took 602.5µs
-I0617 01:27:36.162796   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:36.164060   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetTeacherDashboard: succeeded. Connector: nsrit
-I0617 01:27:36.165805   34080 execute.go:57] Database ping is quick (likely cached), took 1.179ms
-I0617 01:27:36.242676   34080 every.go:43] @check passed after running 1 checks
-I0617 01:27:36.243309   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:28:04.087168   34080 execute.go:57] Database ping is quick (likely cached), took 2.3599ms
-I0617 01:28:04.105444   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:28:04.216002   34080 execute.go:57] Database ping is quick (likely cached), took 2.8858ms
-I0617 01:28:04.226812   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:28:04.353682   34080 execute.go:57] Database ping is quick (likely cached), took 1.1213ms
-I0617 01:28:04.358274   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:28:04.423156   34080 execute.go:57] Database ping is quick (likely cached), took 703µs
-I0617 01:28:04.431176   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:28:04.505817   34080 execute.go:57] Database ping is quick (likely cached), took 967.1µs
-I0617 01:28:04.520174   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
-I0617 01:28:05.062814   34080 execute.go:57] Database ping is quick (likely cached), took 1.1391ms
-I0617 01:28:05.218197   34080 every.go:43] @check passed after running 1 checks
-I0617 01:28:05.218197   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
-I0617 01:28:34.289263   34080 execute.go:57] Database ping is quick (likely cached), took 1.509ms
-I0617 01:28:34.296559   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:28:34.358212   34080 execute.go:57] Database ping is quick (likely cached), took 1.0888ms
-I0617 01:28:34.363805   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:28:34.419667   34080 execute.go:57] Database ping is quick (likely cached), took 551.1µs
-I0617 01:28:34.423257   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:28:34.471929   34080 execute.go:57] Database ping is quick (likely cached), took 1.4989ms
-I0617 01:28:34.476868   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:28:34.531907   34080 execute.go:57] Database ping is quick (likely cached), took 1.002ms
-I0617 01:28:34.566774   34080 every.go:43] @check passed after running 1 checks
-I0617 01:28:34.566774   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAccountantByUser: succeeded. Connector: nsrit
-I0617 01:29:04.782625   34080 execute.go:57] Database ping is quick (likely cached), took 1.1778ms
-I0617 01:29:04.810512   34080 every.go:43] @check passed after running 1 checks
-I0617 01:29:04.810512   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:29:04.890431   34080 execute.go:57] Database ping is quick (likely cached), took 1.1105ms
-I0617 01:29:04.916653   34080 every.go:43] @check passed after running 1 checks
-I0617 01:29:04.916653   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:29:23.564107   34080 execute.go:57] Database ping is quick (likely cached), took 1.0763ms
-I0617 01:29:23.569238   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:29:24.102141   34080 execute.go:57] Database ping is quick (likely cached), took 775.1µs
-I0617 01:29:24.109871   34080 every.go:43] @check passed after running 1 checks
-I0617 01:29:24.109871   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetAccountantByUser: succeeded. Connector: nsrit
-I0617 01:29:25.085694   34080 execute.go:57] Database ping is quick (likely cached), took 2.6754ms
-I0617 01:29:25.120107   34080 every.go:43] @check passed after running 1 checks
-I0617 01:29:25.120107   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
-I0617 01:29:25.270685   34080 execute.go:57] Database ping is quick (likely cached), took 634.2µs
-I0617 01:29:25.302968   34080 every.go:43] @check passed after running 1 checks
-I0617 01:29:25.302968   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
-I0617 01:30:44.475140   34080 execute.go:57] Database ping is quick (likely cached), took 1.636ms
-I0617 01:30:44.479344   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:30:44.551654   34080 execute.go:57] Database ping is quick (likely cached), took 1.2565ms
-I0617 01:30:44.558602   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
-I0617 01:30:44.662098   34080 execute.go:57] Database ping is quick (likely cached), took 1.5764ms
-I0617 01:30:44.665523   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
-I0617 01:30:44.748202   34080 execute.go:57] Database ping is quick (likely cached), took 1.2071ms
-I0617 01:30:44.757631   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:43:02.875610   34080 execute.go:57] Database ping is quick (likely cached), took 3.2162ms
-I0617 01:43:02.890593   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
-I0617 01:43:04.056184   34080 engine.go:211] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetFeeReports: invalid request. Connector: nsrit
-Auth: user of {"UID":"6KWmOw0yB1ebWGS7VMV8HxW6Male","Token":{"aud":"nsrit-school-2b749","auth_time":1781640782,"exp":1781644382,"firebase":{"identities":{"phone":["+919999999999"]},"sign_in_provider":"phone"},"iat":1781640782,"iss":"https://securetoken.google.com/nsrit-school-2b749","phone_number":"+919999999999","sub":"6KWmOw0yB1ebWGS7VMV8HxW6Male","user_id":"6KWmOw0yB1ebWGS7VMV8HxW6Male"}}
-
-Variables Set: [limit offset]
-Errors: [message:"$branchId (UUID) is missing" extensions:{code:INVALID_ARGUMENT}]
-sources: connectors\nsrit\mutations.gql [60486B] connectors\nsrit\queries.gql [68377B] 
-I0617 01:43:04.096760   34080 execute.go:57] Database ping is quick (likely cached), took 931.6µs
-I0617 01:43:04.112883   34080 every.go:43] @check passed after running 1 checks
-I0617 01:43:04.113393   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
-I0617 02:06:59.127583   34080 execute.go:57] Database ping is quick (likely cached), took 2.7906ms
-I0617 02:06:59.252815   34080 every.go:43] @check passed after running 1 checks
-I0617 02:06:59.255614   34080 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service dad5] ExecuteQuery query GetDashboardStatistics: succeeded. Connector: nsrit
+W0617 04:00:44.821359   30032 execute.go:51] Database ping is slow 23.4121ms
+stats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+stats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+I0617 04:00:44.913523   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 04:00:45.287260   30032 execute.go:57] Database ping is quick (likely cached), took 530.1µs
+I0617 04:00:45.298734   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 04:00:45.376621   30032 execute.go:57] Database ping is quick (likely cached), took 583.6µs
+I0617 04:00:45.411418   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 04:00:45.459772   30032 execute.go:57] Database ping is quick (likely cached), took 539.1µs
+I0617 04:00:45.462276   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 04:00:45.802227   30032 execute.go:57] Database ping is quick (likely cached), took 540.4µs
+I0617 04:00:45.890737   30032 every.go:43] @check passed after running 1 checks
+I0617 04:00:45.891934   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetFeeReports: succeeded. Connector: nsrit
+I0617 04:00:45.913870   30032 execute.go:57] Database ping is quick (likely cached), took 1.0208ms
+I0617 04:00:45.929041   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
+I0617 04:00:45.930124   30032 execute.go:57] Database ping is quick (likely cached), took 532.9µs
+I0617 04:00:45.934920   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetWingsByBranch: succeeded. Connector: nsrit
+I0617 04:00:45.969090   30032 execute.go:57] Database ping is quick (likely cached), took 522.8µs
+I0617 04:00:46.010084   30032 every.go:43] @check passed after running 1 checks
+I0617 04:00:46.010084   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetPaymentHistory: succeeded. Connector: nsrit
+I0617 04:00:57.141336   30032 execute.go:57] Database ping is quick (likely cached), took 575.6µs
+I0617 04:00:57.146687   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetActiveAcademicClasses: succeeded. Connector: nsrit
+I0617 04:00:57.150225   30032 execute.go:57] Database ping is quick (likely cached), took 585.2µs
+I0617 04:00:57.191804   30032 every.go:43] @check passed after running 1 checks
+I0617 04:00:57.191804   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit
+I0617 04:01:46.199183   30032 execute.go:57] Database ping is quick (likely cached), took 1.578ms
+I0617 04:01:46.215275   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAcademicClasses: succeeded. Connector: nsrit
+I0617 04:01:46.216973   30032 execute.go:57] Database ping is quick (likely cached), took 1.1411ms
+I0617 04:01:46.249522   30032 every.go:43] @check passed after running 1 checks
+I0617 04:01:46.249522   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetSections: succeeded. Connector: nsrit
+I0617 04:02:07.542730   30032 execute.go:57] Database ping is quick (likely cached), took 1.1241ms
+I0617 04:02:07.584677   30032 every.go:43] @check passed after running 1 checks
+I0617 04:02:07.585281   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetStudents: succeeded. Connector: nsrit
+I0617 04:04:18.360725   30032 execute.go:57] Database ping is quick (likely cached), took 539.6µs
+I0617 04:04:18.405319   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 04:04:18.470389   30032 execute.go:57] Database ping is quick (likely cached), took 1.3669ms
+I0617 04:04:18.473138   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetUserByPhone: succeeded. Connector: nsrit
+I0617 04:04:18.530599   30032 execute.go:57] Database ping is quick (likely cached), took 599.9µs
+I0617 04:04:18.532696   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteMutation mutation ClaimUserFirebaseUID: succeeded. Connector: nsrit
+I0617 04:04:18.580880   30032 execute.go:57] Database ping is quick (likely cached), took 552.1µs
+I0617 04:04:18.583822   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 04:04:18.654451   30032 execute.go:57] Database ping is quick (likely cached), took 536.5µs
+I0617 04:04:18.660719   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
+I0617 04:04:18.967577   30032 execute.go:57] Database ping is quick (likely cached), took 1.392ms
+I0617 04:04:19.033880   30032 every.go:43] @check passed after running 1 checks
+I0617 04:04:19.033880   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+I0617 04:05:00.923144   30032 execute.go:57] Database ping is quick (likely cached), took 916.3µs
+I0617 04:05:01.008495   30032 every.go:43] @check passed after running 1 checks
+I0617 04:05:01.008495   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+I0617 04:05:01.200482   30032 execute.go:57] Database ping is quick (likely cached), took 2.0984ms
+I0617 04:05:01.215973   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetAttendanceByMonth: succeeded. Connector: nsrit
+I0617 04:05:08.728616   30032 execute.go:57] Database ping is quick (likely cached), took 1.1296ms
+I0617 04:05:08.793726   30032 every.go:43] @check passed after running 1 checks
+I0617 04:05:08.793726   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+I0617 04:05:15.455506   30032 execute.go:57] Database ping is quick (likely cached), took 567.6µs
+I0617 04:05:15.509886   30032 every.go:43] @check passed after running 1 checks
+I0617 04:05:15.510493   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit
+W0617 10:37:31.591860   30032 execute.go:51] Database ping is slow 37.1738ms
+stats before: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+stats After: sql.DBStats{MaxOpenConnections:0, OpenConnections:1, InUse:0, Idle:1, WaitCount:0, WaitDuration:0, MaxIdleClosed:0, MaxIdleTimeClosed:0, MaxLifetimeClosed:0}
+I0617 10:37:31.640534   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetCurrentUser: succeeded. Connector: nsrit
+I0617 10:37:32.060229   30032 execute.go:57] Database ping is quick (likely cached), took 613.5µs
+I0617 10:37:32.072786   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentByUser: succeeded. Connector: nsrit
+I0617 10:37:33.692193   30032 execute.go:57] Database ping is quick (likely cached), took 1.4498ms
+I0617 10:37:33.830332   30032 every.go:43] @check passed after running 1 checks
+I0617 10:37:33.831990   30032 engine.go:209] [projects/emulator/locations/emulator/services/nsrit-school-2b749-service af6f] ExecuteQuery query GetParentChildren: succeeded. Connector: nsrit

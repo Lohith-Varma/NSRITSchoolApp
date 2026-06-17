@@ -1,13 +1,19 @@
 import React from 'react';
-import {EmptyState, ScreenContainer} from '../../components';
+import {View, StyleSheet} from 'react-native';
+import {EmptyState} from '../../components';
+import {colors} from '../../theme';
 
 const WingFeesScreen = () => (
-  <ScreenContainer>
+  <View style={styles.root}>
     <EmptyState
-      title="Fees are out of scope"
+      title="Wing Fees"
       message="Wing fee screens are intentionally deferred."
     />
-  </ScreenContainer>
+  </View>
 );
+
+const styles = StyleSheet.create({
+  root: {backgroundColor: colors.background, flex: 1},
+});
 
 export default WingFeesScreen;

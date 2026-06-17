@@ -1,12 +1,14 @@
 import React, {useMemo, useState} from 'react';
-import {Alert, FlatList, StyleSheet, View} from 'react-native';
-import {HelperText, Switch, Text} from 'react-native-paper';
+import {Alert, FlatList, Pressable, StyleSheet, Switch, TextInput, View} from 'react-native';
+import {Text} from 'react-native-paper';
+import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {CustomButton, CustomInput, DashboardCard, EmptyState, Header, SelectField, SectionHeader} from '../../components';
+import {EmptyState, SelectField} from '../../components';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import academicRepository from '../../repositories/academicRepository';
 import feeService from '../../services/fees/feeService';
-import {colors, spacing} from '../../theme';
+import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 const currentYear = () => new Date().getFullYear();
@@ -36,6 +38,13 @@ const emptyForm = {
   applyToFuture: true,
   status: 'ACTIVE',
 };
+
+const NativeInput = ({icon, label, ...props}) => (
+  <View style={styles.inputWrap}>
+    <MaterialCommunityIcons name={icon} size={14} color={colors.textMuted} style={styles.inputIcon} />
+    <TextInput style={styles.input} placeholder={label} placeholderTextColor={colors.textSoft} {...props} />
+  </View>
+);
 
 const ClassFeeManagementScreen = () => {
   const access = useFeeAccess();
@@ -136,73 +145,281 @@ const ClassFeeManagementScreen = () => {
 
   if (!canManage) {
     return (
-      <View style={styles.container}>
-        <EmptyState title="Class fee access denied" message="Only coordinators, principals, branch admins, and main admins can manage class fees." />
+      <View style={styles.root}>
+        <EmptyState
+          title="Access denied"
+          message="Only coordinators, principals, branch admins, and main admins can manage class fees."
+        />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.root}>
       <FlatList
         data={classFeesQuery.data || []}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <>
-            <Header title="Class Fee Management" subtitle="Academic year tuition templates by class" />
-            <SelectField label="Academic Year" value={form.academicYear} options={academicYearOptions()} onChange={value => updateField('academicYear', value)} />
-            <SelectField label="Class" value={form.academicClassId} options={classOptions} onChange={value => updateField('academicClassId', value)} />
-            <CustomInput label="1st Term Fee" keyboardType="numeric" value={form.term1Fee} onChangeText={value => updateField('term1Fee', value)} />
-            <CustomInput label="2nd Term Fee" keyboardType="numeric" value={form.term2Fee} onChangeText={value => updateField('term2Fee', value)} />
-            <CustomInput label="3rd Term Fee" keyboardType="numeric" value={form.term3Fee} onChangeText={value => updateField('term3Fee', value)} />
-            <DashboardCard title="Total Tuition" value={formatCurrency(total)} icon="cash-multiple" />
-            <SelectField label="Apply To" value={applyTo} options={applyOptions} onChange={setApplyTo} />
-            <View style={styles.switchRow}>
-              <View style={styles.switchCopy}>
-                <Text style={styles.switchTitle}>Future Students</Text>
-                <Text style={styles.switchMeta}>New students inherit this class fee automatically.</Text>
+          <View>
+            {/* ── Hero ── */}
+            <Animated.View entering={FadeInDown.duration(260).springify()} style={styles.hero}>
+              <View style={styles.heroDecor} />
+              <Text style={styles.heroOverline}>Fee</Text>
+              <Text style={styles.heroTitle}>Class Fee Templates</Text>
+              <Text style={styles.heroSub}>Academic year tuition templates by class</Text>
+            </Animated.View>
+
+            {/* ── Form ── */}
+            <Animated.View entering={FadeInDown.delay(60).duration(260).springify()} style={styles.formCard}>
+              <Text style={styles.formSection}>Class & Year</Text>
+              <View style={styles.selectWrap}>
+                <SelectField label="Academic Year" value={form.academicYear} options={academicYearOptions()} onChange={v => updateField('academicYear', v)} />
               </View>
-              <Switch value={form.applyToFuture} onValueChange={value => updateField('applyToFuture', value)} />
+              <View style={styles.selectWrap}>
+                <SelectField label="Class" value={form.academicClassId} options={classOptions} onChange={v => updateField('academicClassId', v)} />
+              </View>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(80).duration(260).springify()} style={styles.formCard}>
+              <Text style={styles.formSection}>Term Fees</Text>
+              <NativeInput icon="numeric-1-circle-outline" label="1st Term Fee" keyboardType="numeric" value={form.term1Fee} onChangeText={v => updateField('term1Fee', v)} />
+              <NativeInput icon="numeric-2-circle-outline" label="2nd Term Fee" keyboardType="numeric" value={form.term2Fee} onChangeText={v => updateField('term2Fee', v)} />
+              <NativeInput icon="numeric-3-circle-outline" label="3rd Term Fee" keyboardType="numeric" value={form.term3Fee} onChangeText={v => updateField('term3Fee', v)} />
+            </Animated.View>
+
+            {/* ── Total pill ── */}
+            <View style={styles.totalCard}>
+              <Text style={styles.totalLabel}>Total Tuition</Text>
+              <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
             </View>
-            <SelectField label="Status" value={form.status} options={statusOptions} onChange={value => updateField('status', value)} />
-            <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
-            <CustomButton loading={mutation.isPending} disabled={mutation.isPending} onPress={confirmSave}>
-              {form.id ? 'Update Class Fee' : 'Create Class Fee'}
-            </CustomButton>
-            {form.id ? <CustomButton mode="text" onPress={resetForm}>Cancel Edit</CustomButton> : null}
-            <SectionHeader title="Existing Class Fees" />
-          </>
+
+            <Animated.View entering={FadeInDown.delay(100).duration(260).springify()} style={styles.formCard}>
+              <Text style={styles.formSection}>Apply To</Text>
+              <View style={styles.selectWrap}>
+                <SelectField label="Apply To" value={applyTo} options={applyOptions} onChange={setApplyTo} />
+              </View>
+              <View style={styles.switchRow}>
+                <MaterialCommunityIcons name="account-multiple-plus-outline" size={15} color={colors.textMuted} />
+                <View style={styles.switchCopy}>
+                  <Text style={styles.switchTitle}>Future Students</Text>
+                  <Text style={styles.switchMeta}>New students inherit this class fee automatically.</Text>
+                </View>
+                <Switch
+                  value={form.applyToFuture}
+                  onValueChange={v => updateField('applyToFuture', v)}
+                  trackColor={{false: colors.border, true: colors.secondarySoft}}
+                  thumbColor={form.applyToFuture ? colors.secondary : colors.textMuted}
+                />
+              </View>
+              <View style={styles.selectWrap}>
+                <SelectField label="Status" value={form.status} options={statusOptions} onChange={v => updateField('status', v)} />
+              </View>
+            </Animated.View>
+
+            {error ? (
+              <View style={styles.errorBox}>
+                <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
+
+            <Pressable
+              onPress={confirmSave}
+              disabled={mutation.isPending}
+              style={({pressed}) => [styles.submitBtn, mutation.isPending && {opacity: 0.5}, pressed && !mutation.isPending && {opacity: 0.88}]}>
+              <MaterialCommunityIcons name="content-save-outline" size={18} color={colors.white} />
+              <Text style={styles.submitBtnText}>
+                {mutation.isPending ? 'Saving…' : form.id ? 'Update Class Fee' : 'Create Class Fee'}
+              </Text>
+            </Pressable>
+            {form.id ? (
+              <Pressable onPress={resetForm} style={styles.cancelBtn}>
+                <Text style={styles.cancelBtnText}>Cancel Edit</Text>
+              </Pressable>
+            ) : null}
+
+            {(classFeesQuery.data || []).length > 0 ? (
+              <Text style={styles.sectionLabel}>Existing Class Fees</Text>
+            ) : null}
+          </View>
         }
-        renderItem={({item}) => (
-          <DashboardCard
-            title={`${item.academicClass?.name || 'Class'} - ${item.academicYear}-${String(Number(item.academicYear || 0) + 1).slice(-2)}`}
-            value={formatCurrency(item.totalTuitionFee)}
-            description={`Term 1 ${formatCurrency(item.term1Fee)} | Term 2 ${formatCurrency(item.term2Fee)} | Term 3 ${formatCurrency(item.term3Fee)}`}
-            icon="google-classroom"
-            onPress={() => editTemplate(item)}
-          />
+        renderItem={({item, index}) => (
+          <Animated.View entering={FadeInRight.delay(index * 30).duration(200).springify()}>
+            <Pressable
+              onPress={() => editTemplate(item)}
+              style={({pressed}) => [styles.feeCard, pressed && {opacity: 0.88}]}>
+              <View style={styles.feeCardIcon}>
+                <MaterialCommunityIcons name="google-classroom" size={16} color={colors.secondary} />
+              </View>
+              <View style={styles.feeCardBody}>
+                <Text style={styles.feeCardTitle}>
+                  {item.academicClass?.name || 'Class'} · {item.academicYear}-{String(Number(item.academicYear || 0) + 1).slice(-2)}
+                </Text>
+                <Text style={styles.feeCardMeta}>
+                  T1 {formatCurrency(item.term1Fee)} · T2 {formatCurrency(item.term2Fee)} · T3 {formatCurrency(item.term3Fee)}
+                </Text>
+              </View>
+              <View style={styles.feeCardRight}>
+                <Text style={styles.feeCardTotal}>{formatCurrency(item.totalTuitionFee)}</Text>
+                <MaterialCommunityIcons name="pencil-outline" size={13} color={colors.textMuted} />
+              </View>
+            </Pressable>
+          </Animated.View>
         )}
-        ListEmptyComponent={<EmptyState title={classFeesQuery.isLoading ? 'Loading class fees' : 'No class fees'} message={classFeesQuery.error?.message || 'Create class fee templates for the academic year.'} />}
+        ListEmptyComponent={
+          <EmptyState
+            title={classFeesQuery.isLoading ? 'Loading class fees' : 'No class fees'}
+            message={classFeesQuery.error?.message || 'Create class fee templates for the academic year.'}
+          />
+        }
+        ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {backgroundColor: colors.background, flex: 1},
-  list: {padding: spacing.lg, paddingBottom: spacing.xxxl},
+  root: {backgroundColor: colors.background, flex: 1},
+  list: {padding: spacing.lg},
+
+  hero: {
+    backgroundColor: colors.secondary,
+    borderRadius: radius.card,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 80,
+    height: 130,
+    position: 'absolute',
+    right: -20,
+    top: -40,
+    width: 130,
+  },
+  heroOverline: {color: 'rgba(255,255,255,0.55)', fontSize: 10, fontWeight: '700', letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase'},
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800'},
+  heroSub: {color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '500', marginTop: 4},
+
+  formCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    ...shadows.soft,
+  },
+  formSection: {
+    backgroundColor: colors.background,
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    padding: spacing.md,
+    paddingBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  selectWrap: {borderTopColor: colors.border, borderTopWidth: 1, padding: spacing.sm},
+  inputWrap: {
+    alignItems: 'center',
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+  },
+  inputIcon: {marginRight: spacing.sm},
+  input: {color: colors.text, flex: 1, fontSize: 14, fontWeight: '500', minHeight: 46},
+
   switchRow: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: 8,
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
     flexDirection: 'row',
-    marginBottom: spacing.md,
+    gap: spacing.sm,
     padding: spacing.md,
   },
-  switchCopy: {flex: 1, marginRight: spacing.md},
-  switchTitle: {color: colors.text, fontWeight: '700'},
-  switchMeta: {color: colors.textMuted, marginTop: spacing.xxs},
+  switchCopy: {flex: 1},
+  switchTitle: {color: colors.text, fontSize: 13, fontWeight: '700'},
+  switchMeta: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+
+  totalCard: {
+    alignItems: 'center',
+    backgroundColor: colors.secondarySoft,
+    borderRadius: radius.card,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    padding: spacing.lg,
+    ...shadows.soft,
+  },
+  totalLabel: {color: colors.secondary, fontSize: 14, fontWeight: '700'},
+  totalValue: {color: colors.secondary, fontSize: 20, fontWeight: '800'},
+
+  errorBox: {
+    alignItems: 'center',
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  errorText: {color: colors.danger, flex: 1, fontSize: 12, fontWeight: '600'},
+  submitBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
+    borderRadius: radius.lg,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 50,
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
+    ...shadows.medium,
+  },
+  submitBtnText: {color: colors.white, fontSize: 14, fontWeight: '700'},
+  cancelBtn: {alignItems: 'center', marginBottom: spacing.md, paddingVertical: spacing.xs},
+  cancelBtnText: {color: colors.textMuted, fontSize: 13, fontWeight: '600'},
+
+  sectionLabel: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    marginTop: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  feeCard: {
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.xs,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
+  feeCardIcon: {
+    alignItems: 'center',
+    backgroundColor: colors.secondarySoft,
+    borderRadius: radius.md,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  feeCardBody: {flex: 1},
+  feeCardTitle: {...typography.bodyBold, color: colors.text},
+  feeCardMeta: {color: colors.textMuted, fontSize: 11, fontWeight: '500', marginTop: 2},
+  feeCardRight: {alignItems: 'flex-end', gap: 3},
+  feeCardTotal: {color: colors.secondary, fontSize: 13, fontWeight: '800'},
 });
 
 export default ClassFeeManagementScreen;
