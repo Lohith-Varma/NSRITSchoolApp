@@ -5,7 +5,7 @@ import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
 import {useDispatch, useSelector} from 'react-redux';
-import {AnimatedProgressBar, SectionHeader, StatCard} from '../../components';
+import {AnimatedProgressBar, SectionHeader, StatCard, LogoutButton} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -69,9 +69,7 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Branch Admin'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons name="logout-variant" size={18} color="rgba(255,255,255,0.85)" />
-          </Pressable>
+          <LogoutButton />
         </View>
         <View style={styles.roleBadge}>
           <View style={styles.roleDot} />

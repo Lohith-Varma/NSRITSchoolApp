@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {USER_ROLES} from '../config/constants';
 import SplashScreen from '../screens/auth/SplashScreen';
-import {bootstrapAuth} from '../store/slices/authSlice';
+import {bootstrapAuth, clearNewLoginFlag} from '../store/slices/authSlice';
 import AccountantNavigator from './AccountantNavigator';
 import AuthNavigator from './AuthNavigator';
 import BranchAdminNavigator from './BranchAdminNavigator';
@@ -14,6 +14,7 @@ import ParentNavigator from './ParentNavigator';
 import PrincipalNavigator from './PrincipalNavigator';
 import TeacherNavigator from './TeacherNavigator';
 import {ensureMasterClassesForBranch} from '../services/academics/SeedMasterClasses';
+import {SuccessModal} from '../components';
 
 const getRoleNavigator = role => {
   switch (String(role || '').toUpperCase()) {
@@ -39,11 +40,11 @@ const getRoleNavigator = role => {
 
 const AppNavigator = () => {
   const dispatch = useDispatch();
-  const {isBootstrapping, isAuthenticated, role, user} = useSelector(
+  const {isBootstrapping, isAuthenticated, role, user, isNewLogin} = useSelector(
     state => state.auth,
   );
 
-  console.log('AppNavigator render state:', {isBootstrapping, isAuthenticated, role});
+  console.log('AppNavigator render state:', {isBootstrapping, isAuthenticated, role, isNewLogin});
 
   useEffect(() => {
     const canSeedClasses = ['PRINCIPAL', 'BRANCH_ADMIN', 'MAIN_ADMIN'].includes(
@@ -73,6 +74,18 @@ const AppNavigator = () => {
     return (
       <NavigationContainer onReady={() => console.log('NavigationContainer: Ready')}>
         {getRoleNavigator(role)}
+        <SuccessModal
+          visible={isNewLogin}
+          title="Login Successful"
+          message={`Welcome back, ${user?.fullName || user?.name || 'User'}! Your session has been verified successfully.`}
+          buttonLabel="Continue"
+          onConfirm={() => {
+            dispatch(clearNewLoginFlag());
+          }}
+          onClose={() => {
+            dispatch(clearNewLoginFlag());
+          }}
+        />
       </NavigationContainer>
     );
   }

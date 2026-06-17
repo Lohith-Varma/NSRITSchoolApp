@@ -5,7 +5,7 @@ import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState, LoadingScreen, SearchBar} from '../../components';
+import {EmptyState, LoadingScreen, SearchBar, ScreenWrapper, AppHeader} from '../../components';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
 import {
   buildMainAdminBranchContext,
@@ -143,7 +143,8 @@ const BranchContextScreen = ({navigation}) => {
   }
 
   return (
-    <View style={styles.root}>
+    <ScreenWrapper style={styles.root}>
+      <AppHeader title="Branch Context" onBack={true} />
       <FlatList
         data={branches}
         keyExtractor={item => item.id}
@@ -234,7 +235,7 @@ const BranchContextScreen = ({navigation}) => {
         }
         ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

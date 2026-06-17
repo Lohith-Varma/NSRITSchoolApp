@@ -11,6 +11,8 @@ import {
   DashboardCard,
   EmptyState,
   SectionHeader,
+  LogoutButton,
+  RoleBadge,
 } from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
@@ -77,19 +79,14 @@ const DashboardScreen = ({navigation}) => {
         <View style={styles.headerDecor2} />
 
         <View style={styles.headerTop}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{getGreeting()},</Text>
             <Text style={styles.parentName} numberOfLines={1}>
               {user?.fullName || user?.name || 'Parent'}
             </Text>
+            <RoleBadge label="Parent" style={{ marginTop: 4 }} />
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
-              color="rgba(255,255,255,0.85)"
-            />
-          </Pressable>
+          <LogoutButton />
         </View>
 
         <Text style={styles.headerSub}>

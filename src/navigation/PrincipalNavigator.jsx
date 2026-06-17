@@ -38,7 +38,7 @@ import {renderFeeStackScreens} from './FeeStackScreens';
 const Stack = createNativeStackNavigator();
 
 const PrincipalNavigator = () => (
-  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen
       name="PrincipalDashboard"
       component={DashboardScreen}

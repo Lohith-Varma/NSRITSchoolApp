@@ -1,6 +1,7 @@
 export const DATA_CONNECT_QUERIES = {
   GET_CURRENT_USER: 'GetCurrentUser',
   GET_USER_BY_PHONE: 'GetUserByPhone',
+  GET_USERS_BY_PHONE: 'GetUsersByPhone',
   GET_BRANCHES: 'GetBranches',
   GET_BRANCH_DETAILS: 'GetBranchDetails',
   GET_USERS_BY_ROLE: 'GetUsersByRole',

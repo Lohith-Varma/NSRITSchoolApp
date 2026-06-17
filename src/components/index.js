@@ -28,6 +28,9 @@ export {default as PaymentCard} from './fees/PaymentCard';
 
 // Common
 export {default as AppHeader} from './common/AppHeader';
+export {default as BackButton} from './common/BackButton';
+export {default as LogoutButton} from './common/LogoutButton';
+export {default as ScreenWrapper} from './common/ScreenWrapper';
 export {default as Avatar} from './common/Avatar';
 export {default as EmptyState} from './common/EmptyState';
 export {default as FilterTabs} from './common/FilterTabs';
@@ -39,6 +42,7 @@ export {default as SearchBar} from './common/SearchBar';
 export {default as ScreenContainer} from './common/ScreenContainer';
 export {default as SectionHeader} from './common/SectionHeader';
 export {default as StatusBadge} from './common/StatusBadge';
+export {default as RoleBadge} from './common/RoleBadge';
 
 // Forms
 export {default as CustomInput} from './forms/CustomInput';
@@ -47,6 +51,9 @@ export {default as SelectField} from './forms/SelectField';
 
 // Feedback
 export {default as SkeletonLoader} from './feedback/SkeletonLoader';
+export {SuccessModal, ErrorModal, WarningModal, ConfirmationModal} from './feedback/FeedbackModals';
+export {default as LoadingOverlay} from './feedback/LoadingOverlay';
+export {default as ToastNotification} from './feedback/ToastNotification';
 
 // Lists
 export {default as StudentListItem} from './lists/StudentListItem';
@@ -56,3 +63,4 @@ export {default as LoadingScreen} from './loaders/LoadingScreen';
 
 // Layout
 export {default as ERPLayout} from './erp/ERPLayout';
+export {default as RoleSwitcherModal} from './common/RoleSwitcherModal';

@@ -22,6 +22,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {clearAuthError, verifyOtp} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {validateOtp} from '../../utils/validators';
+import {LoadingOverlay} from '../../components';
 
 // Individual OTP digit box
 const OtpBox = ({value, focused}) => (
@@ -76,13 +77,16 @@ const OTPVerificationScreen = ({route, navigation}) => {
   };
 
   const handleVerify = async () => {
+    console.log('TRACE LOGIN FLOW: Verify OTP Button Pressed (Verify OTP) with OTP:', otp);
     const validationError = validateOtp(otp);
+    console.log('TRACE LOGIN FLOW: Validation result (OTPVerificationScreen):', validationError || 'Success');
     if (validationError) {
       setLocalError(validationError);
       triggerShake();
       return;
     }
-    await dispatch(
+    console.log('TRACE LOGIN FLOW: Dispatching verifyOtp request');
+    const action = await dispatch(
       verifyOtp({
         otp,
         countryCode: params.countryCode,
@@ -90,6 +94,11 @@ const OTPVerificationScreen = ({route, navigation}) => {
         verificationId: params.verificationId || storedVerificationId,
       }),
     );
+    if (verifyOtp.fulfilled.match(action)) {
+      console.log('TRACE LOGIN FLOW: verifyOtp fulfilled, session set up. User role:', action.payload?.user?.role);
+    } else {
+      console.log('TRACE LOGIN FLOW: verifyOtp rejected with payload/error:', action.payload || action.error);
+    }
   };
 
   const displayError = localError || (error ? 'Incorrect code. Try again.' : '');
@@ -99,6 +108,7 @@ const OTPVerificationScreen = ({route, navigation}) => {
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <LoadingOverlay visible={loading} message="Verifying OTP..." />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"

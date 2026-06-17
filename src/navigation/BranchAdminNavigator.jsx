@@ -13,7 +13,7 @@ import {renderFeeStackScreens} from './FeeStackScreens';
 const Stack = createNativeStackNavigator();
 
 const BranchAdminNavigator = () => (
-  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen
       name="BranchAdminDashboard"
       component={DashboardScreen}

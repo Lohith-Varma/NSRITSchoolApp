@@ -11,6 +11,8 @@ import {
   DashboardCard,
   SectionHeader,
   StatCard,
+  LogoutButton,
+  RoleBadge,
 } from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import principalDashboardService from '../../services/principal/principalDashboardService';
@@ -82,10 +84,8 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Principal'}
             </Text>
           </View>
-          <View style={styles.roleBadge}>
-            <View style={styles.roleDot} />
-            <Text style={styles.roleText}>Principal</Text>
-          </View>
+          <RoleBadge label="Principal" />
+          <LogoutButton />
         </View>
         <Text style={styles.headerDate}>
           {new Date().toLocaleDateString('en-IN', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'})}

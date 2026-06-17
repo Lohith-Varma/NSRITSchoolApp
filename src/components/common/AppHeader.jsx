@@ -1,13 +1,14 @@
 /**
  * AppHeader — top bar for management/stack screens.
  * Replaces the old Header component with a cleaner, more structured layout.
- * Still uses the same props for backward compatibility (title, subtitle, actionLabel, onAction).
  */
 import React from 'react';
-import {Pressable, StyleSheet, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {colors, radius, spacing, typography} from '../../theme';
+import Pressable from 'react-native/Libraries/Components/Pressable/Pressable';
+import BackButton from './BackButton';
+import {colors, spacing, typography} from '../../theme';
 
 const AppHeader = ({
   title,
@@ -17,17 +18,15 @@ const AppHeader = ({
   actionIcon,
   onBack,
   children,
+  style,
 }) => (
-  <View style={styles.container}>
+  <View style={[styles.container, style]}>
     <View style={styles.left}>
       {onBack ? (
-        <Pressable onPress={onBack} style={styles.backBtn} hitSlop={8}>
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={20}
-            color={colors.text}
-          />
-        </Pressable>
+        <BackButton
+          onPress={typeof onBack === 'function' ? onBack : undefined}
+          style={styles.backBtn}
+        />
       ) : null}
       <View style={styles.copy}>
         {subtitle ? <Text style={styles.overline}>{subtitle}</Text> : null}
@@ -63,10 +62,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
+    paddingTop: spacing.sm,
+    height: 56,
   },
   left: {
     alignItems: 'center',
@@ -76,12 +75,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   backBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.neutralSoft,
-    borderRadius: radius.md,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
+    marginRight: 2,
   },
   copy: {
     flex: 1,
@@ -91,10 +85,13 @@ const styles = StyleSheet.create({
     ...typography.overline,
     color: colors.textMuted,
     marginBottom: 1,
+    fontSize: 9,
   },
   title: {
     ...typography.subtitle,
     color: colors.text,
+    fontSize: 15,
+    fontWeight: '800',
   },
   right: {
     alignItems: 'center',
@@ -105,16 +102,16 @@ const styles = StyleSheet.create({
   actionBtn: {
     alignItems: 'center',
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.lg,
+    borderRadius: 8,
     flexDirection: 'row',
     gap: 4,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   actionText: {
     ...typography.captionBold,
     color: colors.primary,
-    fontSize: 12,
+    fontSize: 11,
   },
 });
 

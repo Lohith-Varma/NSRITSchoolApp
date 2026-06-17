@@ -138,12 +138,30 @@ export const authService = {
   async sendOtp({countryCode, phoneNumber}) {
     try {
       const fullPhoneNumber = buildFullPhoneNumber({countryCode, phoneNumber});
+
+      if (authConfig.ENABLE_DEV_OTP_BYPASS && __DEV__) {
+        console.log('[LOGIN BYPASS] sendOtp bypassing Firebase');
+        const dummyVerificationId = 'dev-bypass-verification-id';
+        storage.set(STORAGE_KEYS.OTP_VERIFICATION_ID, dummyVerificationId);
+        return successResponse(
+          {
+            verificationId: dummyVerificationId,
+            fullPhoneNumber,
+          },
+          'OTP sent successfully (Bypass)',
+        );
+      }
+
       const authInstance = getAuth();
 
       authInstance.settings.appVerificationDisabledForTesting =
         authConfig.disablePhoneAuthAppVerificationForTesting;
       
+      console.log('[LOGIN] Calling Firebase');
+      console.log('[LOGIN] Firebase Request Sent');
       const confirmation = await signInWithPhoneNumber(authInstance, fullPhoneNumber);
+      console.log('[LOGIN] Firebase Response Received');
+      console.log('[LOGIN] Verification ID Received:', confirmation.verificationId);
       storage.set(STORAGE_KEYS.OTP_VERIFICATION_ID, confirmation.verificationId);
 
       return successResponse(
@@ -154,6 +172,11 @@ export const authService = {
         'OTP sent successfully',
       );
     } catch (error) {
+      console.log('[LOGIN ERROR] Full Error Object:', {
+        code: error?.code,
+        message: error?.message,
+        stack: error?.stack,
+      });
       return errorResponse(error, 'Unable to send OTP');
     }
   },
@@ -161,6 +184,85 @@ export const authService = {
   async verifyOtp({verificationId, otp, countryCode, phoneNumber}) {
     try {
       console.log('authService: verifyOtp called with payload:', {verificationId, otp, countryCode, phoneNumber});
+
+      if (authConfig.ENABLE_DEV_OTP_BYPASS && __DEV__ && verificationId === 'dev-bypass-verification-id') {
+        if (otp !== '123456') {
+          throw new Error('Invalid OTP');
+        }
+        console.log('[LOGIN BYPASS] verifyOtp verifying dummy token');
+        const fullPhoneNumber = buildFullPhoneNumber({countryCode, phoneNumber});
+        
+        console.log('[LOGIN BYPASS] Fetching profile by phone:', fullPhoneNumber);
+        let profile = null;
+        try {
+          const dbProfile = await fetchUserProfileByPhone(fullPhoneNumber);
+          if (dbProfile) {
+            profile = await hydrateRoleProfile(dbProfile);
+          }
+        } catch (dbError) {
+          console.warn('[LOGIN BYPASS] Database query failed, using fallback mock profile:', dbError);
+        }
+        
+        if (!profile) {
+          // If no profile is found or connection is unauthenticated, generate a structured mock profile
+          let role = USER_ROLES.MAIN_ADMIN;
+          let fullName = 'Dev Admin';
+          
+          if (phoneNumber.includes('8888888888')) {
+            role = USER_ROLES.PRINCIPAL;
+            fullName = 'Dev Principal';
+          } else if (phoneNumber.includes('7777777777')) {
+            role = USER_ROLES.COORDINATOR;
+            fullName = 'Dev Coordinator';
+          } else if (phoneNumber.includes('6666666666')) {
+            role = USER_ROLES.TEACHER;
+            fullName = 'Dev Teacher';
+          } else if (phoneNumber.includes('4444444444')) {
+            role = USER_ROLES.PARENT;
+            fullName = 'Dev Parent';
+          } else if (phoneNumber.includes('5555555555')) {
+            role = USER_ROLES.ACCOUNTANT;
+            fullName = 'Dev Accountant';
+          } else if (phoneNumber.includes('2222222222')) {
+            role = USER_ROLES.FRONT_DESK;
+            fullName = 'Dev Front Desk';
+          }
+
+          profile = {
+            id: 'dev-mock-user-id-' + phoneNumber,
+            firebaseUID: 'dev-mock-firebase-uid-' + phoneNumber,
+            fullName,
+            countryCode,
+            phoneNumber: fullPhoneNumber,
+            role,
+            isActive: true,
+            branchId: 'dev-mock-branch-id',
+            branch: {
+              id: 'dev-mock-branch-id',
+              branchCode: '01',
+              name: 'Dev Branch',
+            },
+            coordinatorId: role === USER_ROLES.COORDINATOR ? 'dev-mock-coord-id' : null,
+            teacherId: role === USER_ROLES.TEACHER ? 'dev-mock-teacher-id' : null,
+            accountantId: role === USER_ROLES.ACCOUNTANT ? 'dev-mock-acct-id' : null,
+            parentId: role === USER_ROLES.PARENT ? 'dev-mock-parent-id' : null,
+          };
+          console.log('[LOGIN BYPASS] Generated Mock Profile:', profile);
+        }
+
+        const user = normalizeProfile(profile, {
+          countryCode,
+          phoneNumber: fullPhoneNumber,
+        });
+        const token = 'dev-bypass-mock-token';
+
+        setJSON(STORAGE_KEYS.AUTH_USER, user);
+        storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
+        console.log('[LOGIN BYPASS] Session created and saved in MMKV');
+
+        return successResponse({user, token}, 'Login successful');
+      }
+
       const authInstance = getAuth();
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       console.log('authService: signing in with credential...');
@@ -250,6 +352,34 @@ export const authService = {
     const token = storage.getString(STORAGE_KEYS.AUTH_TOKEN);
     const user = getJSON(STORAGE_KEYS.AUTH_USER);
     return token && user ? {token, user} : null;
+  },
+
+  async fetchUsersByPhone(phoneNumber) {
+    try {
+      console.log('authService: fetchUsersByPhone called for:', phoneNumber);
+      const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_USERS_BY_PHONE, {
+        phoneNumber,
+      });
+      return response.users || [];
+    } catch (error) {
+      console.warn('authService: fetchUsersByPhone error:', error);
+      return [];
+    }
+  },
+
+  async loadProfileForSwitch(dbProfile, countryCode, phoneNumber) {
+    try {
+      const profile = await hydrateRoleProfile(dbProfile);
+      if (!profile) return null;
+      const user = normalizeProfile(profile, {
+        countryCode,
+        phoneNumber,
+      });
+      return user;
+    } catch (error) {
+      console.warn('authService: loadProfileForSwitch error:', error);
+      return null;
+    }
   },
 };
 

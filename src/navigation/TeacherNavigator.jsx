@@ -30,7 +30,7 @@ const TeacherStudentsIcon = ({color, size}) => (
 );
 
 const TeacherHomeStack = () => (
-  <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen
       name="TeacherDashboard"
       component={TeacherDashboardScreen}

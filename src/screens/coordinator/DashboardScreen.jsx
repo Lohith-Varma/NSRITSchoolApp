@@ -10,6 +10,7 @@ import {
   AnimatedProgressBar,
   SectionHeader,
   StatCard,
+  LogoutButton,
 } from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import feeService from '../../services/fees/feeService';
@@ -77,9 +78,7 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Coordinator'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons name="logout-variant" size={18} color="rgba(255,255,255,0.85)" />
-          </Pressable>
+          <LogoutButton />
         </View>
         {/* Wing badge */}
         <View style={styles.wingBadge}>

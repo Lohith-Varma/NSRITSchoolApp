@@ -4,7 +4,7 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {EmptyState, SearchBar} from '../../components';
+import {EmptyState, SearchBar, ScreenWrapper, AppHeader} from '../../components';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
@@ -161,7 +161,8 @@ const GlobalStudentsScreen = ({navigation}) => {
     setFilters(current => ({...current, [key]: current[key] === value ? null : value}));
 
   return (
-    <View style={styles.root}>
+    <ScreenWrapper style={styles.root}>
+      <AppHeader title="Global Students" onBack={true} />
       <FlatList
         data={result?.items || []}
         keyExtractor={item => item.id}
@@ -334,7 +335,7 @@ const GlobalStudentsScreen = ({navigation}) => {
           </View>
         }
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

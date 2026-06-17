@@ -22,69 +22,69 @@ export const renderFeeStackScreens = (Stack, options = {}) => (
       <Stack.Screen
         name="FeeDashboard"
         component={FeeDashboardScreen}
-        options={{title: 'Fees'}}
+        options={{title: 'Fees', headerShown: true}}
       />
     ) : null}
     <Stack.Screen
       name="StudentFeeDetails"
       component={StudentFeeDetailsScreen}
-      options={{title: 'Student Fee'}}
+      options={{title: 'Student Fee', headerShown: true}}
     />
     <Stack.Screen
       name="StudentFeeProfile"
       component={StudentFeeProfileScreen}
-      options={{title: 'Student Fee Profile'}}
+      options={{title: 'Student Fee Profile', headerShown: true}}
     />
     <Stack.Screen
       name="FeePlanManagement"
       component={FeePlanManagementScreen}
-      options={{title: 'Fee Plans'}}
+      options={{title: 'Fee Plans', headerShown: true}}
     />
     <Stack.Screen
       name="ClassFeeManagement"
       component={ClassFeeManagementScreen}
-      options={{title: 'Class Fees'}}
+      options={{title: 'Class Fees', headerShown: true}}
     />
     <Stack.Screen
       name="CreateFeePlan"
       component={CreateFeePlanScreen}
-      options={{title: 'Create Fee Plan'}}
+      options={{title: 'Create Fee Plan', headerShown: true}}
     />
     <Stack.Screen
       name="FeeCollection"
       component={FeeCollectionScreen}
-      options={{title: 'Fee Collection'}}
+      options={{title: 'Fee Collection', headerShown: true}}
     />
     <Stack.Screen
       name="FeeCategoryManagement"
       component={FeeCategoryManagementScreen}
-      options={{title: 'Fee Categories'}}
+      options={{title: 'Fee Categories', headerShown: true}}
     />
     <Stack.Screen
       name="PaymentHistory"
       component={PaymentHistoryScreen}
-      options={{title: 'Payments'}}
+      options={{title: 'Payments', headerShown: true}}
     />
     <Stack.Screen
       name="FeeLedger"
       component={FeeLedgerScreen}
-      options={{title: 'Ledger'}}
+      options={{title: 'Ledger', headerShown: true}}
     />
     <Stack.Screen
       name="DueStudents"
       component={DueStudentsScreen}
-      options={{title: 'Due Students'}}
+      options={{title: 'Due Students', headerShown: true}}
     />
     <Stack.Screen
       name="PaidStudents"
       component={PaidStudentsScreen}
-      options={{title: 'Paid Students'}}
+      options={{title: 'Paid Students', headerShown: true}}
     />
     {options.canUpload ? (
       <Stack.Screen
         name="UploadOfflinePayment"
         component={UploadOfflinePaymentScreen}
-        options={{title: 'Upload Payment'}}
+        options={{title: 'Upload Payment', headerShown: true}}
       />
     ) : null}
     {options.reports ? (
@@ -92,12 +92,12 @@ export const renderFeeStackScreens = (Stack, options = {}) => (
         <Stack.Screen
           name="ClassWiseFeeReport"
           component={ClassWiseFeeReportScreen}
-          options={{title: 'Class-wise Report'}}
+          options={{title: 'Class-wise Report', headerShown: true}}
         />
         <Stack.Screen
           name="FeeReports"
           component={FeeReportsScreen}
-          options={{title: 'Fee Reports'}}
+          options={{title: 'Fee Reports', headerShown: true}}
         />
       </>
     ) : null}

@@ -3104,5 +3104,26 @@ query GetAuditLogs($branchId: UUID, $limit: Int = 100, $offset: Int = 0) @auth(l
   }
 }
 
+query GetUsersByPhone($phoneNumber: String!) @auth(level: USER) {
+  users(where: {phoneNumber: {eq: $phoneNumber}, isActive: {eq: true}}) {
+    id
+    firebaseUID
+    fullName
+    countryCode
+    phoneNumber
+    role
+    employeeId
+    staffType
+    branchId
+    wingId
+    branch {
+      id
+      branchCode
+      name
+    }
+    isActive
+  }
+}
+
 
 

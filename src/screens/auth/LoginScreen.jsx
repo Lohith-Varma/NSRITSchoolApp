@@ -21,6 +21,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {clearAuthError, sendOtp} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {validatePhoneLogin} from '../../utils/validators';
+import {LoadingOverlay} from '../../components';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -46,13 +47,16 @@ const LoginScreen = ({navigation}) => {
   };
 
   const handleSendOtp = async () => {
+    console.log('[LOGIN] Button Pressed');
     const validationError = validatePhoneLogin(form);
     if (validationError) {
       setLocalError(validationError);
       return;
     }
+    console.log('[LOGIN] Phone Validation Success');
     const action = await dispatch(sendOtp(form));
     if (sendOtp.fulfilled.match(action)) {
+      console.log('[LOGIN] OTP Screen Navigation');
       navigation.navigate('OTPVerification', {
         ...form,
         verificationId: action.payload.verificationId,
@@ -72,12 +76,13 @@ const LoginScreen = ({navigation}) => {
     transform: [{scale: btnScale.value}],
   }));
 
-  const displayError = localError || (error ? 'Unable to connect. Please try again.' : '');
+  const displayError = localError || error || '';
 
   return (
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <LoadingOverlay visible={loading} message="Sending OTP..." />
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"

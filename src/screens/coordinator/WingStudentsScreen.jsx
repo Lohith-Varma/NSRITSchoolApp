@@ -5,7 +5,7 @@ import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {EmptyState, SearchBar, SkeletonLoader} from '../../components';
+import {EmptyState, SearchBar, SkeletonLoader, ScreenWrapper, AppHeader} from '../../components';
 import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
 import {getAccessScope} from '../../services/rbacScope';
@@ -136,7 +136,8 @@ const WingStudentsScreen = ({navigation}) => {
     );
 
   return (
-    <View style={styles.root}>
+    <ScreenWrapper style={styles.root}>
+      <AppHeader title="Wing Students" onBack={true} />
       <FlatList
         data={filteredStudents}
         keyExtractor={item => item.id}
@@ -274,7 +275,7 @@ const WingStudentsScreen = ({navigation}) => {
         onSubmit={status => statusMutation.mutate(status)}
         loading={statusMutation.isPending}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

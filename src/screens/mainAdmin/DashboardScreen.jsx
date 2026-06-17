@@ -4,7 +4,7 @@ import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch, useSelector} from 'react-redux';
-import {AnimatedMetric, EmptyState, SectionHeader} from '../../components';
+import {AnimatedMetric, EmptyState, SectionHeader, LogoutButton, RoleBadge} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
@@ -96,20 +96,11 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Main Admin'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
-              color="rgba(255,255,255,0.8)"
-            />
-          </Pressable>
+          <LogoutButton />
         </View>
 
         <View style={styles.headerBottom}>
-          <View style={styles.roleBadge}>
-            <View style={styles.roleDot} />
-            <Text style={styles.roleLabel}>Global Administrator</Text>
-          </View>
+          <RoleBadge label="Global Administrator" />
           <Text style={styles.headerDate}>
             {new Date().toLocaleDateString('en-IN', {
               day: 'numeric', month: 'short', year: 'numeric',

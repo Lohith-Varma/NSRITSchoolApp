@@ -11,6 +11,7 @@ import {
   DashboardCard,
   EmptyState,
   SectionHeader,
+  LogoutButton,
 } from '../../components';
 import teacherService from '../../services/teachers/teacherService';
 import feeService from '../../services/fees/feeService';
@@ -90,13 +91,7 @@ const TeacherDashboardScreen = ({navigation}) => {
               {isLoading ? 'Loading...' : user?.fullName || 'Teacher'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
-              color="rgba(255,255,255,0.85)"
-            />
-          </Pressable>
+          <LogoutButton />
         </View>
 
         {/* Section + subject info */}

@@ -6,6 +6,7 @@ import {
 } from '../../services/mainAdmin/mainAdminContextService';
 import {USER_ROLES} from '../../config/constants';
 import {unwrapResponse} from '../../utils/firebaseResponse';
+import {authConfig} from '../../config/env';
 
 export const bootstrapAuth = createAsyncThunk('auth/bootstrap', async () => {
   console.log('authSlice: bootstrapAuth thunk started');
@@ -62,6 +63,81 @@ export const verifyOtp = createAsyncThunk(
   },
 );
 
+export const switchRole = createAsyncThunk(
+  'auth/switchRole',
+  async ({role, profileData, countryCode, phoneNumber}, {rejectWithValue}) => {
+    try {
+      if (authConfig.ENABLE_DEV_OTP_BYPASS && __DEV__) {
+        console.log('[LOGIN BYPASS] Switching to role:', role);
+        const fullPhoneNumber = phoneNumber || '+919100046512';
+        let fullName = `Dev ${role.charAt(0) + role.slice(1).toLowerCase().replace('_', ' ')}`;
+        
+        const profile = {
+          id: 'dev-mock-user-id-' + fullPhoneNumber,
+          firebaseUID: 'dev-mock-firebase-uid-' + fullPhoneNumber,
+          fullName,
+          countryCode: countryCode || '+91',
+          phoneNumber: fullPhoneNumber,
+          role,
+          isActive: true,
+          branchId: 'dev-mock-branch-id',
+          branch: {
+            id: 'dev-mock-branch-id',
+            branchCode: '01',
+            name: 'Dev Branch',
+          },
+          coordinatorId: role === USER_ROLES.COORDINATOR ? 'dev-mock-coord-id' : null,
+          teacherId: role === USER_ROLES.TEACHER ? 'dev-mock-teacher-id' : null,
+          accountantId: role === USER_ROLES.ACCOUNTANT ? 'dev-mock-acct-id' : null,
+          parentId: role === USER_ROLES.PARENT ? 'dev-mock-parent-id' : null,
+        };
+
+        const user = {
+          id: profile.id,
+          uid: profile.firebaseUID,
+          firebaseUID: profile.firebaseUID,
+          fullName: profile.fullName,
+          name: profile.fullName,
+          countryCode: profile.countryCode,
+          phoneNumber: profile.phoneNumber,
+          role: profile.role,
+          employeeId: null,
+          branchId: profile.branchId,
+          branchCode: profile.branch.branchCode,
+          branchName: profile.branch.name,
+          wingId: null,
+          wing: null,
+          coordinatorId: profile.coordinatorId,
+          teacherId: profile.teacherId,
+          accountantId: profile.accountantId,
+          parentId: profile.parentId,
+          isActive: true,
+        };
+        const token = 'dev-bypass-mock-token';
+
+        const {setJSON, storage} = require('../../services/storage/mmkvStorage');
+        const {STORAGE_KEYS} = require('../../config/constants');
+        
+        setJSON(STORAGE_KEYS.AUTH_USER, user);
+        storage.set(STORAGE_KEYS.AUTH_TOKEN, token);
+
+        return {user, token};
+      } else {
+        const user = await authService.loadProfileForSwitch(profileData, countryCode, phoneNumber);
+        if (!user) throw new Error('Failed to load profile for role ' + role);
+        
+        const {setJSON, storage} = require('../../services/storage/mmkvStorage');
+        const {STORAGE_KEYS} = require('../../config/constants');
+        setJSON(STORAGE_KEYS.AUTH_USER, user);
+        
+        return {user, token: storage.getString(STORAGE_KEYS.AUTH_TOKEN)};
+      }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
   await authService.logout();
 });
@@ -77,6 +153,7 @@ const initialState = {
   pendingPhone: null,
   loading: false,
   error: null,
+  isNewLogin: false,
 };
 
 const authSlice = createSlice({
@@ -105,6 +182,9 @@ const authSlice = createSlice({
         };
       }
     },
+    clearNewLoginFlag: state => {
+      state.isNewLogin = false;
+    },
   },
   extraReducers: builder => {
     builder
@@ -121,6 +201,7 @@ const authSlice = createSlice({
         state.user = session?.user || null;
         state.role = session?.user?.role || null;
         state.mainAdminBranchContext = session?.mainAdminBranchContext || null;
+        state.isNewLogin = false;
       })
       .addCase(bootstrapAuth.rejected, (state, action) => {
         console.log('authSlice: bootstrapAuth.rejected, action error:', action.error);
@@ -168,10 +249,26 @@ const authSlice = createSlice({
         state.role = action.payload.user.role;
         state.mainAdminBranchContext = null;
         state.verificationId = null;
+        state.isNewLogin = true;
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Unable to verify OTP';
+      })
+      .addCase(switchRole.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(switchRole.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.role = action.payload.user.role;
+        state.token = action.payload.token;
+        state.mainAdminBranchContext = null;
+      })
+      .addCase(switchRole.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Unable to switch role';
       })
       .addCase(logoutUser.fulfilled, state => {
         state.isAuthenticated = false;
@@ -189,5 +286,6 @@ export const {
   clearAuthError,
   enterMainAdminBranchContext,
   clearMainAdminBranchContext,
+  clearNewLoginFlag,
 } = authSlice.actions;
 export default authSlice.reducer;

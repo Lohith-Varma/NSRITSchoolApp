@@ -11,6 +11,7 @@ import {
   EmptyState,
   PaymentCard,
   SectionHeader,
+  LogoutButton,
 } from '../../components';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
@@ -93,13 +94,7 @@ const DashboardScreen = ({navigation}) => {
               {user?.fullName || 'Accountant'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
-              color="rgba(255,255,255,0.85)"
-            />
-          </Pressable>
+          <LogoutButton />
         </View>
         <Text style={styles.headerDate}>
           {new Date().toLocaleDateString('en-IN', {

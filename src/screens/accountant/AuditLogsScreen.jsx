@@ -3,7 +3,7 @@ import {FlatList, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {SearchBar} from '../../components';
+import {SearchBar, ScreenWrapper, AppHeader} from '../../components';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const AUDIT_LOGS = [
@@ -175,7 +175,8 @@ const AuditLogsScreen = ({navigation}) => {
   const alertCount = AUDIT_LOGS.filter(l => l.action === 'NOTIFICATION_SENT').length;
 
   return (
-    <View style={styles.root}>
+    <ScreenWrapper style={styles.root}>
+      <AppHeader title="System Audit Logs" onBack={true} />
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
@@ -260,7 +261,7 @@ const AuditLogsScreen = ({navigation}) => {
         }
         ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 
