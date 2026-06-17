@@ -3545,6 +3545,11 @@ export interface StudentIdSequence_Key {
   __typename?: 'StudentIdSequence_Key';
 }
 
+export interface StudentParent_Key {
+  id: UUIDString;
+  __typename?: 'StudentParent_Key';
+}
+
 export interface StudentPromotionHistory_Key {
   id: UUIDString;
   __typename?: 'StudentPromotionHistory_Key';
@@ -3825,6 +3830,11 @@ export interface UploadFeePaymentVariables {
   receiptNumber?: string | null;
   uploadedById: UUIDString;
   remarks?: string | null;
+}
+
+export interface UserRole_Key {
+  id: UUIDString;
+  __typename?: 'UserRole_Key';
 }
 
 export interface User_Key {

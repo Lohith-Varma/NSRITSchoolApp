@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleSheet, View, Pressable} from 'react-native';
-import {Avatar, Badge, IconButton, Text} from 'react-native-paper';
-import {colors, spacing, shadows} from '../../../theme';
+import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {colors, shadows, spacing} from '../../../theme';
 
 const DashboardHeader = ({
   title = 'NSRIT Connect',
@@ -12,16 +12,19 @@ const DashboardHeader = ({
   userAvatar,
   userName = 'Jane Doe, CPA',
 }) => {
+  const initials = userName
+    .split(' ')
+    .slice(0, 2)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
+
   return (
     <View style={styles.container}>
       <View style={styles.leftSection}>
-        <IconButton
-          icon="menu"
-          iconColor={colors.text}
-          size={24}
-          onPress={onMenuPress}
-          style={styles.menuButton}
-        />
+        <Pressable onPress={onMenuPress} style={styles.iconBtn} hitSlop={8}>
+          <MaterialCommunityIcons name="menu" size={24} color={colors.text} />
+        </Pressable>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
@@ -29,30 +32,22 @@ const DashboardHeader = ({
       </View>
 
       <View style={styles.rightSection}>
-        <Pressable onPress={onNotificationPress} style={styles.notificationWrapper}>
-          <IconButton
-            icon="bell-outline"
-            iconColor={colors.text}
-            size={24}
-            style={styles.bellButton}
-          />
-          {notificationCount > 0 && (
-            <Badge style={styles.badge} size={16}>
-              {notificationCount}
-            </Badge>
-          )}
+        <Pressable onPress={onNotificationPress} style={styles.bellWrap} hitSlop={8}>
+          <MaterialCommunityIcons name="bell-outline" size={24} color={colors.text} />
+          {notificationCount > 0 ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{notificationCount}</Text>
+            </View>
+          ) : null}
         </Pressable>
 
         <Pressable style={styles.avatarWrapper}>
           {userAvatar ? (
-            <Avatar.Image size={36} source={{uri: userAvatar}} />
+            <Image source={{uri: userAvatar}} style={styles.avatarImage} />
           ) : (
-            <Avatar.Text
-              size={36}
-              label={userName.split(' ').map(n => n[0]).join('')}
-              style={styles.avatarPlaceholder}
-              labelStyle={styles.avatarLabel}
-            />
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarLabel}>{initials}</Text>
+            </View>
           )}
         </Pressable>
       </View>
@@ -62,71 +57,47 @@ const DashboardHeader = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: colors.white,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    elevation: 2,
     ...shadows.soft,
   },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  menuButton: {
-    margin: 0,
-  },
-  titleContainer: {
-    marginLeft: spacing.xs,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: -0.3,
-  },
-  subtitle: {
-    fontSize: 11,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
-  rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  notificationWrapper: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bellButton: {
-    margin: 0,
-  },
+  leftSection: {alignItems: 'center', flex: 1, flexDirection: 'row'},
+  iconBtn: {alignItems: 'center', height: 40, justifyContent: 'center', width: 40},
+  titleContainer: {marginLeft: spacing.xs},
+  title: {color: colors.primary, fontSize: 16, fontWeight: '800', letterSpacing: -0.3},
+  subtitle: {color: colors.textMuted, fontSize: 11, fontWeight: '500'},
+  rightSection: {alignItems: 'center', flexDirection: 'row', gap: spacing.xs},
+  bellWrap: {alignItems: 'center', height: 40, justifyContent: 'center', position: 'relative', width: 40},
   badge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
+    alignItems: 'center',
     backgroundColor: colors.danger,
-    color: colors.white,
-    fontWeight: '700',
+    borderRadius: 8,
+    height: 16,
+    justifyContent: 'center',
+    minWidth: 16,
+    paddingHorizontal: 2,
+    position: 'absolute',
+    right: 4,
+    top: 4,
   },
-  avatarWrapper: {
-    paddingRight: spacing.xs,
-  },
+  badgeText: {color: colors.white, fontSize: 9, fontWeight: '700'},
+  avatarWrapper: {paddingRight: spacing.xs},
+  avatarImage: {borderRadius: 18, height: 36, width: 36},
   avatarPlaceholder: {
+    alignItems: 'center',
     backgroundColor: colors.primarySoft,
+    borderRadius: 18,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
   },
-  avatarLabel: {
-    color: colors.primary,
-    fontWeight: '800',
-    fontSize: 13,
-  },
+  avatarLabel: {color: colors.primary, fontSize: 13, fontWeight: '800'},
 });
 
 export default DashboardHeader;

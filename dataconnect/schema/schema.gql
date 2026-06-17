@@ -111,6 +111,7 @@ type User @table(name: "users", key: "id") {
   branch: Branch
   wing: Wing
   isActive: Boolean! @default(value: true)
+  status: String @col(dataType: "varchar(30)")
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
 }
@@ -601,6 +602,9 @@ type AuditLog @table(name: "audit_logs", key: "id") @index(fields: ["branchId", 
   entityId: String @col(name: "entity_id", dataType: "varchar(120)")
   oldData: String @col(name: "old_data")
   newData: String @col(name: "new_data")
+  userId: UUID @col(name: "user_id")
+  newRole: String @col(name: "new_role", dataType: "varchar(30)")
+  oldRole: String @col(name: "old_role", dataType: "varchar(30)")
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
 }
 
@@ -655,3 +659,16 @@ extend type Suggestion {
   studentId: UUID
   branchId: UUID!
 }
+
+type StudentParent @table(name: "student_parents", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  studentId: UUID @col(name: "student_id")
+  parentId: UUID @col(name: "parent_id")
+}
+
+type UserRole @table(name: "user_roles", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  userId: UUID @col(name: "user_id")
+  role: String @col(dataType: "varchar(30)")
+}
+

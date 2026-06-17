@@ -100,17 +100,35 @@ const AssignClassTeacherScreen = ({route}) => {
   const rows = useMemo(
     () => sections.map(section => {
       const assignment = assignmentBySection[section.id];
+      const hasAssignmentRecord = assignments.some(item => item.sectionId === section.id);
       const teacher = assignment?.teacher;
       const wing = section.academicClass?.wing?.code || '';
+
+      const teacherId = assignment
+        ? assignment.teacherId
+        : (hasAssignmentRecord ? '' : (section.classTeacherId || ''));
+
+      const teacherName = assignment
+        ? assignment.teacherName
+        : (hasAssignmentRecord ? 'Not assigned' : (section.classTeacher?.fullName || 'Not assigned'));
+
+      const employeeId = assignment
+        ? assignment.employeeId
+        : (hasAssignmentRecord ? '-' : (section.classTeacher?.employeeId || '-'));
+
+      const teacherPhoneNumber = assignment
+        ? assignment.teacherPhoneNumber
+        : (hasAssignmentRecord ? '-' : (section.classTeacher?.phoneNumber || '-'));
+
       return {
         id: section.id, section, assignment,
         status: assignment ? 'ASSIGNED' : 'UNASSIGNED',
         className: section.academicClass?.name || '-',
         sectionName: section.name || '-',
-        teacherId: assignment?.teacherId || section.classTeacherId || '',
-        teacherName: assignment?.teacherName || section.classTeacher?.fullName || 'Not assigned',
-        employeeId: assignment?.employeeId || teacher?.employeeId || section.classTeacher?.employeeId || '-',
-        teacherPhoneNumber: assignment?.teacherPhoneNumber || section.classTeacher?.phoneNumber || '-',
+        teacherId,
+        teacherName,
+        employeeId,
+        teacherPhoneNumber,
         assignedDate: assignment?.createdAt,
         assignedBy: assignment?.assignedByName || assignment?.assignedBy?.fullName || '-',
         wing,
@@ -118,7 +136,7 @@ const AssignClassTeacherScreen = ({route}) => {
         studentCount: studentCounts[section.id] || 0,
       };
     }),
-    [assignmentBySection, coordinatorByWing, sections, studentCounts],
+    [assignmentBySection, assignments, coordinatorByWing, sections, studentCounts],
   );
 
   const filterOptions = useMemo(() => {

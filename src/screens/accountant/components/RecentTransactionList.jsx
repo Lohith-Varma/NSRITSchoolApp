@@ -1,6 +1,5 @@
 import React from 'react';
 import {StyleSheet, View, Text, Pressable} from 'react-native';
-import {Avatar} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {colors, spacing, radius, shadows} from '../../../theme';
 

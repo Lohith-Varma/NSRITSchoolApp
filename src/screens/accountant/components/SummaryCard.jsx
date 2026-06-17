@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {IconButton} from 'react-native-paper';
-import {colors, spacing, radius, shadows} from '../../../theme';
+import {StyleSheet, Text, View} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {colors, radius, shadows, spacing} from '../../../theme';
 
 const SummaryCard = ({
   title,
@@ -18,31 +18,27 @@ const SummaryCard = ({
       <Text style={styles.title}>{title}</Text>
       <View style={styles.valueRow}>
         <Text style={styles.value}>{value}</Text>
-        <IconButton
-          icon={icon}
-          iconColor="rgba(255, 255, 255, 0.42)"
-          size={36}
-          style={styles.icon}
-        />
+        <View style={styles.iconWrap}>
+          <MaterialCommunityIcons name={icon} size={36} color="rgba(255,255,255,0.42)" />
+        </View>
       </View>
-      {(percentage !== undefined || subtitle) && (
+      {(percentage !== undefined || subtitle) ? (
         <View style={styles.footer}>
-          {percentage !== undefined && (
+          {percentage !== undefined ? (
             <View style={styles.trendContainer}>
-              <IconButton
-                icon={isIncrease ? 'trending-up' : 'trending-down'}
-                iconColor="rgba(255, 255, 255, 0.85)"
+              <MaterialCommunityIcons
+                name={isIncrease ? 'trending-up' : 'trending-down'}
                 size={14}
-                style={styles.trendIcon}
+                color="rgba(255,255,255,0.85)"
               />
               <Text style={styles.trendText}>
                 {percentage}% {isIncrease ? 'increase' : 'decrease'}
               </Text>
             </View>
-          )}
-          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          ) : null}
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-      )}
+      ) : null}
     </View>
   );
 };
@@ -50,63 +46,27 @@ const SummaryCard = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.xl,
-    padding: spacing.lg,
-    elevation: 4,
-    ...shadows.medium,
-    position: 'relative',
     overflow: 'hidden',
+    padding: spacing.lg,
+    position: 'relative',
+    ...shadows.medium,
   },
-  title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.85)',
-    marginBottom: spacing.xs,
-  },
-  valueRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  value: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.white,
-    letterSpacing: -0.5,
-  },
-  icon: {
-    margin: 0,
-    position: 'absolute',
-    right: -10,
-    bottom: -10,
-  },
-  footer: {
-    marginTop: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-  },
+  title: {color: 'rgba(255,255,255,0.85)', fontSize: 14, fontWeight: '600', marginBottom: spacing.xs},
+  valueRow: {alignItems: 'flex-end', flexDirection: 'row', justifyContent: 'space-between'},
+  value: {color: colors.white, fontSize: 28, fontWeight: '800', letterSpacing: -0.5},
+  iconWrap: {bottom: -10, position: 'absolute', right: -10},
+  footer: {alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.sm},
   trendContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingVertical: 2,
-    paddingHorizontal: spacing.xs,
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderRadius: radius.sm,
+    flexDirection: 'row',
+    gap: 3,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
   },
-  trendIcon: {
-    margin: 0,
-  },
-  trendText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  subtitle: {
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontWeight: '500',
-  },
+  trendText: {color: colors.white, fontSize: 10, fontWeight: '700'},
+  subtitle: {color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '500'},
 });
 
 export default SummaryCard;

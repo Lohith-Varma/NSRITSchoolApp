@@ -92,3 +92,7 @@ yarn-error.log
 .firebase/
 
 dataconnect/.dataconnect/
+
+# Debug and local log files
+*-debug.log
+*.log
