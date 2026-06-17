@@ -15,6 +15,7 @@
   GET_STUDENT_FEE_HISTORY: 'GetStudentFeeHistory',
   GET_GLOBAL_REPORTS: 'GetGlobalReports',
   GET_AUDIT_LOGS: 'GetAuditLogs',
+  GET_USERS_BY_PHONE: 'GetUsersByPhone',
   GET_DASHBOARD_STATISTICS: 'GetDashboardStatistics',
   GET_WINGS_BY_BRANCH: 'GetWingsByBranch',
   GET_CLASSES_BY_WING: 'GetClassesByWing',

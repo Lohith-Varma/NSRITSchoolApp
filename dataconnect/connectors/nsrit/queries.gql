@@ -4317,6 +4317,27 @@ query GetClassOutstandingSummary(
   }
 }
 
+query GetUsersByPhone($phoneNumber: String!) @auth(level: USER) {
+  users(where: {phoneNumber: {eq: $phoneNumber}, isActive: {eq: true}}) {
+    id
+    firebaseUID
+    fullName
+    countryCode
+    phoneNumber
+    role
+    employeeId
+    staffType
+    branchId
+    wingId
+    branch {
+      id
+      branchCode
+      name
+    }
+    isActive
+  }
+}
+
 # ── Notice Board ─────────────────────────────────────────────────────────────
 
 query GetNoticesByBranch($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(level: USER) {
