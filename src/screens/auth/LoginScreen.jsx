@@ -190,19 +190,7 @@ const LoginScreen = ({navigation}) => {
             )}
           </AnimatedPressable>
 
-          {/* Dev bypass hint */}
-          {__DEV__ ? (
-            <View style={styles.devHint}>
-              <MaterialCommunityIcons
-                name="information-outline"
-                size={12}
-                color={colors.textSoft}
-              />
-              <Text style={styles.devText}>
-                Dev: Use OTP <Text style={{color: colors.primary}}>123456</Text>
-              </Text>
-            </View>
-          ) : null}
+
         </Animated.View>
 
         {/* Footer */}
@@ -389,22 +377,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '800',
   },
-  // Dev hint
-  devHint: {
-    alignItems: 'center',
-    backgroundColor: colors.neutralSoft,
-    borderRadius: radius.md,
-    flexDirection: 'row',
-    gap: 5,
-    justifyContent: 'center',
-    marginTop: spacing.md,
-    padding: spacing.sm,
-  },
-  devText: {
-    color: colors.textSoft,
-    fontSize: 11,
-    fontWeight: '600',
-  },
+
   // Footer
   footer: {
     alignItems: 'center',

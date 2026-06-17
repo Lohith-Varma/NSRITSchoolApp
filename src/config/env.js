@@ -15,7 +15,7 @@ export const apiConfig = {
 };
 
 // Use the local emulator in development mode
-export const USE_EMULATOR = typeof __DEV__ !== 'undefined' ? __DEV__ : false;
+export const USE_EMULATOR = false;
 
 const EMULATOR_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 

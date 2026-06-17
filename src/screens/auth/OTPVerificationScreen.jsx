@@ -212,24 +212,7 @@ const OTPVerificationScreen = ({route, navigation}) => {
           </View>
         </Animated.View>
 
-        {/* Dev hint */}
-        {__DEV__ ? (
-          <Animated.View
-            entering={FadeInDown.delay(200).duration(300)}
-            style={styles.devHint}>
-            <MaterialCommunityIcons
-              name="information-outline"
-              size={12}
-              color={colors.textSoft}
-            />
-            <Text style={styles.devText}>
-              Dev bypass OTP:{' '}
-              <Text style={{color: colors.primary, fontWeight: '800'}}>
-                123456
-              </Text>
-            </Text>
-          </Animated.View>
-        ) : null}
+
 
       </ScrollView>
     </KeyboardAvoidingView>
@@ -420,21 +403,7 @@ const styles = StyleSheet.create({
     ...typography.captionBold,
     color: colors.primary,
   },
-  // Dev
-  devHint: {
-    alignItems: 'center',
-    backgroundColor: colors.neutralSoft,
-    borderRadius: radius.md,
-    flexDirection: 'row',
-    gap: 5,
-    justifyContent: 'center',
-    padding: spacing.sm,
-  },
-  devText: {
-    color: colors.textSoft,
-    fontSize: 11,
-    fontWeight: '600',
-  },
+
 });
 
 export default OTPVerificationScreen;
