@@ -10,9 +10,12 @@ This README will guide you through the process of using the generated JavaScript
 - [**Queries**](#queries)
   - [*GetCurrentUser*](#getcurrentuser)
   - [*GetUserByPhone*](#getuserbyphone)
+  - [*GetUserRoles*](#getuserroles)
   - [*GetStudentsByBranch*](#getstudentsbybranch)
   - [*GetStudentsBySection*](#getstudentsbysection)
   - [*GetParentChildren*](#getparentchildren)
+  - [*GetParentChildrenByUser*](#getparentchildrenbyuser)
+  - [*GetStudentParents*](#getstudentparents)
   - [*GetParentByUser*](#getparentbyuser)
   - [*GetParentByPhone*](#getparentbyphone)
   - [*GetBranches*](#getbranches)
@@ -84,6 +87,10 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetGlobalStudentExplorer*](#getglobalstudentexplorer)
   - [*GetGlobalReports*](#getglobalreports)
   - [*GetAuditLogs*](#getauditlogs)
+  - [*GetClassFeeReport*](#getclassfeereport)
+  - [*GetClassStudentsFeeStatus*](#getclassstudentsfeestatus)
+  - [*GetClassCollectionSummary*](#getclasscollectionsummary)
+  - [*GetClassOutstandingSummary*](#getclassoutstandingsummary)
 - [**Mutations**](#mutations)
   - [*CreateBranch*](#createbranch)
   - [*UpdateBranch*](#updatebranch)
@@ -98,6 +105,10 @@ This README will guide you through the process of using the generated JavaScript
   - [*RemoveSection*](#removesection)
   - [*CreateUser*](#createuser)
   - [*ClaimUserFirebaseUID*](#claimuserfirebaseuid)
+  - [*EnsureCurrentUserLegacyRole*](#ensurecurrentuserlegacyrole)
+  - [*AddParentRole*](#addparentrole)
+  - [*SwitchRole*](#switchrole)
+  - [*LinkStudentParent*](#linkstudentparent)
   - [*CreateParent*](#createparent)
   - [*CreateParentWithoutUser*](#createparentwithoutuser)
   - [*CreateStudent*](#createstudent)
@@ -116,8 +127,10 @@ This README will guide you through the process of using the generated JavaScript
   - [*ClearTeacherSubjects*](#clearteachersubjects)
   - [*CreateAccountant*](#createaccountant)
   - [*ClearTeacherWingRestrictions*](#clearteacherwingrestrictions)
+  - [*EnsureCoordinatorTeacherProfile*](#ensurecoordinatorteacherprofile)
   - [*UpdateClassTeacherAssignment*](#updateclassteacherassignment)
   - [*RemoveClassTeacherAssignment*](#removeclassteacherassignment)
+  - [*RemoveLegacyClassTeacherAssignment*](#removelegacyclassteacherassignment)
   - [*UpdateAccountant*](#updateaccountant)
   - [*CreateFeeCategory*](#createfeecategory)
   - [*UpdateFeeCategory*](#updatefeecategory)
@@ -226,6 +239,7 @@ export interface GetCurrentUserData {
     fullName: string;
     countryCode: string;
     phoneNumber: string;
+    status: string;
     role: string;
     employeeId?: string | null;
     staffType?: string | null;
@@ -236,6 +250,34 @@ export interface GetCurrentUserData {
       branchCode: string;
       name: string;
     } & Branch_Key;
+    branchAdminBranches: ({
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key)[];
+    principalBranches: ({
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key)[];
+    coordinatorProfiles: ({
+      id: UUIDString;
+      branchId: UUIDString;
+      wing: string;
+    } & Coordinator_Key)[];
+    teacherProfile?: {
+      id: UUIDString;
+      branchId: UUIDString;
+    } & Teacher_Key;
+    accountantProfile?: {
+      id: UUIDString;
+      branchId: UUIDString;
+    } & Accountant_Key;
+    roles: ({
+      id: UUIDString;
+      role: string;
+      createdAt: TimestampString;
+    })[];
     isActive: boolean;
   } & User_Key)[];
 }
@@ -352,6 +394,7 @@ export interface GetUserByPhoneData {
     fullName: string;
     countryCode: string;
     phoneNumber: string;
+    status: string;
     role: string;
     employeeId?: string | null;
     staffType?: string | null;
@@ -361,6 +404,34 @@ export interface GetUserByPhoneData {
       branchCode: string;
       name: string;
     } & Branch_Key;
+    branchAdminBranches: ({
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key)[];
+    principalBranches: ({
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key)[];
+    coordinatorProfiles: ({
+      id: UUIDString;
+      branchId: UUIDString;
+      wing: string;
+    } & Coordinator_Key)[];
+    teacherProfile?: {
+      id: UUIDString;
+      branchId: UUIDString;
+    } & Teacher_Key;
+    accountantProfile?: {
+      id: UUIDString;
+      branchId: UUIDString;
+    } & Accountant_Key;
+    roles: ({
+      id: UUIDString;
+      role: string;
+      createdAt: TimestampString;
+    })[];
     isActive: boolean;
   } & User_Key)[];
 }
@@ -425,6 +496,120 @@ console.log(data.users);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.users);
+});
+```
+
+## GetUserRoles
+You can execute the `GetUserRoles` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getUserRoles(vars: GetUserRolesVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserRolesData, GetUserRolesVariables>;
+
+interface GetUserRolesRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserRolesVariables): QueryRef<GetUserRolesData, GetUserRolesVariables>;
+}
+export const getUserRolesRef: GetUserRolesRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getUserRoles(dc: DataConnect, vars: GetUserRolesVariables, options?: ExecuteQueryOptions): QueryPromise<GetUserRolesData, GetUserRolesVariables>;
+
+interface GetUserRolesRef {
+  ...
+  (dc: DataConnect, vars: GetUserRolesVariables): QueryRef<GetUserRolesData, GetUserRolesVariables>;
+}
+export const getUserRolesRef: GetUserRolesRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getUserRolesRef:
+```typescript
+const name = getUserRolesRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetUserRoles` query requires an argument of type `GetUserRolesVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetUserRolesVariables {
+  userId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetUserRoles` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetUserRolesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetUserRolesData {
+  userRoles: ({
+    id: UUIDString;
+    userId: UUIDString;
+    role: string;
+    createdAt: TimestampString;
+  } & UserRole_Key)[];
+}
+```
+### Using `GetUserRoles`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getUserRoles, GetUserRolesVariables } from '@dataconnect/generated';
+
+// The `GetUserRoles` query requires an argument of type `GetUserRolesVariables`:
+const getUserRolesVars: GetUserRolesVariables = {
+  userId: ..., 
+};
+
+// Call the `getUserRoles()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getUserRoles(getUserRolesVars);
+// Variables can be defined inline as well.
+const { data } = await getUserRoles({ userId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getUserRoles(dataConnect, getUserRolesVars);
+
+console.log(data.userRoles);
+
+// Or, you can use the `Promise` API.
+getUserRoles(getUserRolesVars).then((response) => {
+  const data = response.data;
+  console.log(data.userRoles);
+});
+```
+
+### Using `GetUserRoles`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getUserRolesRef, GetUserRolesVariables } from '@dataconnect/generated';
+
+// The `GetUserRoles` query requires an argument of type `GetUserRolesVariables`:
+const getUserRolesVars: GetUserRolesVariables = {
+  userId: ..., 
+};
+
+// Call the `getUserRolesRef()` function to get a reference to the query.
+const ref = getUserRolesRef(getUserRolesVars);
+// Variables can be defined inline as well.
+const ref = getUserRolesRef({ userId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getUserRolesRef(dataConnect, getUserRolesVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.userRoles);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.userRoles);
 });
 ```
 
@@ -934,6 +1119,488 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## GetParentChildrenByUser
+You can execute the `GetParentChildrenByUser` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getParentChildrenByUser(vars: GetParentChildrenByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentChildrenByUserData, GetParentChildrenByUserVariables>;
+
+interface GetParentChildrenByUserRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetParentChildrenByUserVariables): QueryRef<GetParentChildrenByUserData, GetParentChildrenByUserVariables>;
+}
+export const getParentChildrenByUserRef: GetParentChildrenByUserRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getParentChildrenByUser(dc: DataConnect, vars: GetParentChildrenByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetParentChildrenByUserData, GetParentChildrenByUserVariables>;
+
+interface GetParentChildrenByUserRef {
+  ...
+  (dc: DataConnect, vars: GetParentChildrenByUserVariables): QueryRef<GetParentChildrenByUserData, GetParentChildrenByUserVariables>;
+}
+export const getParentChildrenByUserRef: GetParentChildrenByUserRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getParentChildrenByUserRef:
+```typescript
+const name = getParentChildrenByUserRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetParentChildrenByUser` query requires an argument of type `GetParentChildrenByUserVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetParentChildrenByUserVariables {
+  userId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetParentChildrenByUser` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetParentChildrenByUserData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetParentChildrenByUserData {
+  studentParents: ({
+    id: UUIDString;
+    relationship: string;
+    student: {
+      id: UUIDString;
+      studentId: string;
+      fullName: string;
+      gender?: string | null;
+      dateOfBirth?: DateString | null;
+      branchId: UUIDString;
+      academicClassId: UUIDString;
+      sectionId: UUIDString;
+      parentId: UUIDString;
+      phoneNumber?: string | null;
+      admissionYear: number;
+      branchCode: string;
+      admissionDate: DateString;
+      status: string;
+      academicClass: {
+        id: UUIDString;
+        name: string;
+        wing: {
+          id: UUIDString;
+          code: string;
+          name: string;
+        } & Wing_Key;
+      } & AcademicClass_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicYear: number;
+        classTeacher?: {
+          id: UUIDString;
+          fullName: string;
+          phoneNumber: string;
+        } & User_Key;
+      } & Section_Key;
+      parent: {
+        id: UUIDString;
+        fullName: string;
+        fatherName?: string | null;
+        motherName?: string | null;
+        countryCode: string;
+        phoneNumber: string;
+        address?: string | null;
+      } & Parent_Key;
+      linkedParents: ({
+        id: UUIDString;
+        relationship: string;
+        user: {
+          id: UUIDString;
+          fullName: string;
+          phoneNumber: string;
+          role: string;
+          roles: ({
+            role: string;
+          })[];
+        } & User_Key;
+      })[];
+      linkedRecentAttendance: ({
+        id: UUIDString;
+        attendanceDate: DateString;
+        status: string;
+        remarks?: string | null;
+      } & Attendance_Key)[];
+      linkedAttendance: ({
+        id: UUIDString;
+        attendanceDate: DateString;
+        status: string;
+      } & Attendance_Key)[];
+      linkedFees: ({
+        id: UUIDString;
+        totalFee: number;
+        paidAmount: number;
+        remainingAmount: number;
+        status: string;
+        dueDate: DateString;
+      } & StudentFee_Key)[];
+      linkedParentFeePlans: ({
+        id: UUIDString;
+        academicYear: number;
+        classFeeTemplateId?: UUIDString | null;
+        term1Fee: number;
+        term2Fee: number;
+        term3Fee: number;
+        booksFee: number;
+        transportFee: number;
+        concessionType?: string | null;
+        concessionValue: number;
+        concessionAmount: number;
+        grossAmount: number;
+        totalAmount: number;
+        isActive: boolean;
+        classFeeTemplate?: {
+          id: UUIDString;
+          totalTuitionFee: number;
+          applyToFuture: boolean;
+          status: string;
+        } & AcademicYearFeeTemplate_Key;
+        linkedParentFeeItems: ({
+          id: UUIDString;
+          amount: number;
+          category: {
+            id: UUIDString;
+            name: string;
+          } & FeeCategory_Key;
+        } & StudentFeeItem_Key)[];
+        linkedParentFeePayments: ({
+          id: UUIDString;
+          amount: number;
+          paymentDate: DateString;
+          paymentMode: string;
+          referenceNumber?: string | null;
+          receiptNumber: string;
+          status: string;
+          reversedAt?: TimestampString | null;
+          reverseReason?: string | null;
+          remarks?: string | null;
+          collectedBy: {
+            id: UUIDString;
+            fullName: string;
+          } & User_Key;
+        } & FeePayment_Key)[];
+      } & StudentFeePlan_Key)[];
+    } & Student_Key;
+  })[];
+  legacyStudents: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    gender?: string | null;
+    dateOfBirth?: DateString | null;
+    branchId: UUIDString;
+    academicClassId: UUIDString;
+    sectionId: UUIDString;
+    parentId: UUIDString;
+    phoneNumber?: string | null;
+    admissionYear: number;
+    branchCode: string;
+    admissionDate: DateString;
+    status: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+    section: {
+      id: UUIDString;
+      name: string;
+      academicYear: number;
+      classTeacher?: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+      } & User_Key;
+    } & Section_Key;
+    parent: {
+      id: UUIDString;
+      fullName: string;
+      fatherName?: string | null;
+      motherName?: string | null;
+      countryCode: string;
+      phoneNumber: string;
+      address?: string | null;
+    } & Parent_Key;
+    linkedParents: ({
+      id: UUIDString;
+      relationship: string;
+      user: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+        role: string;
+        roles: ({
+          role: string;
+        })[];
+      } & User_Key;
+    })[];
+    legacyRecentAttendance: ({
+      id: UUIDString;
+      attendanceDate: DateString;
+      status: string;
+      remarks?: string | null;
+    } & Attendance_Key)[];
+    legacyAttendance: ({
+      id: UUIDString;
+      attendanceDate: DateString;
+      status: string;
+    } & Attendance_Key)[];
+    legacyFees: ({
+      id: UUIDString;
+      totalFee: number;
+      paidAmount: number;
+      remainingAmount: number;
+      status: string;
+      dueDate: DateString;
+    } & StudentFee_Key)[];
+    legacyParentFeePlans: ({
+      id: UUIDString;
+      academicYear: number;
+      classFeeTemplateId?: UUIDString | null;
+      term1Fee: number;
+      term2Fee: number;
+      term3Fee: number;
+      booksFee: number;
+      transportFee: number;
+      concessionType?: string | null;
+      concessionValue: number;
+      concessionAmount: number;
+      grossAmount: number;
+      totalAmount: number;
+      isActive: boolean;
+      classFeeTemplate?: {
+        id: UUIDString;
+        totalTuitionFee: number;
+        applyToFuture: boolean;
+        status: string;
+      } & AcademicYearFeeTemplate_Key;
+      legacyParentFeeItems: ({
+        id: UUIDString;
+        amount: number;
+        category: {
+          id: UUIDString;
+          name: string;
+        } & FeeCategory_Key;
+      } & StudentFeeItem_Key)[];
+      legacyParentFeePayments: ({
+        id: UUIDString;
+        amount: number;
+        paymentDate: DateString;
+        paymentMode: string;
+        referenceNumber?: string | null;
+        receiptNumber: string;
+        status: string;
+        reversedAt?: TimestampString | null;
+        reverseReason?: string | null;
+        remarks?: string | null;
+        collectedBy: {
+          id: UUIDString;
+          fullName: string;
+        } & User_Key;
+      } & FeePayment_Key)[];
+    } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+```
+### Using `GetParentChildrenByUser`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getParentChildrenByUser, GetParentChildrenByUserVariables } from '@dataconnect/generated';
+
+// The `GetParentChildrenByUser` query requires an argument of type `GetParentChildrenByUserVariables`:
+const getParentChildrenByUserVars: GetParentChildrenByUserVariables = {
+  userId: ..., 
+};
+
+// Call the `getParentChildrenByUser()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getParentChildrenByUser(getParentChildrenByUserVars);
+// Variables can be defined inline as well.
+const { data } = await getParentChildrenByUser({ userId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getParentChildrenByUser(dataConnect, getParentChildrenByUserVars);
+
+console.log(data.studentParents);
+console.log(data.legacyStudents);
+
+// Or, you can use the `Promise` API.
+getParentChildrenByUser(getParentChildrenByUserVars).then((response) => {
+  const data = response.data;
+  console.log(data.studentParents);
+  console.log(data.legacyStudents);
+});
+```
+
+### Using `GetParentChildrenByUser`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getParentChildrenByUserRef, GetParentChildrenByUserVariables } from '@dataconnect/generated';
+
+// The `GetParentChildrenByUser` query requires an argument of type `GetParentChildrenByUserVariables`:
+const getParentChildrenByUserVars: GetParentChildrenByUserVariables = {
+  userId: ..., 
+};
+
+// Call the `getParentChildrenByUserRef()` function to get a reference to the query.
+const ref = getParentChildrenByUserRef(getParentChildrenByUserVars);
+// Variables can be defined inline as well.
+const ref = getParentChildrenByUserRef({ userId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getParentChildrenByUserRef(dataConnect, getParentChildrenByUserVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.studentParents);
+console.log(data.legacyStudents);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.studentParents);
+  console.log(data.legacyStudents);
+});
+```
+
+## GetStudentParents
+You can execute the `GetStudentParents` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getStudentParents(vars: GetStudentParentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentParentsData, GetStudentParentsVariables>;
+
+interface GetStudentParentsRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetStudentParentsVariables): QueryRef<GetStudentParentsData, GetStudentParentsVariables>;
+}
+export const getStudentParentsRef: GetStudentParentsRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getStudentParents(dc: DataConnect, vars: GetStudentParentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetStudentParentsData, GetStudentParentsVariables>;
+
+interface GetStudentParentsRef {
+  ...
+  (dc: DataConnect, vars: GetStudentParentsVariables): QueryRef<GetStudentParentsData, GetStudentParentsVariables>;
+}
+export const getStudentParentsRef: GetStudentParentsRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getStudentParentsRef:
+```typescript
+const name = getStudentParentsRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetStudentParents` query requires an argument of type `GetStudentParentsVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetStudentParentsVariables {
+  studentId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `GetStudentParents` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetStudentParentsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetStudentParentsData {
+  studentParents: ({
+    id: UUIDString;
+    relationship: string;
+    createdAt: TimestampString;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      role: string;
+      roles: ({
+        role: string;
+      })[];
+    } & User_Key;
+  })[];
+}
+```
+### Using `GetStudentParents`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getStudentParents, GetStudentParentsVariables } from '@dataconnect/generated';
+
+// The `GetStudentParents` query requires an argument of type `GetStudentParentsVariables`:
+const getStudentParentsVars: GetStudentParentsVariables = {
+  studentId: ..., 
+};
+
+// Call the `getStudentParents()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getStudentParents(getStudentParentsVars);
+// Variables can be defined inline as well.
+const { data } = await getStudentParents({ studentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getStudentParents(dataConnect, getStudentParentsVars);
+
+console.log(data.studentParents);
+
+// Or, you can use the `Promise` API.
+getStudentParents(getStudentParentsVars).then((response) => {
+  const data = response.data;
+  console.log(data.studentParents);
+});
+```
+
+### Using `GetStudentParents`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getStudentParentsRef, GetStudentParentsVariables } from '@dataconnect/generated';
+
+// The `GetStudentParents` query requires an argument of type `GetStudentParentsVariables`:
+const getStudentParentsVars: GetStudentParentsVariables = {
+  studentId: ..., 
+};
+
+// Call the `getStudentParentsRef()` function to get a reference to the query.
+const ref = getStudentParentsRef(getStudentParentsVars);
+// Variables can be defined inline as well.
+const ref = getStudentParentsRef({ studentId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getStudentParentsRef(dataConnect, getStudentParentsVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.studentParents);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.studentParents);
+});
+```
+
 ## GetParentByUser
 You can execute the `GetParentByUser` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -1242,6 +1909,9 @@ export interface GetBranchesData {
       phoneNumber: string;
       role: string;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
     } & User_Key;
     principal?: {
       id: UUIDString;
@@ -1604,6 +2274,9 @@ export interface GetUsersByRoleData {
     fullName: string;
     phoneNumber: string;
     role: string;
+    roles: ({
+      role: string;
+    })[];
     branchId?: UUIDString | null;
     isActive: boolean;
   } & User_Key)[];
@@ -2419,6 +3092,20 @@ export interface GetStudentProfileData {
       email?: string | null;
       address?: string | null;
     } & Parent_Key;
+    linkedParents: ({
+      id: UUIDString;
+      relationship: string;
+      createdAt: TimestampString;
+      user: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+        role: string;
+        roles: ({
+          role: string;
+        })[];
+      } & User_Key;
+    })[];
   } & Student_Key;
   attendances: ({
     id: UUIDString;
@@ -3740,6 +4427,20 @@ export interface GetStudentDetailsData {
       email?: string | null;
       address?: string | null;
     } & Parent_Key;
+    linkedParents: ({
+      id: UUIDString;
+      relationship: string;
+      createdAt: TimestampString;
+      user: {
+        id: UUIDString;
+        fullName: string;
+        phoneNumber: string;
+        role: string;
+        roles: ({
+          role: string;
+        })[];
+      } & User_Key;
+    })[];
   } & Student_Key;
   attendances: ({
     id: UUIDString;
@@ -6201,6 +6902,40 @@ export interface GetCoordinatorsData {
       staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
+      teacherProfile?: {
+        id: UUIDString;
+        userId: UUIDString;
+        employeeId: string;
+        staffType: string;
+        branchId: UUIDString;
+        joiningDate: DateString;
+        designation: string;
+        gender: string;
+        email?: string | null;
+        isActive: boolean;
+        classTeacherAssignments: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          isActive: boolean;
+          createdAt: TimestampString;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+      } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key)[];
 }
@@ -6330,6 +7065,40 @@ export interface GetCoordinatorDetailsData {
       staffType?: string | null;
       branchId?: UUIDString | null;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
+      teacherProfile?: {
+        id: UUIDString;
+        userId: UUIDString;
+        employeeId: string;
+        staffType: string;
+        branchId: UUIDString;
+        joiningDate: DateString;
+        designation: string;
+        gender: string;
+        email?: string | null;
+        isActive: boolean;
+        classTeacherAssignments: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          isActive: boolean;
+          createdAt: TimestampString;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+      } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key;
 }
@@ -6589,6 +7358,17 @@ export interface GetSectionsData {
       employeeId?: string | null;
       staffType?: string | null;
       role: string;
+      roles: ({
+        role: string;
+      })[];
+      teacherProfile?: {
+        id: UUIDString;
+        userId: UUIDString;
+        employeeId: string;
+        staffType: string;
+        branchId: UUIDString;
+        isActive: boolean;
+      } & Teacher_Key;
     } & User_Key;
     classTeacherAssignments: ({
       id: UUIDString;
@@ -6610,6 +7390,10 @@ export interface GetSectionsData {
           fullName: string;
           phoneNumber: string;
           employeeId?: string | null;
+          role: string;
+          roles: ({
+            role: string;
+          })[];
         } & User_Key;
       } & Teacher_Key;
     } & TeacherSectionAssignment_Key)[];
@@ -7825,6 +8609,9 @@ export interface GetTeachersData {
       role: string;
       staffType?: string | null;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
     } & User_Key;
     teacherSubjects_on_teacher: ({
       id: UUIDString;
@@ -8107,6 +8894,9 @@ export interface GetTeachersByWingData {
       role: string;
       staffType?: string | null;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
     } & User_Key;
     teacherSubjects_on_teacher: ({
       id: UUIDString;
@@ -8274,6 +9064,9 @@ export interface GetCoordinatorTeachersByWingData {
       role: string;
       staffType?: string | null;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
     } & User_Key;
     teacherSubjects_on_teacher: ({
       id: UUIDString;
@@ -8445,6 +9238,9 @@ export interface GetTeacherProfileData {
       phoneNumber: string;
       role: string;
       isActive: boolean;
+      roles: ({
+        role: string;
+      })[];
     } & User_Key;
     branch: {
       id: UUIDString;
@@ -8465,6 +9261,12 @@ export interface GetTeacherProfileData {
       sectionId: UUIDString;
       isClassTeacher: boolean;
       isActive: boolean;
+      createdAt: TimestampString;
+      assignedBy?: {
+        id: UUIDString;
+        fullName: string;
+        role: string;
+      } & User_Key;
       section: {
         id: UUIDString;
         name: string;
@@ -8628,6 +9430,39 @@ export interface GetTeacherProfileByUserData {
     designation: string;
     gender: string;
     isActive: boolean;
+    user: {
+      id: UUIDString;
+      fullName: string;
+      phoneNumber: string;
+      role: string;
+      roles: ({
+        role: string;
+      })[];
+    } & User_Key;
+    assignments: ({
+      id: UUIDString;
+      sectionId: UUIDString;
+      isClassTeacher: boolean;
+      isActive: boolean;
+      createdAt: TimestampString;
+      assignedBy?: {
+        id: UUIDString;
+        fullName: string;
+        role: string;
+      } & User_Key;
+      section: {
+        id: UUIDString;
+        name: string;
+        academicClass: {
+          id: UUIDString;
+          name: string;
+          wing: {
+            code: string;
+            name: string;
+          };
+        } & AcademicClass_Key;
+      } & Section_Key;
+    } & TeacherSectionAssignment_Key)[];
   } & Teacher_Key)[];
 }
 ```
@@ -8748,6 +9583,10 @@ export interface GetTeacherDashboardData {
       id: UUIDString;
       fullName: string;
       phoneNumber: string;
+      role: string;
+      roles: ({
+        role: string;
+      })[];
       dashboardMarkedAttendance: ({
         id: UUIDString;
         attendanceDate: DateString;
@@ -9722,6 +10561,17 @@ export interface GetClassTeacherAssignmentsData {
       employeeId?: string | null;
       staffType?: string | null;
       role: string;
+      roles: ({
+        role: string;
+      })[];
+      teacherProfile?: {
+        id: UUIDString;
+        userId: UUIDString;
+        employeeId: string;
+        staffType: string;
+        branchId: UUIDString;
+        isActive: boolean;
+      } & Teacher_Key;
     } & User_Key;
   } & Section_Key)[];
   teacherSectionAssignments: ({
@@ -9747,6 +10597,17 @@ export interface GetClassTeacherAssignmentsData {
         phoneNumber: string;
         employeeId?: string | null;
         role: string;
+        roles: ({
+          role: string;
+        })[];
+        teacherProfile?: {
+          id: UUIDString;
+          userId: UUIDString;
+          employeeId: string;
+          staffType: string;
+          branchId: UUIDString;
+          isActive: boolean;
+        } & Teacher_Key;
       } & User_Key;
     } & Teacher_Key;
     section: {
@@ -9780,6 +10641,41 @@ export interface GetClassTeacherAssignmentsData {
       fullName: string;
       employeeId?: string | null;
       phoneNumber: string;
+      role: string;
+      staffType?: string | null;
+      roles: ({
+        role: string;
+      })[];
+      teacherProfile?: {
+        id: UUIDString;
+        userId: UUIDString;
+        employeeId: string;
+        staffType: string;
+        branchId: UUIDString;
+        joiningDate: DateString;
+        designation: string;
+        gender: string;
+        email?: string | null;
+        isActive: boolean;
+        assignments: ({
+          id: UUIDString;
+          sectionId: UUIDString;
+          isClassTeacher: boolean;
+          isActive: boolean;
+          section: {
+            id: UUIDString;
+            name: string;
+            academicClass: {
+              id: UUIDString;
+              name: string;
+              wing: {
+                code: string;
+                name: string;
+              };
+            } & AcademicClass_Key;
+          } & Section_Key;
+        } & TeacherSectionAssignment_Key)[];
+      } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key)[];
 }
@@ -10044,6 +10940,8 @@ The `GetStudentFeeProfile` query requires an argument of type `GetStudentFeeProf
 ```typescript
 export interface GetStudentFeeProfileVariables {
   studentId: UUIDString;
+  actorRole?: string | null;
+  actorRoleAlias?: string | null;
 }
 ```
 ### Return Type
@@ -10150,13 +11048,15 @@ import { connectorConfig, getStudentFeeProfile, GetStudentFeeProfileVariables } 
 // The `GetStudentFeeProfile` query requires an argument of type `GetStudentFeeProfileVariables`:
 const getStudentFeeProfileVars: GetStudentFeeProfileVariables = {
   studentId: ..., 
+  actorRole: ..., // optional
+  actorRoleAlias: ..., // optional
 };
 
 // Call the `getStudentFeeProfile()` function to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await getStudentFeeProfile(getStudentFeeProfileVars);
 // Variables can be defined inline as well.
-const { data } = await getStudentFeeProfile({ studentId: ..., });
+const { data } = await getStudentFeeProfile({ studentId: ..., actorRole: ..., actorRoleAlias: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -10180,12 +11080,14 @@ import { connectorConfig, getStudentFeeProfileRef, GetStudentFeeProfileVariables
 // The `GetStudentFeeProfile` query requires an argument of type `GetStudentFeeProfileVariables`:
 const getStudentFeeProfileVars: GetStudentFeeProfileVariables = {
   studentId: ..., 
+  actorRole: ..., // optional
+  actorRoleAlias: ..., // optional
 };
 
 // Call the `getStudentFeeProfileRef()` function to get a reference to the query.
 const ref = getStudentFeeProfileRef(getStudentFeeProfileVars);
 // Variables can be defined inline as well.
-const ref = getStudentFeeProfileRef({ studentId: ..., });
+const ref = getStudentFeeProfileRef({ studentId: ..., actorRole: ..., actorRoleAlias: ..., });
 
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -11037,6 +11939,7 @@ The `data` property is an object of type `GetAuditLogsData`, which is defined in
 export interface GetAuditLogsData {
   auditLogs: ({
     id: UUIDString;
+    userId?: UUIDString | null;
     performedBy: string;
     performedRole: string;
     actingAs?: string | null;
@@ -11044,6 +11947,8 @@ export interface GetAuditLogsData {
     action: string;
     entityType?: string | null;
     entityId?: string | null;
+    oldRole?: string | null;
+    newRole?: string | null;
     oldData?: string | null;
     newData?: string | null;
     createdAt: TimestampString;
@@ -11118,6 +12023,662 @@ console.log(data.auditLogs);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.auditLogs);
+});
+```
+
+## GetClassFeeReport
+You can execute the `GetClassFeeReport` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getClassFeeReport(vars: GetClassFeeReportVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassFeeReportData, GetClassFeeReportVariables>;
+
+interface GetClassFeeReportRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassFeeReportVariables): QueryRef<GetClassFeeReportData, GetClassFeeReportVariables>;
+}
+export const getClassFeeReportRef: GetClassFeeReportRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getClassFeeReport(dc: DataConnect, vars: GetClassFeeReportVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassFeeReportData, GetClassFeeReportVariables>;
+
+interface GetClassFeeReportRef {
+  ...
+  (dc: DataConnect, vars: GetClassFeeReportVariables): QueryRef<GetClassFeeReportData, GetClassFeeReportVariables>;
+}
+export const getClassFeeReportRef: GetClassFeeReportRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getClassFeeReportRef:
+```typescript
+const name = getClassFeeReportRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetClassFeeReport` query requires an argument of type `GetClassFeeReportVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetClassFeeReportVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  sectionId?: UUIDString | null;
+  academicYear: number;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+### Return Type
+Recall that executing the `GetClassFeeReport` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetClassFeeReportData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetClassFeeReportData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+    section: {
+      id: UUIDString;
+      name: string;
+    } & Section_Key;
+    classReportFeePlans: ({
+      id: UUIDString;
+      academicYear: number;
+      term1Fee: number;
+      term2Fee: number;
+      term3Fee: number;
+      booksFee: number;
+      transportFee: number;
+      concessionType?: string | null;
+      concessionValue: number;
+      concessionAmount: number;
+      grossAmount: number;
+      totalAmount: number;
+      isActive: boolean;
+      classReportFeePayments: ({
+        id: UUIDString;
+        amount: number;
+        paymentDate: DateString;
+        paymentMode: string;
+        receiptNumber: string;
+        status: string;
+      } & FeePayment_Key)[];
+    } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+```
+### Using `GetClassFeeReport`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getClassFeeReport, GetClassFeeReportVariables } from '@dataconnect/generated';
+
+// The `GetClassFeeReport` query requires an argument of type `GetClassFeeReportVariables`:
+const getClassFeeReportVars: GetClassFeeReportVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassFeeReport()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getClassFeeReport(getClassFeeReportVars);
+// Variables can be defined inline as well.
+const { data } = await getClassFeeReport({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getClassFeeReport(dataConnect, getClassFeeReportVars);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+getClassFeeReport(getClassFeeReportVars).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+### Using `GetClassFeeReport`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getClassFeeReportRef, GetClassFeeReportVariables } from '@dataconnect/generated';
+
+// The `GetClassFeeReport` query requires an argument of type `GetClassFeeReportVariables`:
+const getClassFeeReportVars: GetClassFeeReportVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassFeeReportRef()` function to get a reference to the query.
+const ref = getClassFeeReportRef(getClassFeeReportVars);
+// Variables can be defined inline as well.
+const ref = getClassFeeReportRef({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getClassFeeReportRef(dataConnect, getClassFeeReportVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+## GetClassStudentsFeeStatus
+You can execute the `GetClassStudentsFeeStatus` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getClassStudentsFeeStatus(vars: GetClassStudentsFeeStatusVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassStudentsFeeStatusData, GetClassStudentsFeeStatusVariables>;
+
+interface GetClassStudentsFeeStatusRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassStudentsFeeStatusVariables): QueryRef<GetClassStudentsFeeStatusData, GetClassStudentsFeeStatusVariables>;
+}
+export const getClassStudentsFeeStatusRef: GetClassStudentsFeeStatusRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getClassStudentsFeeStatus(dc: DataConnect, vars: GetClassStudentsFeeStatusVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassStudentsFeeStatusData, GetClassStudentsFeeStatusVariables>;
+
+interface GetClassStudentsFeeStatusRef {
+  ...
+  (dc: DataConnect, vars: GetClassStudentsFeeStatusVariables): QueryRef<GetClassStudentsFeeStatusData, GetClassStudentsFeeStatusVariables>;
+}
+export const getClassStudentsFeeStatusRef: GetClassStudentsFeeStatusRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getClassStudentsFeeStatusRef:
+```typescript
+const name = getClassStudentsFeeStatusRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetClassStudentsFeeStatus` query requires an argument of type `GetClassStudentsFeeStatusVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetClassStudentsFeeStatusVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  sectionId?: UUIDString | null;
+  academicYear: number;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+### Return Type
+Recall that executing the `GetClassStudentsFeeStatus` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetClassStudentsFeeStatusData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetClassStudentsFeeStatusData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+    section: {
+      id: UUIDString;
+      name: string;
+    } & Section_Key;
+    classStatusFeePlans: ({
+      id: UUIDString;
+      academicYear: number;
+      term1Fee: number;
+      term2Fee: number;
+      term3Fee: number;
+      booksFee: number;
+      transportFee: number;
+      concessionType?: string | null;
+      concessionValue: number;
+      concessionAmount: number;
+      grossAmount: number;
+      totalAmount: number;
+      isActive: boolean;
+      classStatusFeePayments: ({
+        id: UUIDString;
+        amount: number;
+        paymentDate: DateString;
+        paymentMode: string;
+        receiptNumber: string;
+        status: string;
+      } & FeePayment_Key)[];
+    } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+```
+### Using `GetClassStudentsFeeStatus`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getClassStudentsFeeStatus, GetClassStudentsFeeStatusVariables } from '@dataconnect/generated';
+
+// The `GetClassStudentsFeeStatus` query requires an argument of type `GetClassStudentsFeeStatusVariables`:
+const getClassStudentsFeeStatusVars: GetClassStudentsFeeStatusVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassStudentsFeeStatus()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getClassStudentsFeeStatus(getClassStudentsFeeStatusVars);
+// Variables can be defined inline as well.
+const { data } = await getClassStudentsFeeStatus({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getClassStudentsFeeStatus(dataConnect, getClassStudentsFeeStatusVars);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+getClassStudentsFeeStatus(getClassStudentsFeeStatusVars).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+### Using `GetClassStudentsFeeStatus`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getClassStudentsFeeStatusRef, GetClassStudentsFeeStatusVariables } from '@dataconnect/generated';
+
+// The `GetClassStudentsFeeStatus` query requires an argument of type `GetClassStudentsFeeStatusVariables`:
+const getClassStudentsFeeStatusVars: GetClassStudentsFeeStatusVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassStudentsFeeStatusRef()` function to get a reference to the query.
+const ref = getClassStudentsFeeStatusRef(getClassStudentsFeeStatusVars);
+// Variables can be defined inline as well.
+const ref = getClassStudentsFeeStatusRef({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getClassStudentsFeeStatusRef(dataConnect, getClassStudentsFeeStatusVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+## GetClassCollectionSummary
+You can execute the `GetClassCollectionSummary` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getClassCollectionSummary(vars: GetClassCollectionSummaryVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassCollectionSummaryData, GetClassCollectionSummaryVariables>;
+
+interface GetClassCollectionSummaryRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassCollectionSummaryVariables): QueryRef<GetClassCollectionSummaryData, GetClassCollectionSummaryVariables>;
+}
+export const getClassCollectionSummaryRef: GetClassCollectionSummaryRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getClassCollectionSummary(dc: DataConnect, vars: GetClassCollectionSummaryVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassCollectionSummaryData, GetClassCollectionSummaryVariables>;
+
+interface GetClassCollectionSummaryRef {
+  ...
+  (dc: DataConnect, vars: GetClassCollectionSummaryVariables): QueryRef<GetClassCollectionSummaryData, GetClassCollectionSummaryVariables>;
+}
+export const getClassCollectionSummaryRef: GetClassCollectionSummaryRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getClassCollectionSummaryRef:
+```typescript
+const name = getClassCollectionSummaryRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetClassCollectionSummary` query requires an argument of type `GetClassCollectionSummaryVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetClassCollectionSummaryVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  sectionId?: UUIDString | null;
+  academicYear: number;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+### Return Type
+Recall that executing the `GetClassCollectionSummary` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetClassCollectionSummaryData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetClassCollectionSummaryData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+    section: {
+      id: UUIDString;
+      name: string;
+    } & Section_Key;
+    classCollectionFeePlans: ({
+      id: UUIDString;
+      academicYear: number;
+      term1Fee: number;
+      term2Fee: number;
+      term3Fee: number;
+      booksFee: number;
+      transportFee: number;
+      concessionType?: string | null;
+      concessionValue: number;
+      concessionAmount: number;
+      grossAmount: number;
+      totalAmount: number;
+      isActive: boolean;
+      classCollectionFeePayments: ({
+        id: UUIDString;
+        amount: number;
+        paymentDate: DateString;
+        paymentMode: string;
+        receiptNumber: string;
+        status: string;
+      } & FeePayment_Key)[];
+    } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+```
+### Using `GetClassCollectionSummary`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getClassCollectionSummary, GetClassCollectionSummaryVariables } from '@dataconnect/generated';
+
+// The `GetClassCollectionSummary` query requires an argument of type `GetClassCollectionSummaryVariables`:
+const getClassCollectionSummaryVars: GetClassCollectionSummaryVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassCollectionSummary()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getClassCollectionSummary(getClassCollectionSummaryVars);
+// Variables can be defined inline as well.
+const { data } = await getClassCollectionSummary({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getClassCollectionSummary(dataConnect, getClassCollectionSummaryVars);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+getClassCollectionSummary(getClassCollectionSummaryVars).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+### Using `GetClassCollectionSummary`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getClassCollectionSummaryRef, GetClassCollectionSummaryVariables } from '@dataconnect/generated';
+
+// The `GetClassCollectionSummary` query requires an argument of type `GetClassCollectionSummaryVariables`:
+const getClassCollectionSummaryVars: GetClassCollectionSummaryVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassCollectionSummaryRef()` function to get a reference to the query.
+const ref = getClassCollectionSummaryRef(getClassCollectionSummaryVars);
+// Variables can be defined inline as well.
+const ref = getClassCollectionSummaryRef({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getClassCollectionSummaryRef(dataConnect, getClassCollectionSummaryVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+## GetClassOutstandingSummary
+You can execute the `GetClassOutstandingSummary` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getClassOutstandingSummary(vars: GetClassOutstandingSummaryVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassOutstandingSummaryData, GetClassOutstandingSummaryVariables>;
+
+interface GetClassOutstandingSummaryRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetClassOutstandingSummaryVariables): QueryRef<GetClassOutstandingSummaryData, GetClassOutstandingSummaryVariables>;
+}
+export const getClassOutstandingSummaryRef: GetClassOutstandingSummaryRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getClassOutstandingSummary(dc: DataConnect, vars: GetClassOutstandingSummaryVariables, options?: ExecuteQueryOptions): QueryPromise<GetClassOutstandingSummaryData, GetClassOutstandingSummaryVariables>;
+
+interface GetClassOutstandingSummaryRef {
+  ...
+  (dc: DataConnect, vars: GetClassOutstandingSummaryVariables): QueryRef<GetClassOutstandingSummaryData, GetClassOutstandingSummaryVariables>;
+}
+export const getClassOutstandingSummaryRef: GetClassOutstandingSummaryRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getClassOutstandingSummaryRef:
+```typescript
+const name = getClassOutstandingSummaryRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetClassOutstandingSummary` query requires an argument of type `GetClassOutstandingSummaryVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetClassOutstandingSummaryVariables {
+  branchId: UUIDString;
+  academicClassId: UUIDString;
+  sectionId?: UUIDString | null;
+  academicYear: number;
+  limit?: number | null;
+  offset?: number | null;
+}
+```
+### Return Type
+Recall that executing the `GetClassOutstandingSummary` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetClassOutstandingSummaryData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetClassOutstandingSummaryData {
+  students: ({
+    id: UUIDString;
+    studentId: string;
+    fullName: string;
+    academicClass: {
+      id: UUIDString;
+      name: string;
+      wing: {
+        id: UUIDString;
+        code: string;
+        name: string;
+      } & Wing_Key;
+    } & AcademicClass_Key;
+    section: {
+      id: UUIDString;
+      name: string;
+    } & Section_Key;
+    classOutstandingFeePlans: ({
+      id: UUIDString;
+      academicYear: number;
+      term1Fee: number;
+      term2Fee: number;
+      term3Fee: number;
+      booksFee: number;
+      transportFee: number;
+      concessionType?: string | null;
+      concessionValue: number;
+      concessionAmount: number;
+      grossAmount: number;
+      totalAmount: number;
+      isActive: boolean;
+      classOutstandingFeePayments: ({
+        id: UUIDString;
+        amount: number;
+        paymentDate: DateString;
+        paymentMode: string;
+        receiptNumber: string;
+        status: string;
+      } & FeePayment_Key)[];
+    } & StudentFeePlan_Key)[];
+  } & Student_Key)[];
+}
+```
+### Using `GetClassOutstandingSummary`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getClassOutstandingSummary, GetClassOutstandingSummaryVariables } from '@dataconnect/generated';
+
+// The `GetClassOutstandingSummary` query requires an argument of type `GetClassOutstandingSummaryVariables`:
+const getClassOutstandingSummaryVars: GetClassOutstandingSummaryVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassOutstandingSummary()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getClassOutstandingSummary(getClassOutstandingSummaryVars);
+// Variables can be defined inline as well.
+const { data } = await getClassOutstandingSummary({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getClassOutstandingSummary(dataConnect, getClassOutstandingSummaryVars);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+getClassOutstandingSummary(getClassOutstandingSummaryVars).then((response) => {
+  const data = response.data;
+  console.log(data.students);
+});
+```
+
+### Using `GetClassOutstandingSummary`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getClassOutstandingSummaryRef, GetClassOutstandingSummaryVariables } from '@dataconnect/generated';
+
+// The `GetClassOutstandingSummary` query requires an argument of type `GetClassOutstandingSummaryVariables`:
+const getClassOutstandingSummaryVars: GetClassOutstandingSummaryVariables = {
+  branchId: ..., 
+  academicClassId: ..., 
+  sectionId: ..., // optional
+  academicYear: ..., 
+  limit: ..., // optional
+  offset: ..., // optional
+};
+
+// Call the `getClassOutstandingSummaryRef()` function to get a reference to the query.
+const ref = getClassOutstandingSummaryRef(getClassOutstandingSummaryVars);
+// Variables can be defined inline as well.
+const ref = getClassOutstandingSummaryRef({ branchId: ..., academicClassId: ..., sectionId: ..., academicYear: ..., limit: ..., offset: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getClassOutstandingSummaryRef(dataConnect, getClassOutstandingSummaryVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.students);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.students);
 });
 ```
 
@@ -12518,6 +14079,7 @@ The `data` property is an object of type `CreateUserData`, which is defined in [
 ```typescript
 export interface CreateUserData {
   user_insert: User_Key;
+  userRole_upsert: UserRole_Key;
 }
 ```
 ### Using `CreateUser`'s action shortcut function
@@ -12550,11 +14112,13 @@ const dataConnect = getDataConnect(connectorConfig);
 const { data } = await createUser(dataConnect, createUserVars);
 
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 
 // Or, you can use the `Promise` API.
 createUser(createUserVars).then((response) => {
   const data = response.data;
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
 });
 ```
 
@@ -12591,11 +14155,13 @@ const ref = createUserRef(dataConnect, createUserVars);
 const { data } = await executeMutation(ref);
 
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
 });
 ```
 
@@ -12708,6 +14274,452 @@ executeMutation(ref).then((response) => {
 });
 ```
 
+## EnsureCurrentUserLegacyRole
+You can execute the `EnsureCurrentUserLegacyRole` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+ensureCurrentUserLegacyRole(): MutationPromise<EnsureCurrentUserLegacyRoleData, undefined>;
+
+interface EnsureCurrentUserLegacyRoleRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): MutationRef<EnsureCurrentUserLegacyRoleData, undefined>;
+}
+export const ensureCurrentUserLegacyRoleRef: EnsureCurrentUserLegacyRoleRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+ensureCurrentUserLegacyRole(dc: DataConnect): MutationPromise<EnsureCurrentUserLegacyRoleData, undefined>;
+
+interface EnsureCurrentUserLegacyRoleRef {
+  ...
+  (dc: DataConnect): MutationRef<EnsureCurrentUserLegacyRoleData, undefined>;
+}
+export const ensureCurrentUserLegacyRoleRef: EnsureCurrentUserLegacyRoleRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the ensureCurrentUserLegacyRoleRef:
+```typescript
+const name = ensureCurrentUserLegacyRoleRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `EnsureCurrentUserLegacyRole` mutation has no variables.
+### Return Type
+Recall that executing the `EnsureCurrentUserLegacyRole` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `EnsureCurrentUserLegacyRoleData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface EnsureCurrentUserLegacyRoleData {
+  userRole_upsert: UserRole_Key;
+}
+```
+### Using `EnsureCurrentUserLegacyRole`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, ensureCurrentUserLegacyRole } from '@dataconnect/generated';
+
+
+// Call the `ensureCurrentUserLegacyRole()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await ensureCurrentUserLegacyRole();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await ensureCurrentUserLegacyRole(dataConnect);
+
+console.log(data.userRole_upsert);
+
+// Or, you can use the `Promise` API.
+ensureCurrentUserLegacyRole().then((response) => {
+  const data = response.data;
+  console.log(data.userRole_upsert);
+});
+```
+
+### Using `EnsureCurrentUserLegacyRole`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, ensureCurrentUserLegacyRoleRef } from '@dataconnect/generated';
+
+
+// Call the `ensureCurrentUserLegacyRoleRef()` function to get a reference to the mutation.
+const ref = ensureCurrentUserLegacyRoleRef();
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = ensureCurrentUserLegacyRoleRef(dataConnect);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.userRole_upsert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.userRole_upsert);
+});
+```
+
+## AddParentRole
+You can execute the `AddParentRole` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+addParentRole(vars: AddParentRoleVariables): MutationPromise<AddParentRoleData, AddParentRoleVariables>;
+
+interface AddParentRoleRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: AddParentRoleVariables): MutationRef<AddParentRoleData, AddParentRoleVariables>;
+}
+export const addParentRoleRef: AddParentRoleRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+addParentRole(dc: DataConnect, vars: AddParentRoleVariables): MutationPromise<AddParentRoleData, AddParentRoleVariables>;
+
+interface AddParentRoleRef {
+  ...
+  (dc: DataConnect, vars: AddParentRoleVariables): MutationRef<AddParentRoleData, AddParentRoleVariables>;
+}
+export const addParentRoleRef: AddParentRoleRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the addParentRoleRef:
+```typescript
+const name = addParentRoleRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `AddParentRole` mutation requires an argument of type `AddParentRoleVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface AddParentRoleVariables {
+  userId: UUIDString;
+  branchId?: UUIDString | null;
+}
+```
+### Return Type
+Recall that executing the `AddParentRole` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `AddParentRoleData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface AddParentRoleData {
+  userRole_upsert: UserRole_Key;
+  auditLog_insert: AuditLog_Key;
+}
+```
+### Using `AddParentRole`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, addParentRole, AddParentRoleVariables } from '@dataconnect/generated';
+
+// The `AddParentRole` mutation requires an argument of type `AddParentRoleVariables`:
+const addParentRoleVars: AddParentRoleVariables = {
+  userId: ..., 
+  branchId: ..., // optional
+};
+
+// Call the `addParentRole()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await addParentRole(addParentRoleVars);
+// Variables can be defined inline as well.
+const { data } = await addParentRole({ userId: ..., branchId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await addParentRole(dataConnect, addParentRoleVars);
+
+console.log(data.userRole_upsert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+addParentRole(addParentRoleVars).then((response) => {
+  const data = response.data;
+  console.log(data.userRole_upsert);
+  console.log(data.auditLog_insert);
+});
+```
+
+### Using `AddParentRole`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, addParentRoleRef, AddParentRoleVariables } from '@dataconnect/generated';
+
+// The `AddParentRole` mutation requires an argument of type `AddParentRoleVariables`:
+const addParentRoleVars: AddParentRoleVariables = {
+  userId: ..., 
+  branchId: ..., // optional
+};
+
+// Call the `addParentRoleRef()` function to get a reference to the mutation.
+const ref = addParentRoleRef(addParentRoleVars);
+// Variables can be defined inline as well.
+const ref = addParentRoleRef({ userId: ..., branchId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = addParentRoleRef(dataConnect, addParentRoleVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.userRole_upsert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.userRole_upsert);
+  console.log(data.auditLog_insert);
+});
+```
+
+## SwitchRole
+You can execute the `SwitchRole` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+switchRole(vars: SwitchRoleVariables): MutationPromise<SwitchRoleData, SwitchRoleVariables>;
+
+interface SwitchRoleRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SwitchRoleVariables): MutationRef<SwitchRoleData, SwitchRoleVariables>;
+}
+export const switchRoleRef: SwitchRoleRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+switchRole(dc: DataConnect, vars: SwitchRoleVariables): MutationPromise<SwitchRoleData, SwitchRoleVariables>;
+
+interface SwitchRoleRef {
+  ...
+  (dc: DataConnect, vars: SwitchRoleVariables): MutationRef<SwitchRoleData, SwitchRoleVariables>;
+}
+export const switchRoleRef: SwitchRoleRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the switchRoleRef:
+```typescript
+const name = switchRoleRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `SwitchRole` mutation requires an argument of type `SwitchRoleVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface SwitchRoleVariables {
+  userId: UUIDString;
+  oldRole: string;
+  newRole: string;
+}
+```
+### Return Type
+Recall that executing the `SwitchRole` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `SwitchRoleData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface SwitchRoleData {
+  auditLog_insert: AuditLog_Key;
+}
+```
+### Using `SwitchRole`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, switchRole, SwitchRoleVariables } from '@dataconnect/generated';
+
+// The `SwitchRole` mutation requires an argument of type `SwitchRoleVariables`:
+const switchRoleVars: SwitchRoleVariables = {
+  userId: ..., 
+  oldRole: ..., 
+  newRole: ..., 
+};
+
+// Call the `switchRole()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await switchRole(switchRoleVars);
+// Variables can be defined inline as well.
+const { data } = await switchRole({ userId: ..., oldRole: ..., newRole: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await switchRole(dataConnect, switchRoleVars);
+
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+switchRole(switchRoleVars).then((response) => {
+  const data = response.data;
+  console.log(data.auditLog_insert);
+});
+```
+
+### Using `SwitchRole`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, switchRoleRef, SwitchRoleVariables } from '@dataconnect/generated';
+
+// The `SwitchRole` mutation requires an argument of type `SwitchRoleVariables`:
+const switchRoleVars: SwitchRoleVariables = {
+  userId: ..., 
+  oldRole: ..., 
+  newRole: ..., 
+};
+
+// Call the `switchRoleRef()` function to get a reference to the mutation.
+const ref = switchRoleRef(switchRoleVars);
+// Variables can be defined inline as well.
+const ref = switchRoleRef({ userId: ..., oldRole: ..., newRole: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = switchRoleRef(dataConnect, switchRoleVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.auditLog_insert);
+});
+```
+
+## LinkStudentParent
+You can execute the `LinkStudentParent` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+linkStudentParent(vars: LinkStudentParentVariables): MutationPromise<LinkStudentParentData, LinkStudentParentVariables>;
+
+interface LinkStudentParentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: LinkStudentParentVariables): MutationRef<LinkStudentParentData, LinkStudentParentVariables>;
+}
+export const linkStudentParentRef: LinkStudentParentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+linkStudentParent(dc: DataConnect, vars: LinkStudentParentVariables): MutationPromise<LinkStudentParentData, LinkStudentParentVariables>;
+
+interface LinkStudentParentRef {
+  ...
+  (dc: DataConnect, vars: LinkStudentParentVariables): MutationRef<LinkStudentParentData, LinkStudentParentVariables>;
+}
+export const linkStudentParentRef: LinkStudentParentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the linkStudentParentRef:
+```typescript
+const name = linkStudentParentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `LinkStudentParent` mutation requires an argument of type `LinkStudentParentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface LinkStudentParentVariables {
+  studentId: UUIDString;
+  userId: UUIDString;
+  relationship: string;
+  branchId: UUIDString;
+}
+```
+### Return Type
+Recall that executing the `LinkStudentParent` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `LinkStudentParentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface LinkStudentParentData {
+  studentParent_upsert: StudentParent_Key;
+  auditLog_insert: AuditLog_Key;
+}
+```
+### Using `LinkStudentParent`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, linkStudentParent, LinkStudentParentVariables } from '@dataconnect/generated';
+
+// The `LinkStudentParent` mutation requires an argument of type `LinkStudentParentVariables`:
+const linkStudentParentVars: LinkStudentParentVariables = {
+  studentId: ..., 
+  userId: ..., 
+  relationship: ..., 
+  branchId: ..., 
+};
+
+// Call the `linkStudentParent()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await linkStudentParent(linkStudentParentVars);
+// Variables can be defined inline as well.
+const { data } = await linkStudentParent({ studentId: ..., userId: ..., relationship: ..., branchId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await linkStudentParent(dataConnect, linkStudentParentVars);
+
+console.log(data.studentParent_upsert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+linkStudentParent(linkStudentParentVars).then((response) => {
+  const data = response.data;
+  console.log(data.studentParent_upsert);
+  console.log(data.auditLog_insert);
+});
+```
+
+### Using `LinkStudentParent`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, linkStudentParentRef, LinkStudentParentVariables } from '@dataconnect/generated';
+
+// The `LinkStudentParent` mutation requires an argument of type `LinkStudentParentVariables`:
+const linkStudentParentVars: LinkStudentParentVariables = {
+  studentId: ..., 
+  userId: ..., 
+  relationship: ..., 
+  branchId: ..., 
+};
+
+// Call the `linkStudentParentRef()` function to get a reference to the mutation.
+const ref = linkStudentParentRef(linkStudentParentVars);
+// Variables can be defined inline as well.
+const ref = linkStudentParentRef({ studentId: ..., userId: ..., relationship: ..., branchId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = linkStudentParentRef(dataConnect, linkStudentParentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.studentParent_upsert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.studentParent_upsert);
+  console.log(data.auditLog_insert);
+});
+```
+
 ## CreateParent
 You can execute the `CreateParent` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -12758,7 +14770,9 @@ Recall that executing the `CreateParent` mutation returns a `MutationPromise` th
 The `data` property is an object of type `CreateParentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
 ```typescript
 export interface CreateParentData {
+  userRole_upsert: UserRole_Key;
   parent_insert: Parent_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `CreateParent`'s action shortcut function
@@ -12789,12 +14803,16 @@ const { data } = await createParent({ userId: ..., branchId: ..., fullName: ...,
 const dataConnect = getDataConnect(connectorConfig);
 const { data } = await createParent(dataConnect, createParentVars);
 
+console.log(data.userRole_upsert);
 console.log(data.parent_insert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 createParent(createParentVars).then((response) => {
   const data = response.data;
+  console.log(data.userRole_upsert);
   console.log(data.parent_insert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -12829,12 +14847,16 @@ const ref = createParentRef(dataConnect, createParentVars);
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await executeMutation(ref);
 
+console.log(data.userRole_upsert);
 console.log(data.parent_insert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
+  console.log(data.userRole_upsert);
   console.log(data.parent_insert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -12889,7 +14911,9 @@ The `data` property is an object of type `CreateParentWithoutUserData`, which is
 ```typescript
 export interface CreateParentWithoutUserData {
   user_insert: User_Key;
+  userRole_upsert: UserRole_Key;
   parent_insert: Parent_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `CreateParentWithoutUser`'s action shortcut function
@@ -12921,13 +14945,17 @@ const dataConnect = getDataConnect(connectorConfig);
 const { data } = await createParentWithoutUser(dataConnect, createParentWithoutUserVars);
 
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.parent_insert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 createParentWithoutUser(createParentWithoutUserVars).then((response) => {
   const data = response.data;
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.parent_insert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -12963,13 +14991,17 @@ const ref = createParentWithoutUserRef(dataConnect, createParentWithoutUserVars)
 const { data } = await executeMutation(ref);
 
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.parent_insert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.parent_insert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -13918,6 +15950,7 @@ export interface CreateCoordinatorData {
   employeeSequence_upsert: EmployeeSequence_Key;
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
+  userRole_upsert: UserRole_Key;
   coordinator_insert: Coordinator_Key;
   auditLog_insert: AuditLog_Key;
 }
@@ -13958,6 +15991,7 @@ const { data } = await createCoordinator(dataConnect, createCoordinatorVars);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.coordinator_insert);
 console.log(data.auditLog_insert);
 
@@ -13967,6 +16001,7 @@ createCoordinator(createCoordinatorVars).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.coordinator_insert);
   console.log(data.auditLog_insert);
 });
@@ -14011,6 +16046,7 @@ const { data } = await executeMutation(ref);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.coordinator_insert);
 console.log(data.auditLog_insert);
 
@@ -14020,6 +16056,7 @@ executeMutation(ref).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.coordinator_insert);
   console.log(data.auditLog_insert);
 });
@@ -14094,6 +16131,7 @@ export interface CreateTeacherData {
   employeeSequence_upsert: EmployeeSequence_Key;
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
+  userRole_upsert: UserRole_Key;
   teacher_insert: Teacher_Key;
   auditLog_insert: AuditLog_Key;
 }
@@ -14145,6 +16183,7 @@ const { data } = await createTeacher(dataConnect, createTeacherVars);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.teacher_insert);
 console.log(data.auditLog_insert);
 
@@ -14154,6 +16193,7 @@ createTeacher(createTeacherVars).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.teacher_insert);
   console.log(data.auditLog_insert);
 });
@@ -14209,6 +16249,7 @@ const { data } = await executeMutation(ref);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.teacher_insert);
 console.log(data.auditLog_insert);
 
@@ -14218,6 +16259,7 @@ executeMutation(ref).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.teacher_insert);
   console.log(data.auditLog_insert);
 });
@@ -14273,7 +16315,9 @@ The `data` property is an object of type `AssignTeacherClassTeacherData`, which 
 export interface AssignTeacherClassTeacherData {
   teacherSectionAssignment_insert: TeacherSectionAssignment_Key;
   section_update?: Section_Key | null;
+  userRole_upsert: UserRole_Key;
   auditLog_insert: AuditLog_Key;
+  roleAuditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `AssignTeacherClassTeacher`'s action shortcut function
@@ -14304,14 +16348,18 @@ const { data } = await assignTeacherClassTeacher(dataConnect, assignTeacherClass
 
 console.log(data.teacherSectionAssignment_insert);
 console.log(data.section_update);
+console.log(data.userRole_upsert);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 assignTeacherClassTeacher(assignTeacherClassTeacherVars).then((response) => {
   const data = response.data;
   console.log(data.teacherSectionAssignment_insert);
   console.log(data.section_update);
+  console.log(data.userRole_upsert);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
@@ -14346,14 +16394,18 @@ const { data } = await executeMutation(ref);
 
 console.log(data.teacherSectionAssignment_insert);
 console.log(data.section_update);
+console.log(data.userRole_upsert);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.teacherSectionAssignment_insert);
   console.log(data.section_update);
+  console.log(data.userRole_upsert);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
@@ -14804,6 +16856,8 @@ The `data` property is an object of type `AssignTeacherSubjectData`, which is de
 ```typescript
 export interface AssignTeacherSubjectData {
   teacherSubject_insert: TeacherSubject_Key;
+  userRole_upsert: UserRole_Key;
+  auditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `AssignTeacherSubject`'s action shortcut function
@@ -14830,11 +16884,15 @@ const dataConnect = getDataConnect(connectorConfig);
 const { data } = await assignTeacherSubject(dataConnect, assignTeacherSubjectVars);
 
 console.log(data.teacherSubject_insert);
+console.log(data.userRole_upsert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 assignTeacherSubject(assignTeacherSubjectVars).then((response) => {
   const data = response.data;
   console.log(data.teacherSubject_insert);
+  console.log(data.userRole_upsert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -14865,11 +16923,15 @@ const ref = assignTeacherSubjectRef(dataConnect, assignTeacherSubjectVars);
 const { data } = await executeMutation(ref);
 
 console.log(data.teacherSubject_insert);
+console.log(data.userRole_upsert);
+console.log(data.auditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.teacherSubject_insert);
+  console.log(data.userRole_upsert);
+  console.log(data.auditLog_insert);
 });
 ```
 
@@ -15052,6 +17114,7 @@ export interface CreateAccountantData {
   employeeSequence_upsert: EmployeeSequence_Key;
   staffIdSequence_upsert: StaffIdSequence_Key;
   user_insert: User_Key;
+  userRole_upsert: UserRole_Key;
   accountant_insert: Accountant_Key;
   auditLog_insert: AuditLog_Key;
 }
@@ -15101,6 +17164,7 @@ const { data } = await createAccountant(dataConnect, createAccountantVars);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.accountant_insert);
 console.log(data.auditLog_insert);
 
@@ -15110,6 +17174,7 @@ createAccountant(createAccountantVars).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.accountant_insert);
   console.log(data.auditLog_insert);
 });
@@ -15163,6 +17228,7 @@ const { data } = await executeMutation(ref);
 console.log(data.employeeSequence_upsert);
 console.log(data.staffIdSequence_upsert);
 console.log(data.user_insert);
+console.log(data.userRole_upsert);
 console.log(data.accountant_insert);
 console.log(data.auditLog_insert);
 
@@ -15172,6 +17238,7 @@ executeMutation(ref).then((response) => {
   console.log(data.employeeSequence_upsert);
   console.log(data.staffIdSequence_upsert);
   console.log(data.user_insert);
+  console.log(data.userRole_upsert);
   console.log(data.accountant_insert);
   console.log(data.auditLog_insert);
 });
@@ -15286,6 +17353,141 @@ executeMutation(ref).then((response) => {
 });
 ```
 
+## EnsureCoordinatorTeacherProfile
+You can execute the `EnsureCoordinatorTeacherProfile` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+ensureCoordinatorTeacherProfile(vars: EnsureCoordinatorTeacherProfileVariables): MutationPromise<EnsureCoordinatorTeacherProfileData, EnsureCoordinatorTeacherProfileVariables>;
+
+interface EnsureCoordinatorTeacherProfileRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: EnsureCoordinatorTeacherProfileVariables): MutationRef<EnsureCoordinatorTeacherProfileData, EnsureCoordinatorTeacherProfileVariables>;
+}
+export const ensureCoordinatorTeacherProfileRef: EnsureCoordinatorTeacherProfileRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+ensureCoordinatorTeacherProfile(dc: DataConnect, vars: EnsureCoordinatorTeacherProfileVariables): MutationPromise<EnsureCoordinatorTeacherProfileData, EnsureCoordinatorTeacherProfileVariables>;
+
+interface EnsureCoordinatorTeacherProfileRef {
+  ...
+  (dc: DataConnect, vars: EnsureCoordinatorTeacherProfileVariables): MutationRef<EnsureCoordinatorTeacherProfileData, EnsureCoordinatorTeacherProfileVariables>;
+}
+export const ensureCoordinatorTeacherProfileRef: EnsureCoordinatorTeacherProfileRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the ensureCoordinatorTeacherProfileRef:
+```typescript
+const name = ensureCoordinatorTeacherProfileRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `EnsureCoordinatorTeacherProfile` mutation requires an argument of type `EnsureCoordinatorTeacherProfileVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface EnsureCoordinatorTeacherProfileVariables {
+  userId: UUIDString;
+  branchId: UUIDString;
+  employeeId: string;
+  staffType?: string;
+  joiningDate: DateString;
+  designation?: string;
+  gender?: string;
+  email?: string | null;
+}
+```
+### Return Type
+Recall that executing the `EnsureCoordinatorTeacherProfile` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `EnsureCoordinatorTeacherProfileData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface EnsureCoordinatorTeacherProfileData {
+  teacher_insert: Teacher_Key;
+  auditLog_insert: AuditLog_Key;
+}
+```
+### Using `EnsureCoordinatorTeacherProfile`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, ensureCoordinatorTeacherProfile, EnsureCoordinatorTeacherProfileVariables } from '@dataconnect/generated';
+
+// The `EnsureCoordinatorTeacherProfile` mutation requires an argument of type `EnsureCoordinatorTeacherProfileVariables`:
+const ensureCoordinatorTeacherProfileVars: EnsureCoordinatorTeacherProfileVariables = {
+  userId: ..., 
+  branchId: ..., 
+  employeeId: ..., 
+  staffType: ..., // optional
+  joiningDate: ..., 
+  designation: ..., // optional
+  gender: ..., // optional
+  email: ..., // optional
+};
+
+// Call the `ensureCoordinatorTeacherProfile()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await ensureCoordinatorTeacherProfile(ensureCoordinatorTeacherProfileVars);
+// Variables can be defined inline as well.
+const { data } = await ensureCoordinatorTeacherProfile({ userId: ..., branchId: ..., employeeId: ..., staffType: ..., joiningDate: ..., designation: ..., gender: ..., email: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await ensureCoordinatorTeacherProfile(dataConnect, ensureCoordinatorTeacherProfileVars);
+
+console.log(data.teacher_insert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+ensureCoordinatorTeacherProfile(ensureCoordinatorTeacherProfileVars).then((response) => {
+  const data = response.data;
+  console.log(data.teacher_insert);
+  console.log(data.auditLog_insert);
+});
+```
+
+### Using `EnsureCoordinatorTeacherProfile`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, ensureCoordinatorTeacherProfileRef, EnsureCoordinatorTeacherProfileVariables } from '@dataconnect/generated';
+
+// The `EnsureCoordinatorTeacherProfile` mutation requires an argument of type `EnsureCoordinatorTeacherProfileVariables`:
+const ensureCoordinatorTeacherProfileVars: EnsureCoordinatorTeacherProfileVariables = {
+  userId: ..., 
+  branchId: ..., 
+  employeeId: ..., 
+  staffType: ..., // optional
+  joiningDate: ..., 
+  designation: ..., // optional
+  gender: ..., // optional
+  email: ..., // optional
+};
+
+// Call the `ensureCoordinatorTeacherProfileRef()` function to get a reference to the mutation.
+const ref = ensureCoordinatorTeacherProfileRef(ensureCoordinatorTeacherProfileVars);
+// Variables can be defined inline as well.
+const ref = ensureCoordinatorTeacherProfileRef({ userId: ..., branchId: ..., employeeId: ..., staffType: ..., joiningDate: ..., designation: ..., gender: ..., email: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = ensureCoordinatorTeacherProfileRef(dataConnect, ensureCoordinatorTeacherProfileVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.teacher_insert);
+console.log(data.auditLog_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.teacher_insert);
+  console.log(data.auditLog_insert);
+});
+```
+
 ## UpdateClassTeacherAssignment
 You can execute the `UpdateClassTeacherAssignment` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -15342,7 +17544,10 @@ export interface UpdateClassTeacherAssignmentData {
   oldSection_update?: Section_Key | null;
   teacherSectionAssignment_insert: TeacherSectionAssignment_Key;
   section_update?: Section_Key | null;
+  userRole_upsert: UserRole_Key;
+  oldClassTeacherRole_delete: number;
   auditLog_insert: AuditLog_Key;
+  roleAuditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `UpdateClassTeacherAssignment`'s action shortcut function
@@ -15379,7 +17584,10 @@ console.log(data.teacherSectionAssignment_update);
 console.log(data.oldSection_update);
 console.log(data.teacherSectionAssignment_insert);
 console.log(data.section_update);
+console.log(data.userRole_upsert);
+console.log(data.oldClassTeacherRole_delete);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 updateClassTeacherAssignment(updateClassTeacherAssignmentVars).then((response) => {
@@ -15388,7 +17596,10 @@ updateClassTeacherAssignment(updateClassTeacherAssignmentVars).then((response) =
   console.log(data.oldSection_update);
   console.log(data.teacherSectionAssignment_insert);
   console.log(data.section_update);
+  console.log(data.userRole_upsert);
+  console.log(data.oldClassTeacherRole_delete);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
@@ -15429,7 +17640,10 @@ console.log(data.teacherSectionAssignment_update);
 console.log(data.oldSection_update);
 console.log(data.teacherSectionAssignment_insert);
 console.log(data.section_update);
+console.log(data.userRole_upsert);
+console.log(data.oldClassTeacherRole_delete);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
@@ -15438,7 +17652,10 @@ executeMutation(ref).then((response) => {
   console.log(data.oldSection_update);
   console.log(data.teacherSectionAssignment_insert);
   console.log(data.section_update);
+  console.log(data.userRole_upsert);
+  console.log(data.oldClassTeacherRole_delete);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
@@ -15492,7 +17709,9 @@ The `data` property is an object of type `RemoveClassTeacherAssignmentData`, whi
 export interface RemoveClassTeacherAssignmentData {
   teacherSectionAssignment_update?: TeacherSectionAssignment_Key | null;
   section_update?: Section_Key | null;
+  classTeacherRole_delete: number;
   auditLog_insert: AuditLog_Key;
+  roleAuditLog_insert: AuditLog_Key;
 }
 ```
 ### Using `RemoveClassTeacherAssignment`'s action shortcut function
@@ -15523,14 +17742,18 @@ const { data } = await removeClassTeacherAssignment(dataConnect, removeClassTeac
 
 console.log(data.teacherSectionAssignment_update);
 console.log(data.section_update);
+console.log(data.classTeacherRole_delete);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 removeClassTeacherAssignment(removeClassTeacherAssignmentVars).then((response) => {
   const data = response.data;
   console.log(data.teacherSectionAssignment_update);
   console.log(data.section_update);
+  console.log(data.classTeacherRole_delete);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
@@ -15565,14 +17788,154 @@ const { data } = await executeMutation(ref);
 
 console.log(data.teacherSectionAssignment_update);
 console.log(data.section_update);
+console.log(data.classTeacherRole_delete);
 console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.teacherSectionAssignment_update);
   console.log(data.section_update);
+  console.log(data.classTeacherRole_delete);
   console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
+});
+```
+
+## RemoveLegacyClassTeacherAssignment
+You can execute the `RemoveLegacyClassTeacherAssignment` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+removeLegacyClassTeacherAssignment(vars: RemoveLegacyClassTeacherAssignmentVariables): MutationPromise<RemoveLegacyClassTeacherAssignmentData, RemoveLegacyClassTeacherAssignmentVariables>;
+
+interface RemoveLegacyClassTeacherAssignmentRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: RemoveLegacyClassTeacherAssignmentVariables): MutationRef<RemoveLegacyClassTeacherAssignmentData, RemoveLegacyClassTeacherAssignmentVariables>;
+}
+export const removeLegacyClassTeacherAssignmentRef: RemoveLegacyClassTeacherAssignmentRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+removeLegacyClassTeacherAssignment(dc: DataConnect, vars: RemoveLegacyClassTeacherAssignmentVariables): MutationPromise<RemoveLegacyClassTeacherAssignmentData, RemoveLegacyClassTeacherAssignmentVariables>;
+
+interface RemoveLegacyClassTeacherAssignmentRef {
+  ...
+  (dc: DataConnect, vars: RemoveLegacyClassTeacherAssignmentVariables): MutationRef<RemoveLegacyClassTeacherAssignmentData, RemoveLegacyClassTeacherAssignmentVariables>;
+}
+export const removeLegacyClassTeacherAssignmentRef: RemoveLegacyClassTeacherAssignmentRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the removeLegacyClassTeacherAssignmentRef:
+```typescript
+const name = removeLegacyClassTeacherAssignmentRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `RemoveLegacyClassTeacherAssignment` mutation requires an argument of type `RemoveLegacyClassTeacherAssignmentVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface RemoveLegacyClassTeacherAssignmentVariables {
+  sectionId: UUIDString;
+  teacherUserId: UUIDString;
+  branchId: UUIDString;
+  sectionAuditId: string;
+  teacherAuditId: string;
+}
+```
+### Return Type
+Recall that executing the `RemoveLegacyClassTeacherAssignment` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `RemoveLegacyClassTeacherAssignmentData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface RemoveLegacyClassTeacherAssignmentData {
+  section_update?: Section_Key | null;
+  classTeacherRole_delete: number;
+  auditLog_insert: AuditLog_Key;
+  roleAuditLog_insert: AuditLog_Key;
+}
+```
+### Using `RemoveLegacyClassTeacherAssignment`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, removeLegacyClassTeacherAssignment, RemoveLegacyClassTeacherAssignmentVariables } from '@dataconnect/generated';
+
+// The `RemoveLegacyClassTeacherAssignment` mutation requires an argument of type `RemoveLegacyClassTeacherAssignmentVariables`:
+const removeLegacyClassTeacherAssignmentVars: RemoveLegacyClassTeacherAssignmentVariables = {
+  sectionId: ..., 
+  teacherUserId: ..., 
+  branchId: ..., 
+  sectionAuditId: ..., 
+  teacherAuditId: ..., 
+};
+
+// Call the `removeLegacyClassTeacherAssignment()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await removeLegacyClassTeacherAssignment(removeLegacyClassTeacherAssignmentVars);
+// Variables can be defined inline as well.
+const { data } = await removeLegacyClassTeacherAssignment({ sectionId: ..., teacherUserId: ..., branchId: ..., sectionAuditId: ..., teacherAuditId: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await removeLegacyClassTeacherAssignment(dataConnect, removeLegacyClassTeacherAssignmentVars);
+
+console.log(data.section_update);
+console.log(data.classTeacherRole_delete);
+console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
+
+// Or, you can use the `Promise` API.
+removeLegacyClassTeacherAssignment(removeLegacyClassTeacherAssignmentVars).then((response) => {
+  const data = response.data;
+  console.log(data.section_update);
+  console.log(data.classTeacherRole_delete);
+  console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
+});
+```
+
+### Using `RemoveLegacyClassTeacherAssignment`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, removeLegacyClassTeacherAssignmentRef, RemoveLegacyClassTeacherAssignmentVariables } from '@dataconnect/generated';
+
+// The `RemoveLegacyClassTeacherAssignment` mutation requires an argument of type `RemoveLegacyClassTeacherAssignmentVariables`:
+const removeLegacyClassTeacherAssignmentVars: RemoveLegacyClassTeacherAssignmentVariables = {
+  sectionId: ..., 
+  teacherUserId: ..., 
+  branchId: ..., 
+  sectionAuditId: ..., 
+  teacherAuditId: ..., 
+};
+
+// Call the `removeLegacyClassTeacherAssignmentRef()` function to get a reference to the mutation.
+const ref = removeLegacyClassTeacherAssignmentRef(removeLegacyClassTeacherAssignmentVars);
+// Variables can be defined inline as well.
+const ref = removeLegacyClassTeacherAssignmentRef({ sectionId: ..., teacherUserId: ..., branchId: ..., sectionAuditId: ..., teacherAuditId: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = removeLegacyClassTeacherAssignmentRef(dataConnect, removeLegacyClassTeacherAssignmentVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.section_update);
+console.log(data.classTeacherRole_delete);
+console.log(data.auditLog_insert);
+console.log(data.roleAuditLog_insert);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.section_update);
+  console.log(data.classTeacherRole_delete);
+  console.log(data.auditLog_insert);
+  console.log(data.roleAuditLog_insert);
 });
 ```
 
