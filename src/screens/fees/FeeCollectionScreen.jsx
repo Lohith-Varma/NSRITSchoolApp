@@ -13,6 +13,18 @@ import {formatDateForDisplay, toISODate} from '../../utils/helpers/dateHelpers';
 const paymentModes = ['Cash', 'UPI', 'Bank Transfer', 'Cheque'].map(value => ({label: value, value}));
 const today = () => toISODate(new Date());
 
+const installmentOptions = [
+  {label: '1st Term Tuition', value: '1st Term Tuition'},
+  {label: '2nd Term Tuition', value: '2nd Term Tuition'},
+  {label: '3rd Term Tuition', value: '3rd Term Tuition'},
+  {label: 'Books Fee', value: 'Books Fee'},
+  {label: 'Transport Fee', value: 'Transport Fee'},
+  {label: 'Admission Fee', value: 'Admission Fee'},
+  {label: 'Uniform Fee', value: 'Uniform Fee'},
+  {label: 'Exam Fee', value: 'Exam Fee'},
+  {label: 'Other / Combined', value: 'Other / Combined'},
+];
+
 const FeeCollectionScreen = ({navigation, route}) => {
   const access = useFeeAccess();
   const queryClient = useQueryClient();
@@ -26,6 +38,9 @@ const FeeCollectionScreen = ({navigation, route}) => {
     paymentMode: 'Cash',
     referenceNumber: '',
     remarks: '',
+    receiptNumber: '',
+    installment: '1st Term Tuition',
+    paidBy: '',
   });
   const [error, setError] = useState('');
 
@@ -41,13 +56,29 @@ const FeeCollectionScreen = ({navigation, route}) => {
   });
   const profile = profileQuery.data;
 
+  React.useEffect(() => {
+    if (profile) {
+      setForm(prev => ({
+        ...prev,
+        paidBy: prev.paidBy || profile.studentName || '',
+      }));
+    }
+  }, [profile]);
+
   const mutation = useMutation({
-    mutationFn: () =>
-      editingPayment
+    mutationFn: () => {
+      const remarksPayload = JSON.stringify({
+        installment: form.installment,
+        paidBy: form.paidBy,
+        remarks: form.remarks,
+      });
+
+      return editingPayment
         ? feeService.updatePayment(
             {
               ...editingPayment,
               ...form,
+              remarks: remarksPayload,
               paymentId: editingPayment.id,
               studentId: profile.studentId,
               feePlanId: profile.feePlanId,
@@ -60,6 +91,7 @@ const FeeCollectionScreen = ({navigation, route}) => {
         : feeService.recordPayment(
             {
               ...form,
+              remarks: remarksPayload,
               studentId: profile.studentId,
               feePlanId: profile.feePlanId,
               branchId: profile.branchId,
@@ -67,7 +99,8 @@ const FeeCollectionScreen = ({navigation, route}) => {
               amount: Number(form.amount),
             },
             access,
-          ),
+          );
+    },
     onSuccess: payment => {
       queryClient.invalidateQueries({queryKey: ['feeRecords']});
       queryClient.invalidateQueries({queryKey: ['studentFeeProfile', selectedStudentId]});
@@ -80,7 +113,16 @@ const FeeCollectionScreen = ({navigation, route}) => {
       queryClient.invalidateQueries({queryKey: ['parentDashboard']});
       queryClient.invalidateQueries({queryKey: ['studentDetails', selectedStudentId]});
       setEditingPayment(null);
-      setForm({paymentDate: today(), amount: '', paymentMode: 'Cash', referenceNumber: '', remarks: ''});
+      setForm({
+        paymentDate: today(),
+        amount: '',
+        paymentMode: 'Cash',
+        referenceNumber: '',
+        remarks: '',
+        receiptNumber: '',
+        installment: '1st Term Tuition',
+        paidBy: profile?.studentName || '',
+      });
       navigation.navigate('StudentFeeProfile', {studentId: selectedStudentId, receiptNumber: payment?.receiptNumber});
     },
     onError: err => setError(err.message),
@@ -116,12 +158,38 @@ const FeeCollectionScreen = ({navigation, route}) => {
       return;
     }
     setEditingPayment(payment);
+    
+    let parsedRemarks = { installment: '1st Term Tuition', paidBy: profile?.studentName || '', remarks: '' };
+    try {
+      if (payment.remarks && payment.remarks.trim().startsWith('{')) {
+        const parsed = JSON.parse(payment.remarks);
+        parsedRemarks = {
+          installment: parsed.installment || '1st Term Tuition',
+          paidBy: parsed.paidBy || profile?.studentName || '',
+          remarks: parsed.remarks || '',
+        };
+      } else if (payment.remarks) {
+        parsedRemarks = {
+          installment: payment.remarks,
+          paidBy: profile?.studentName || '',
+          remarks: '',
+        };
+      }
+    } catch (e) {
+      if (payment.remarks) {
+        parsedRemarks.installment = payment.remarks;
+      }
+    }
+
     setForm({
       paymentDate: payment.paymentDate || today(),
       amount: String(payment.amount || ''),
       paymentMode: payment.paymentMode || 'Cash',
       referenceNumber: payment.referenceNumber || '',
-      remarks: payment.remarks || '',
+      remarks: parsedRemarks.remarks,
+      receiptNumber: payment.receiptNumber || '',
+      installment: parsedRemarks.installment,
+      paidBy: parsedRemarks.paidBy,
     });
     setError('');
   };
@@ -154,9 +222,12 @@ const FeeCollectionScreen = ({navigation, route}) => {
                   onPress={() => setSelectedStudentId('')}
                 />
                 <DashboardCard title="Pending Amount" value={formatCurrency(profile.dueAmount)} icon="cash-clock" />
+                <CustomInput label="Receipt Number (Optional)" value={form.receiptNumber} onChangeText={value => updateField('receiptNumber', value)} />
                 <DatePickerField label="Payment Date" value={form.paymentDate} maximumDate={toISODate(new Date())} onChange={value => updateField('paymentDate', value)} />
                 <CustomInput label="Amount" keyboardType="numeric" value={form.amount} onChangeText={value => updateField('amount', value)} />
                 <SelectField label="Payment Mode" value={form.paymentMode} options={paymentModes} onChange={value => updateField('paymentMode', value)} />
+                <SelectField label="Installment" value={form.installment} options={installmentOptions} onChange={value => updateField('installment', value)} />
+                <CustomInput label="Received From / Paid By" value={form.paidBy} onChangeText={value => updateField('paidBy', value)} />
                 <CustomInput label="Reference Number" value={form.referenceNumber} onChangeText={value => updateField('referenceNumber', value)} />
                 <CustomInput label="Remarks" value={form.remarks} multiline onChangeText={value => updateField('remarks', value)} />
                 <SectionHeader title="Payment History" />

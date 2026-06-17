@@ -11,12 +11,13 @@ import {
   SectionHeader,
   StudentListItem,
 } from '../../components';
-import {ATTENDANCE_STATUS} from '../../config/constants';
+import {ATTENDANCE_STATUS, USER_ROLES} from '../../config/constants';
 import attendanceService from '../../services/attendance/attendanceService';
 import classService from '../../services/classes/classService';
 import {getAccessScope} from '../../services/rbacScope';
 import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
+import teacherService from '../../services/teachers/teacherService';
 import {colors, spacing} from '../../theme';
 import {toISODate} from '../../utils/helpers/dateHelpers';
 
@@ -25,22 +26,54 @@ const TakeAttendanceScreen = () => {
   const scope = useMemo(() => getAccessScope(user), [user]);
   const queryClient = useQueryClient();
   const today = toISODate();
+  const role = String(user?.role || '').toUpperCase();
+  const isTeachingRole = [USER_ROLES.TEACHER, USER_ROLES.CLASS_TEACHER].includes(role);
+  const isClassTeacherRole = role === USER_ROLES.CLASS_TEACHER;
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState('');
   const [statuses, setStatuses] = useState({});
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
 
+  const assignmentsQuery = useQuery({
+    queryKey: ['attendanceTeacherAssignments', user?.teacherId, role],
+    queryFn: () => teacherService.getAssignments({teacherId: user?.teacherId}),
+    enabled: Boolean(user?.teacherId && isTeachingRole),
+  });
+
+  const scopedAssignments = useMemo(() => {
+    const assignments = assignmentsQuery.data || [];
+    return isClassTeacherRole
+      ? assignments.filter(item => item.isClassTeacher)
+      : assignments;
+  }, [assignmentsQuery.data, isClassTeacherRole]);
+
   const classesQuery = useQuery({
     queryKey: ['attendanceClasses', user?.branchId],
     queryFn: () => classService.getClasses(),
-    enabled: Boolean(user?.branchId),
+    enabled: Boolean(user?.branchId && !isTeachingRole),
   });
 
-  const classes = useMemo(
+  const branchClasses = useMemo(
     () => (classesQuery.data || []).filter(item => !item.branchId || item.branchId === user?.branchId),
     [classesQuery.data, user?.branchId],
   );
+  const assignmentClasses = useMemo(() => {
+    const byId = new Map();
+    scopedAssignments.forEach(assignment => {
+      const academicClass = assignment.section?.academicClass;
+      const id = academicClass?.id || assignment.academicClassId;
+      if (id && !byId.has(id)) {
+        byId.set(id, {
+          ...academicClass,
+          id,
+          name: academicClass?.name || 'Class',
+        });
+      }
+    });
+    return [...byId.values()];
+  }, [scopedAssignments]);
+  const classes = isTeachingRole ? assignmentClasses : branchClasses;
 
   useEffect(() => {
     if (!selectedClassId && classes[0]?.id) {
@@ -51,13 +84,29 @@ const TakeAttendanceScreen = () => {
   const sectionsQuery = useQuery({
     queryKey: ['attendanceSections', selectedClassId],
     queryFn: () => sectionService.getSectionsByClass(selectedClassId),
-    enabled: Boolean(selectedClassId),
+    enabled: Boolean(selectedClassId && !isTeachingRole),
   });
 
-  const sections = useMemo(
+  const branchSections = useMemo(
     () => (sectionsQuery.data || []).filter(item => item.isActive !== false),
     [sectionsQuery.data],
   );
+  const assignmentSections = useMemo(
+    () =>
+      scopedAssignments
+        .filter(assignment => {
+          const academicClassId = assignment.section?.academicClass?.id || assignment.academicClassId;
+          return !selectedClassId || academicClassId === selectedClassId;
+        })
+        .map(assignment => ({
+          ...assignment.section,
+          id: assignment.section?.id || assignment.sectionId,
+          academicClass: assignment.section?.academicClass,
+        }))
+        .filter(section => section.id),
+    [scopedAssignments, selectedClassId],
+  );
+  const sections = isTeachingRole ? assignmentSections : branchSections;
 
   useEffect(() => {
     if (!sections.some(item => item.id === selectedSectionId)) {
@@ -244,7 +293,13 @@ const TakeAttendanceScreen = () => {
         ListEmptyComponent={
           <EmptyState
             title={classesQuery.isLoading || sectionsQuery.isLoading || studentsQuery.isLoading ? 'Loading roster' : 'No students'}
-            message={classesQuery.error?.message || sectionsQuery.error?.message || studentsQuery.error?.message || 'Select a class and section with active students.'}
+            message={
+              assignmentsQuery.error?.message ||
+              classesQuery.error?.message ||
+              sectionsQuery.error?.message ||
+              studentsQuery.error?.message ||
+              'Select a class and section with active students.'
+            }
           />
         }
         ListFooterComponent={<View style={styles.footerSpacer} />}

@@ -1,4 +1,4 @@
-import {STAFF_TYPES, USER_ROLES} from '../../config/constants';
+import {ROLE_LABELS, STAFF_TYPES, USER_ROLES} from '../../config/constants';
 import dataConnectClient from '../dataconnect/dataConnectClient';
 import {DATA_CONNECT_MUTATIONS, DATA_CONNECT_QUERIES} from '../dataconnect/operations';
 import {assertBranchAccess} from '../academics/academicAccess';
@@ -8,6 +8,32 @@ import {formatE164PhoneNumber, normalizePhoneNumber} from '../../utils/phone';
 const today = () => new Date().toISOString().slice(0, 10);
 
 const normalizeRole = role => String(role || '').toUpperCase();
+
+const uniqueRoles = roles => {
+  const seen = new Set();
+  return (roles || [])
+    .map(item => normalizeRole(item?.role || item))
+    .filter(Boolean)
+    .filter(role => {
+      if (seen.has(role)) {
+        return false;
+      }
+      seen.add(role);
+      return true;
+    });
+};
+
+const getUserRoles = user => uniqueRoles([...(user?.roles || []), user?.role]);
+
+const getPrimaryRole = user => {
+  const normalized = normalizeRole(user?.role);
+  return normalized || getUserRoles(user)[0] || '';
+};
+
+const formatRoleList = roles =>
+  uniqueRoles(roles)
+    .map(role => ROLE_LABELS[role] || role)
+    .join(', ');
 
 const buildPendingFirebaseUID = ({branchId, phoneNumber}) =>
   `pending:teacher:${branchId}:${normalizePhoneNumber(phoneNumber)}`;
@@ -80,39 +106,127 @@ const normalizeTeacherPayload = (payload, scope) => {
   };
 };
 
-const flattenTeacher = teacher => ({
-  ...teacher,
-  fullName: teacher.user?.fullName,
-  phoneNumber: teacher.user?.phoneNumber,
-  countryCode: teacher.user?.countryCode,
-  role: teacher.user?.role,
-  staffType: teacher.staffType || teacher.user?.staffType || STAFF_TYPES.TEACHING,
-  subjects:
-    (teacher.subjects || teacher.teacherSubjects_on_teacher || [])
-      .map(item => item.subject)
-      .filter(Boolean) || [],
-  assignments: (teacher.assignments || teacher.teacherSectionAssignments_on_teacher || []).filter(
-    item => item.isActive !== false,
-  ),
-  attendanceMarked:
-    teacher.attendanceMarked?.attendances_on_markedBy ||
-    teacher.attendanceMarked?.profileMarkedAttendance ||
-    teacher.user?.dashboardMarkedAttendance ||
-    teacher.user?.profileMarkedAttendance ||
-    teacher.user?.attendances_on_markedBy ||
-    [],
-});
+const flattenTeacher = teacher => {
+  const roles = getUserRoles(teacher.user);
+  const primaryRole = getPrimaryRole(teacher.user);
 
-const flattenClassTeacherAssignment = assignment => ({
-  ...assignment,
-  teacherName: assignment.teacher?.user?.fullName || assignment.teacher?.fullName || '',
-  employeeId: assignment.teacher?.employeeId || assignment.teacher?.user?.employeeId || '',
-  teacherPhoneNumber: assignment.teacher?.user?.phoneNumber || '',
-  assignedByName: assignment.assignedBy?.fullName || '',
-  className: assignment.section?.academicClass?.name || '',
-  sectionName: assignment.section?.name || '',
-  wing: assignment.section?.academicClass?.wing?.code || '',
-});
+  return {
+    ...teacher,
+    fullName: teacher.user?.fullName,
+    phoneNumber: teacher.user?.phoneNumber,
+    countryCode: teacher.user?.countryCode,
+    role: teacher.user?.role,
+    roles,
+    primaryRole,
+    primaryRoleLabel: ROLE_LABELS[primaryRole] || primaryRole || 'Teacher',
+    additionalRoles: roles.filter(role => role !== primaryRole),
+    additionalRoleLabels: formatRoleList(roles.filter(role => role !== primaryRole)),
+    staffType: teacher.staffType || teacher.user?.staffType || STAFF_TYPES.TEACHING,
+    subjects:
+      (teacher.subjects || teacher.teacherSubjects_on_teacher || [])
+        .map(item => item.subject)
+        .filter(Boolean) || [],
+    assignments: (teacher.assignments || teacher.teacherSectionAssignments_on_teacher || []).filter(
+      item => item.isActive !== false,
+    ),
+    attendanceMarked:
+      teacher.attendanceMarked?.attendances_on_markedBy ||
+      teacher.attendanceMarked?.profileMarkedAttendance ||
+      teacher.user?.dashboardMarkedAttendance ||
+      teacher.user?.profileMarkedAttendance ||
+      teacher.user?.attendances_on_markedBy ||
+      [],
+  };
+};
+
+const flattenClassTeacherAssignment = assignment => {
+  const teacherUser = assignment.teacher?.user || {};
+  const roles = getUserRoles(teacherUser);
+  const primaryRole = getPrimaryRole(teacherUser);
+
+  return {
+    ...assignment,
+    teacherUserId: assignment.teacher?.user?.id || assignment.teacherUserId,
+    teacherName: assignment.teacher?.user?.fullName || assignment.teacher?.fullName || '',
+    employeeId: assignment.teacher?.employeeId || assignment.teacher?.user?.employeeId || '',
+    teacherPhoneNumber: assignment.teacher?.user?.phoneNumber || '',
+    roles,
+    primaryRole,
+    primaryRoleLabel: ROLE_LABELS[primaryRole] || primaryRole || 'Teacher',
+    additionalRoles: roles.filter(role => role !== primaryRole),
+    additionalRoleLabels: formatRoleList(roles.filter(role => role !== primaryRole)),
+    assignedByName: assignment.assignedBy?.fullName || '',
+    className: assignment.section?.academicClass?.name || '',
+    sectionName: assignment.section?.name || '',
+    wing: assignment.section?.academicClass?.wing?.code || '',
+  };
+};
+
+const isSyntheticCoordinatorId = id => String(id || '').startsWith('coordinator:');
+
+const ensureAssignableTeacherProfile = async ({candidate, branchId}) => {
+  const teacherId = candidate?.teacherId || (!isSyntheticCoordinatorId(candidate?.id) ? candidate?.id : null);
+  const userId = candidate?.userId || candidate?.user?.id;
+
+  if (teacherId && userId) {
+    return {
+      ...candidate,
+      id: teacherId,
+      teacherId,
+      userId,
+    };
+  }
+
+  if (!candidate?.isCoordinatorCandidate || !userId) {
+    return candidate;
+  }
+
+  const payload = {
+    userId,
+    branchId: branchId || candidate.branchId,
+    employeeId: candidate.employeeId,
+    staffType: candidate.staffType || STAFF_TYPES.TEACHING,
+    joiningDate: candidate.joiningDate || today(),
+    designation: candidate.designation || 'Class Teacher',
+    gender: candidate.gender || 'Other',
+    email: candidate.email || null,
+  };
+
+  if (!payload.branchId || !payload.employeeId) {
+    throw new Error('Coordinator employee profile is incomplete.');
+  }
+
+  try {
+    const response = await dataConnectClient.mutate(
+      DATA_CONNECT_MUTATIONS.ENSURE_COORDINATOR_TEACHER_PROFILE,
+      payload,
+    );
+    const createdTeacherId = response.teacher_insert?.id || response.teacher_insert;
+    return {
+      ...candidate,
+      id: createdTeacherId,
+      teacherId: createdTeacherId,
+      userId,
+      branchId: payload.branchId,
+    };
+  } catch (error) {
+    if (!String(error.message || '').toLowerCase().includes('already exists')) {
+      throw error;
+    }
+
+    const existingTeacher = await teacherService.getTeacherProfileByUser(userId);
+    if (!existingTeacher?.id) {
+      throw error;
+    }
+    return {
+      ...candidate,
+      id: existingTeacher.id,
+      teacherId: existingTeacher.id,
+      userId,
+      branchId: existingTeacher.branchId || payload.branchId,
+    };
+  }
+};
 
 export const teacherService = {
   async getTeachers({branchId, limit = 50, offset = 0}, scope) {
@@ -409,22 +523,26 @@ export const teacherService = {
     if (!canManageClassTeacherAssignments(scope?.role)) {
       throw new Error('Class teacher assignment access denied.');
     }
-    const resolvedTeacher = teacher || {};
-    const resolvedTeacherId = teacherId || resolvedTeacher.id;
+    const resolvedBranchId = branchId || teacher?.branchId || scope?.branchId;
+    const resolvedTeacher = await ensureAssignableTeacherProfile({
+      candidate: teacher || {id: teacherId},
+      branchId: resolvedBranchId,
+    });
+    const resolvedTeacherId = resolvedTeacher.teacherId || teacherId || resolvedTeacher.id;
     const teacherUserId = resolvedTeacher.userId || resolvedTeacher.user?.id;
 
     if (!resolvedTeacherId || !teacherUserId || !sectionId) {
       throw new Error('Select a teacher and section.');
     }
 
-    assertBranchAccess(scope, branchId || resolvedTeacher.branchId || scope?.branchId);
+    assertBranchAccess(scope, resolvedBranchId || resolvedTeacher.branchId || scope?.branchId);
     assertCoordinatorSectionAccess(scope, section);
 
     const response = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.ASSIGN_CLASS_TEACHER, {
       sectionId,
       teacherId: resolvedTeacherId,
       teacherUserId,
-      branchId: branchId || resolvedTeacher.branchId || scope?.branchId,
+      branchId: resolvedBranchId || resolvedTeacher.branchId || scope?.branchId,
       sectionAuditId: String(sectionId),
       teacherAuditId: String(resolvedTeacherId),
     });
@@ -436,13 +554,17 @@ export const teacherService = {
     if (!canManageClassTeacherAssignments(scope?.role)) {
       throw new Error('Class teacher assignment access denied.');
     }
-    const resolvedTeacher = payload.teacher || {};
-    const teacherId = payload.teacherId || resolvedTeacher.id;
+    const resolvedBranchId = payload.branchId || payload.teacher?.branchId || scope?.branchId;
+    const resolvedTeacher = await ensureAssignableTeacherProfile({
+      candidate: payload.teacher || {id: payload.teacherId},
+      branchId: resolvedBranchId,
+    });
+    const teacherId = resolvedTeacher.teacherId || payload.teacherId || resolvedTeacher.id;
     const teacherUserId = resolvedTeacher.userId || resolvedTeacher.user?.id;
     if (!payload.assignmentId || !payload.oldSectionId || !payload.sectionId || !teacherId || !teacherUserId) {
       throw new Error('Select an assignment, teacher, and section.');
     }
-    assertBranchAccess(scope, payload.branchId || resolvedTeacher.branchId || scope?.branchId);
+    assertBranchAccess(scope, resolvedBranchId || resolvedTeacher.branchId || scope?.branchId);
     assertCoordinatorSectionAccess(scope, payload.section);
     assertCoordinatorSectionAccess(scope, payload.oldSection);
 
@@ -452,7 +574,7 @@ export const teacherService = {
       sectionId: payload.sectionId,
       teacherId,
       teacherUserId,
-      branchId: payload.branchId || resolvedTeacher.branchId || scope?.branchId,
+      branchId: resolvedBranchId || resolvedTeacher.branchId || scope?.branchId,
       oldTeacherId: payload.oldTeacherId || null,
       sectionAuditId: String(payload.sectionId),
       teacherAuditId: String(teacherId),

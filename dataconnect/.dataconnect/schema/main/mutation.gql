@@ -216,6 +216,15 @@ extend type Mutation {
     data: StudentIdSequence_Data!
   ): StudentIdSequence_KeyOutput! @fdc_generated(from: "StudentIdSequence", purpose: INSERT_SINGLE)
   """
+  ✨ Insert a single `StudentParent` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  studentParent_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: StudentParent_Data!
+  ): StudentParent_KeyOutput! @fdc_generated(from: "StudentParent", purpose: INSERT_SINGLE)
+  """
   ✨ Insert a single `StudentPromotionHistory` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
   studentPromotionHistory_insert(
@@ -314,6 +323,15 @@ extend type Mutation {
     """
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
+  """
+  ✨ Insert a single `UserRole` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  userRole_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: UserRole_Data!
+  ): UserRole_KeyOutput! @fdc_generated(from: "UserRole", purpose: INSERT_SINGLE)
   """
   ✨ Insert a single `Wing` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -540,6 +558,15 @@ extend type Mutation {
     data: [StudentIdSequence_Data!]!
   ): [StudentIdSequence_KeyOutput!]! @fdc_generated(from: "StudentIdSequence", purpose: INSERT_MULTIPLE)
   """
+  ✨ Insert `StudentParent` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  studentParent_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [StudentParent_Data!]!
+  ): [StudentParent_KeyOutput!]! @fdc_generated(from: "StudentParent", purpose: INSERT_MULTIPLE)
+  """
   ✨ Insert `StudentPromotionHistory` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
   studentPromotionHistory_insertMany(
@@ -638,6 +665,15 @@ extend type Mutation {
     """
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `UserRole` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  userRole_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [UserRole_Data!]!
+  ): [UserRole_KeyOutput!]! @fdc_generated(from: "UserRole", purpose: INSERT_MULTIPLE)
   """
   ✨ Insert `Wing` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -864,6 +900,15 @@ extend type Mutation {
     data: StudentIdSequence_Data!
   ): StudentIdSequence_KeyOutput! @fdc_generated(from: "StudentIdSequence", purpose: UPSERT_SINGLE)
   """
+  ✨ Insert or update a single `StudentParent` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `StudentParent`.
+  """
+  studentParent_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: StudentParent_Data!
+  ): StudentParent_KeyOutput! @fdc_generated(from: "StudentParent", purpose: UPSERT_SINGLE)
+  """
   ✨ Insert or update a single `StudentPromotionHistory` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `StudentPromotionHistory`.
   """
   studentPromotionHistory_upsert(
@@ -962,6 +1007,15 @@ extend type Mutation {
     """
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
+  """
+  ✨ Insert or update a single `UserRole` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `UserRole`.
+  """
+  userRole_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: UserRole_Data!
+  ): UserRole_KeyOutput! @fdc_generated(from: "UserRole", purpose: UPSERT_SINGLE)
   """
   ✨ Insert or update a single `Wing` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Wing`.
   """
@@ -1188,6 +1242,15 @@ extend type Mutation {
     data: [StudentIdSequence_Data!]!
   ): [StudentIdSequence_KeyOutput!]! @fdc_generated(from: "StudentIdSequence", purpose: UPSERT_MULTIPLE)
   """
+  ✨ Insert or update `StudentParent` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `StudentParent`.
+  """
+  studentParent_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [StudentParent_Data!]!
+  ): [StudentParent_KeyOutput!]! @fdc_generated(from: "StudentParent", purpose: UPSERT_MULTIPLE)
+  """
   ✨ Insert or update `StudentPromotionHistory` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `StudentPromotionHistory`.
   """
   studentPromotionHistory_upsertMany(
@@ -1286,6 +1349,15 @@ extend type Mutation {
     """
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `UserRole` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `UserRole`.
+  """
+  userRole_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [UserRole_Data!]!
+  ): [UserRole_KeyOutput!]! @fdc_generated(from: "UserRole", purpose: UPSERT_MULTIPLE)
   """
   ✨ Insert or update `Wing` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Wing`.
   """
@@ -1852,6 +1924,25 @@ extend type Mutation {
     data: StudentIdSequence_Data!
   ): StudentIdSequence_KeyOutput @fdc_generated(from: "StudentIdSequence", purpose: UPDATE_SINGLE)
   """
+  ✨ Update a single `StudentParent` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `StudentParent` or `null` if not found.
+  """
+  studentParent_update(
+    """
+    The key used to identify the object.
+    """
+    key: StudentParent_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: StudentParent_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: StudentParent_Data!
+  ): StudentParent_KeyOutput @fdc_generated(from: "StudentParent", purpose: UPDATE_SINGLE)
+  """
   ✨ Update a single `StudentPromotionHistory` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `StudentPromotionHistory` or `null` if not found.
   """
   studentPromotionHistory_update(
@@ -2110,6 +2201,25 @@ extend type Mutation {
     """
     data: User_Data!
   ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
+  """
+  ✨ Update a single `UserRole` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `UserRole` or `null` if not found.
+  """
+  userRole_update(
+    """
+    The key used to identify the object.
+    """
+    key: UserRole_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: UserRole_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: UserRole_Data!
+  ): UserRole_KeyOutput @fdc_generated(from: "UserRole", purpose: UPDATE_SINGLE)
   """
   ✨ Update a single `Wing` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Wing` or `null` if not found.
   """
@@ -2591,6 +2701,25 @@ extend type Mutation {
     data: StudentIdSequence_Data!
   ): Int! @fdc_generated(from: "StudentIdSequence", purpose: UPDATE_MULTIPLE)
   """
+  ✨ Update `StudentParent` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  studentParent_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: StudentParent_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: StudentParent_Data!
+  ): Int! @fdc_generated(from: "StudentParent", purpose: UPDATE_MULTIPLE)
+  """
   ✨ Update `StudentPromotionHistory` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
   studentPromotionHistory_updateMany(
@@ -2799,6 +2928,25 @@ extend type Mutation {
     """
     data: User_Data!
   ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `UserRole` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  userRole_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: UserRole_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: UserRole_Data!
+  ): Int! @fdc_generated(from: "UserRole", purpose: UPDATE_MULTIPLE)
   """
   ✨ Update `Wing` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
@@ -3255,6 +3403,20 @@ extend type Mutation {
     first: StudentIdSequence_FirstRow
   ): StudentIdSequence_KeyOutput @fdc_generated(from: "StudentIdSequence", purpose: DELETE_SINGLE)
   """
+  ✨ Delete a single `StudentParent` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  studentParent_delete(
+    """
+    The key used to identify the object.
+    """
+    key: StudentParent_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: StudentParent_FirstRow
+  ): StudentParent_KeyOutput @fdc_generated(from: "StudentParent", purpose: DELETE_SINGLE)
+  """
   ✨ Delete a single `StudentPromotionHistory` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
   studentPromotionHistory_delete(
@@ -3458,6 +3620,20 @@ extend type Mutation {
     """
     first: User_FirstRow
   ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
+  """
+  ✨ Delete a single `UserRole` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  userRole_delete(
+    """
+    The key used to identify the object.
+    """
+    key: UserRole_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: UserRole_FirstRow
+  ): UserRole_KeyOutput @fdc_generated(from: "UserRole", purpose: DELETE_SINGLE)
   """
   ✨ Delete a single `Wing` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
@@ -3814,6 +3990,20 @@ extend type Mutation {
     all: Boolean = false
   ): Int! @fdc_generated(from: "StudentIdSequence", purpose: DELETE_MULTIPLE)
   """
+  ✨ Delete `StudentParent` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  studentParent_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: StudentParent_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent", purpose: DELETE_MULTIPLE)
+  """
   ✨ Delete `StudentPromotionHistory` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """
   studentPromotionHistory_deleteMany(
@@ -3967,6 +4157,20 @@ extend type Mutation {
     """
     all: Boolean = false
   ): Int! @fdc_generated(from: "User", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `UserRole` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  userRole_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: UserRole_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "UserRole", purpose: DELETE_MULTIPLE)
   """
   ✨ Delete `Wing` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """

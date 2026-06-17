@@ -91,7 +91,16 @@ const StudentFeeDetailsScreen = () => {
       />
       {payments.length ? (
         payments.map(payment => (
-          <PaymentCard key={payment.id} payment={payment} />
+          <PaymentCard
+            key={payment.id}
+            payment={{
+              ...payment,
+              studentName: studentFee.studentName,
+              className: studentFee.className,
+              sectionName: studentFee.sectionName,
+              admissionNumber: studentFee.admissionNumber,
+            }}
+          />
         ))
       ) : (
         <EmptyState

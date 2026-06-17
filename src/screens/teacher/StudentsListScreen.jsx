@@ -3,6 +3,7 @@ import {FlatList, StyleSheet, View} from 'react-native';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
 import {EmptyState, Header, SearchBar, SkeletonLoader, StudentListItem} from '../../components';
+import {ROLE_LABELS, USER_ROLES} from '../../config/constants';
 import studentService from '../../services/students/studentService';
 import teacherService from '../../services/teachers/teacherService';
 import {colors, spacing} from '../../theme';
@@ -10,6 +11,8 @@ import {colors, spacing} from '../../theme';
 const StudentsListScreen = () => {
   const user = useSelector(state => state.auth.user);
   const [query, setQuery] = useState('');
+  const role = String(user?.role || '').toUpperCase();
+  const isClassTeacherRole = role === USER_ROLES.CLASS_TEACHER;
 
   const assignmentsQuery = useQuery({
     queryKey: ['teacherAssignments', user?.teacherId],
@@ -17,7 +20,10 @@ const StudentsListScreen = () => {
     enabled: Boolean(user?.teacherId),
   });
 
-  const assignments = assignmentsQuery.data || [];
+  const assignments = useMemo(() => {
+    const items = assignmentsQuery.data || [];
+    return isClassTeacherRole ? items.filter(item => item.isClassTeacher) : items;
+  }, [assignmentsQuery.data, isClassTeacherRole]);
 
   const studentsQuery = useQuery({
     queryKey: ['teacherAssignedStudents', user?.teacherId, assignments.map(item => item.sectionId).join(',')],
@@ -50,7 +56,7 @@ const StudentsListScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Header title="Students" subtitle="Assigned section roster" />
+        <Header title="Students" subtitle={`${ROLE_LABELS[role] || 'Teacher'} assigned section roster`} />
         <SearchBar
           value={query}
           onChangeText={setQuery}

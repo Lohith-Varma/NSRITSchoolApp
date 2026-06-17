@@ -24,7 +24,11 @@ const blankForm = {
   dateOfBirth: '',
   admissionDate: toISODate(new Date()),
   fatherName: '',
+  fatherMobile: '',
   motherName: '',
+  motherMobile: '',
+  guardianName: '',
+  guardianMobile: '',
   parentPhoneNumber: '',
   photoUrl: '',
   aadhaarNumber: '',
@@ -173,9 +177,12 @@ const AddStudentScreen = ({navigation}) => {
       <DatePickerField label="Date of Birth" value={form.dateOfBirth} maximumDate={toISODate(new Date())} required onChange={value => updateField('dateOfBirth', value)} />
       <DatePickerField label="Admission Date" value={form.admissionDate} minimumDate={form.dateOfBirth} maximumDate={toISODate(new Date())} required onChange={value => updateField('admissionDate', value)} />
       <SectionHeader title="Parent Information" />
-      <CustomInput label="Father Name *" value={form.fatherName} onChangeText={value => updateField('fatherName', value)} />
+      <CustomInput label="Father Name" value={form.fatherName} onChangeText={value => updateField('fatherName', value)} />
+      <CustomInput label="Father Mobile" keyboardType="phone-pad" value={form.fatherMobile} onChangeText={value => updateField('fatherMobile', value)} />
       <CustomInput label="Mother Name" value={form.motherName} onChangeText={value => updateField('motherName', value)} />
-      <CustomInput label="Parent Mobile Number *" keyboardType="phone-pad" value={form.parentPhoneNumber} onChangeText={value => updateField('parentPhoneNumber', value)} />
+      <CustomInput label="Mother Mobile" keyboardType="phone-pad" value={form.motherMobile} onChangeText={value => updateField('motherMobile', value)} />
+      <CustomInput label="Guardian Name" value={form.guardianName} onChangeText={value => updateField('guardianName', value)} />
+      <CustomInput label="Guardian Mobile" keyboardType="phone-pad" value={form.guardianMobile} onChangeText={value => updateField('guardianMobile', value)} />
       <SectionHeader title="Optional Information" />
       <CustomInput label="Student Photo URL" value={form.photoUrl} onChangeText={value => updateField('photoUrl', value)} />
       <CustomInput label="Aadhaar Number" keyboardType="number-pad" value={form.aadhaarNumber} onChangeText={value => updateField('aadhaarNumber', value)} />

@@ -74,7 +74,7 @@ const BulkStudentImportScreen = () => {
       />
       <ProgressBar progress={progressValue} color={colors.primary} style={styles.progress} />
       <HelperText type="info" visible>
-        Required columns: Full Name, Gender, DOB, Father Name, Mother Name, Parent Mobile, Class, Section.
+        Required columns: Full Name, Gender, DOB, Class, Section, and at least one of Father Mobile, Mother Mobile, or Guardian Mobile.
       </HelperText>
       {result ? (
         <>

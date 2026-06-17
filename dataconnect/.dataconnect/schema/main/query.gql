@@ -436,6 +436,20 @@ extend type Query {
     first: StudentIdSequence_FirstRow
   ): StudentIdSequence @fdc_generated(from: "StudentIdSequence", purpose: QUERY_SINGLE)
   """
+  ✨ Look up a single `StudentParent` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  studentParent(
+    """
+    The key used to identify the object.
+    """
+    key: StudentParent_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: StudentParent_FirstRow
+  ): StudentParent @fdc_generated(from: "StudentParent", purpose: QUERY_SINGLE)
+  """
   ✨ Look up a single `StudentPromotionHistory` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
   studentPromotionHistory(
@@ -639,6 +653,20 @@ extend type Query {
     """
     first: User_FirstRow
   ): User @fdc_generated(from: "User", purpose: QUERY_SINGLE)
+  """
+  ✨ Look up a single `UserRole` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  """
+  userRole(
+    """
+    The key used to identify the object.
+    """
+    key: UserRole_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: UserRole_FirstRow
+  ): UserRole @fdc_generated(from: "UserRole", purpose: QUERY_SINGLE)
   """
   ✨ Look up a single `Wing` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
@@ -1475,6 +1503,40 @@ extend type Query {
     having: StudentIdSequence_Having
   ): [StudentIdSequence!]! @fdc_generated(from: "StudentIdSequence", purpose: QUERY_MULTIPLE)
   """
+  ✨ List `StudentParent` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  studentParents(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: StudentParent_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [StudentParent_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: StudentParent_Having
+  ): [StudentParent!]! @fdc_generated(from: "StudentParent", purpose: QUERY_MULTIPLE)
+  """
   ✨ List `StudentPromotionHistory` objects in the table and return selected fields, optionally filtered by `where` conditions
   """
   studentPromotionHistories(
@@ -1848,6 +1910,40 @@ extend type Query {
     """
     having: User_Having
   ): [User!]! @fdc_generated(from: "User", purpose: QUERY_MULTIPLE)
+  """
+  ✨ List `UserRole` objects in the table and return selected fields, optionally filtered by `where` conditions
+  """
+  userRoles(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: UserRole_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [UserRole_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: UserRole_Having
+  ): [UserRole!]! @fdc_generated(from: "UserRole", purpose: QUERY_MULTIPLE)
   """
   ✨ List `Wing` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

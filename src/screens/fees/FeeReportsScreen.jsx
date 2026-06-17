@@ -3,7 +3,6 @@ import {FlatList, StyleSheet, View} from 'react-native';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import XLSX from 'xlsx';
-import {Text} from 'react-native-paper';
 import {useQuery} from '@tanstack/react-query';
 import {CustomButton, DashboardCard, EmptyState, FilterTabs, Header, SearchBar, SectionHeader} from '../../components';
 import feeService from '../../services/fees/feeService';
@@ -53,7 +52,7 @@ const statusTabs = [
   {label: 'Books', value: 'BOOKS'},
 ];
 
-const FeeReportsScreen = () => {
+const FeeReportsScreen = ({navigation}) => {
   const access = useFeeAccess();
   const canViewReports = feeService.canViewReports(access.role);
   const [query, setQuery] = useState('');
@@ -100,8 +99,12 @@ const FeeReportsScreen = () => {
             </View>
             <SearchBar value={query} onChangeText={setQuery} placeholder="Filter reports" />
             <FilterTabs tabs={statusTabs} value={status} onChange={setStatus} />
-            <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'csv')}>Export CSV</CustomButton>
-            <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'xlsx')}>Export Excel</CustomButton>
+            {!['TEACHER', 'CLASS_TEACHER'].includes(String(access.role).toUpperCase()) && (
+              <>
+                <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'csv')}>Export CSV</CustomButton>
+                <CustomButton mode="outlined" onPress={() => exportReport(filtered, 'xlsx')}>Export Excel</CustomButton>
+              </>
+            )}
             <SectionHeader title="Class-wise Report" />
             {(data?.classWise || []).map(item => (
               <DashboardCard
@@ -110,6 +113,7 @@ const FeeReportsScreen = () => {
                 value={formatCurrency(item.dueAmount)}
                 description={`Assigned ${formatCurrency(item.totalFee)} | Collected ${formatCurrency(item.paidAmount)} | Students ${item.students}`}
                 icon="file-chart-outline"
+                onPress={() => navigation.navigate('ClassWiseFeeReport', { className: item.className })}
               />
             ))}
             <SectionHeader title="Student-wise Report" />

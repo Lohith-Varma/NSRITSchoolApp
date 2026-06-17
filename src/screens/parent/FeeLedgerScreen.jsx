@@ -1,7 +1,7 @@
 import React from 'react';
 import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
-import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from '../../components';
+import {DashboardCard, EmptyState, Header, PaymentCard, ScreenContainer, SectionHeader} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
@@ -32,9 +32,9 @@ const FeeLedgerScreen = () => {
               <DashboardCard title="1st Term" value={formatCurrency(child.feePlan?.term1Fee)} icon="numeric-1-circle-outline" />
               <DashboardCard title="2nd Term" value={formatCurrency(child.feePlan?.term2Fee)} icon="numeric-2-circle-outline" />
               <DashboardCard title="3rd Term" value={formatCurrency(child.feePlan?.term3Fee)} icon="numeric-3-circle-outline" />
-              <DashboardCard title="Books Fee" value={formatCurrency(child.feePlan?.booksFee)} icon="book-open-page-variant-outline" />
+              {/* <DashboardCard title="Books Fee" value={formatCurrency(child.feePlan?.booksFee)} icon="book-open-page-variant-outline" /> */}
               <DashboardCard title="Transport Fee" value={formatCurrency(child.feePlan?.transportFee)} icon="bus-school" />
-              <DashboardCard title="Concession" value={formatCurrency(child.feeSummary?.concession)} icon="sale-outline" />
+              {/* <DashboardCard title="Concession" value={formatCurrency(child.feeSummary?.concession)} icon="sale-outline" /> */}
               <DashboardCard title="Total Fee" value={formatCurrency(child.feeSummary?.total)} icon="cash-multiple" />
               <DashboardCard title="Paid Amount" value={formatCurrency(child.feeSummary?.paid)} icon="cash-check" />
               <DashboardCard title="Pending Amount" value={formatCurrency(child.feeSummary?.due)} icon="cash-clock" />
@@ -50,12 +50,18 @@ const FeeLedgerScreen = () => {
               ))}
               <SectionHeader title="Receipt History" subtitle="Recent payments and payment dates" />
               {payments.slice(0, 5).map(payment => (
-                <DashboardCard
+                <PaymentCard
                   key={payment.id}
-                  title={payment.receiptNumber || 'Receipt pending'}
-                  value={formatCurrency(payment.amount)}
-                  description={`${formatDateForDisplay(payment.paymentDate) || '-'} | ${payment.paymentMode || '-'}`}
-                  icon="receipt"
+                  payment={{
+                    ...payment,
+                    studentName: child.fullName,
+                    className: child.academicClass?.name,
+                    sectionName: child.section?.name,
+                    admissionNumber: child.studentId,
+                    mode: payment.paymentMode,
+                    date: payment.paymentDate,
+                    receiptNo: payment.receiptNumber,
+                  }}
                 />
               ))}
             </React.Fragment>

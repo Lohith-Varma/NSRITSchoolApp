@@ -76,7 +76,22 @@ const StudentFeeProfileScreen = ({navigation, route}) => {
       {canViewTimeline ? (
         <>
           <SectionHeader title="Payment Timeline" />
-          {profile.payments.length ? profile.payments.map(payment => <PaymentCard key={payment.id} payment={payment} />) : <EmptyState title="No payments" message="Recorded payments will appear here." />}
+          {profile.payments.length ? (
+            profile.payments.map(payment => (
+              <PaymentCard
+                key={payment.id}
+                payment={{
+                  ...payment,
+                  studentName: profile.studentName,
+                  className: profile.className,
+                  sectionName: profile.sectionName,
+                  admissionNumber: profile.admissionNumber,
+                }}
+              />
+            ))
+          ) : (
+            <EmptyState title="No payments" message="Recorded payments will appear here." />
+          )}
         </>
       ) : null}
     </ScreenContainer>

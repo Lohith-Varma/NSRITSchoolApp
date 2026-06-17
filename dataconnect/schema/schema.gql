@@ -105,6 +105,8 @@ type User @table(name: "users", key: "id") {
   fullName: String! @col(dataType: "varchar(140)")
   countryCode: String! @col(dataType: "varchar(5)")
   phoneNumber: String! @col(dataType: "varchar(20)")
+  status: String! @col(dataType: "varchar(20)") @default(value: "ACTIVE")
+  # Legacy rollout field. New authorization and switching logic should read UserRole.
   role: String! @col(dataType: "varchar(30)")
   employeeId: String @col(name: "employee_id", dataType: "varchar(40)") @unique
   staffType: String @col(name: "staff_type", dataType: "varchar(20)")
@@ -118,6 +120,17 @@ type User @table(name: "users", key: "id") {
 extend type User {
   branchId: UUID
   wingId: UUID
+}
+
+type UserRole @table(name: "user_roles", key: ["user", "role"]) @index(fields: ["userId", "role"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User!
+  role: String! @col(dataType: "varchar(30)")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+}
+
+extend type UserRole {
+  userId: UUID!
 }
 
 type Parent @table(name: "parents", key: "id") {
@@ -329,6 +342,19 @@ extend type Student {
   academicClassId: UUID!
   sectionId: UUID!
   parentId: UUID!
+}
+
+type StudentParent @table(name: "student_parents", key: ["student", "user", "relationship"]) @index(fields: ["studentId"]) @index(fields: ["userId"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  student: Student!
+  user: User!
+  relationship: String! @col(dataType: "varchar(20)")
+  createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+}
+
+extend type StudentParent {
+  studentId: UUID!
+  userId: UUID!
 }
 
 type StudentSectionHistory @table(name: "student_section_history", key: "id") @index(fields: ["studentId", "changedAt"]) {
@@ -592,6 +618,7 @@ extend type FeeAuditLog {
 
 type AuditLog @table(name: "audit_logs", key: "id") @index(fields: ["branchId", "createdAt"]) @index(fields: ["performedBy", "createdAt"]) {
   id: UUID! @default(expr: "uuidV4()")
+  user: User
   performedBy: String! @col(name: "performed_by", dataType: "varchar(128)")
   performedRole: String! @col(name: "performed_role", dataType: "varchar(30)")
   actingAs: String @col(name: "acting_as", dataType: "varchar(30)")
@@ -599,9 +626,15 @@ type AuditLog @table(name: "audit_logs", key: "id") @index(fields: ["branchId", 
   action: String! @col(dataType: "varchar(80)")
   entityType: String @col(name: "entity_type", dataType: "varchar(80)")
   entityId: String @col(name: "entity_id", dataType: "varchar(120)")
+  oldRole: String @col(name: "old_role", dataType: "varchar(30)")
+  newRole: String @col(name: "new_role", dataType: "varchar(30)")
   oldData: String @col(name: "old_data")
   newData: String @col(name: "new_data")
   createdAt: Timestamp! @col(name: "created_at") @default(expr: "request.time")
+}
+
+extend type AuditLog {
+  userId: UUID
 }
 
 type DueTracking @table(name: "due_tracking", key: "id") {

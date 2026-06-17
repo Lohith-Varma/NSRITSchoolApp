@@ -59,6 +59,17 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   await authService.logout();
 });
 
+export const switchActiveRole = createAsyncThunk(
+  'auth/switchRole',
+  async (role, {rejectWithValue}) => {
+    try {
+      return await authService.switchRole(role);
+    } catch (error) {
+      return rejectWithValue(error.message || 'Unable to switch role');
+    }
+  },
+);
+
 const initialState = {
   isBootstrapping: true,
   isAuthenticated: false,
@@ -171,6 +182,21 @@ const authSlice = createSlice({
         state.mainAdminBranchContext = null;
         state.verificationId = null;
         state.pendingPhone = null;
+      })
+      .addCase(switchActiveRole.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(switchActiveRole.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token || state.token;
+        state.user = action.payload.user;
+        state.role = action.payload.user.role;
+        state.mainAdminBranchContext = null;
+      })
+      .addCase(switchActiveRole.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Unable to switch role';
       });
   },
 });

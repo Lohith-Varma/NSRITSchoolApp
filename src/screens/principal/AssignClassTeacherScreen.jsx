@@ -13,7 +13,7 @@ import {
   SectionHeader,
   SelectField,
 } from '../../components';
-import {USER_ROLES} from '../../config/constants';
+import {ROLE_LABELS, USER_ROLES} from '../../config/constants';
 import academicRepository from '../../repositories/academicRepository';
 import sectionService from '../../services/sections/sectionService';
 import teacherService from '../../services/teachers/teacherService';
@@ -23,6 +23,22 @@ import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
 
 const allOption = label => ({label, value: 'ALL'});
 const normalizeRole = role => String(role || '').toUpperCase();
+const uniqueRoles = roles => {
+  const seen = new Set();
+  return (roles || [])
+    .map(item => normalizeRole(item?.role || item))
+    .filter(Boolean)
+    .filter(role => {
+      if (seen.has(role)) {
+        return false;
+      }
+      seen.add(role);
+      return true;
+    });
+};
+const getRoles = user => uniqueRoles([...(user?.roles || []), user?.role]);
+const getPrimaryRole = user => normalizeRole(user?.role) || getRoles(user)[0] || '';
+const formatRoles = roles => uniqueRoles(roles).map(item => ROLE_LABELS[item] || item).join(', ');
 
 const AssignClassTeacherScreen = ({route}) => {
   const user = useSelector(state => state.auth.user);
@@ -103,6 +119,88 @@ const AssignClassTeacherScreen = ({route}) => {
   const students = useMemo(() => assignmentsQuery.data?.students || [], [assignmentsQuery.data?.students]);
   const coordinators = useMemo(() => assignmentsQuery.data?.coordinators || [], [assignmentsQuery.data?.coordinators]);
   const teachers = useMemo(() => teachersQuery.data || [], [teachersQuery.data]);
+  const teacherCandidates = useMemo(() => {
+    const byUserId = new Map();
+    teachers.forEach(teacher => {
+      const userProfile = teacher.user || teacher;
+      const userId = teacher.userId || userProfile.id;
+      if (!userId) {
+        return;
+      }
+      const roles = uniqueRoles([...(teacher.roles || []), ...getRoles(userProfile)]);
+      const primaryRole = teacher.primaryRole || getPrimaryRole(userProfile) || USER_ROLES.TEACHER;
+      byUserId.set(userId, {
+        ...teacher,
+        id: teacher.id,
+        teacherId: teacher.id,
+        userId,
+        user: userProfile,
+        roles,
+        primaryRole,
+        primaryRoleLabel: ROLE_LABELS[primaryRole] || primaryRole,
+        additionalRoles: roles.filter(item => item !== primaryRole),
+        additionalRoleLabels: formatRoles(roles.filter(item => item !== primaryRole)),
+        isCoordinatorCandidate: roles.includes(USER_ROLES.COORDINATOR),
+      });
+    });
+
+    coordinators.forEach(coordinator => {
+      const userProfile = coordinator.user || {};
+      const userId = coordinator.userId || userProfile.id;
+      if (!userId) {
+        return;
+      }
+      const teacherProfile = userProfile.teacherProfile;
+      const roles = getRoles(userProfile);
+      const primaryRole = getPrimaryRole(userProfile) || USER_ROLES.COORDINATOR;
+      const existing = byUserId.get(userId);
+      if (existing) {
+        const mergedRoles = uniqueRoles([...existing.roles, ...roles]);
+        byUserId.set(userId, {
+          ...existing,
+          coordinatorId: coordinator.id,
+          coordinatorWing: coordinator.wing,
+          roles: mergedRoles,
+          primaryRole,
+          primaryRoleLabel: ROLE_LABELS[primaryRole] || primaryRole,
+          additionalRoles: mergedRoles.filter(item => item !== primaryRole),
+          additionalRoleLabels: formatRoles(mergedRoles.filter(item => item !== primaryRole)),
+          isCoordinatorCandidate: true,
+        });
+        return;
+      }
+
+      byUserId.set(userId, {
+        id: teacherProfile?.id || `coordinator:${coordinator.id}`,
+        teacherId: teacherProfile?.id || null,
+        userId,
+        user: userProfile,
+        fullName: userProfile.fullName,
+        phoneNumber: userProfile.phoneNumber,
+        employeeId: teacherProfile?.employeeId || coordinator.employeeId || userProfile.employeeId,
+        staffType: teacherProfile?.staffType || coordinator.staffType || userProfile.staffType,
+        branchId: teacherProfile?.branchId || coordinator.branchId || effectiveBranchId,
+        joiningDate: teacherProfile?.joiningDate,
+        designation: teacherProfile?.designation || 'Class Teacher',
+        gender: teacherProfile?.gender || coordinator.gender || 'Other',
+        email: teacherProfile?.email || coordinator.email || null,
+        roles,
+        primaryRole,
+        primaryRoleLabel: ROLE_LABELS[primaryRole] || primaryRole,
+        additionalRoles: roles.filter(item => item !== primaryRole),
+        additionalRoleLabels: formatRoles(roles.filter(item => item !== primaryRole)),
+        coordinatorId: coordinator.id,
+        coordinatorWing: coordinator.wing,
+        isCoordinatorCandidate: true,
+      });
+    });
+
+    return [...byUserId.values()].sort((left, right) =>
+      String(left.fullName || left.user?.fullName || '').localeCompare(
+        String(right.fullName || right.user?.fullName || ''),
+      ),
+    );
+  }, [coordinators, effectiveBranchId, teachers]);
 
   const studentCounts = useMemo(() => {
     const counts = {};
@@ -148,6 +246,8 @@ const AssignClassTeacherScreen = ({route}) => {
           teacherName: assignment?.teacherName || section.classTeacher?.fullName || 'Not assigned',
           employeeId: assignment?.employeeId || teacher?.employeeId || section.classTeacher?.employeeId || '-',
           teacherPhoneNumber: assignment?.teacherPhoneNumber || section.classTeacher?.phoneNumber || '-',
+          primaryRole: assignment?.primaryRoleLabel || ROLE_LABELS[normalizeRole(section.classTeacher?.role)] || '-',
+          additionalRoles: assignment?.additionalRoleLabels || '-',
           assignedDate: assignment?.createdAt,
           assignedBy: assignment?.assignedByName || assignment?.assignedBy?.fullName || '-',
           wing,
@@ -178,7 +278,7 @@ const AssignClassTeacherScreen = ({route}) => {
     return {
       classes: [allOption('All Classes'), ...sorted(classMap)],
       sections: [allOption('All Sections'), ...sorted(sectionOptions)],
-      teachers: [allOption('All Teachers'), ...sorted(teacherOptions)],
+      teachers: [allOption('All Teachers / Coordinators'), ...sorted(teacherOptions)],
     };
   }, [rows]);
 
@@ -207,12 +307,12 @@ const AssignClassTeacherScreen = ({route}) => {
 
   const teacherOptions = useMemo(
     () =>
-      teachers.map(item => ({
-        label: `${item.fullName || item.user?.fullName || 'Teacher'} (${item.employeeId || '-'})`,
+      teacherCandidates.map(item => ({
+        label: `${item.fullName || item.user?.fullName || 'Staff'} (${item.primaryRoleLabel || 'Teacher'}) - ${item.employeeId || '-'}`,
         value: item.id,
         item,
       })),
-    [teachers],
+    [teacherCandidates],
   );
 
   const selectedSection = useMemo(
@@ -379,7 +479,7 @@ const AssignClassTeacherScreen = ({route}) => {
           <HelperText type="error" visible={Boolean(form.classId) && !pickerSectionsQuery.isLoading && !pickerSectionsQuery.error && !sectionOptions.length}>
             No active sections exist for this class.
           </HelperText>
-          <SelectField label="Teacher" value={form.teacherId} options={teacherOptions} onChange={value => setForm(current => ({...current, teacherId: value}))} />
+          <SelectField label="Teacher / Coordinator" value={form.teacherId} options={teacherOptions} onChange={value => setForm(current => ({...current, teacherId: value}))} />
           <HelperText type="error" visible={Boolean(error)}>{error}</HelperText>
           <View style={styles.formActions}>
             {editingAssignment ? (
@@ -403,7 +503,7 @@ const AssignClassTeacherScreen = ({route}) => {
       )}
 
       <SectionHeader title="Class Teacher Overview" subtitle={`${rows.length} sections`} />
-      <SearchBar value={query} onChangeText={setQuery} placeholder="Search teacher, class, section" />
+      <SearchBar value={query} onChangeText={setQuery} placeholder="Search teacher, coordinator, class, section" />
       <FilterTabs
         value={statusFilter}
         onChange={setStatusFilter}
@@ -415,7 +515,7 @@ const AssignClassTeacherScreen = ({route}) => {
       />
       <SelectField label="Filter By Class" value={classFilter} options={filterOptions.classes} onChange={setClassFilter} />
       <SelectField label="Filter By Section" value={sectionFilter} options={filterOptions.sections} onChange={setSectionFilter} />
-      <SelectField label="Filter By Teacher" value={teacherFilter} options={filterOptions.teachers} onChange={setTeacherFilter} />
+      <SelectField label="Filter By Teacher / Coordinator" value={teacherFilter} options={filterOptions.teachers} onChange={setTeacherFilter} />
 
       <SectionHeader title="Current Class Teacher Assignments" />
       {filteredRows.length ? (
@@ -424,7 +524,7 @@ const AssignClassTeacherScreen = ({route}) => {
             <DashboardCard
               title={`${row.className}-${row.sectionName}`}
               value={row.teacherName}
-              description={`Employee ID: ${row.employeeId} | Students: ${row.studentCount} | Coordinator: ${row.coordinator} | Wing: ${row.wing || '-'} | Assigned: ${formatDateForDisplay(row.assignedDate) || '-'} | By: ${row.assignedBy} | Status: ${row.status}`}
+              description={`Employee ID: ${row.employeeId} | Primary Role: ${row.primaryRole} | Additional Roles: ${row.additionalRoles} | Assigned: ${row.className}-${row.sectionName} | Students: ${row.studentCount} | Coordinator: ${row.coordinator} | Wing: ${row.wing || '-'} | Date: ${formatDateForDisplay(row.assignedDate) || '-'} | By: ${row.assignedBy} | Status: ${row.status}`}
               icon={row.assignment ? 'account-tie-outline' : 'account-question-outline'}
               tone={row.assignment ? colors.success : colors.warning}
             />

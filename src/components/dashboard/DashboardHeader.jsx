@@ -1,10 +1,40 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useDispatch, useSelector} from 'react-redux';
 import {Text} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ROLE_LABELS} from '../../config/constants';
+import {switchActiveRole} from '../../store/slices/authSlice';
 import CustomButton from '../buttons/CustomButton';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+
+const RoleSwitch = () => {
+  const dispatch = useDispatch();
+  const {role, user, loading} = useSelector(state => state.auth);
+  const roles = (user?.roles || []).filter(item => item && item !== role);
+
+  if (!roles.length) {
+    return null;
+  }
+
+  return (
+    <View style={styles.switchContainer}>
+      <Text style={styles.switchLabel}>Switch Role</Text>
+      <View style={styles.switchRow}>
+        {roles.map(item => (
+          <CustomButton
+            key={item}
+            compact
+            disabled={loading}
+            mode="contained-tonal"
+            onPress={() => dispatch(switchActiveRole(item))}>
+            {ROLE_LABELS[item] || item}
+          </CustomButton>
+        ))}
+      </View>
+    </View>
+  );
+};
 
 const DashboardHeader = ({name, role, subtitle, onLogout}) => (
   <View style={styles.container}>
@@ -31,6 +61,7 @@ const DashboardHeader = ({name, role, subtitle, onLogout}) => (
     <Text style={styles.title}>
       {name || ROLE_LABELS[role] || 'NSRIT User'}
     </Text>
+    <RoleSwitch />
   </View>
 );
 
@@ -79,6 +110,20 @@ const styles = StyleSheet.create({
   subtitle: {
     color: 'rgba(255,255,255,0.82)',
     marginTop: spacing.xs,
+  },
+  switchContainer: {
+    marginTop: spacing.lg,
+  },
+  switchLabel: {
+    ...typography.caption,
+    color: 'rgba(255,255,255,0.78)',
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
 });
 

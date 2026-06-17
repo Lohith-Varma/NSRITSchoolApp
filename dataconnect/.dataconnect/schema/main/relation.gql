@@ -1216,6 +1216,15 @@ extend type AuditLog {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "AuditLog.newData", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `AuditLog` table where the `newRole` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  newRole_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AuditLog.newRole", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `AuditLog` table where the `oldData` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   oldData_count(
@@ -1224,6 +1233,15 @@ extend type AuditLog {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "AuditLog.oldData", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AuditLog` table where the `oldRole` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  oldRole_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AuditLog.oldRole", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `AuditLog` table where the `performedBy` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -1242,6 +1260,15 @@ extend type AuditLog {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "AuditLog.performedRole", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `AuditLog` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "AuditLog.userId", purpose: QUERY_COUNT)
   """
   ✨ Minimum of the `createdAt` field in the `AuditLog` table.
   """
@@ -4272,6 +4299,40 @@ extend type Student {
     having: StudentFeePlan_Having
   ): [StudentFeePlan!]! @fdc_generated(from: "StudentFeePlan.student", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `StudentParent` objects in a one-to-many relationship (where `StudentParent`.`student` is this object).
+  """
+  studentParents_on_student(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: StudentParent_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [StudentParent_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: StudentParent_Having
+  ): [StudentParent!]! @fdc_generated(from: "StudentParent.student", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `StudentPromotionHistory` objects in a one-to-many relationship (where `StudentPromotionHistory`.`student` is this object).
   """
   studentPromotionHistories_on_student(
@@ -5781,6 +5842,73 @@ extend type StudentIdSequence {
   """
   _id: ID! @fdc_generated(from: "StudentIdSequence.admissionYear,branchCode", purpose: ENTITY_ID)
 }
+extend type StudentParent {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "StudentParent", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `StudentParent` table.
+  """
+  _count: Int! @fdc_generated(from: "StudentParent.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentParent` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  createdAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent.createdAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentParent` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentParent` table where the `relationship` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  relationship_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent.relationship", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentParent` table where the `studentId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  studentId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent.studentId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `StudentParent` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "StudentParent.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Minimum of the `createdAt` field in the `StudentParent` table.
+  """
+  createdAt_min: Timestamp @fdc_generated(from: "StudentParent.createdAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `createdAt` field in the `StudentParent` table.
+  """
+  createdAt_max: Timestamp @fdc_generated(from: "StudentParent.createdAt", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "StudentParent.studentId,userId,relationship", purpose: ENTITY_ID)
+}
 extend type StudentPromotionHistory {
   """
   Implicit metadata field that cannot be written. It provides extra information about query results.
@@ -7157,6 +7285,40 @@ extend type User {
     having: Attendance_Having
   ): [Attendance!]! @fdc_generated(from: "Attendance.markedBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `AuditLog` objects in a one-to-many relationship (where `AuditLog`.`user` is this object).
+  """
+  auditLogs_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: AuditLog_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [AuditLog_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: AuditLog_Having
+  ): [AuditLog!]! @fdc_generated(from: "AuditLog.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `Branch` objects in a one-to-many relationship (where `Branch`.`branchAdmin` is this object).
   """
   branches_on_branchAdmin(
@@ -7531,6 +7693,40 @@ extend type User {
     having: StudentFeePlan_Having
   ): [StudentFeePlan!]! @fdc_generated(from: "StudentFeePlan.createdBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `StudentParent` objects in a one-to-many relationship (where `StudentParent`.`user` is this object).
+  """
+  studentParents_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: StudentParent_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [StudentParent_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: StudentParent_Having
+  ): [StudentParent!]! @fdc_generated(from: "StudentParent.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `StudentPromotionHistory` objects in a one-to-many relationship (where `StudentPromotionHistory`.`promotedBy` is this object).
   """
   studentPromotionHistories_on_promotedBy(
@@ -7701,6 +7897,40 @@ extend type User {
     having: TeacherTransferHistory_Having
   ): [TeacherTransferHistory!]! @fdc_generated(from: "TeacherTransferHistory.changedBy", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
   """
+  ✨ List `UserRole` objects in a one-to-many relationship (where `UserRole`.`user` is this object).
+  """
+  userRoles_on_user(
+    """
+    Filter condition to narrow down the query results.
+    """
+    where: UserRole_Filter
+
+    """
+    Order the query results by specific fields.
+    """
+    orderBy: [UserRole_Order!]
+
+    """
+    Number of rows to skip before starting to return the results.
+    """
+    offset: Int
+
+    """
+    Maximum number of rows to return (defaults to 100 rows).
+    """
+    limit: Int = 100
+
+    """
+    Set to true to return distinct results.
+    """
+    distinct: Boolean = false
+
+    """
+    Filter condition to apply to the groups of aggregate queries.
+    """
+    having: UserRole_Having
+  ): [UserRole!]! @fdc_generated(from: "UserRole.user", purpose: QUERY_MULTIPLE_ONE_TO_MANY)
+  """
   ✨ List `Accountant` objects in a one-to-one relationship (where `Accountant`.`user` is this object).
   """
   accountant_on_user: Accountant @fdc_generated(from: "Accountant.user", purpose: QUERY_SINGLE_ONE_TO_ONE)
@@ -7816,6 +8046,15 @@ extend type User {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.staffType", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  status_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.status", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   updatedAt_count(
@@ -7853,6 +8092,64 @@ extend type User {
   A generated field that is used for caching results in SDKs.
   """
   _id: ID! @fdc_generated(from: "User.id", purpose: ENTITY_ID)
+}
+extend type UserRole {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "UserRole", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `UserRole` table.
+  """
+  _count: Int! @fdc_generated(from: "UserRole.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `UserRole` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  createdAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "UserRole.createdAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `UserRole` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "UserRole.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `UserRole` table where the `role` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  role_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "UserRole.role", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `UserRole` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  userId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "UserRole.userId", purpose: QUERY_COUNT)
+  """
+  ✨ Minimum of the `createdAt` field in the `UserRole` table.
+  """
+  createdAt_min: Timestamp @fdc_generated(from: "UserRole.createdAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `createdAt` field in the `UserRole` table.
+  """
+  createdAt_max: Timestamp @fdc_generated(from: "UserRole.createdAt", purpose: QUERY_MAX)
+  """
+  A generated field that is used for caching results in SDKs.
+  """
+  _id: ID! @fdc_generated(from: "UserRole.userId,role", purpose: ENTITY_ID)
 }
 extend type Wing {
   """

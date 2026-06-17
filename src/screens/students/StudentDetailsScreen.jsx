@@ -14,6 +14,10 @@ const getFeeItems = plan => plan?.items || plan?.detailFeeItems || [];
 const getFeePayments = plan => plan?.payments || plan?.detailFeePayments || [];
 const isActivePayment = payment =>
   !['REVERSED', 'CANCELLED'].includes(String(payment.status || 'RECORDED').toUpperCase());
+const getRoleList = user => {
+  const roles = [...(user?.roles || []).map(item => item.role), user?.role].filter(Boolean);
+  return [...new Set(roles.map(role => String(role).toUpperCase()))].join(', ');
+};
 
 const StudentDetailsScreen = ({navigation, route}) => {
   const studentId = route.params?.studentId;
@@ -57,6 +61,7 @@ const StudentDetailsScreen = ({navigation, route}) => {
   }, [activeFeeItems, activeFeePayments, activeFeePlan, data]);
 
   const student = data?.student;
+  const linkedParents = student?.linkedParents || [];
   if (!student) {
     return (
       <ScreenContainer>
@@ -79,9 +84,23 @@ const StudentDetailsScreen = ({navigation, route}) => {
       <DashboardCard title="Blood Group" value={student.bloodGroup || '-'} icon="water-outline" />
       <DashboardCard title="Address" value={[student.address, student.city, student.state, student.pincode].filter(Boolean).join(', ') || '-'} icon="map-marker-outline" />
       <SectionHeader title="Parent Details" />
-      <DashboardCard title="Father" value={student.parent?.fatherName || student.parent?.fullName || '-'} icon="account-outline" />
-      <DashboardCard title="Mother" value={student.parent?.motherName || '-'} icon="account-outline" />
-      <DashboardCard title="Parent Mobile" value={student.parent?.phoneNumber || student.phoneNumber || '-'} icon="phone-outline" />
+      {linkedParents.length ? (
+        linkedParents.map(link => (
+          <DashboardCard
+            key={link.id}
+            title={link.relationship}
+            value={link.user?.phoneNumber || '-'}
+            description={`${link.user?.fullName || 'Parent'} | Roles: ${getRoleList(link.user) || '-'}`}
+            icon="account-outline"
+          />
+        ))
+      ) : (
+        <>
+          <DashboardCard title="Father" value={student.parent?.fatherName || student.parent?.fullName || '-'} icon="account-outline" />
+          <DashboardCard title="Mother" value={student.parent?.motherName || '-'} icon="account-outline" />
+          <DashboardCard title="Parent Mobile" value={student.parent?.phoneNumber || student.phoneNumber || '-'} icon="phone-outline" />
+        </>
+      )}
       <SectionHeader title="Academic Details" />
       <DashboardCard title="Class" value={student.academicClass?.name || '-'} icon="book-education-outline" />
       <DashboardCard title="Section" value={student.section?.name || '-'} icon="google-classroom" />

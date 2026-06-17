@@ -23,6 +23,11 @@ const monthLabel = value => {
   return date.toLocaleString('default', {month: 'short'});
 };
 
+const getRoleList = user => {
+  const roles = [...(user?.roles || []).map(item => item.role), user?.role].filter(Boolean);
+  return [...new Set(roles.map(role => String(role).toUpperCase()))].join(', ');
+};
+
 const StudentProfileScreen = ({route}) => {
   const {studentId} = route.params || {};
   const {data, loading, error} = useAsyncResource(
@@ -67,6 +72,7 @@ const StudentProfileScreen = ({route}) => {
   }
 
   const {student, summary, payments, fees, feePlans, transferHistory, promotionHistory} = data;
+  const linkedParents = student.linkedParents || [];
 
   return (
     <ScreenContainer>
@@ -101,10 +107,22 @@ const StudentProfileScreen = ({route}) => {
       </ProfileCard>
 
       <ProfileCard title="Parent Details">
-        <Info label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
-        <Info label="Mother" value={student.parent?.motherName} />
-        <Info label="Phone" value={student.parent?.phoneNumber} />
-        <Info label="Email" value={student.parent?.email} />
+        {linkedParents.length ? (
+          linkedParents.map(link => (
+            <Info
+              key={link.id}
+              label={link.relationship}
+              value={`${link.user?.fullName || '-'} | ${link.user?.phoneNumber || '-'} | Roles: ${getRoleList(link.user) || '-'}`}
+            />
+          ))
+        ) : (
+          <>
+            <Info label="Father" value={student.parent?.fatherName || student.parent?.fullName} />
+            <Info label="Mother" value={student.parent?.motherName} />
+            <Info label="Phone" value={student.parent?.phoneNumber} />
+            <Info label="Email" value={student.parent?.email} />
+          </>
+        )}
       </ProfileCard>
 
       <ProfileCard title="Academic Details">

@@ -1,8 +1,14 @@
 import React from 'react';
 import {useQuery} from '@tanstack/react-query';
-import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader} from '../../components';
+import {StyleSheet, View} from 'react-native';
+import {DashboardCard, EmptyState, Header, ScreenContainer, SectionHeader, StatusBadge} from '../../components';
+import {ROLE_LABELS} from '../../config/constants';
 import teacherService from '../../services/teachers/teacherService';
 import {formatDateForDisplay} from '../../utils/helpers/dateHelpers';
+import {spacing} from '../../theme';
+
+const normalizeRole = role => String(role || '').toUpperCase();
+const uniqueRoles = roles => [...new Set((roles || []).map(item => normalizeRole(item?.role || item)).filter(Boolean))];
 
 const TeacherProfileScreen = ({route}) => {
   const teacherId = route.params?.teacherId;
@@ -36,6 +42,7 @@ const TeacherProfileScreen = ({route}) => {
     0,
   );
   const attendanceRecordsMarked = teacher.attendanceMarked?.length || 0;
+  const roles = uniqueRoles([...(teacher.roles || teacher.user?.roles || []), teacher.user?.role, teacher.role]);
 
   return (
     <ScreenContainer>
@@ -43,6 +50,13 @@ const TeacherProfileScreen = ({route}) => {
         title={teacher.fullName || teacher.user?.fullName || 'Teacher'}
         subtitle={`${teacher.designation || 'Teacher'} | ${teacher.branch?.name || 'Branch resource'}`}
       />
+      {roles.length ? (
+        <View style={styles.roleRow}>
+          {roles.map(role => (
+            <StatusBadge key={role} status="info" label={ROLE_LABELS[role] || role} />
+          ))}
+        </View>
+      ) : null}
       <SectionHeader title="Personal Information" />
       <DashboardCard title="Mobile" value={teacher.phoneNumber || teacher.user?.phoneNumber || '-'} icon="phone" />
       <DashboardCard title="Gender" value={teacher.gender || '-'} icon="account-outline" />
@@ -75,5 +89,14 @@ const TeacherProfileScreen = ({route}) => {
     </ScreenContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  roleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+});
 
 export default TeacherProfileScreen;

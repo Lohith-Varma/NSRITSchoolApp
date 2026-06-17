@@ -34,7 +34,7 @@ export const applyRoleFilter = (items, scope) => {
     });
   }
 
-  if (role === USER_ROLES.TEACHER) {
+  if (role === USER_ROLES.TEACHER || role === USER_ROLES.CLASS_TEACHER) {
     return items.filter(item => !item.sectionId || item.sectionId === scope.sectionId);
   }
 
