@@ -7,8 +7,10 @@ import CreateStudentScreen from '../screens/branchAdmin/CreateStudentScreen';
 import BulkStudentUploadScreen from '../screens/branchAdmin/BulkStudentUploadScreen';
 import AttendanceOverviewScreen from '../screens/branchAdmin/AttendanceOverviewScreen';
 import BranchSettingsScreen from '../screens/branchAdmin/BranchSettingsScreen';
+import BranchAnalyticsScreen from '../screens/branchAdmin/BranchAnalyticsScreen';
 import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
+import BranchAdminProfileScreen from '../screens/branchAdmin/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +55,16 @@ const BranchAdminNavigator = () => (
       name="BranchSettings"
       component={BranchSettingsScreen}
       options={{title: 'Settings'}}
+    />
+    <Stack.Screen
+      name="BranchAdminProfile"
+      component={BranchAdminProfileScreen}
+      options={{title: 'My Profile', headerShown: false}}
+    />
+    <Stack.Screen
+      name="BranchAnalytics"
+      component={BranchAnalyticsScreen}
+      options={{title: 'Branch Analytics'}}
     />
     {renderFeeStackScreens(Stack, {reports: true})}
   </Stack.Navigator>

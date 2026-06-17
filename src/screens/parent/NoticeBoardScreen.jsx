@@ -1,9 +1,12 @@
 import React, {useState} from 'react';
-import {FlatList, Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSelector} from 'react-redux';
+import {useQuery} from '@tanstack/react-query';
 import {EmptyState} from '../../components';
+import noticesService from '../../services/notices/noticesService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const CATEGORIES = ['All', 'Academic', 'Fee', 'Holiday', 'Event', 'Urgent'];
@@ -16,58 +19,6 @@ const CATEGORY_META = {
   Urgent: {color: colors.danger, icon: 'alert-circle-outline'},
 };
 
-const MOCK_NOTICES = [
-  {
-    id: 'n1',
-    category: 'Urgent',
-    title: 'Term II Fee Payment Deadline Extended',
-    body: 'Due to technical issues with the payment gateway, the deadline for Term II fee payment has been extended to 25th June 2026. Parents are requested to complete payment before the new deadline.',
-    date: '2026-06-17',
-    author: 'Principal Office',
-    pinned: true,
-    isNew: true,
-  },
-  {
-    id: 'n2',
-    category: 'Academic',
-    title: 'Annual Examination Schedule Released',
-    body: 'The timetable for annual examinations (Classes I–XII) has been published. Students must carry hall tickets during the examination period from 20th June to 5th July.',
-    date: '2026-06-15',
-    author: 'Academic Committee',
-    pinned: false,
-    isNew: true,
-  },
-  {
-    id: 'n3',
-    category: 'Holiday',
-    title: 'Summer Vacation Dates Announced',
-    body: 'School will remain closed from 1st July to 31st July 2026 for summer vacation. The new academic year will commence on 1st August 2026.',
-    date: '2026-06-12',
-    author: 'Principal Office',
-    pinned: false,
-    isNew: false,
-  },
-  {
-    id: 'n4',
-    category: 'Event',
-    title: 'Annual Sports Day – Registration Open',
-    body: 'Registration for Annual Sports Day events is now open. Students can register through the class teacher on or before 22nd June.',
-    date: '2026-06-10',
-    author: 'Sports Department',
-    pinned: false,
-    isNew: false,
-  },
-  {
-    id: 'n5',
-    category: 'Fee',
-    title: 'Transport Fee Revision — AY 2026-27',
-    body: 'The transport fee for the academic year 2026-27 has been revised. The updated fee structure is available on the parent portal.',
-    date: '2026-06-08',
-    author: 'Accounts Department',
-    pinned: false,
-    isNew: false,
-  },
-];
 
 const formatDate = dateStr => {
   try {
@@ -136,16 +87,42 @@ const NoticeCard = ({notice, index}) => {
 };
 
 const NoticeBoardScreen = () => {
+  const {user} = useSelector(state => state.auth);
+  const branchId = user?.branchId;
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [allNotices, setAllNotices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
 
-  const filtered =
-    selectedCategory === 'All'
-      ? MOCK_NOTICES
-      : MOCK_NOTICES.filter(n => n.category === selectedCategory);
+  React.useEffect(() => {
+    setIsLoading(true);
+    const unsubscribe = noticesService.subscribeNotices({
+      branchId,
+      category: selectedCategory !== 'All' ? selectedCategory : undefined,
+      onUpdate: (data) => {
+        setAllNotices(data);
+        setIsLoading(false);
+        setIsRefetching(false);
+      },
+      onError: (err) => {
+        console.warn('[NoticeBoardScreen] Subscription error:', err);
+        setIsLoading(false);
+        setIsRefetching(false);
+      },
+    });
+    return () => unsubscribe();
+  }, [branchId, selectedCategory]);
 
-  const pinnedNotices = filtered.filter(n => n.pinned);
-  const regularNotices = filtered.filter(n => !n.pinned);
-  const newCount = MOCK_NOTICES.filter(n => n.isNew).length;
+  const refetch = () => {
+    setIsRefetching(true);
+    setTimeout(() => {
+      setIsRefetching(false);
+    }, 500);
+  };
+
+  const pinnedNotices = allNotices.filter(n => n.pinned);
+  const regularNotices = allNotices.filter(n => !n.pinned);
+  const newCount = 0;
 
   return (
     <View style={styles.root}>
@@ -153,6 +130,13 @@ const NoticeBoardScreen = () => {
         data={regularNotices}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[colors.primary]}
+          />
+        }
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View>
@@ -171,9 +155,13 @@ const NoticeBoardScreen = () => {
                 </View>
                 <View style={styles.headerCopy}>
                   <Text style={styles.headerTitle}>Notice Board</Text>
-                  <Text style={styles.headerSub}>School announcements & updates</Text>
+                  <Text style={styles.headerSub}>
+                    {isLoading ? 'Loading…' : `${allNotices.length} notice${allNotices.length !== 1 ? 's' : ''} from school`}
+                  </Text>
                 </View>
-                {newCount > 0 ? (
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
+                ) : newCount > 0 ? (
                   <View style={styles.newBadge}>
                     <Text style={styles.newBadgeText}>{newCount} new</Text>
                   </View>
@@ -216,10 +204,12 @@ const NoticeBoardScreen = () => {
           <NoticeCard notice={item} index={pinnedNotices.length + index} />
         )}
         ListEmptyComponent={
-          <EmptyState
-            title="No notices"
-            message="School notices and announcements will appear here."
-          />
+          !isLoading ? (
+            <EmptyState
+              title="No notices"
+              message="School notices and announcements will appear here."
+            />
+          ) : null
         }
         ListFooterComponent={<View style={{height: spacing.xxxl}} />}
       />

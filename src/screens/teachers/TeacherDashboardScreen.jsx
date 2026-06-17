@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
@@ -19,10 +19,12 @@ import {formatCurrency} from '../../utils/formatters/currency';
 import {logoutUser} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import {ROLE_LABELS, USER_ROLES} from '../../config/constants';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 const TeacherDashboardScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const access = useFeeAccess();
   const teacherId = user?.teacherId;
   const role = String(user?.role || '').toUpperCase();
@@ -126,10 +128,11 @@ const TeacherDashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View
@@ -148,10 +151,10 @@ const TeacherDashboardScreen = ({navigation}) => {
               {isLoading ? 'Loading...' : user?.fullName || 'Teacher'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
             <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
+              name="dots-vertical"
+              size={20}
               color="rgba(255,255,255,0.85)"
             />
           </Pressable>
@@ -329,6 +332,7 @@ const TeacherDashboardScreen = ({navigation}) => {
             description="Assigned section homework"
             icon="book-check-outline"
             tone={colors.secondary}
+            onPress={() => navigation.navigate('Homework')}
           />
           <DashboardCard
             title="Parent Information"
@@ -382,6 +386,14 @@ const TeacherDashboardScreen = ({navigation}) => {
       </Animated.View>
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="TeacherProfile"
+      profileParams={{teacherId: user?.teacherId || user?.id}}
+    />
   );
 };
 

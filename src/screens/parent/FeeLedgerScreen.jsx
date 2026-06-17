@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View, ActivityIndicator} from 'react-native';
-import {IconButton, Text} from 'react-native-paper';
+import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useSelector} from 'react-redux';
@@ -88,13 +88,9 @@ const ReceiptItem = ({payment, child, index}) => {
             </View>
           </View>
           {isActive ? (
-            <IconButton
-              icon="share-variant"
-              iconColor={colors.primary}
-              size={18}
-              style={styles.receiptShareBtn}
-              onPress={handleShare}
-            />
+            <Pressable onPress={handleShare} style={styles.receiptShareBtn} hitSlop={6}>
+              <MaterialCommunityIcons name="share-variant" size={18} color={colors.primary} />
+            </Pressable>
           ) : null}
         </View>
       </View>

@@ -7,6 +7,7 @@ import TakeAttendanceScreen from '../screens/teachers/TakeAttendanceScreen';
 import StudentsListScreen from '../screens/teachers/StudentsListScreen';
 import StudentProfileScreen from '../screens/students/StudentProfileScreen';
 import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
+import HomeworkScreen from '../screens/teachers/HomeworkScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 import {colors} from '../theme';
 
@@ -50,6 +51,11 @@ const TeacherHomeStack = () => (
       name="StudentProfile"
       component={StudentProfileScreen}
       options={{title: 'Student'}}
+    />
+    <Stack.Screen
+      name="Homework"
+      component={HomeworkScreen}
+      options={{title: 'Homework'}}
     />
     {renderFeeStackScreens(Stack)}
   </Stack.Navigator>

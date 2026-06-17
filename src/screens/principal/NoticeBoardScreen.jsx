@@ -1,9 +1,20 @@
 import React, {useState} from 'react';
-import {FlatList, Pressable, ScrollView, StyleSheet, View} from 'react-native';
+import {
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSelector} from 'react-redux';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {EmptyState, FloatingActionButton} from '../../components';
+import noticesService from '../../services/notices/noticesService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
 const CATEGORIES = ['All', 'Academic', 'Fee', 'Holiday', 'Event', 'Urgent'];
@@ -15,59 +26,6 @@ const CATEGORY_META = {
   Event: {color: colors.purple, icon: 'party-popper'},
   Urgent: {color: colors.danger, icon: 'alert-circle-outline'},
 };
-
-const MOCK_NOTICES = [
-  {
-    id: 'n1',
-    category: 'Urgent',
-    title: 'Term II Fee Payment Deadline Extended',
-    body: 'Due to technical issues with the payment gateway, the deadline for Term II fee payment has been extended to 25th June 2026. Parents are requested to complete payment before the new deadline.',
-    date: '2026-06-17',
-    author: 'Principal Office',
-    pinned: true,
-    readCount: 142,
-  },
-  {
-    id: 'n2',
-    category: 'Academic',
-    title: 'Annual Examination Schedule Released',
-    body: 'The timetable for annual examinations (Classes I–XII) has been published on the school portal. Students must carry hall tickets during the examination period from 20th June to 5th July.',
-    date: '2026-06-15',
-    author: 'Academic Committee',
-    pinned: false,
-    readCount: 289,
-  },
-  {
-    id: 'n3',
-    category: 'Holiday',
-    title: 'Summer Vacation Dates Announced',
-    body: 'School will remain closed from 1st July to 31st July 2026 for summer vacation. The new academic year will commence on 1st August 2026.',
-    date: '2026-06-12',
-    author: 'Principal Office',
-    pinned: false,
-    readCount: 431,
-  },
-  {
-    id: 'n4',
-    category: 'Event',
-    title: 'Annual Sports Day – Registration Open',
-    body: 'Registration for Annual Sports Day events is now open. Students can register through the class teacher on or before 22nd June. Events include track, field, and team sports for all age groups.',
-    date: '2026-06-10',
-    author: 'Sports Department',
-    pinned: false,
-    readCount: 198,
-  },
-  {
-    id: 'n5',
-    category: 'Fee',
-    title: 'Transport Fee Revision — AY 2026-27',
-    body: 'The transport fee for the academic year 2026-27 has been revised. The updated fee structure is available on the parent portal. Bus route changes will be communicated separately.',
-    date: '2026-06-08',
-    author: 'Accounts Department',
-    pinned: false,
-    readCount: 167,
-  },
-];
 
 const formatDate = dateStr => {
   try {
@@ -81,7 +39,7 @@ const formatDate = dateStr => {
   }
 };
 
-const NoticeCard = ({notice, index}) => {
+const NoticeCard = ({notice, index, onPin}) => {
   const [expanded, setExpanded] = useState(false);
   const meta = CATEGORY_META[notice.category] || {color: colors.primary, icon: 'bell-outline'};
 
@@ -98,15 +56,9 @@ const NoticeCard = ({notice, index}) => {
           </View>
         ) : null}
         <View style={styles.noticeTop}>
-          <View
-            style={[
-              styles.categoryBadge,
-              {backgroundColor: `${meta.color}15`},
-            ]}>
+          <View style={[styles.categoryBadge, {backgroundColor: `${meta.color}15`}]}>
             <MaterialCommunityIcons name={meta.icon} size={11} color={meta.color} />
-            <Text style={[styles.categoryText, {color: meta.color}]}>
-              {notice.category}
-            </Text>
+            <Text style={[styles.categoryText, {color: meta.color}]}>{notice.category}</Text>
           </View>
           <Text style={styles.noticeDate}>{formatDate(notice.date)}</Text>
         </View>
@@ -118,30 +70,28 @@ const NoticeCard = ({notice, index}) => {
         </Text>
         <View style={styles.noticeMeta}>
           <View style={styles.noticeAuthor}>
-            <MaterialCommunityIcons
-              name="account-tie-outline"
-              size={12}
-              color={colors.textMuted}
-            />
+            <MaterialCommunityIcons name="account-tie-outline" size={12} color={colors.textMuted} />
             <Text style={styles.noticeAuthorText}>{notice.author}</Text>
           </View>
-          <View style={styles.noticeReads}>
-            <MaterialCommunityIcons
-              name="eye-outline"
-              size={12}
-              color={colors.textSoft}
-            />
-            <Text style={styles.noticeReadsText}>{notice.readCount}</Text>
-          </View>
+          {onPin ? (
+            <Pressable
+              onPress={() => onPin(notice)}
+              hitSlop={6}
+              style={styles.pinBtn}>
+              <MaterialCommunityIcons
+                name={notice.pinned ? 'pin-off' : 'pin-outline'}
+                size={14}
+                color={notice.pinned ? colors.danger : colors.textMuted}
+              />
+            </Pressable>
+          ) : null}
           <View style={styles.expandBtn}>
             <MaterialCommunityIcons
               name={expanded ? 'chevron-up' : 'chevron-down'}
               size={14}
               color={colors.primary}
             />
-            <Text style={styles.expandText}>
-              {expanded ? 'Less' : 'More'}
-            </Text>
+            <Text style={styles.expandText}>{expanded ? 'Less' : 'More'}</Text>
           </View>
         </View>
       </Pressable>
@@ -150,15 +100,52 @@ const NoticeCard = ({notice, index}) => {
 };
 
 const NoticeBoardScreen = ({navigation}) => {
+  const {user} = useSelector(state => state.auth);
+  const branchId = user?.branchId;
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [notices, setNotices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
 
-  const filtered =
-    selectedCategory === 'All'
-      ? MOCK_NOTICES
-      : MOCK_NOTICES.filter(n => n.category === selectedCategory);
+  React.useEffect(() => {
+    setIsLoading(true);
+    const unsubscribe = noticesService.subscribeNotices({
+      branchId,
+      category: selectedCategory !== 'All' ? selectedCategory : undefined,
+      onUpdate: (data) => {
+        setNotices(data);
+        setIsLoading(false);
+        setIsRefetching(false);
+      },
+      onError: (err) => {
+        console.warn('[NoticeBoardScreen] Subscription error:', err);
+        setIsLoading(false);
+        setIsRefetching(false);
+      },
+    });
+    return () => unsubscribe();
+  }, [branchId, selectedCategory]);
 
-  const pinnedNotices = filtered.filter(n => n.pinned);
-  const regularNotices = filtered.filter(n => !n.pinned);
+  const refetch = () => {
+    setIsRefetching(true);
+    setTimeout(() => {
+      setIsRefetching(false);
+    }, 500);
+  };
+
+  const handlePin = async notice => {
+    try {
+      await noticesService.togglePin(notice.id, notice.pinned);
+      queryClient.invalidateQueries({queryKey: ['principalNotices']});
+      queryClient.invalidateQueries({queryKey: ['parentNotices']});
+    } catch (err) {
+      console.warn('[NoticeBoardScreen] togglePin failed:', err?.message);
+    }
+  };
+
+  const pinnedNotices = notices.filter(n => n.pinned);
+  const regularNotices = notices.filter(n => !n.pinned);
 
   return (
     <View style={styles.root}>
@@ -167,26 +154,30 @@ const NoticeBoardScreen = ({navigation}) => {
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[colors.primary]}
+          />
+        }
         ListHeaderComponent={
           <View>
             {/* ── Header ── */}
-            <Animated.View
-              entering={FadeInDown.duration(280).springify()}
-              style={styles.header}>
+            <Animated.View entering={FadeInDown.duration(280).springify()} style={styles.header}>
               <View style={styles.headerDecor1} />
               <View style={styles.headerDecor2} />
               <View style={styles.headerRow}>
-                <MaterialCommunityIcons
-                  name="bulletin-board"
-                  size={22}
-                  color={colors.white}
-                />
+                <MaterialCommunityIcons name="bulletin-board" size={22} color={colors.white} />
                 <View style={styles.headerCopy}>
                   <Text style={styles.headerTitle}>Notice Board</Text>
                   <Text style={styles.headerSub}>
-                    {MOCK_NOTICES.length} notices · Principal Edition
+                    {notices.length} notice{notices.length !== 1 ? 's' : ''} · Principal Edition
                   </Text>
                 </View>
+                {isLoading ? (
+                  <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
+                ) : null}
               </View>
               <ScrollView
                 horizontal
@@ -197,10 +188,7 @@ const NoticeBoardScreen = ({navigation}) => {
                   <Pressable
                     key={cat}
                     onPress={() => setSelectedCategory(cat)}
-                    style={[
-                      styles.catChip,
-                      selectedCategory === cat && styles.catChipActive,
-                    ]}>
+                    style={[styles.catChip, selectedCategory === cat && styles.catChipActive]}>
                     <Text
                       style={[
                         styles.catChipText,
@@ -217,11 +205,10 @@ const NoticeBoardScreen = ({navigation}) => {
             {pinnedNotices.length > 0 ? (
               <View style={styles.pinnedSection}>
                 <Text style={styles.sectionLabel}>
-                  <MaterialCommunityIcons name="pin" size={12} color={colors.danger} />
                   {'  '}Pinned
                 </Text>
                 {pinnedNotices.map((notice, i) => (
-                  <NoticeCard key={notice.id} notice={notice} index={i} />
+                  <NoticeCard key={notice.id} notice={notice} index={i} onPin={handlePin} />
                 ))}
               </View>
             ) : null}
@@ -232,13 +219,19 @@ const NoticeBoardScreen = ({navigation}) => {
           </View>
         }
         renderItem={({item, index}) => (
-          <NoticeCard notice={item} index={pinnedNotices.length + index} />
+          <NoticeCard
+            notice={item}
+            index={pinnedNotices.length + index}
+            onPin={handlePin}
+          />
         )}
         ListEmptyComponent={
-          <EmptyState
-            title="No notices"
-            message="Post a notice using the button below. It will be visible to all parents and staff."
-          />
+          !isLoading ? (
+            <EmptyState
+              title="No notices yet"
+              message="Tap the button below to post your first notice for parents and staff."
+            />
+          ) : null
         }
         ListFooterComponent={<View style={{height: spacing.xxxl + spacing.xl}} />}
       />
@@ -246,7 +239,7 @@ const NoticeBoardScreen = ({navigation}) => {
       <FloatingActionButton
         icon="plus"
         label="New Notice"
-        onPress={() => navigation.navigate('PostNotice')}
+        onPress={() => navigation.navigate('PostNotice', {branchId})}
         extended
       />
     </View>
@@ -257,7 +250,6 @@ const styles = StyleSheet.create({
   root: {backgroundColor: colors.background, flex: 1},
   list: {padding: spacing.lg, paddingBottom: spacing.xxl},
 
-  // Header
   header: {
     backgroundColor: colors.primary,
     borderRadius: radius.card,
@@ -316,7 +308,6 @@ const styles = StyleSheet.create({
   },
   pinnedSection: {marginBottom: spacing.sm},
 
-  // Notice card
   noticeCard: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
@@ -327,17 +318,14 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     ...shadows.soft,
   },
-  noticePinned: {
-    borderColor: `${colors.danger}50`,
-    borderWidth: 1.5,
-  },
+  noticePinned: {borderColor: `${colors.danger}50`, borderWidth: 1.5},
   pinnedBanner: {
     alignItems: 'center',
+    alignSelf: 'flex-start',
     backgroundColor: colors.danger,
     borderRadius: radius.sm,
     flexDirection: 'row',
     gap: 4,
-    alignSelf: 'flex-start',
     marginBottom: spacing.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
@@ -381,8 +369,7 @@ const styles = StyleSheet.create({
   },
   noticeAuthor: {alignItems: 'center', flex: 1, flexDirection: 'row', gap: 4},
   noticeAuthorText: {color: colors.textMuted, fontSize: 11, fontWeight: '600'},
-  noticeReads: {alignItems: 'center', flexDirection: 'row', gap: 3},
-  noticeReadsText: {color: colors.textSoft, fontSize: 11, fontWeight: '600'},
+  pinBtn: {padding: 2},
   expandBtn: {alignItems: 'center', flexDirection: 'row', gap: 2},
   expandText: {color: colors.primary, fontSize: 11, fontWeight: '700'},
 });

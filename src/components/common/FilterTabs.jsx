@@ -1,6 +1,5 @@
 import React from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
-import {Chip} from 'react-native-paper';
+import {Pressable, ScrollView, StyleSheet, Text} from 'react-native';
 import {colors, radius, spacing} from '../../theme';
 
 const FilterTabs = ({tabs, value, onChange}) => (
@@ -10,16 +9,13 @@ const FilterTabs = ({tabs, value, onChange}) => (
     contentContainerStyle={styles.container}>
     {tabs.map(tab => {
       const active = tab.value === value;
-
       return (
-        <Chip
+        <Pressable
           key={tab.value}
-          selected={active}
           onPress={() => onChange(tab.value)}
-          style={[styles.chip, active && styles.activeChip]}
-          textStyle={[styles.text, active && styles.activeText]}>
-          {tab.label}
-        </Chip>
+          style={[styles.chip, active && styles.activeChip]}>
+          <Text style={[styles.text, active && styles.activeText]}>{tab.label}</Text>
+        </Pressable>
       );
     })}
   </ScrollView>
@@ -31,10 +27,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   chip: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderColor: colors.border,
     borderRadius: radius.pill,
     borderWidth: 1,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   activeChip: {
     borderColor: colors.primary,
@@ -42,6 +40,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: colors.textMuted,
+    fontSize: 13,
     fontWeight: '700',
   },
   activeText: {

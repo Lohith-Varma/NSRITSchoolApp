@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {
   AnimatedMetric,
   AnimatedProgressBar,
@@ -16,8 +16,8 @@ import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {toISODate} from '../../utils/helpers/dateHelpers';
-import {logoutUser} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 const isSameMonth = date => {
   const v = new Date(date);
@@ -41,8 +41,8 @@ const ActionTile = ({icon, label, sub, color, onPress, delay = 0}) => (
 );
 
 const DashboardScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const access = useFeeAccess();
 
   const {data} = useQuery({
@@ -71,10 +71,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View
@@ -93,10 +94,10 @@ const DashboardScreen = ({navigation}) => {
               {user?.fullName || 'Accountant'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
             <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
+              name="dots-vertical"
+              size={20}
               color="rgba(255,255,255,0.85)"
             />
           </Pressable>
@@ -251,6 +252,14 @@ const DashboardScreen = ({navigation}) => {
       )}
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="AccountantProfile"
+    />
+    </>
   );
 };
 

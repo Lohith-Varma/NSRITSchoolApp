@@ -1,15 +1,8 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-import {ProgressBar, Text} from 'react-native-paper';
+import {StyleSheet, Text, View} from 'react-native';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 
-const SummaryCard = ({
-  title,
-  value,
-  subtitle,
-  progress = 0,
-  tone = colors.primary,
-}) => {
+const SummaryCard = ({title, value, subtitle, progress = 0, tone = colors.primary}) => {
   const safeProgress = Math.min(Math.max(Number(progress) || 0, 0), 1);
 
   return (
@@ -23,11 +16,9 @@ const SummaryCard = ({
           {Math.round(safeProgress * 100)}%
         </Text>
       </View>
-      <ProgressBar
-        progress={safeProgress}
-        color={tone}
-        style={styles.progress}
-      />
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, {width: `${safeProgress * 100}%`, backgroundColor: tone}]} />
+      </View>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   );
@@ -36,45 +27,27 @@ const SummaryCard = ({
 const styles = StyleSheet.create({
   card: {
     ...shadows.soft,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderColor: colors.border,
-    borderWidth: 1,
     borderRadius: radius.lg,
+    borderWidth: 1,
     marginBottom: spacing.md,
     padding: spacing.lg,
   },
-  row: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  copy: {
-    flex: 1,
-    minWidth: 0,
-    paddingRight: spacing.md,
-  },
-  title: {
-    ...typography.caption,
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-  },
-  value: {
-    ...typography.title,
-    color: colors.text,
-    marginTop: spacing.xs,
-  },
-  percent: {
-    ...typography.subtitle,
-  },
-  progress: {
+  row: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'},
+  copy: {flex: 1, minWidth: 0, paddingRight: spacing.md},
+  title: {...typography.caption, color: colors.textMuted, textTransform: 'uppercase'},
+  value: {...typography.title, color: colors.text, marginTop: spacing.xs},
+  percent: {...typography.subtitle},
+  progressTrack: {
+    backgroundColor: colors.background,
     borderRadius: radius.pill,
     height: 8,
     marginTop: spacing.md,
+    overflow: 'hidden',
   },
-  subtitle: {
-    color: colors.textMuted,
-    marginTop: spacing.sm,
-  },
+  progressFill: {borderRadius: radius.pill, height: 8},
+  subtitle: {color: colors.textMuted, marginTop: spacing.sm},
 });
 
 export default SummaryCard;

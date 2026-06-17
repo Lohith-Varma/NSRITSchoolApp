@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
@@ -18,6 +18,7 @@ import {getAccessScope} from '../../services/rbacScope';
 import feeService from '../../services/fees/feeService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 // Navigation action row
 const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
@@ -37,6 +38,7 @@ const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
 
 const DashboardScreen = ({navigation}) => {
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const scope = getAccessScope(user);
 
   const {data} = useQuery({
@@ -61,10 +63,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View
@@ -82,10 +85,13 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Principal'}
             </Text>
           </View>
-          <View style={styles.roleBadge}>
-            <View style={styles.roleDot} />
-            <Text style={styles.roleText}>Principal</Text>
-          </View>
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
+            <MaterialCommunityIcons name="dots-vertical" size={20} color="rgba(255,255,255,0.85)" />
+          </Pressable>
+        </View>
+        <View style={styles.roleBadge}>
+          <View style={styles.roleDot} />
+          <Text style={styles.roleText}>Principal</Text>
         </View>
         <Text style={styles.headerDate}>
           {new Date().toLocaleDateString('en-IN', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'})}
@@ -182,6 +188,8 @@ const DashboardScreen = ({navigation}) => {
         <NavRow icon="school-outline" label="Academic Structure" desc="Classes, sections, subjects" color={colors.secondary} onPress={() => navigation.navigate('AcademicStructure')} delay={120} />
         <View style={styles.div} />
         <NavRow icon="school-outline" label="Promotion Management" desc="Year-end student promotions" color={colors.warning} onPress={() => navigation.navigate('PromotionManagement')} delay={160} />
+        <View style={styles.div} />
+        <NavRow icon="bulletin-board" label="Notice Board" desc="Post notices for parents and staff" color={colors.primary} onPress={() => navigation.navigate('NoticeBoard')} delay={200} />
       </Animated.View>
 
       {/* ── Staff management ── */}
@@ -199,6 +207,14 @@ const DashboardScreen = ({navigation}) => {
       </Animated.View>
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="PrincipalProfile"
+    />
+    </>
   );
 };
 
@@ -234,6 +250,7 @@ const styles = StyleSheet.create({
     width: 100,
   },
   headerTop: {alignItems: 'center', flexDirection: 'row', gap: spacing.md, marginBottom: spacing.md},
+  logoutBtn: {alignItems: 'center', height: 36, justifyContent: 'center', width: 36},
   avatarWrap: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.18)',

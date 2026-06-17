@@ -1,17 +1,17 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {AnimatedProgressBar, SectionHeader, StatCard} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
-import {logoutUser} from '../../store/slices/authSlice';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
   <Animated.View entering={FadeInRight.delay(delay).duration(260).springify()}>
@@ -29,8 +29,8 @@ const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
 );
 
 const DashboardScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const access = useFeeAccess();
 
   const {data} = useQuery({
@@ -49,10 +49,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View
@@ -69,8 +70,8 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Branch Admin'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons name="logout-variant" size={18} color="rgba(255,255,255,0.85)" />
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
+            <MaterialCommunityIcons name="dots-vertical" size={20} color="rgba(255,255,255,0.85)" />
           </Pressable>
         </View>
         <View style={styles.roleBadge}>
@@ -158,10 +159,21 @@ const DashboardScreen = ({navigation}) => {
         <View style={styles.div} />
         <NavRow icon="finance" label="Fee Overview" desc="Branch fee collection desk" color={colors.accent} onPress={() => navigation.navigate('FeeDashboard')} delay={120} />
         <View style={styles.div} />
-        <NavRow icon="cog-outline" label="Branch Settings" desc="Configuration and preferences" color={colors.textMuted} onPress={() => navigation.navigate('BranchSettings')} delay={160} />
+        <NavRow icon="chart-box-outline" label="Branch Analytics" desc="Fee collection and performance data" color={colors.purple} onPress={() => navigation.navigate('BranchAnalytics')} delay={160} />
+        <View style={styles.div} />
+        <NavRow icon="cog-outline" label="Branch Settings" desc="Configuration and preferences" color={colors.textMuted} onPress={() => navigation.navigate('BranchSettings')} delay={200} />
       </Animated.View>
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="BranchAdminProfile"
+      settingsRoute="BranchSettings"
+    />
+    </>
   );
 };
 

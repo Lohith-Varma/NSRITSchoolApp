@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {useQuery} from '@tanstack/react-query';
 import {
   AnimatedMetric,
@@ -14,8 +14,8 @@ import {
 } from '../../components';
 import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
-import {logoutUser} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 // Quick action pill for the action strip
 const QuickAction = ({icon, label, onPress, color = colors.primary, delay = 0}) => (
@@ -43,8 +43,8 @@ const HeroMetric = ({label, value, color = colors.success, icon}) => (
 );
 
 const DashboardScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const parentId = user?.parentId;
 
   const {data, error, isLoading} = useQuery({
@@ -66,10 +66,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View entering={FadeInDown.duration(320).springify()} style={styles.header}>
@@ -83,10 +84,10 @@ const DashboardScreen = ({navigation}) => {
               {user?.fullName || user?.name || 'Parent'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
             <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
+              name="dots-vertical"
+              size={20}
               color="rgba(255,255,255,0.85)"
             />
           </Pressable>
@@ -222,6 +223,13 @@ const DashboardScreen = ({navigation}) => {
           onPress={() => navigation.navigate('FeeLedger')}
         />
         <QuickAction
+          icon="cash-register"
+          label="Pay Fees"
+          color={colors.success}
+          delay={90}
+          onPress={() => navigation.navigate('Payments')}
+        />
+        <QuickAction
           icon="bell-outline"
           label="Notices"
           color={colors.info}
@@ -331,6 +339,14 @@ const DashboardScreen = ({navigation}) => {
         />
       ) : null}
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="Profile"
+    />
+    </>
   );
 };
 

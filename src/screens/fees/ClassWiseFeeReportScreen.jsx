@@ -1,6 +1,6 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {StyleSheet, View, FlatList} from 'react-native';
-import {Text, ActivityIndicator} from 'react-native-paper';
+import {ActivityIndicator, StyleSheet, View, FlatList} from 'react-native';
+import {Text} from 'react-native-paper';
 import {useQuery} from '@tanstack/react-query';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';

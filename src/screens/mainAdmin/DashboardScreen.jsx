@@ -1,15 +1,15 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {AnimatedMetric, EmptyState, SectionHeader} from '../../components';
 import {USER_ROLES} from '../../config/constants';
 import useAsyncResource from '../../hooks/useAsyncResource';
 import mainAdminService from '../../services/mainAdmin/mainAdminService';
-import {logoutUser} from '../../store/slices/authSlice';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 import {formatCurrency} from '../../utils/formatters/currency';
 
 // Enterprise KPI card
@@ -56,8 +56,8 @@ const ActionRow = ({title, description, icon, color, onPress, delay = 0}) => (
 );
 
 const DashboardScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const {data: stats} = useAsyncResource(
     options => mainAdminService.getDashboardStatistics(options),
     [],
@@ -71,10 +71,11 @@ const DashboardScreen = ({navigation}) => {
   };
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Hero header ── */}
       <Animated.View
@@ -96,11 +97,11 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Main Admin'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
             <MaterialCommunityIcons
-              name="logout-variant"
-              size={18}
-              color="rgba(255,255,255,0.8)"
+              name="dots-vertical"
+              size={20}
+              color="rgba(255,255,255,0.85)"
             />
           </Pressable>
         </View>
@@ -300,6 +301,15 @@ const DashboardScreen = ({navigation}) => {
       </Animated.View>
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="Profile"
+      settingsRoute="Settings"
+    />
+    </>
   );
 };
 

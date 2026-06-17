@@ -10,6 +10,7 @@ import NoticeBoardScreen from '../screens/parent/NoticeBoardScreen';
 import SuggestionScreen from '../screens/parent/SuggestionScreen';
 import SuggestionStatusScreen from '../screens/parent/SuggestionStatusScreen';
 import FeeLedgerScreen from '../screens/parent/FeeLedgerScreen';
+import PaymentScreen from '../screens/parent/PaymentScreen';
 import {colors} from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -41,6 +42,11 @@ const ParentHomeStack = () => (
       name="FeeLedger"
       component={FeeLedgerScreen}
       options={{title: 'Fee Ledger'}}
+    />
+    <Stack.Screen
+      name="Payments"
+      component={PaymentScreen}
+      options={{title: 'Fee Payments'}}
     />
   </Stack.Navigator>
 );

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useQuery} from '@tanstack/react-query';
-import {useDispatch, useSelector} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {
   AnimatedMetric,
   AnimatedProgressBar,
@@ -14,9 +14,9 @@ import {
 import {USER_ROLES} from '../../config/constants';
 import feeService from '../../services/fees/feeService';
 import useFeeAccess from '../../hooks/useFeeAccess';
-import {logoutUser} from '../../store/slices/authSlice';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import UserMenuDrawer from '../../components/common/UserMenuDrawer';
 
 const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
   <Animated.View entering={FadeInRight.delay(delay).duration(260).springify()}>
@@ -34,8 +34,8 @@ const NavRow = ({icon, label, desc, color, onPress, delay = 0}) => (
 );
 
 const DashboardScreen = ({navigation}) => {
-  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
+  const [menuOpen, setMenuOpen] = useState(false);
   const access = useFeeAccess();
 
   const {data} = useQuery({
@@ -56,10 +56,11 @@ const DashboardScreen = ({navigation}) => {
   const wingName = user?.wing || user?.wingName || 'Wing';
 
   return (
-    <ScrollView
-      style={styles.root}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
+    <>
+      <ScrollView
+        style={styles.root}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
       <Animated.View
@@ -77,8 +78,8 @@ const DashboardScreen = ({navigation}) => {
               {user?.name || 'Coordinator'}
             </Text>
           </View>
-          <Pressable onPress={() => dispatch(logoutUser())} style={styles.logoutBtn}>
-            <MaterialCommunityIcons name="logout-variant" size={18} color="rgba(255,255,255,0.85)" />
+          <Pressable onPress={() => setMenuOpen(true)} style={styles.logoutBtn} hitSlop={6}>
+            <MaterialCommunityIcons name="dots-vertical" size={20} color="rgba(255,255,255,0.85)" />
           </Pressable>
         </View>
         {/* Wing badge */}
@@ -220,9 +221,26 @@ const DashboardScreen = ({navigation}) => {
           onPress={() => navigation.navigate('FeeDashboard')}
           delay={120}
         />
+        <View style={styles.div} />
+        <NavRow
+          icon="bulletin-board"
+          label="Post Notice"
+          desc="Publish announcements for parents"
+          color={colors.primary}
+          onPress={() => navigation.navigate('PostNotice')}
+          delay={160}
+        />
       </Animated.View>
 
     </ScrollView>
+
+    <UserMenuDrawer
+      visible={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      navigation={navigation}
+      profileRoute="CoordinatorProfile"
+    />
+    </>
   );
 };
 

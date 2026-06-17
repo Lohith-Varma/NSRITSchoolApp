@@ -1,39 +1,25 @@
 import React, {useMemo, useState} from 'react';
-import {Pressable, ScrollView, StyleSheet, View} from 'react-native';
-import {Button, IconButton, Modal, Portal, Text, TextInput} from 'react-native-paper';
+import {Modal, Portal} from 'react-native-paper';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {colors, radius, spacing, typography} from '../../theme';
 import {formatDateForDisplay, parseDateString, toISODate} from '../../utils/helpers/dateHelpers';
 
 const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const sameDay = (left, right) =>
-  left &&
-  right &&
+  left && right &&
   left.getFullYear() === right.getFullYear() &&
   left.getMonth() === right.getMonth() &&
   left.getDate() === right.getDate();
 
 const clampDate = (date, minDate, maxDate) => {
-  if (minDate && date < minDate) {
-    return minDate;
-  }
-  if (maxDate && date > maxDate) {
-    return maxDate;
-  }
+  if (minDate && date < minDate) return minDate;
+  if (maxDate && date > maxDate) return maxDate;
   return date;
 };
 
@@ -46,9 +32,7 @@ const buildCalendarDays = date => {
   for (let day = 1; day <= daysInMonth; day += 1) {
     cells.push(new Date(year, month, day));
   }
-  while (cells.length % 7 !== 0) {
-    cells.push(null);
-  }
+  while (cells.length % 7 !== 0) cells.push(null);
   return cells;
 };
 
@@ -59,11 +43,16 @@ const buildYearOptions = (viewDate, selectedDate, minDate, maxDate) => {
   const upperYear = maxDate?.getFullYear() || Math.max(currentYear, selectedYear || currentYear, viewYear);
   const lowerYear = minDate?.getFullYear() || Math.min(upperYear - 25, selectedYear || upperYear - 25, viewYear);
   const years = [];
-  for (let year = upperYear; year >= lowerYear; year -= 1) {
-    years.push(year);
-  }
+  for (let year = upperYear; year >= lowerYear; year -= 1) years.push(year);
   return years;
 };
+
+// ─── Nav Arrow Button ───────────────────────────────────────────────────────
+const NavBtn = ({icon, onPress}) => (
+  <Pressable onPress={onPress} style={({pressed}) => [styles.navBtn, pressed && {opacity: 0.7}]}>
+    <MaterialCommunityIcons name={icon} size={20} color={colors.text} />
+  </Pressable>
+);
 
 const DatePickerField = ({
   label,
@@ -87,24 +76,13 @@ const DatePickerField = ({
     [maxDate, minDate, selectedDate, viewDate],
   );
 
-  const open = () => {
-    setViewDate(initialDate);
-    setVisible(true);
-  };
-  const moveMonth = delta => setViewDate(current => new Date(current.getFullYear(), current.getMonth() + delta, 1));
-  const moveYear = delta => setViewDate(current => new Date(current.getFullYear() + delta, current.getMonth(), 1));
-  const selectYear = year =>
-    setViewDate(current => clampDate(new Date(year, current.getMonth(), 1), minDate, maxDate));
-  const selectMonth = month =>
-    setViewDate(current => clampDate(new Date(current.getFullYear(), month, 1), minDate, maxDate));
-  const selectDate = date => {
-    onChange(toISODate(date));
-    setVisible(false);
-  };
-  const isDisabledDate = date =>
-    !date ||
-    (minDate && date < minDate) ||
-    (maxDate && date > maxDate);
+  const open = () => { setViewDate(initialDate); setVisible(true); };
+  const moveMonth = delta => setViewDate(c => new Date(c.getFullYear(), c.getMonth() + delta, 1));
+  const moveYear = delta => setViewDate(c => new Date(c.getFullYear() + delta, c.getMonth(), 1));
+  const selectYear = year => setViewDate(c => clampDate(new Date(year, c.getMonth(), 1), minDate, maxDate));
+  const selectMonth = month => setViewDate(c => clampDate(new Date(c.getFullYear(), month, 1), minDate, maxDate));
+  const selectDate = date => { onChange(toISODate(date)); setVisible(false); };
+  const isDisabledDate = date => !date || (minDate && date < minDate) || (maxDate && date > maxDate);
   const isDisabledMonth = month => {
     const start = new Date(viewDate.getFullYear(), month, 1);
     const end = new Date(viewDate.getFullYear(), month + 1, 0);
@@ -113,69 +91,61 @@ const DatePickerField = ({
 
   return (
     <>
-      <Pressable disabled={disabled} onPress={open}>
-        <TextInput
-          mode="outlined"
-          label={`${label}${required ? ' *' : ''}`}
-          value={formatDateForDisplay(value)}
-          placeholder={placeholder}
-          editable={false}
-          disabled={disabled}
-          right={<TextInput.Icon icon="calendar-month-outline" onPress={open} />}
-          outlineColor={colors.border}
-          activeOutlineColor={colors.primary}
-          textColor={colors.text}
-          placeholderTextColor={colors.textSoft}
-          outlineStyle={styles.outline}
-          style={styles.input}
-          onPressIn={open}
-        />
+      {/* ── Trigger ── */}
+      <Pressable disabled={disabled} onPress={open} style={styles.triggerWrapper}>
+        {label ? <Text style={styles.triggerLabel}>{label}{required ? ' *' : ''}</Text> : null}
+        <View style={[styles.triggerInput, disabled && styles.triggerDisabled]}>
+          <Text style={[styles.triggerText, !value && styles.triggerPlaceholder]}>
+            {formatDateForDisplay(value) || placeholder}
+          </Text>
+          <MaterialCommunityIcons name="calendar-month-outline" size={18} color={colors.textSoft} />
+        </View>
       </Pressable>
+
+      {/* ── Calendar Modal ── */}
       <Portal>
         <Modal visible={visible} onDismiss={() => setVisible(false)} contentContainerStyle={styles.modal}>
+          {/* Header nav */}
           <View style={styles.headerRow}>
-            <IconButton icon="chevron-double-left" onPress={() => moveYear(-1)} />
-            <IconButton icon="chevron-left" onPress={() => moveMonth(-1)} />
+            <NavBtn icon="chevron-double-left" onPress={() => moveYear(-1)} />
+            <NavBtn icon="chevron-left" onPress={() => moveMonth(-1)} />
             <View style={styles.monthCopy}>
               <Text style={styles.monthTitle}>{monthNames[viewDate.getMonth()]}</Text>
               <Text style={styles.yearTitle}>{viewDate.getFullYear()}</Text>
             </View>
-            <IconButton icon="chevron-right" onPress={() => moveMonth(1)} />
-            <IconButton icon="chevron-double-right" onPress={() => moveYear(1)} />
+            <NavBtn icon="chevron-right" onPress={() => moveMonth(1)} />
+            <NavBtn icon="chevron-double-right" onPress={() => moveYear(1)} />
           </View>
+
+          {/* Year selector */}
           <View style={styles.selectorBlock}>
             <Text style={styles.selectorLabel}>Year</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.yearList}>
               {yearOptions.map(year => {
-                const selectedYear = year === viewDate.getFullYear();
+                const sel = year === viewDate.getFullYear();
                 return (
-                  <Pressable
-                    key={year}
-                    style={[styles.yearChip, selectedYear && styles.selectedChip]}
-                    onPress={() => selectYear(year)}>
-                    <Text style={[styles.chipText, selectedYear && styles.selectedText]}>{year}</Text>
+                  <Pressable key={year} style={[styles.yearChip, sel && styles.selectedChip]} onPress={() => selectYear(year)}>
+                    <Text style={[styles.chipText, sel && styles.selectedText]}>{year}</Text>
                   </Pressable>
                 );
               })}
             </ScrollView>
           </View>
+
+          {/* Month selector */}
           <View style={styles.selectorBlock}>
             <Text style={styles.selectorLabel}>Month</Text>
             <View style={styles.monthGrid}>
               {monthNames.map((month, index) => {
                 const disabledMonth = isDisabledMonth(index);
-                const selectedMonth = index === viewDate.getMonth();
+                const sel = index === viewDate.getMonth();
                 return (
                   <Pressable
                     key={month}
                     disabled={disabledMonth}
-                    style={[
-                      styles.monthChip,
-                      selectedMonth && styles.selectedChip,
-                      disabledMonth && styles.disabledDay,
-                    ]}
+                    style={[styles.monthChip, sel && styles.selectedChip, disabledMonth && styles.disabledDay]}
                     onPress={() => selectMonth(index)}>
-                    <Text style={[styles.chipText, selectedMonth && styles.selectedText, disabledMonth && styles.disabledText]}>
+                    <Text style={[styles.chipText, sel && styles.selectedText, disabledMonth && styles.disabledText]}>
                       {month.slice(0, 3)}
                     </Text>
                   </Pressable>
@@ -183,35 +153,43 @@ const DatePickerField = ({
               })}
             </View>
           </View>
+
+          {/* Week header */}
           <View style={styles.weekRow}>
             {weekDays.map((day, index) => (
               <Text key={`${day}-${index}`} style={styles.weekLabel}>{day}</Text>
             ))}
           </View>
+
+          {/* Days grid */}
           <View style={styles.grid}>
             {days.map((date, index) => {
               const disabledDate = isDisabledDate(date);
-              const selected = sameDay(date, selectedDate);
+              const sel = sameDay(date, selectedDate);
               return (
                 <Pressable
                   key={date ? toISODate(date) : `blank-${index}`}
                   disabled={disabledDate}
-                  style={[
-                    styles.dayCell,
-                    selected && styles.selectedDay,
-                    disabledDate && styles.disabledDay,
-                  ]}
+                  style={[styles.dayCell, sel && styles.selectedDay, disabledDate && styles.disabledDay]}
                   onPress={() => date && selectDate(date)}>
-                  <Text style={[styles.dayText, selected && styles.selectedText, disabledDate && styles.disabledText]}>
+                  <Text style={[styles.dayText, sel && styles.selectedText, disabledDate && styles.disabledText]}>
                     {date ? date.getDate() : ''}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
+
+          {/* Footer */}
           <View style={styles.footer}>
-            <Button mode="text" onPress={() => setVisible(false)}>Cancel</Button>
-            <Button mode="outlined" onPress={() => setViewDate(clampDate(new Date(), minDate, maxDate))}>Today</Button>
+            <Pressable onPress={() => setVisible(false)} style={styles.footerBtn}>
+              <Text style={styles.footerBtnText}>Cancel</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setViewDate(clampDate(new Date(), minDate, maxDate))}
+              style={[styles.footerBtn, styles.footerBtnOutline]}>
+              <Text style={[styles.footerBtnText, styles.footerBtnOutlineText]}>Today</Text>
+            </Pressable>
           </View>
         </Modal>
       </Portal>
@@ -220,94 +198,71 @@ const DatePickerField = ({
 };
 
 const styles = StyleSheet.create({
-  input: {
-    backgroundColor: colors.surface,
-    marginBottom: spacing.md,
-  },
-  outline: {
+  // ── Trigger ──
+  triggerWrapper: {marginBottom: spacing.md},
+  triggerLabel: {color: colors.text, fontSize: 13, fontWeight: '700', marginBottom: 6},
+  triggerInput: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderColor: colors.border,
     borderRadius: radius.sm,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
   },
+  triggerDisabled: {backgroundColor: colors.background, opacity: 0.6},
+  triggerText: {color: colors.text, fontSize: 14},
+  triggerPlaceholder: {color: colors.textSoft},
+
+  // ── Modal ──
   modal: {
     alignSelf: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderRadius: radius.lg,
     margin: spacing.lg,
     maxWidth: 420,
     padding: spacing.lg,
     width: '92%',
   },
-  headerRow: {
+  headerRow: {alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.sm},
+  navBtn: {
     alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
+    borderRadius: radius.pill,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
   },
-  monthCopy: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  monthTitle: {
-    ...typography.subtitle,
-    color: colors.text,
-  },
-  yearTitle: {
-    color: colors.textMuted,
-    marginTop: spacing.xxs,
-  },
-  selectorBlock: {
-    marginBottom: spacing.md,
-  },
-  selectorLabel: {
-    ...typography.caption,
-    color: colors.textMuted,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  yearList: {
-    gap: spacing.xs,
-    paddingRight: spacing.md,
-  },
+  monthCopy: {alignItems: 'center', flex: 1},
+  monthTitle: {...typography.subtitle, color: colors.text},
+  yearTitle: {color: colors.textMuted, marginTop: spacing.xxs},
+
+  selectorBlock: {marginBottom: spacing.md},
+  selectorLabel: {...typography.caption, color: colors.textMuted, fontWeight: '700', marginBottom: spacing.xs},
+  yearList: {gap: spacing.xs, paddingRight: spacing.md},
   yearChip: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
+    backgroundColor: colors.background,
     borderRadius: radius.pill,
     minWidth: 64,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  monthGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-  },
+  monthGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs},
   monthChip: {
     alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
+    backgroundColor: colors.background,
     borderRadius: radius.pill,
     paddingVertical: spacing.sm,
     width: `${(100 - 3) / 4}%`,
   },
-  selectedChip: {
-    backgroundColor: colors.primary,
-  },
-  chipText: {
-    color: colors.text,
-    fontWeight: '700',
-  },
-  weekRow: {
-    flexDirection: 'row',
-  },
-  weekLabel: {
-    color: colors.textMuted,
-    flex: 1,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: spacing.sm,
-  },
+  selectedChip: {backgroundColor: colors.primary},
+  chipText: {color: colors.text, fontWeight: '700'},
+
+  weekRow: {flexDirection: 'row'},
+  weekLabel: {color: colors.textMuted, flex: 1, fontWeight: '700', textAlign: 'center'},
+  grid: {flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm},
   dayCell: {
     alignItems: 'center',
     aspectRatio: 1,
@@ -315,27 +270,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: `${100 / 7}%`,
   },
-  selectedDay: {
-    backgroundColor: colors.primary,
+  selectedDay: {backgroundColor: colors.primary},
+  disabledDay: {opacity: 0.32},
+  dayText: {color: colors.text},
+  selectedText: {color: colors.white, fontWeight: '700'},
+  disabledText: {color: colors.textSoft},
+
+  footer: {flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.sm, marginTop: spacing.md},
+  footerBtn: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  disabledDay: {
-    opacity: 0.32,
+  footerBtnText: {color: colors.textMuted, fontSize: 14, fontWeight: '700'},
+  footerBtnOutline: {
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    borderWidth: 1.5,
   },
-  dayText: {
-    color: colors.text,
-  },
-  selectedText: {
-    color: colors.white,
-    fontWeight: '700',
-  },
-  disabledText: {
-    color: colors.textSoft,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: spacing.md,
-  },
+  footerBtnOutlineText: {color: colors.primary},
 });
 
 export default DatePickerField;

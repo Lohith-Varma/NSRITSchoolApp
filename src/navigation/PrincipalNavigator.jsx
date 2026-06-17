@@ -34,6 +34,9 @@ import CreateAccountantScreen from '../screens/principal/CreateAccountantScreen'
 import EditAccountantScreen from '../screens/principal/EditAccountantScreen';
 import AccountantProfileScreen from '../screens/principal/AccountantProfileScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
+import PrincipalProfileScreen from '../screens/principal/ProfileScreen';
+import NoticeBoardScreen from '../screens/principal/NoticeBoardScreen';
+import PostNoticeScreen from '../screens/coordinator/PostNoticeScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -205,6 +208,21 @@ const PrincipalNavigator = () => (
       options={{title: 'Correct Attendance'}}
     />
     {renderFeeStackScreens(Stack, {canUpload: true, reports: true})}
+    <Stack.Screen
+      name="NoticeBoard"
+      component={NoticeBoardScreen}
+      options={{title: 'Notice Board'}}
+    />
+    <Stack.Screen
+      name="PostNotice"
+      component={PostNoticeScreen}
+      options={{title: 'Post Notice'}}
+    />
+    <Stack.Screen
+      name="PrincipalProfile"
+      component={PrincipalProfileScreen}
+      options={{title: 'My Profile', headerShown: false}}
+    />
   </Stack.Navigator>
 );
 

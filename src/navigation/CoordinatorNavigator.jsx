@@ -26,7 +26,9 @@ import TeacherDetailsScreen from '../screens/teachers/TeacherDetailsScreen';
 import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
 import AssignSubjectsScreen from '../screens/teachers/AssignSubjectsScreen';
 import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
+import PostNoticeScreen from '../screens/coordinator/PostNoticeScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
+import CoordinatorProfileScreen from '../screens/coordinator/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -67,8 +69,7 @@ const CoordinatorTabs = () => (
     <Tab.Screen name="Classes" component={WingStudentsScreen} />
     <Tab.Screen name="Attendance" component={WingAttendanceScreen} />
     <Tab.Screen name="Events" component={EventsScreen} />
-    {/* Profile tab — uses the DashboardScreen as a fallback since Coordinator has no dedicated profile screen */}
-    <Tab.Screen name="Profile" component={DashboardScreen} />
+    <Tab.Screen name="Profile" component={CoordinatorProfileScreen} />
   </Tab.Navigator>
 );
 
@@ -104,6 +105,9 @@ const CoordinatorNavigator = () => (
     <Stack.Screen name="StudentDetails" component={StudentDetailsScreen} />
     <Stack.Screen name="BulkStudentImport" component={BulkStudentImportScreen} />
     <Stack.Screen name="TransferStudent" component={TransferStudentScreen} />
+
+    <Stack.Screen name="CoordinatorProfile" component={CoordinatorProfileScreen} options={{headerShown: false}} />
+    <Stack.Screen name="PostNotice" component={PostNoticeScreen} options={{title: 'Post Notice'}} />
 
     {/* ── Shared fee sub-screens ── */}
     {renderFeeStackScreens(Stack, {skipDashboard: true, reports: true})}

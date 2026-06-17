@@ -1,19 +1,100 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
-import {EmptyState} from '../../components';
-import {colors} from '../../theme';
+import {ScrollView, StyleSheet, View, Text} from 'react-native';
+import Animated, {FadeInDown} from 'react-native-reanimated';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {colors, radius, shadows, spacing} from '../../theme';
 
 const ExpensesScreen = () => (
-  <View style={styles.root}>
-    <EmptyState
-      title="Expenses (Coming Soon)"
-      message="Expense management is planned for a future phase."
-    />
-  </View>
+  <ScrollView style={styles.root} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <Animated.View entering={FadeInDown.duration(300).springify()} style={styles.hero}>
+      <View style={styles.heroDecor} />
+      <View style={styles.heroIconWrap}>
+        <MaterialCommunityIcons name="currency-usd" size={40} color="rgba(255,255,255,0.9)" />
+      </View>
+      <Text style={styles.heroTitle}>Expenses</Text>
+      <Text style={styles.heroSub}>Track and manage branch expenditures</Text>
+    </Animated.View>
+
+    <Animated.View entering={FadeInDown.delay(80).duration(280).springify()} style={styles.comingSoonCard}>
+      <View style={styles.comingSoonIcon}>
+        <MaterialCommunityIcons name="clock-outline" size={36} color={colors.warning} />
+      </View>
+      <Text style={styles.comingSoonTitle}>Coming in Next Release</Text>
+      <Text style={styles.comingSoonBody}>
+        Expense tracking, petty cash management, and vendor payments are being built.
+        This feature will be available in the next update.
+      </Text>
+      <View style={styles.featureList}>
+        {['Petty cash entries', 'Vendor payments', 'Monthly expense reports', 'Budget tracking'].map(f => (
+          <View key={f} style={styles.featureItem}>
+            <MaterialCommunityIcons name="check-circle-outline" size={14} color={colors.success} />
+            <Text style={styles.featureText}>{f}</Text>
+          </View>
+        ))}
+      </View>
+    </Animated.View>
+  </ScrollView>
 );
 
 const styles = StyleSheet.create({
   root: {backgroundColor: colors.background, flex: 1},
+  content: {padding: spacing.lg, paddingBottom: 80},
+
+  hero: {
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: radius.card,
+    marginBottom: spacing.lg,
+    overflow: 'hidden',
+    paddingBottom: spacing.xl,
+    paddingTop: spacing.xxl,
+    position: 'relative',
+    ...shadows.medium,
+  },
+  heroDecor: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 999,
+    height: 160,
+    position: 'absolute',
+    right: -40,
+    top: -40,
+    width: 160,
+  },
+  heroIconWrap: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: radius.pill,
+    height: 72,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    width: 72,
+  },
+  heroTitle: {color: colors.white, fontSize: 22, fontWeight: '800', marginBottom: 4},
+  heroSub: {color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '500'},
+
+  comingSoonCard: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    padding: spacing.xl,
+    ...shadows.soft,
+  },
+  comingSoonIcon: {
+    alignItems: 'center',
+    backgroundColor: `${colors.warning}15`,
+    borderRadius: 32,
+    height: 64,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    width: 64,
+  },
+  comingSoonTitle: {color: colors.text, fontSize: 17, fontWeight: '800', marginBottom: spacing.sm, textAlign: 'center'},
+  comingSoonBody: {color: colors.textMuted, fontSize: 13, lineHeight: 19, marginBottom: spacing.lg, textAlign: 'center'},
+  featureList: {alignSelf: 'stretch', gap: spacing.sm},
+  featureItem: {alignItems: 'center', flexDirection: 'row', gap: spacing.sm},
+  featureText: {color: colors.text, fontSize: 13, fontWeight: '600'},
 });
 
 export default ExpensesScreen;
