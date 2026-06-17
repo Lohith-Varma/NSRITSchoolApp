@@ -230,6 +230,13 @@ const DashboardScreen = ({navigation}) => {
           onPress={() => navigation.navigate('Payments')}
         />
         <QuickAction
+          icon="calendar-month"
+          label="Timetable"
+          color={colors.secondary}
+          delay={90}
+          onPress={() => navigation.navigate('Timetable')}
+        />
+        <QuickAction
           icon="bell-outline"
           label="Notices"
           color={colors.info}

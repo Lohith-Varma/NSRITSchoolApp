@@ -4317,6 +4317,193 @@ query GetClassOutstandingSummary(
   }
 }
 
+# ── Notice Board ─────────────────────────────────────────────────────────────
 
+query GetNoticesByBranch($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(level: USER) {
+  notices(
+    where: {branchId: {eq: $branchId}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    branchId
+    authorId
+    title
+    body
+    category
+    pinned
+    date
+    createdAt
+    updatedAt
+    author {
+      id
+      fullName
+    }
+  }
+}
 
+query GetNoticesByBranchCategory($branchId: UUID!, $category: String!, $limit: Int = 50, $offset: Int = 0) @auth(level: USER) {
+  notices(
+    where: {branchId: {eq: $branchId}, category: {eq: $category}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    branchId
+    authorId
+    title
+    body
+    category
+    pinned
+    date
+    createdAt
+    updatedAt
+    author {
+      id
+      fullName
+    }
+  }
+}
 
+# ── Timetable ────────────────────────────────────────────────────────────────
+
+query GetTimetableForSection($sectionId: UUID!) @auth(level: USER) {
+  timetablePeriods(
+    where: {sectionId: {eq: $sectionId}, isActive: {eq: true}}
+    orderBy: {periodNum: ASC}
+    limit: 100
+  ) {
+    sectionId
+    branchId
+    teacherId
+    day
+    periodNum
+    subject
+    teacherName
+    room
+    isActive
+    section {
+      id
+      name
+      academicClass {
+        id
+        name
+      }
+    }
+  }
+}
+
+query GetTimetablesForBranch($branchId: UUID!) @auth(level: USER) {
+  timetablePeriods(
+    where: {branchId: {eq: $branchId}, isActive: {eq: true}}
+    orderBy: {periodNum: ASC}
+    limit: 2000
+  ) {
+    sectionId
+    branchId
+    teacherId
+    day
+    periodNum
+    subject
+    teacherName
+    room
+    isActive
+    section {
+      id
+      name
+      academicClass {
+        id
+        name
+      }
+    }
+  }
+}
+
+query GetTimetableForTeacher($teacherId: UUID!, $branchId: UUID!) @auth(level: USER) {
+  timetablePeriods(
+    where: {teacherId: {eq: $teacherId}, branchId: {eq: $branchId}, isActive: {eq: true}}
+    orderBy: {periodNum: ASC}
+    limit: 200
+  ) {
+    sectionId
+    branchId
+    teacherId
+    day
+    periodNum
+    subject
+    teacherName
+    room
+    isActive
+    section {
+      id
+      name
+      academicClass {
+        id
+        name
+      }
+    }
+  }
+}
+
+# ── Suggestions ──────────────────────────────────────────────────────────────
+
+query GetSuggestionsByParent($parentId: UUID!, $limit: Int = 50) @auth(level: USER) {
+  suggestions(
+    where: {parentId: {eq: $parentId}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+  ) {
+    id
+    parentId
+    studentId
+    branchId
+    title
+    message
+    status
+    response
+    createdAt
+    updatedAt
+    student {
+      id
+      fullName
+    }
+  }
+}
+
+query GetSuggestionsByBranch($branchId: UUID!, $limit: Int = 100) @auth(level: USER) {
+  currentUser: users(
+    where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+    limit: 1
+  ) @redact @check(expr: "this.exists(u, (u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin') && (u.branchId == vars.branchId || u.role == 'MAIN_ADMIN' || u.role == 'main_admin'))", message: "Principal or Main Admin required") {
+    id
+    role
+    branchId
+  }
+  suggestions(
+    where: {branchId: {eq: $branchId}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+  ) {
+    id
+    parentId
+    studentId
+    branchId
+    title
+    message
+    status
+    response
+    createdAt
+    updatedAt
+    parent {
+      id
+      fullName
+      phoneNumber
+    }
+    student {
+      id
+      fullName
+    }
+  }
+}

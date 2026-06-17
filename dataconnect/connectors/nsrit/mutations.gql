@@ -1,4 +1,4 @@
-mutation CreateBranch(
+﻿mutation CreateBranch(
   $name: String!
   $branchCode: String!
   $address: String
@@ -2644,3 +2644,175 @@ mutation RecordAuditLog(
     }
   )
 }
+
+# â”€â”€ Notice Board â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+mutation CreateNotice(
+  $branchId: UUID!
+  $authorId: UUID!
+  $title: String!
+  $body: String!
+  $category: String!
+  $pinned: Boolean!
+  $date: Date!
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, (u.branchId == vars.branchId && (u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'COORDINATOR' || u.role == 'coordinator')) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal, Coordinator, or Main Admin required") {
+      id
+      role
+      branchId
+    }
+  }
+  notice_insert(data: {
+    branchId: $branchId
+    authorId: $authorId
+    title: $title
+    body: $body
+    category: $category
+    pinned: $pinned
+    date: $date
+  })
+}
+
+mutation UpdateNotice(
+  $id: UUID!
+  $title: String!
+  $body: String!
+  $category: String!
+  $pinned: Boolean!
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+    }
+  }
+  notice_update(id: $id, data: {
+    title: $title
+    body: $body
+    category: $category
+    pinned: $pinned
+  })
+}
+
+mutation DeleteNotice($id: UUID!) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+    }
+  }
+  notice_delete(id: $id)
+}
+
+mutation ToggleNoticePin($id: UUID!, $pinned: Boolean!) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+    }
+  }
+  notice_update(id: $id, data: {pinned: $pinned})
+}
+
+# â”€â”€ Timetable â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+mutation UpsertTimetablePeriod(
+  $sectionId: UUID!
+  $branchId: UUID!
+  $day: String!
+  $periodNum: Int!
+  $subject: String
+  $teacherId: UUID
+  $teacherName: String
+  $room: String
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, (u.branchId == vars.branchId && (u.role == 'PRINCIPAL' || u.role == 'principal')) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+      branchId
+    }
+  }
+  timetablePeriod_upsert(data: {
+    sectionId: $sectionId
+    branchId: $branchId
+    day: $day
+    periodNum: $periodNum
+    subject: $subject
+    teacherId: $teacherId
+    teacherName: $teacherName
+    room: $room
+    isActive: true
+  })
+}
+
+mutation ClearTimetableForSection($sectionId: UUID!, $branchId: UUID!) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, (u.branchId == vars.branchId && (u.role == 'PRINCIPAL' || u.role == 'principal')) || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+      branchId
+    }
+  }
+  timetablePeriod_deleteMany(where: {sectionId: {eq: $sectionId}})
+}
+
+# â”€â”€ Suggestions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+mutation CreateSuggestion(
+  $parentId: UUID!
+  $branchId: UUID!
+  $title: String!
+  $message: String!
+  $studentId: UUID
+) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, true)", message: "Authenticated user required") {
+      id
+    }
+  }
+  suggestion_insert(data: {
+    parentId: $parentId
+    branchId: $branchId
+    title: $title
+    message: $message
+    studentId: $studentId
+    status: "Pending"
+  })
+}
+
+mutation RespondToSuggestion($id: UUID!, $response: String!, $status: String!) @auth(level: USER) @transaction {
+  query @redact {
+    users(
+      where: {firebaseUID: {eq_expr: "auth.uid"}, isActive: {eq: true}}
+      limit: 1
+    ) @check(expr: "this.exists(u, u.role == 'PRINCIPAL' || u.role == 'principal' || u.role == 'MAIN_ADMIN' || u.role == 'main_admin')", message: "Principal or Main Admin required") {
+      id
+      role
+    }
+  }
+  suggestion_update(id: $id, data: {response: $response, status: $status})
+}
+

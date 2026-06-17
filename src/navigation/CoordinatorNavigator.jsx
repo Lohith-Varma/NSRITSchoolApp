@@ -27,6 +27,8 @@ import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
 import AssignSubjectsScreen from '../screens/teachers/AssignSubjectsScreen';
 import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
 import PostNoticeScreen from '../screens/coordinator/PostNoticeScreen';
+import WingFeesScreen from '../screens/coordinator/WingFeesScreen';
+import SharedNoticeBoardScreen from '../screens/shared/NoticeBoardScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 import CoordinatorProfileScreen from '../screens/coordinator/ProfileScreen';
 
@@ -108,6 +110,13 @@ const CoordinatorNavigator = () => (
 
     <Stack.Screen name="CoordinatorProfile" component={CoordinatorProfileScreen} options={{headerShown: false}} />
     <Stack.Screen name="PostNotice" component={PostNoticeScreen} options={{title: 'Post Notice'}} />
+    <Stack.Screen name="WingFees" component={WingFeesScreen} options={{title: 'Wing Fees'}} />
+    <Stack.Screen
+      name="NoticeBoard"
+      component={SharedNoticeBoardScreen}
+      options={{title: 'Notice Board'}}
+      initialParams={{edition: 'Coordinator Edition', canPost: true}}
+    />
 
     {/* ── Shared fee sub-screens ── */}
     {renderFeeStackScreens(Stack, {skipDashboard: true, reports: true})}

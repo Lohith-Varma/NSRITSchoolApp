@@ -350,6 +350,22 @@ const TeacherDashboardScreen = ({navigation}) => {
         </>
       ) : null}
       <DashboardCard
+        title="My Timetable"
+        value="Weekly"
+        description="View your assigned periods and classes"
+        icon="calendar-clock"
+        tone={colors.primary}
+        onPress={() => navigation.navigate('Timetable')}
+      />
+      <DashboardCard
+        title="Notice Board"
+        value="View"
+        description="School announcements and notices"
+        icon="bulletin-board"
+        tone={colors.info}
+        onPress={() => navigation.navigate('NoticeBoard')}
+      />
+      <DashboardCard
         title="Teacher Profile"
         value="View"
         description="Your assignments, subjects, and bio"

@@ -8,6 +8,8 @@ import StudentsListScreen from '../screens/teachers/StudentsListScreen';
 import StudentProfileScreen from '../screens/students/StudentProfileScreen';
 import TeacherProfileScreen from '../screens/teachers/TeacherProfileScreen';
 import HomeworkScreen from '../screens/teachers/HomeworkScreen';
+import TimetableScreen from '../screens/teachers/TimetableScreen';
+import SharedNoticeBoardScreen from '../screens/shared/NoticeBoardScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 import {colors} from '../theme';
 
@@ -56,6 +58,17 @@ const TeacherHomeStack = () => (
       name="Homework"
       component={HomeworkScreen}
       options={{title: 'Homework'}}
+    />
+    <Stack.Screen
+      name="Timetable"
+      component={TimetableScreen}
+      options={{title: 'My Timetable'}}
+    />
+    <Stack.Screen
+      name="NoticeBoard"
+      component={SharedNoticeBoardScreen}
+      options={{title: 'Notice Board'}}
+      initialParams={{edition: 'Teacher Edition', canPost: false}}
     />
     {renderFeeStackScreens(Stack)}
   </Stack.Navigator>

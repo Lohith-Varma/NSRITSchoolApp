@@ -42,7 +42,7 @@ const AttendanceOverviewScreen = () => {
     <View style={styles.root}>
       <FlatList
         data={items}
-        keyExtractor={item => item.id || String(Math.random())}
+        keyExtractor={(item, index) => item.id || `attendance-${index}`}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.list}
         ListHeaderComponent={

@@ -3,8 +3,9 @@ import {ActivityIndicator, FlatList, Pressable, RefreshControl, ScrollView, Styl
 import {Text} from 'react-native-paper';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSelector} from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
 import {useQuery} from '@tanstack/react-query';
+import {useSelector} from 'react-redux';
 import {EmptyState} from '../../components';
 import noticesService from '../../services/notices/noticesService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
@@ -90,39 +91,22 @@ const NoticeBoardScreen = () => {
   const {user} = useSelector(state => state.auth);
   const branchId = user?.branchId;
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [allNotices, setAllNotices] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefetching, setIsRefetching] = useState(false);
 
-  React.useEffect(() => {
-    setIsLoading(true);
-    const unsubscribe = noticesService.subscribeNotices({
-      branchId,
-      category: selectedCategory !== 'All' ? selectedCategory : undefined,
-      onUpdate: (data) => {
-        setAllNotices(data);
-        setIsLoading(false);
-        setIsRefetching(false);
-      },
-      onError: (err) => {
-        console.warn('[NoticeBoardScreen] Subscription error:', err);
-        setIsLoading(false);
-        setIsRefetching(false);
-      },
-    });
-    return () => unsubscribe();
-  }, [branchId, selectedCategory]);
+  const {data: allNotices = [], isLoading, isRefetching, refetch} = useQuery({
+    queryKey: ['parentNotices', branchId, selectedCategory],
+    queryFn: () => noticesService.getNotices({branchId, category: selectedCategory}),
+    enabled: !!branchId,
+    staleTime: 30_000,
+  });
 
-  const refetch = () => {
-    setIsRefetching(true);
-    setTimeout(() => {
-      setIsRefetching(false);
-    }, 500);
-  };
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const pinnedNotices = allNotices.filter(n => n.pinned);
   const regularNotices = allNotices.filter(n => !n.pinned);
-  const newCount = 0;
 
   return (
     <View style={styles.root}>
@@ -161,10 +145,6 @@ const NoticeBoardScreen = () => {
                 </View>
                 {isLoading ? (
                   <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
-                ) : newCount > 0 ? (
-                  <View style={styles.newBadge}>
-                    <Text style={styles.newBadgeText}>{newCount} new</Text>
-                  </View>
                 ) : null}
               </View>
               <ScrollView

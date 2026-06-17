@@ -11,6 +11,7 @@ import SuggestionScreen from '../screens/parent/SuggestionScreen';
 import SuggestionStatusScreen from '../screens/parent/SuggestionStatusScreen';
 import FeeLedgerScreen from '../screens/parent/FeeLedgerScreen';
 import PaymentScreen from '../screens/parent/PaymentScreen';
+import TimetableScreen from '../screens/parent/TimetableScreen';
 import {colors} from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -47,6 +48,11 @@ const ParentHomeStack = () => (
       name="Payments"
       component={PaymentScreen}
       options={{title: 'Fee Payments'}}
+    />
+    <Stack.Screen
+      name="Timetable"
+      component={TimetableScreen}
+      options={{title: 'Class Timetable'}}
     />
   </Stack.Navigator>
 );

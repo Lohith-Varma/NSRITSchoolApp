@@ -668,6 +668,49 @@ extend type Notification {
   userId: UUID
 }
 
+# School notice board — branch-wide announcements posted by Principal / Coordinator.
+# Distinct from Notification (which is per-user in-app alerts).
+type Notice @table(name: "notices", key: "id") @index(fields: ["branchId", "createdAt"]) @index(fields: ["branchId", "category", "createdAt"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  branch: Branch!
+  author: User
+  title: String! @col(dataType: "varchar(200)")
+  body: String!
+  category: String! @col(dataType: "varchar(30)") @default(value: "Academic")
+  pinned: Boolean! @default(value: false)
+  date: Date!
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type Notice {
+  branchId: UUID!
+  authorId: UUID
+}
+
+# One row per period slot in a section's weekly timetable.
+# Unique on (sectionId, day, periodNum) — upsert replaces a slot without knowing the row id.
+type TimetablePeriod @table(name: "timetable_periods", key: ["section", "day", "periodNum"]) @index(fields: ["sectionId", "day"]) @index(fields: ["teacherId", "day"]) {
+  id: UUID! @default(expr: "uuidV4()")
+  section: Section!
+  branch: Branch!
+  teacher: Teacher
+  day: String! @col(dataType: "varchar(15)")
+  periodNum: Int! @col(name: "period_num")
+  subject: String @col(dataType: "varchar(80)")
+  teacherName: String @col(name: "teacher_name", dataType: "varchar(120)")
+  room: String @col(dataType: "varchar(40)")
+  isActive: Boolean! @default(value: true)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+extend type TimetablePeriod {
+  sectionId: UUID!
+  branchId: UUID!
+  teacherId: UUID
+}
+
 type Suggestion @table(name: "suggestions", key: "id") {
   id: UUID! @default(expr: "uuidV4()")
   parent: Parent!

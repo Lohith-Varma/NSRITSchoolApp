@@ -37,6 +37,8 @@ import {renderFeeStackScreens} from './FeeStackScreens';
 import PrincipalProfileScreen from '../screens/principal/ProfileScreen';
 import NoticeBoardScreen from '../screens/principal/NoticeBoardScreen';
 import PostNoticeScreen from '../screens/coordinator/PostNoticeScreen';
+import TimetableDashboardScreen from '../screens/principal/TimetableDashboardScreen';
+import TimetableEditorScreen from '../screens/principal/TimetableEditorScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -217,6 +219,16 @@ const PrincipalNavigator = () => (
       name="PostNotice"
       component={PostNoticeScreen}
       options={{title: 'Post Notice'}}
+    />
+    <Stack.Screen
+      name="Timetable"
+      component={TimetableDashboardScreen}
+      options={{title: 'Timetable Management'}}
+    />
+    <Stack.Screen
+      name="TimetableEditor"
+      component={TimetableEditorScreen}
+      options={{title: 'Edit Timetable'}}
     />
     <Stack.Screen
       name="PrincipalProfile"

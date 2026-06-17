@@ -230,6 +230,15 @@ const DashboardScreen = ({navigation}) => {
           onPress={() => navigation.navigate('PostNotice')}
           delay={160}
         />
+        <View style={styles.div} />
+        <NavRow
+          icon="bell-ring-outline"
+          label="View Notices"
+          desc="All school announcements"
+          color={colors.info}
+          onPress={() => navigation.navigate('NoticeBoard')}
+          delay={200}
+        />
       </Animated.View>
 
     </ScrollView>

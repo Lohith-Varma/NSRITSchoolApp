@@ -1,6 +1,5 @@
 import {initializeApp, getApps} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
-import {getFirestore} from 'firebase/firestore';
 import {firebaseConfig} from './env';
 
 const hasFirebaseConfig = Boolean(
@@ -14,7 +13,6 @@ const firebaseApp = hasFirebaseConfig
   : null;
 
 export const firebaseWebAuth = firebaseApp ? getAuth(firebaseApp) : null;
-export const firestore = firebaseApp ? getFirestore(firebaseApp) : null;
 export const isFirebaseConfigured = hasFirebaseConfig;
 
 export default firebaseApp;

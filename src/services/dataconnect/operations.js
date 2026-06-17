@@ -1,4 +1,4 @@
-export const DATA_CONNECT_QUERIES = {
+﻿export const DATA_CONNECT_QUERIES = {
   GET_CURRENT_USER: 'GetCurrentUser',
   GET_USER_BY_PHONE: 'GetUserByPhone',
   GET_USER_ROLES: 'GetUserRoles',
@@ -80,6 +80,16 @@ export const DATA_CONNECT_QUERIES = {
   GET_CLASS_STUDENTS_FEE_STATUS: 'GetClassStudentsFeeStatus',
   GET_CLASS_COLLECTION_SUMMARY: 'GetClassCollectionSummary',
   GET_CLASS_OUTSTANDING_SUMMARY: 'GetClassOutstandingSummary',
+  // Notice Board
+  GET_NOTICES_BY_BRANCH: 'GetNoticesByBranch',
+  GET_NOTICES_BY_BRANCH_CATEGORY: 'GetNoticesByBranchCategory',
+  // Timetable
+  GET_TIMETABLE_FOR_SECTION: 'GetTimetableForSection',
+  GET_TIMETABLES_FOR_BRANCH: 'GetTimetablesForBranch',
+  GET_TIMETABLE_FOR_TEACHER: 'GetTimetableForTeacher',
+  // Suggestions
+  GET_SUGGESTIONS_BY_PARENT: 'GetSuggestionsByParent',
+  GET_SUGGESTIONS_BY_BRANCH: 'GetSuggestionsByBranch',
 };
 
 export const DATA_CONNECT_MUTATIONS = {
@@ -142,4 +152,16 @@ export const DATA_CONNECT_MUTATIONS = {
   UPDATE_PAYMENT: 'UpdatePayment',
   REVERSE_PAYMENT: 'ReversePayment',
   RECORD_AUDIT_LOG: 'RecordAuditLog',
+  // Notice Board
+  CREATE_NOTICE: 'CreateNotice',
+  UPDATE_NOTICE: 'UpdateNotice',
+  DELETE_NOTICE: 'DeleteNotice',
+  TOGGLE_NOTICE_PIN: 'ToggleNoticePin',
+  // Timetable
+  UPSERT_TIMETABLE_PERIOD: 'UpsertTimetablePeriod',
+  CLEAR_TIMETABLE_FOR_SECTION: 'ClearTimetableForSection',
+  // Suggestions
+  CREATE_SUGGESTION: 'CreateSuggestion',
+  RESPOND_TO_SUGGESTION: 'RespondToSuggestion',
 };
+

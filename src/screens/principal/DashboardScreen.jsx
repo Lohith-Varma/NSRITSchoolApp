@@ -189,7 +189,9 @@ const DashboardScreen = ({navigation}) => {
         <View style={styles.div} />
         <NavRow icon="school-outline" label="Promotion Management" desc="Year-end student promotions" color={colors.warning} onPress={() => navigation.navigate('PromotionManagement')} delay={160} />
         <View style={styles.div} />
-        <NavRow icon="bulletin-board" label="Notice Board" desc="Post notices for parents and staff" color={colors.primary} onPress={() => navigation.navigate('NoticeBoard')} delay={200} />
+        <NavRow icon="calendar-clock" label="Timetable" desc="Set weekly class schedules" color={colors.secondary} onPress={() => navigation.navigate('Timetable')} delay={200} />
+        <View style={styles.div} />
+        <NavRow icon="bulletin-board" label="Notice Board" desc="Post notices for parents and staff" color={colors.primary} onPress={() => navigation.navigate('NoticeBoard')} delay={240} />
       </Animated.View>
 
       {/* ── Staff management ── */}
