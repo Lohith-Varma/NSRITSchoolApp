@@ -91,6 +91,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetClassStudentsFeeStatus*](#getclassstudentsfeestatus)
   - [*GetClassCollectionSummary*](#getclasscollectionsummary)
   - [*GetClassOutstandingSummary*](#getclassoutstandingsummary)
+  - [*GetUsersByPhone*](#getusersbyphone)
   - [*GetNoticesByBranch*](#getnoticesbybranch)
   - [*GetNoticesByBranchCategory*](#getnoticesbybranchcategory)
   - [*GetTimetableForSection*](#gettimetableforsection)
@@ -12694,6 +12695,132 @@ console.log(data.students);
 executeQuery(ref).then((response) => {
   const data = response.data;
   console.log(data.students);
+});
+```
+
+## GetUsersByPhone
+You can execute the `GetUsersByPhone` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+```typescript
+getUsersByPhone(vars: GetUsersByPhoneVariables, options?: ExecuteQueryOptions): QueryPromise<GetUsersByPhoneData, GetUsersByPhoneVariables>;
+
+interface GetUsersByPhoneRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUsersByPhoneVariables): QueryRef<GetUsersByPhoneData, GetUsersByPhoneVariables>;
+}
+export const getUsersByPhoneRef: GetUsersByPhoneRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+getUsersByPhone(dc: DataConnect, vars: GetUsersByPhoneVariables, options?: ExecuteQueryOptions): QueryPromise<GetUsersByPhoneData, GetUsersByPhoneVariables>;
+
+interface GetUsersByPhoneRef {
+  ...
+  (dc: DataConnect, vars: GetUsersByPhoneVariables): QueryRef<GetUsersByPhoneData, GetUsersByPhoneVariables>;
+}
+export const getUsersByPhoneRef: GetUsersByPhoneRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the getUsersByPhoneRef:
+```typescript
+const name = getUsersByPhoneRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `GetUsersByPhone` query requires an argument of type `GetUsersByPhoneVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface GetUsersByPhoneVariables {
+  phoneNumber: string;
+}
+```
+### Return Type
+Recall that executing the `GetUsersByPhone` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `GetUsersByPhoneData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface GetUsersByPhoneData {
+  users: ({
+    id: UUIDString;
+    firebaseUID: string;
+    fullName: string;
+    countryCode: string;
+    phoneNumber: string;
+    role: string;
+    employeeId?: string | null;
+    staffType?: string | null;
+    branchId?: UUIDString | null;
+    wingId?: UUIDString | null;
+    branch?: {
+      id: UUIDString;
+      branchCode: string;
+      name: string;
+    } & Branch_Key;
+    isActive: boolean;
+  } & User_Key)[];
+}
+```
+### Using `GetUsersByPhone`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, getUsersByPhone, GetUsersByPhoneVariables } from '@dataconnect/generated';
+
+// The `GetUsersByPhone` query requires an argument of type `GetUsersByPhoneVariables`:
+const getUsersByPhoneVars: GetUsersByPhoneVariables = {
+  phoneNumber: ..., 
+};
+
+// Call the `getUsersByPhone()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await getUsersByPhone(getUsersByPhoneVars);
+// Variables can be defined inline as well.
+const { data } = await getUsersByPhone({ phoneNumber: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await getUsersByPhone(dataConnect, getUsersByPhoneVars);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+getUsersByPhone(getUsersByPhoneVars).then((response) => {
+  const data = response.data;
+  console.log(data.users);
+});
+```
+
+### Using `GetUsersByPhone`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, getUsersByPhoneRef, GetUsersByPhoneVariables } from '@dataconnect/generated';
+
+// The `GetUsersByPhone` query requires an argument of type `GetUsersByPhoneVariables`:
+const getUsersByPhoneVars: GetUsersByPhoneVariables = {
+  phoneNumber: ..., 
+};
+
+// Call the `getUsersByPhoneRef()` function to get a reference to the query.
+const ref = getUsersByPhoneRef(getUsersByPhoneVars);
+// Variables can be defined inline as well.
+const ref = getUsersByPhoneRef({ phoneNumber: ..., });
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = getUsersByPhoneRef(dataConnect, getUsersByPhoneVars);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.users);
 });
 ```
 
