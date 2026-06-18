@@ -13,16 +13,19 @@ import {
 } from 'react-native';
 import {Modal, Portal} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useSelector} from 'react-redux';
+import notificationService from '../../services/notifications/notificationService';
 import {colors, radius, shadows, spacing} from '../../theme';
 
 const TARGETS = [
   {id: 'all', label: 'All Recipients', icon: 'account-group-outline'},
   {id: 'parents', label: 'Parents Only', icon: 'human-male-female-child'},
   {id: 'teachers', label: 'Teachers Only', icon: 'account-tie-outline'},
-  {id: 'students', label: 'Students Only', icon: 'school-outline'},
+  {id: 'students', label: 'Students (via Parents)', icon: 'school-outline'},
 ];
 
 const CreateNotificationScreen = ({navigation}) => {
+  const user = useSelector(state => state.auth.user);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [selectedTarget, setSelectedTarget] = useState('all');
@@ -30,8 +33,9 @@ const CreateNotificationScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
   const [successVisible, setSuccessVisible] = useState(false);
+  const [sentCount, setSentCount] = useState(0);
 
-  const handleBroadcast = () => {
+  const handleBroadcast = async () => {
     if (!title.trim()) {
       setValidationError('Please enter a notification title.');
       return;
@@ -40,12 +44,28 @@ const CreateNotificationScreen = ({navigation}) => {
       setValidationError('Please type your notification message.');
       return;
     }
+    if (!user?.branchId) {
+      setValidationError('Branch context not found. Please re-login.');
+      return;
+    }
     setValidationError('');
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const notifTitle = isPriority ? `🔴 ${title.trim()}` : title.trim();
+      const result = await notificationService.broadcastNotification({
+        branchId: user.branchId,
+        title: notifTitle,
+        message: message.trim(),
+        target: selectedTarget,
+      });
+      setSentCount(result.sent);
       setSuccessVisible(true);
-    }, 1200);
+    } catch (err) {
+      console.log('[CreateNotification] Broadcast error:', err);
+      setValidationError('Failed to send notifications. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSuccessConfirm = () => {
@@ -63,7 +83,7 @@ const CreateNotificationScreen = ({navigation}) => {
         </Pressable>
         <View>
           <Text style={styles.headerTitle}>Compose Notification</Text>
-          <Text style={styles.headerSubtitle}>Broadcast financial alerts & system news</Text>
+          <Text style={styles.headerSubtitle}>Broadcast alerts to school stakeholders</Text>
         </View>
       </View>
 
@@ -129,7 +149,7 @@ const CreateNotificationScreen = ({navigation}) => {
             </View>
             <View style={styles.priorityCopy}>
               <Text style={styles.priorityTitle}>Mark as High Priority</Text>
-              <Text style={styles.prioritySubtitle}>Pin to the top of user screens & send push alerts</Text>
+              <Text style={styles.prioritySubtitle}>Prefixes title with 🔴 priority indicator</Text>
             </View>
           </View>
           <Switch
@@ -143,7 +163,7 @@ const CreateNotificationScreen = ({navigation}) => {
         <View style={styles.infoCard}>
           <MaterialCommunityIcons name="information-outline" size={18} color={colors.primary} style={{marginTop: 2}} />
           <Text style={styles.infoText}>
-            Notifications are immediately processed by the notification dispatcher. Users with active push notification subscriptions will receive background banner alerts within 60 seconds.
+            Notifications appear in each recipient's Notification Center immediately. Delivery is immediate — all matched users in your branch receive it.
           </Text>
         </View>
 
@@ -161,7 +181,7 @@ const CreateNotificationScreen = ({navigation}) => {
           disabled={loading}
           style={({pressed}) => [styles.submitBtn, loading && {opacity: 0.7}, pressed && !loading && {opacity: 0.88}]}>
           {loading ? <ActivityIndicator size="small" color={colors.white} /> : null}
-          <Text style={styles.submitBtnText}>{loading ? 'Broadcasting…' : 'Broadcast Alert'}</Text>
+          <Text style={styles.submitBtnText}>{loading ? 'Sending…' : 'Broadcast Notification'}</Text>
         </Pressable>
       </View>
 
@@ -170,14 +190,14 @@ const CreateNotificationScreen = ({navigation}) => {
           <View style={styles.successIcon}>
             <MaterialCommunityIcons name="check-circle" size={48} color={colors.success} />
           </View>
-          <Text style={styles.successTitle}>Broadcast Dispatched</Text>
+          <Text style={styles.successTitle}>Broadcast Sent</Text>
           <Text style={styles.successText}>
-            Your notification alert has been queued and successfully dispatched to the target recipient stream.
+            Your notification was delivered to {sentCount} recipient{sentCount !== 1 ? 's' : ''} in your branch.
           </Text>
           <Pressable
             onPress={handleSuccessConfirm}
             style={({pressed}) => [styles.acknowledgeBtn, pressed && {opacity: 0.88}]}>
-            <Text style={styles.acknowledgeBtnText}>Acknowledge</Text>
+            <Text style={styles.acknowledgeBtnText}>Done</Text>
           </Pressable>
         </Modal>
       </Portal>

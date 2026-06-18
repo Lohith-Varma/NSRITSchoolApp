@@ -21,6 +21,7 @@ const navItems = [
   {label: 'Record Offline Payment', icon: 'cash-register', route: 'RecordPayment'},
   {label: 'Result Posting', icon: 'clipboard-check-outline', route: 'ResultPosting'},
   {label: 'Fee Tracking', icon: 'currency-usd', route: 'FeeDashboard'},
+  {label: 'Notifications', icon: 'bell-outline', route: 'NotificationCenter'},
   {label: 'Create Notification', icon: 'megaphone-outline', route: 'CreateNotification'},
   {label: 'Audit Logs', icon: 'history', route: 'AuditLogs'},
   {label: 'Settings', icon: 'cog-outline', route: 'AccountantProfile'},

@@ -319,11 +319,26 @@ export const authService = {
   async logout() {
     const authInstance = getAuth();
     await signOut(authInstance);
+    // Full logout: wipe everything including branch context and preferences
+    removeStorageKeys([
+      STORAGE_KEYS.AUTH_TOKEN,
+      STORAGE_KEYS.AUTH_USER,
+      STORAGE_KEYS.OTP_VERIFICATION_ID,
+      STORAGE_KEYS.MAIN_ADMIN_BRANCH_CONTEXT,
+    ]);
+  },
+
+  // Switch User: signs out Firebase but preserves non-auth app preferences.
+  // The next login can be any phone number — auth keys are cleared, rest remains.
+  async switchUser() {
+    const authInstance = getAuth();
+    await signOut(authInstance);
     removeStorageKeys([
       STORAGE_KEYS.AUTH_TOKEN,
       STORAGE_KEYS.AUTH_USER,
       STORAGE_KEYS.OTP_VERIFICATION_ID,
     ]);
+    // Intentionally NOT clearing MAIN_ADMIN_BRANCH_CONTEXT or any UI preferences
   },
 
   async getStoredSession() {

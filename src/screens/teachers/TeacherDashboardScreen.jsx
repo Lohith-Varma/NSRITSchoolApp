@@ -409,6 +409,7 @@ const TeacherDashboardScreen = ({navigation}) => {
       navigation={navigation}
       profileRoute="TeacherProfile"
       profileParams={{teacherId: user?.teacherId || user?.id}}
+      notificationsRoute="NotificationCenter"
     />
     </>
   );

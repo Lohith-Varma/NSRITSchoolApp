@@ -2816,3 +2816,35 @@ mutation RespondToSuggestion($id: UUID!, $response: String!, $status: String!) @
   suggestion_update(id: $id, data: {response: $response, status: $status})
 }
 
+# ─── Notification Mutations ──────────────────────────────────────────────────
+
+mutation CreateNotification(
+  $userId: UUID!
+  $branchId: UUID!
+  $title: String!
+  $message: String!
+  $audienceRole: String
+) @auth(level: USER, insecureReason: "Caller is always an authenticated staff member; userId is the recipient, not the caller") {
+  notification_insert(
+    data: {
+      userId: $userId
+      branchId: $branchId
+      title: $title
+      message: $message
+      audienceRole: $audienceRole
+      isRead: false
+    }
+  )
+}
+
+mutation MarkNotificationRead($id: UUID!) @auth(level: USER, insecureReason: "User only marks their own received notifications as read; enforced in app session") {
+  notification_update(id: $id, data: {isRead: true})
+}
+
+mutation MarkAllNotificationsRead($userId: UUID!) @auth(level: USER, insecureReason: "userId is from authenticated session; user only marks their own notifications") {
+  notification_updateMany(
+    where: {userId: {eq: $userId}, isRead: {eq: false}}
+    data: {isRead: true}
+  )
+}
+

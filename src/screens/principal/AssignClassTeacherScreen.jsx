@@ -278,14 +278,28 @@ const AssignClassTeacherScreen = ({route}) => {
       .map(section => ({label: section.name, value: section.id, item: section})),
     [form.classId, pickerSections],
   );
+  // Teachers already serving as class teacher in another section (exclude from dropdown)
+  const alreadyClassTeacherIds = useMemo(() => {
+    const ids = new Set();
+    activeAssignments.forEach(a => {
+      // Only exclude if they're a class teacher for a DIFFERENT section than the one being edited
+      if (a.isClassTeacher && a.sectionId !== form.sectionId) {
+        ids.add(a.teacherId);
+      }
+    });
+    return ids;
+  }, [activeAssignments, form.sectionId]);
+
   const teacherOptions = useMemo(
     () =>
-      teacherCandidates.map(item => ({
-        label: `${item.fullName || item.user?.fullName || 'Staff'} (${item.primaryRoleLabel || 'Teacher'}) - ${item.employeeId || '-'}`,
-        value: item.id,
-        item,
-      })),
-    [teacherCandidates],
+      teacherCandidates
+        .filter(item => !alreadyClassTeacherIds.has(item.id) && !alreadyClassTeacherIds.has(item.teacherId))
+        .map(item => ({
+          label: `${item.fullName || item.user?.fullName || 'Staff'} (${item.primaryRoleLabel || 'Teacher'}) - ${item.employeeId || '-'}`,
+          value: item.id,
+          item,
+        })),
+    [teacherCandidates, alreadyClassTeacherIds],
   );
 
   const selectedSection = useMemo(

@@ -188,6 +188,7 @@ query GetStudentsBySection($sectionId: UUID!, $limit: Int = 50, $offset: Int = 0
     }
     parent {
       id
+      userId
       fullName
       fatherName
       motherName
@@ -4525,6 +4526,71 @@ query GetSuggestionsByBranch($branchId: UUID!, $limit: Int = 100) @auth(level: U
     student {
       id
       fullName
+    }
+  }
+}
+
+# ─── Notification Queries ───────────────────────────────────────────────────
+
+query GetNotificationsByUser($userId: UUID!, $limit: Int = 30, $offset: Int = 0) @auth(level: USER, insecureReason: "userId is passed from authenticated session; users only fetch their own notifications") {
+  notifications(
+    where: {userId: {eq: $userId}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    title
+    message
+    audienceRole
+    isRead
+    createdAt
+    branch {
+      id
+      name
+    }
+  }
+}
+
+query GetUnreadNotificationCount($userId: UUID!) @auth(level: USER, insecureReason: "userId is passed from authenticated session; users only count their own unread notifications") {
+  notifications(
+    where: {userId: {eq: $userId}, isRead: {eq: false}}
+  ) {
+    id
+  }
+}
+
+# ─── Broadcast Notification Helpers ─────────────────────────────────────────
+
+# Returns teacher/staff userIds in a branch for bulk notification dispatch
+query GetBranchStaffUserIds($branchId: UUID!, $limit: Int = 500) @auth(level: USER, insecureReason: "Access is gated by application-level RBAC; only authenticated branch staff invoke this for broadcast notifications") {
+  users(
+    where: {
+      _and: [
+        {branchId: {eq: $branchId}}
+        {isActive: {eq: true}}
+        {_or: [
+          {role: {eq: "TEACHER"}}
+          {role: {eq: "CLASS_TEACHER"}}
+          {role: {eq: "COORDINATOR"}}
+        ]}
+      ]
+    }
+    limit: $limit
+  ) {
+    id
+  }
+}
+
+# Returns student records with linked parent userIds for bulk notification dispatch
+query GetBranchStudentsWithParents($branchId: UUID!, $limit: Int = 1000) @auth(level: USER, insecureReason: "Access is gated by application-level RBAC; only authenticated branch staff invoke this for broadcast notifications") {
+  students(
+    where: {branchId: {eq: $branchId}, isActive: {eq: true}}
+    limit: $limit
+  ) {
+    id
+    linkedParents: studentParents_on_student {
+      userId
     }
   }
 }
