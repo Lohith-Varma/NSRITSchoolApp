@@ -1994,25 +1994,6 @@ query GetCoordinators($branchId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        assignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          createdAt
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -2059,25 +2040,6 @@ query GetCoordinatorDetails($coordinatorId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        assignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          createdAt
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -3142,40 +3104,6 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
   @refresh(onMutationExecuted: {operation: "UpdateClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveLegacyClassTeacherAssignment"}) {
-  currentUser: users(
-    where: {
-      _and: [
-        {firebaseUID: {eq_expr: "auth.uid"}}
-        {isActive: {eq: true}}
-        {
-          _or: [
-            {role: {in: ["MAIN_ADMIN", "main_admin"]}}
-            {userRoles_on_user: {exist: {role: {in: ["MAIN_ADMIN", "main_admin"]}}}}
-            {branches_on_principal: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
-            {branches_on_branchAdmin: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
-            {coordinators_on_user: {exist: {branchId: {eq: $branchId}, isActive: {eq: true}}}}
-            {
-              _and: [
-                {branchId: {eq: $branchId}}
-                {
-                  _or: [
-                    {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator", "TEACHER", "teacher", "CLASS_TEACHER", "class_teacher"]}}
-                    {userRoles_on_user: {exist: {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator", "TEACHER", "teacher", "CLASS_TEACHER", "class_teacher"]}}}}
-                    ]
-                }
-              ]
-            }
-
-          ]
-        }
-      ]
-    }
-    limit: 1
-  ) @redact @check(expr: "this.exists(u, true)", message: "Class teacher assignment access required") {
-    id
-    role
-    branchId
-  }
   sections(
     where: {branchId: {eq: $branchId}, academicYear: {eq: $academicYear}, isActive: {eq: true}}
     orderBy: {name: ASC}
@@ -3306,24 +3234,6 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
         gender
         email
         isActive
-        assignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
