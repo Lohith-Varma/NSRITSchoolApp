@@ -172,6 +172,8 @@ const DashboardScreen = ({navigation}) => {
       navigation={navigation}
       profileRoute="BranchAdminProfile"
       settingsRoute="BranchSettings"
+      notificationsRoute="NotificationCenter"
+      composeNotificationRoute="CreateNotification"
     />
     </>
   );

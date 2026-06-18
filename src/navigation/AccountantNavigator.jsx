@@ -10,6 +10,7 @@ import AccountantProfileScreen from '../screens/accountant/AccountantProfileScre
 import RecordPaymentScreen from '../screens/accountant/RecordPaymentScreen';
 import ResultPostingScreen from '../screens/accountant/ResultPostingScreen';
 import CreateNotificationScreen from '../screens/accountant/CreateNotificationScreen';
+import NotificationCenterScreen from '../screens/notifications/NotificationCenterScreen';
 import AuditLogsScreen from '../screens/accountant/AuditLogsScreen';
 
 import FeeDashboardScreen from '../screens/fees/FeeDashboardScreen';
@@ -72,6 +73,7 @@ const AccountantNavigator = () => (
     <Stack.Screen name="RecordPayment" component={RecordPaymentScreen} />
     <Stack.Screen name="ResultPosting" component={ResultPostingScreen} />
     <Stack.Screen name="CreateNotification" component={CreateNotificationScreen} />
+    <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{title: 'Notifications'}} />
     <Stack.Screen name="AuditLogs" component={AuditLogsScreen} />
     <Stack.Screen name="AccountantProfile" component={AccountantProfileScreen} />
 

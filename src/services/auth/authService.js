@@ -9,15 +9,16 @@ import auth, {
 } from '@react-native-firebase/auth';
 import { Platform } from 'react-native';
 import {STORAGE_KEYS} from '../../config/constants';
-import {authConfig, USE_EMULATOR} from '../../config/env';
+import {USE_EMULATOR} from '../../config/env';
 
-if (USE_EMULATOR) {
+if (__DEV__ && USE_EMULATOR) {
   const host = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
   try {
     auth().useEmulator(`http://${host}:9099`);
-    console.log(`Connected to Firebase Auth Emulator at http://${host}:9099`);
+    console.log(`[Auth] Connected to Firebase Auth Emulator at http://${host}:9099`);
   } catch (e) {
-    console.warn('Firebase Auth Emulator connection error:', e);
+    // useEmulator can only be called once per process — safe to ignore on hot reload
+    console.warn('[Auth] Emulator already configured or error:', e.message);
   }
 }
 
@@ -241,10 +242,6 @@ export const authService = {
     try {
       const fullPhoneNumber = buildFullPhoneNumber({countryCode, phoneNumber});
       const authInstance = getAuth();
-
-      authInstance.settings.appVerificationDisabledForTesting =
-        authConfig.disablePhoneAuthAppVerificationForTesting;
-      
       const confirmation = await signInWithPhoneNumber(authInstance, fullPhoneNumber);
       storage.set(STORAGE_KEYS.OTP_VERIFICATION_ID, confirmation.verificationId);
 
@@ -325,11 +322,26 @@ export const authService = {
   async logout() {
     const authInstance = getAuth();
     await signOut(authInstance);
+    // Full logout: wipe everything including branch context and preferences
+    removeStorageKeys([
+      STORAGE_KEYS.AUTH_TOKEN,
+      STORAGE_KEYS.AUTH_USER,
+      STORAGE_KEYS.OTP_VERIFICATION_ID,
+      STORAGE_KEYS.MAIN_ADMIN_BRANCH_CONTEXT,
+    ]);
+  },
+
+  // Switch User: signs out Firebase but preserves non-auth app preferences.
+  // The next login can be any phone number — auth keys are cleared, rest remains.
+  async switchUser() {
+    const authInstance = getAuth();
+    await signOut(authInstance);
     removeStorageKeys([
       STORAGE_KEYS.AUTH_TOKEN,
       STORAGE_KEYS.AUTH_USER,
       STORAGE_KEYS.OTP_VERIFICATION_ID,
     ]);
+    // Intentionally NOT clearing MAIN_ADMIN_BRANCH_CONTEXT or any UI preferences
   },
 
   async getStoredSession() {

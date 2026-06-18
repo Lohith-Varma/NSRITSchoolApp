@@ -91,6 +91,11 @@
   // Suggestions
   GET_SUGGESTIONS_BY_PARENT: 'GetSuggestionsByParent',
   GET_SUGGESTIONS_BY_BRANCH: 'GetSuggestionsByBranch',
+  // Notifications
+  GET_NOTIFICATIONS_BY_USER: 'GetNotificationsByUser',
+  GET_UNREAD_NOTIFICATION_COUNT: 'GetUnreadNotificationCount',
+  GET_BRANCH_STAFF_USER_IDS: 'GetBranchStaffUserIds',
+  GET_BRANCH_STUDENTS_WITH_PARENTS: 'GetBranchStudentsWithParents',
 };
 
 export const DATA_CONNECT_MUTATIONS = {
@@ -164,5 +169,9 @@ export const DATA_CONNECT_MUTATIONS = {
   // Suggestions
   CREATE_SUGGESTION: 'CreateSuggestion',
   RESPOND_TO_SUGGESTION: 'RespondToSuggestion',
+  // Notifications
+  CREATE_NOTIFICATION: 'CreateNotification',
+  MARK_NOTIFICATION_READ: 'MarkNotificationRead',
+  MARK_ALL_NOTIFICATIONS_READ: 'MarkAllNotificationsRead',
 };
 

@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch, useSelector} from 'react-redux';
-import {logoutUser} from '../../store/slices/authSlice';
+import {logoutUser, switchUser} from '../../store/slices/authSlice';
 import {ROLE_LABELS} from '../../config/constants';
 import {colors, radius, shadows, spacing} from '../../theme';
 
@@ -98,6 +98,7 @@ const UserMenuDrawer = ({
   profileParams,
   settingsRoute,
   notificationsRoute,
+  composeNotificationRoute,
 }) => {
   const dispatch = useDispatch();
   const {user, role} = useSelector(state => state.auth);
@@ -158,6 +159,12 @@ const UserMenuDrawer = ({
   const handleLogout = useCallback(async () => {
     setLogging(true);
     await dispatch(logoutUser());
+    setLogging(false);
+  }, [dispatch]);
+
+  const handleSwitchUser = useCallback(async () => {
+    setLogging(true);
+    await dispatch(switchUser());
     setLogging(false);
   }, [dispatch]);
 
@@ -279,6 +286,18 @@ const UserMenuDrawer = ({
                   disabled={!notificationsRoute}
                   badge={!notificationsRoute ? 'SOON' : undefined}
                 />
+                {composeNotificationRoute ? (
+                  <>
+                    <View style={styles.rowDivider} />
+                    <MenuItem
+                      icon="send-outline"
+                      label="Send Notification"
+                      sub="Broadcast to parents or staff"
+                      accentColor={colors.secondary}
+                      onPress={() => navigate(composeNotificationRoute)}
+                    />
+                  </>
+                ) : null}
                 <View style={styles.rowDivider} />
                 <MenuItem
                   icon="cog-outline"
@@ -333,7 +352,7 @@ const UserMenuDrawer = ({
                 </Text>
 
                 <Pressable
-                  onPress={handleLogout}
+                  onPress={showConfirm === 'logout' ? handleLogout : handleSwitchUser}
                   disabled={logging}
                   style={({pressed}) => [
                     styles.confirmActionBtn,
@@ -350,7 +369,7 @@ const UserMenuDrawer = ({
                         color={colors.white}
                       />
                       <Text style={styles.confirmActionText}>
-                        {showConfirm === 'logout' ? 'Sign Out' : 'Switch User'}
+                        {showConfirm === 'logout' ? 'Sign Out' : 'Switch Account'}
                       </Text>
                     </>
                   )}

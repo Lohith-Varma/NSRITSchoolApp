@@ -1,5 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  Animated as RNAnimated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,11 +12,15 @@ import {
 } from 'react-native';
 import {Text} from 'react-native-paper';
 import Animated, {
+  FadeIn,
   FadeInDown,
   FadeInUp,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch, useSelector} from 'react-redux';
@@ -24,31 +30,109 @@ import {validatePhoneLogin} from '../../utils/validators';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+const COUNTRY_CODES = [
+  {code: '+91', flag: '🇮🇳', name: 'India'},
+  {code: '+1', flag: '🇺🇸', name: 'USA'},
+  {code: '+44', flag: '🇬🇧', name: 'UK'},
+];
+
+// Shimmer component for loading state
+const ShimmerBox = ({style}) => {
+  const shimmer = useRef(new RNAnimated.Value(0)).current;
+  useEffect(() => {
+    RNAnimated.loop(
+      RNAnimated.timing(shimmer, {
+        toValue: 1,
+        duration: 1000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ).start();
+  }, [shimmer]);
+  const translateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-200, 200],
+  });
+  return (
+    <View style={[styles.shimmerContainer, style]}>
+      <RNAnimated.View
+        style={[
+          styles.shimmerHighlight,
+          {transform: [{translateX}]},
+        ]}
+      />
+    </View>
+  );
+};
+
 const LoginScreen = ({navigation}) => {
   const dispatch = useDispatch();
-  const {loading, error} = useSelector(state => state.auth);
+  const {loading, error, isSwitchingUser} = useSelector(state => state.auth);
   const [form, setForm] = useState({countryCode: '+91', phoneNumber: ''});
   const [localError, setLocalError] = useState('');
   const [focused, setFocused] = useState(null);
+  const [isValid, setIsValid] = useState(false);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
 
+  // Button scale animation
   const btnScale = useSharedValue(1);
+  // Error shake animation
+  const shake = useSharedValue(0);
+  // Logo float animation
+  const logoFloat = useSharedValue(0);
+  // Input check mark scale
+  const checkScale = useSharedValue(0);
 
   useEffect(() => {
-    if (error && __DEV__) {
-      console.log('Firebase login error details:', error);
+    // Gentle floating animation for the logo
+    logoFloat.value = withRepeat(
+      withSequence(
+        withTiming(-6, {duration: 2000}),
+        withTiming(0, {duration: 2000}),
+      ),
+      -1,
+      false,
+    );
+  }, [logoFloat]);
+
+  useEffect(() => {
+    if (error) {
+      triggerShake();
     }
   }, [error]);
+
+  useEffect(() => {
+    const valid = form.phoneNumber.replace(/\D/g, '').length === 10;
+    setIsValid(valid);
+    checkScale.value = withSpring(valid ? 1 : 0, {damping: 15, stiffness: 300});
+  }, [form.phoneNumber, checkScale]);
+
+  const triggerShake = () => {
+    shake.value = withSequence(
+      withTiming(-10, {duration: 60}),
+      withTiming(10, {duration: 60}),
+      withTiming(-8, {duration: 55}),
+      withTiming(8, {duration: 55}),
+      withTiming(-4, {duration: 45}),
+      withTiming(0, {duration: 40}),
+    );
+  };
 
   const updateField = (field, value) => {
     if (error) {dispatch(clearAuthError());}
     setLocalError('');
-    setForm(c => ({...c, [field]: value}));
+    if (field === 'phoneNumber') {
+      setForm(c => ({...c, [field]: value.replace(/\D/g, '').slice(0, 10)}));
+    } else {
+      setForm(c => ({...c, [field]: value}));
+    }
   };
 
   const handleSendOtp = async () => {
     const validationError = validatePhoneLogin(form);
     if (validationError) {
       setLocalError(validationError);
+      triggerShake();
       return;
     }
     const action = await dispatch(sendOtp(form));
@@ -58,11 +142,13 @@ const LoginScreen = ({navigation}) => {
         verificationId: action.payload.verificationId,
         fullPhoneNumber: action.payload.fullPhoneNumber,
       });
+    } else {
+      triggerShake();
     }
   };
 
   const handleBtnPressIn = () => {
-    btnScale.value = withSpring(0.97, {damping: 20, stiffness: 300});
+    btnScale.value = withSpring(0.96, {damping: 20, stiffness: 300});
   };
   const handleBtnPressOut = () => {
     btnScale.value = withSpring(1, {damping: 15, stiffness: 200});
@@ -72,7 +158,21 @@ const LoginScreen = ({navigation}) => {
     transform: [{scale: btnScale.value}],
   }));
 
-  const displayError = localError || (error ? 'Unable to connect. Please try again.' : '');
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{translateX: shake.value}],
+  }));
+
+  const logoStyle = useAnimatedStyle(() => ({
+    transform: [{translateY: logoFloat.value}],
+  }));
+
+  const checkStyle = useAnimatedStyle(() => ({
+    transform: [{scale: checkScale.value}],
+    opacity: checkScale.value,
+  }));
+
+  const displayError = localError || (error ? 'Unable to connect. Check your number and try again.' : '');
+  const selectedCountry = COUNTRY_CODES.find(c => c.code === form.countryCode) || COUNTRY_CODES[0];
 
   return (
     <KeyboardAvoidingView
@@ -83,93 +183,155 @@ const LoginScreen = ({navigation}) => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
 
-        {/* Background decoration */}
+        {/* Animated gradient blobs */}
         <View style={styles.bgBlob1} />
         <View style={styles.bgBlob2} />
+        <View style={styles.bgBlob3} />
 
-        {/* Brand header */}
+        {/* Hero section */}
         <Animated.View
-          entering={FadeInDown.duration(400).springify()}
-          style={styles.brand}>
-          <View style={styles.logoWrap}>
-            <MaterialCommunityIcons name="school" size={36} color={colors.primary} />
-          </View>
-          <Text style={styles.brandName}>NSRIT Connect</Text>
-          <Text style={styles.brandTagline}>Enterprise School Management</Text>
+          entering={FadeInDown.duration(500).springify()}
+          style={styles.hero}>
+          <Animated.View style={[styles.logoRing, logoStyle]}>
+            <View style={styles.logoInner}>
+              <MaterialCommunityIcons name="school" size={38} color={colors.primary} />
+            </View>
+            {/* Decorative ring dots */}
+            <View style={[styles.ringDot, {top: 2, right: 14}]} />
+            <View style={[styles.ringDot, styles.ringDotSmall, {bottom: 6, left: 10}]} />
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+            <Text style={styles.brandName}>NSRIT Connect</Text>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(180).duration(400)}>
+            <Text style={styles.brandTagline}>Enterprise School Management</Text>
+          </Animated.View>
+
+          {/* Decorative badge */}
+          <Animated.View entering={FadeIn.delay(300).duration(400)} style={styles.badge}>
+            <MaterialCommunityIcons name="shield-check" size={10} color={colors.success} />
+            <Text style={styles.badgeText}>Secured with Firebase</Text>
+          </Animated.View>
         </Animated.View>
 
         {/* Login card */}
         <Animated.View
-          entering={FadeInDown.delay(120).duration(400).springify()}
+          entering={FadeInDown.delay(200).duration(450).springify()}
           style={styles.card}>
 
-          {/* Card header accent */}
-          <View style={styles.cardAccent} />
+          <View style={styles.cardAccentBar} />
 
-          <Text style={styles.cardTitle}>Sign In</Text>
+          <Text style={styles.cardTitle}>
+            {isSwitchingUser ? 'Switch Account' : 'Sign In'}
+          </Text>
           <Text style={styles.cardSub}>
-            Enter your phone number to receive a verification code
+            {isSwitchingUser
+              ? 'Enter the phone number of the account you want to sign in to'
+              : 'Enter your registered phone number to receive a one-time verification code'}
           </Text>
 
           {/* Phone input */}
-          <Text style={styles.inputLabel}>Phone Number</Text>
-          <View style={styles.phoneRow}>
-            {/* Country code */}
-            <View
-              style={[
-                styles.inputWrap,
-                styles.codeWrap,
-                focused === 'code' && styles.inputFocused,
-              ]}>
-              <TextInput
-                keyboardType="phone-pad"
-                value={form.countryCode}
-                placeholder="+91"
-                placeholderTextColor={colors.textSoft}
-                style={styles.input}
-                onChangeText={v => updateField('countryCode', v)}
-                onFocus={() => setFocused('code')}
-                onBlur={() => setFocused(null)}
-              />
+          <Text style={styles.inputLabel}>
+            <MaterialCommunityIcons name="phone" size={11} color={colors.textMuted} />
+            {'  '}PHONE NUMBER
+          </Text>
+
+          <Animated.View style={shakeStyle}>
+            <View style={styles.phoneRow}>
+              {/* Country code picker */}
+              <Pressable
+                onPress={() => setShowCountryPicker(!showCountryPicker)}
+                style={[
+                  styles.codeBtn,
+                  focused === 'code' && styles.inputFocused,
+                ]}>
+                <Text style={styles.flagText}>{selectedCountry.flag}</Text>
+                <Text style={styles.codeText}>{selectedCountry.code}</Text>
+                <MaterialCommunityIcons
+                  name={showCountryPicker ? 'chevron-up' : 'chevron-down'}
+                  size={14}
+                  color={colors.textMuted}
+                />
+              </Pressable>
+
+              {/* Phone number input */}
+              <View
+                style={[
+                  styles.phoneInput,
+                  focused === 'phone' && styles.inputFocused,
+                  displayError ? styles.inputError : null,
+                  isValid && !displayError ? styles.inputSuccess : null,
+                ]}>
+                <MaterialCommunityIcons
+                  name="phone-outline"
+                  size={16}
+                  color={
+                    displayError
+                      ? colors.danger
+                      : focused === 'phone'
+                      ? colors.primary
+                      : colors.textSoft
+                  }
+                  style={{marginRight: 6}}
+                />
+                <TextInput
+                  keyboardType="phone-pad"
+                  value={form.phoneNumber}
+                  placeholder="10-digit number"
+                  placeholderTextColor={colors.textSoft}
+                  style={styles.input}
+                  onChangeText={v => updateField('phoneNumber', v)}
+                  onFocus={() => setFocused('phone')}
+                  onBlur={() => setFocused(null)}
+                  maxLength={10}
+                />
+                {/* Validation checkmark */}
+                <Animated.View style={checkStyle}>
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={18}
+                    color={colors.success}
+                  />
+                </Animated.View>
+              </View>
             </View>
 
-            {/* Phone number */}
-            <View
-              style={[
-                styles.inputWrap,
-                styles.phoneWrap,
-                focused === 'phone' && styles.inputFocused,
-              ]}>
-              <MaterialCommunityIcons
-                name="phone-outline"
-                size={16}
-                color={
-                  focused === 'phone' ? colors.primary : colors.textSoft
-                }
-                style={styles.inputIcon}
-              />
-              <TextInput
-                keyboardType="phone-pad"
-                value={form.phoneNumber}
-                placeholder="10-digit number"
-                placeholderTextColor={colors.textSoft}
-                style={styles.input}
-                onChangeText={v => updateField('phoneNumber', v)}
-                onFocus={() => setFocused('phone')}
-                onBlur={() => setFocused(null)}
-                maxLength={15}
-              />
-            </View>
-          </View>
+            {/* Country picker dropdown */}
+            {showCountryPicker && (
+              <Animated.View entering={FadeInDown.duration(200)} style={styles.dropdown}>
+                {COUNTRY_CODES.map(country => (
+                  <Pressable
+                    key={country.code}
+                    onPress={() => {
+                      updateField('countryCode', country.code);
+                      setShowCountryPicker(false);
+                    }}
+                    style={[
+                      styles.dropdownItem,
+                      country.code === form.countryCode && styles.dropdownItemActive,
+                    ]}>
+                    <Text style={styles.flagText}>{country.flag}</Text>
+                    <Text style={styles.dropdownItemText}>{country.name}</Text>
+                    <Text style={styles.dropdownItemCode}>{country.code}</Text>
+                    {country.code === form.countryCode && (
+                      <MaterialCommunityIcons name="check" size={14} color={colors.primary} />
+                    )}
+                  </Pressable>
+                ))}
+              </Animated.View>
+            )}
+          </Animated.View>
 
+          {/* Error box */}
           {displayError ? (
-            <View style={styles.errorBox}>
-              <MaterialCommunityIcons name="alert-circle-outline" size={13} color={colors.danger} />
+            <Animated.View entering={FadeInDown.duration(250)} style={styles.errorBox}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={14} color={colors.danger} />
               <Text style={styles.errorText}>{displayError}</Text>
-            </View>
+            </Animated.View>
           ) : null}
 
-          {/* OTP button */}
+          {/* Submit button */}
           <AnimatedPressable
             onPress={handleSendOtp}
             onPressIn={handleBtnPressIn}
@@ -177,25 +339,29 @@ const LoginScreen = ({navigation}) => {
             disabled={loading}
             style={[styles.submitBtn, btnStyle, loading && styles.submitBtnLoading]}>
             {loading ? (
-              <MaterialCommunityIcons name="loading" size={20} color={colors.white} />
+              <View style={styles.loadingRow}>
+                <ShimmerBox style={styles.shimmerInBtn} />
+                <Text style={styles.submitBtnText}>Sending OTP…</Text>
+              </View>
             ) : (
               <>
-                <MaterialCommunityIcons
-                  name="send"
-                  size={16}
-                  color={colors.white}
-                />
+                <MaterialCommunityIcons name="send" size={16} color={colors.white} />
                 <Text style={styles.submitBtnText}>Send OTP</Text>
+                <MaterialCommunityIcons name="arrow-right" size={16} color="rgba(255,255,255,0.7)" />
               </>
             )}
           </AnimatedPressable>
 
-
+          {/* Info strip */}
+          <View style={styles.infoStrip}>
+            <MaterialCommunityIcons name="information-outline" size={12} color={colors.textSoft} />
+            <Text style={styles.infoText}>OTP valid for 60 seconds · Standard rates apply</Text>
+          </View>
         </Animated.View>
 
         {/* Footer */}
         <Animated.View
-          entering={FadeInUp.delay(200).duration(350)}
+          entering={FadeInUp.delay(350).duration(350)}
           style={styles.footer}>
           <Pressable
             onPress={() => navigation.navigate('PhoneLoginHelp')}
@@ -206,7 +372,6 @@ const LoginScreen = ({navigation}) => {
             </Text>
           </Pressable>
         </Animated.View>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -222,55 +387,104 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
-    minHeight: 560,
+    minHeight: 600,
   },
-  // Background decorations
+  // Background blobs
   bgBlob1: {
     backgroundColor: colors.primarySoft,
-    borderRadius: 150,
-    height: 300,
-    opacity: 0.5,
+    borderRadius: 180,
+    height: 360,
+    opacity: 0.55,
     position: 'absolute',
-    right: -80,
-    top: -60,
-    width: 300,
+    right: -100,
+    top: -80,
+    width: 360,
   },
   bgBlob2: {
     backgroundColor: colors.secondarySoft,
-    borderRadius: 120,
-    bottom: -40,
-    height: 240,
-    left: -60,
-    opacity: 0.4,
+    borderRadius: 130,
+    bottom: -50,
+    height: 260,
+    left: -70,
+    opacity: 0.45,
     position: 'absolute',
-    width: 240,
+    width: 260,
   },
-  // Brand
-  brand: {
+  bgBlob3: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: 80,
+    height: 160,
+    left: '30%',
+    opacity: 0.3,
+    position: 'absolute',
+    top: '55%',
+    width: 160,
+  },
+  // Hero
+  hero: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xxl,
   },
-  logoWrap: {
+  logoRing: {
     alignItems: 'center',
     backgroundColor: colors.white,
-    borderColor: colors.border,
-    borderRadius: 22,
-    borderWidth: 1,
-    height: 80,
+    borderColor: colors.primarySoft,
+    borderRadius: 28,
+    borderWidth: 2,
+    height: 88,
     justifyContent: 'center',
-    marginBottom: spacing.md,
-    width: 80,
+    marginBottom: spacing.lg,
+    width: 88,
     ...shadows.medium,
+  },
+  logoInner: {
+    alignItems: 'center',
+    backgroundColor: colors.primaryFaint,
+    borderRadius: 20,
+    height: 64,
+    justifyContent: 'center',
+    width: 64,
+  },
+  ringDot: {
+    backgroundColor: colors.primary,
+    borderRadius: 6,
+    height: 10,
+    position: 'absolute',
+    width: 10,
+  },
+  ringDotSmall: {
+    height: 6,
+    width: 6,
+    backgroundColor: colors.secondary,
   },
   brandName: {
     ...typography.title,
     color: colors.primary,
     letterSpacing: -0.5,
+    textAlign: 'center',
   },
   brandTagline: {
     ...typography.caption,
     color: colors.textMuted,
-    marginTop: 3,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  badge: {
+    alignItems: 'center',
+    backgroundColor: colors.successSoft,
+    borderColor: colors.success,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 4,
+    marginTop: spacing.md,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeText: {
+    color: colors.success,
+    fontSize: 10,
+    fontWeight: '700',
   },
   // Card
   card: {
@@ -280,16 +494,16 @@ const styles = StyleSheet.create({
     borderRadius: radius.card,
     borderWidth: 1,
     marginBottom: spacing.xl,
-    overflow: 'hidden',
+    overflow: 'visible',
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.xl,
   },
-  cardAccent: {
+  cardAccentBar: {
     backgroundColor: colors.primary,
     borderRadius: radius.pill,
     height: 3,
     marginBottom: spacing.lg,
-    width: 40,
+    width: 48,
   },
   cardTitle: {
     ...typography.subtitle,
@@ -305,48 +519,104 @@ const styles = StyleSheet.create({
   // Inputs
   inputLabel: {
     ...typography.label,
-    color: colors.text,
+    color: colors.textMuted,
     marginBottom: spacing.sm,
+    letterSpacing: 0.5,
   },
   phoneRow: {
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
-  inputWrap: {
+  codeBtn: {
     alignItems: 'center',
     backgroundColor: colors.background,
     borderColor: colors.border,
     borderRadius: radius.lg,
     borderWidth: 1.5,
     flexDirection: 'row',
-    height: 50,
+    gap: 4,
+    height: 52,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    width: 90,
+  },
+  flagText: {
+    fontSize: 18,
+  },
+  codeText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  phoneInput: {
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    flex: 1,
+    flexDirection: 'row',
+    height: 52,
     paddingHorizontal: spacing.md,
   },
   inputFocused: {
-    borderColor: colors.primary,
     backgroundColor: colors.white,
+    borderColor: colors.primary,
+    borderWidth: 2,
   },
-  codeWrap: {
-    flex: 0.28,
-    justifyContent: 'center',
+  inputError: {
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerSoft,
   },
-  phoneWrap: {
-    flex: 0.72,
-  },
-  inputIcon: {
-    marginRight: spacing.xs,
+  inputSuccess: {
+    borderColor: colors.success,
   },
   input: {
     color: colors.text,
     flex: 1,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
+  // Dropdown
+  dropdown: {
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    marginBottom: spacing.sm,
+    overflow: 'hidden',
+    ...shadows.medium,
+  },
+  dropdownItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 12,
+  },
+  dropdownItemActive: {
+    backgroundColor: colors.primaryFaint,
+  },
+  dropdownItemText: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  dropdownItemCode: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  // Error
   errorBox: {
     alignItems: 'center',
     backgroundColor: colors.dangerSoft,
+    borderColor: colors.danger,
     borderRadius: radius.lg,
+    borderWidth: 1,
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.sm,
@@ -365,19 +635,60 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     flexDirection: 'row',
     gap: spacing.sm,
-    height: 52,
+    height: 54,
     justifyContent: 'center',
     marginTop: spacing.md,
+    shadowColor: colors.primary,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   submitBtnLoading: {
-    opacity: 0.8,
+    opacity: 0.85,
   },
   submitBtnText: {
     color: colors.white,
     fontSize: 15,
     fontWeight: '800',
+    letterSpacing: 0.3,
   },
-
+  loadingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    overflow: 'hidden',
+  },
+  // Shimmer
+  shimmerContainer: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 4,
+    height: 16,
+    overflow: 'hidden',
+    width: 80,
+  },
+  shimmerHighlight: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    height: '100%',
+    width: 60,
+  },
+  shimmerInBtn: {
+    width: 40,
+    height: 14,
+  },
+  // Info
+  infoStrip: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 5,
+    justifyContent: 'center',
+    marginTop: spacing.md,
+  },
+  infoText: {
+    color: colors.textSoft,
+    fontSize: 11,
+    fontWeight: '500',
+  },
   // Footer
   footer: {
     alignItems: 'center',

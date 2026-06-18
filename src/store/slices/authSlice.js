@@ -66,6 +66,12 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   await authService.logout();
 });
 
+// Switch User: separate Firebase session + clear auth storage.
+// Does NOT wipe non-auth state so the app feels "ready for next login" vs "fully wiped".
+export const switchUser = createAsyncThunk('auth/switchUser', async () => {
+  await authService.switchUser();
+});
+
 export const switchActiveRole = createAsyncThunk(
   'auth/switchRole',
   async (role, {rejectWithValue}) => {
@@ -80,6 +86,7 @@ export const switchActiveRole = createAsyncThunk(
 const initialState = {
   isBootstrapping: true,
   isAuthenticated: false,
+  isSwitchingUser: false,   // true when returning to login via Switch User (not full logout)
   token: null,
   user: null,
   role: null,
@@ -174,6 +181,7 @@ const authSlice = createSlice({
       .addCase(verifyOtp.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
+        state.isSwitchingUser = false;  // clear switch flag on successful new login
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.role = action.payload.user.role;
@@ -186,12 +194,26 @@ const authSlice = createSlice({
       })
       .addCase(logoutUser.fulfilled, state => {
         state.isAuthenticated = false;
+        state.isSwitchingUser = false;
         state.token = null;
         state.user = null;
         state.role = null;
         state.mainAdminBranchContext = null;
         state.verificationId = null;
         state.pendingPhone = null;
+        state.error = null;
+      })
+      .addCase(switchUser.fulfilled, state => {
+        // Clear auth state but mark as switching so Login screen can show context
+        state.isAuthenticated = false;
+        state.isSwitchingUser = true;
+        state.token = null;
+        state.user = null;
+        state.role = null;
+        state.verificationId = null;
+        state.pendingPhone = null;
+        state.error = null;
+        // Intentionally keep mainAdminBranchContext so it can be reused by next login
       })
       .addCase(switchActiveRole.pending, state => {
         state.loading = true;

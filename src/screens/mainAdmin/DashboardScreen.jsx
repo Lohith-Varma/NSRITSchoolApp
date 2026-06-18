@@ -308,6 +308,8 @@ const DashboardScreen = ({navigation}) => {
       navigation={navigation}
       profileRoute="Profile"
       settingsRoute="Settings"
+      notificationsRoute="NotificationCenter"
+      composeNotificationRoute="CreateNotification"
     />
     </>
   );

@@ -9,6 +9,8 @@ import AttendanceOverviewScreen from '../screens/branchAdmin/AttendanceOverviewS
 import BranchSettingsScreen from '../screens/branchAdmin/BranchSettingsScreen';
 import BranchAnalyticsScreen from '../screens/branchAdmin/BranchAnalyticsScreen';
 import AssignClassTeacherScreen from '../screens/principal/AssignClassTeacherScreen';
+import NotificationCenterScreen from '../screens/notifications/NotificationCenterScreen';
+import CreateNotificationScreen from '../screens/accountant/CreateNotificationScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 import BranchAdminProfileScreen from '../screens/branchAdmin/ProfileScreen';
 
@@ -65,6 +67,16 @@ const BranchAdminNavigator = () => (
       name="BranchAnalytics"
       component={BranchAnalyticsScreen}
       options={{title: 'Branch Analytics'}}
+    />
+    <Stack.Screen
+      name="NotificationCenter"
+      component={NotificationCenterScreen}
+      options={{title: 'Notifications'}}
+    />
+    <Stack.Screen
+      name="CreateNotification"
+      component={CreateNotificationScreen}
+      options={{headerShown: false}}
     />
     {renderFeeStackScreens(Stack, {reports: true})}
   </Stack.Navigator>

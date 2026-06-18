@@ -248,6 +248,8 @@ const DashboardScreen = ({navigation}) => {
       onClose={() => setMenuOpen(false)}
       navigation={navigation}
       profileRoute="CoordinatorProfile"
+      notificationsRoute="NotificationCenter"
+      composeNotificationRoute="CreateNotification"
     />
     </>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import {View, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -12,6 +13,7 @@ import SuggestionStatusScreen from '../screens/parent/SuggestionStatusScreen';
 import FeeLedgerScreen from '../screens/parent/FeeLedgerScreen';
 import PaymentScreen from '../screens/parent/PaymentScreen';
 import TimetableScreen from '../screens/parent/TimetableScreen';
+import NotificationCenterScreen from '../screens/notifications/NotificationCenterScreen';
 import {colors} from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -27,7 +29,7 @@ const ParentHomeStack = () => (
     <Stack.Screen
       name="ParentNotices"
       component={NoticeBoardScreen}
-      options={{title: 'Notifications'}}
+      options={{title: 'Notice Board'}}
     />
     <Stack.Screen
       name="ParentSuggestions"
@@ -57,32 +59,32 @@ const ParentHomeStack = () => (
   </Stack.Navigator>
 );
 
+// Tab bar icons
 const HomeIcon = ({color, size}) => (
   <MaterialCommunityIcons name="home-outline" size={size} color={color} />
 );
 
 const AttendanceIcon = ({color, size}) => (
-  <MaterialCommunityIcons
-    name="calendar-check-outline"
-    size={size}
-    color={color}
-  />
+  <MaterialCommunityIcons name="calendar-check-outline" size={size} color={color} />
+);
+
+const NotificationsIcon = ({color, size, unreadCount = 0}) => (
+  <View>
+    <MaterialCommunityIcons name="bell-outline" size={size} color={color} />
+    {unreadCount > 0 && (
+      <View style={styles.badge}>
+        {/* Badge dot only — count kept minimal */}
+      </View>
+    )}
+  </View>
 );
 
 const ProfileIcon = ({color, size}) => (
-  <MaterialCommunityIcons
-    name="account-circle-outline"
-    size={size}
-    color={color}
-  />
+  <MaterialCommunityIcons name="account-circle-outline" size={size} color={color} />
 );
 
 const StudentsIcon = ({color, size}) => (
-  <MaterialCommunityIcons
-    name="account-child-outline"
-    size={size}
-    color={color}
-  />
+  <MaterialCommunityIcons name="account-child-outline" size={size} color={color} />
 );
 
 const ParentNavigator = () => (
@@ -91,6 +93,10 @@ const ParentNavigator = () => (
       headerTitleAlign: 'center',
       tabBarActiveTintColor: colors.primary,
       tabBarInactiveTintColor: colors.textMuted,
+      tabBarStyle: {
+        borderTopColor: colors.border,
+        backgroundColor: colors.white,
+      },
     }}>
     <Tab.Screen
       name="Home"
@@ -101,6 +107,22 @@ const ParentNavigator = () => (
       name="Attendance"
       component={AttendanceScreen}
       options={{tabBarIcon: AttendanceIcon}}
+    />
+    <Tab.Screen
+      name="Notifications"
+      component={NotificationCenterScreen}
+      options={{
+        title: 'Notifications',
+        tabBarIcon: ({color, size}) => (
+          <MaterialCommunityIcons name="bell-outline" size={size} color={color} />
+        ),
+        tabBarBadgeStyle: {
+          backgroundColor: colors.danger,
+          fontSize: 10,
+          minWidth: 16,
+          height: 16,
+        },
+      }}
     />
     <Tab.Screen
       name="Profile"
@@ -114,5 +136,17 @@ const ParentNavigator = () => (
     />
   </Tab.Navigator>
 );
+
+const styles = StyleSheet.create({
+  badge: {
+    backgroundColor: colors.danger,
+    borderRadius: 6,
+    height: 8,
+    position: 'absolute',
+    right: -2,
+    top: -1,
+    width: 8,
+  },
+});
 
 export default ParentNavigator;

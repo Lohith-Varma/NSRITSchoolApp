@@ -15,6 +15,7 @@ import {
 import {ATTENDANCE_STATUS, USER_ROLES} from '../../config/constants';
 import attendanceService from '../../services/attendance/attendanceService';
 import classService from '../../services/classes/classService';
+import notificationService from '../../services/notifications/notificationService';
 import {getAccessScope} from '../../services/rbacScope';
 import sectionService from '../../services/sections/sectionService';
 import studentService from '../../services/students/studentService';
@@ -217,6 +218,21 @@ const TakeAttendanceScreen = () => {
       queryClient.invalidateQueries({queryKey: ['parentChildren']});
       queryClient.invalidateQueries({queryKey: ['parentDashboard']});
       queryClient.invalidateQueries({queryKey: ['branchAttendance']});
+      queryClient.invalidateQueries({queryKey: ['userNotifications']});
+
+      // Fire-and-forget: notify parents of absent students
+      const absentStudents = students.filter(
+        s => statuses[s.id] === ATTENDANCE_STATUS.ABSENT,
+      );
+      if (absentStudents.length > 0) {
+        notificationService
+          .notifyAbsentStudentsParents({
+            absentStudents,
+            attendanceDate: today,
+            markedByName: user?.fullName,
+          })
+          .catch(err => console.log('[TakeAttendance] Notification error:', err));
+      }
     },
     onError: saveError => {
       setError(saveError.message || 'Unable to save attendance.');

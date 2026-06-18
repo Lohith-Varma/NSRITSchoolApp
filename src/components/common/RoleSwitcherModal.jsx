@@ -3,7 +3,7 @@ import { Modal, StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, FadeIn, FadeOut } from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from 'react-redux';
-import { switchRole } from '../../store/slices/authSlice';
+import { switchActiveRole } from '../../store/slices/authSlice';
 import { USER_ROLES, ROLE_LABELS } from '../../config/constants';
 import { colors, radius, shadows, spacing, typography } from '../../theme';
 import { authConfig } from '../../config/env';
@@ -16,7 +16,17 @@ export const RoleSwitcherModal = ({ visible, onClose }) => {
   
   const scale = useSharedValue(0.9);
 
-  const loadAvailableRoles = useCallback(async () => {
+  useEffect(() => {
+    if (visible) {
+      scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+      loadAvailableRoles();
+    } else {
+      scale.value = 0.9;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
+  const loadAvailableRoles = async () => {
     if (authConfig.ENABLE_DEV_OTP_BYPASS && __DEV__) {
       // In dev bypass, enable switching to ALL roles
       const allRoles = Object.keys(USER_ROLES).map(k => ({
@@ -28,40 +38,24 @@ export const RoleSwitcherModal = ({ visible, onClose }) => {
       return;
     }
 
-    const roles = user?.roles?.length ? user.roles : [user?.role].filter(Boolean);
-    if (!roles.length) {
+    if (!user?.roles) {
       setAvailableProfiles([]);
       return;
     }
 
-    setAvailableProfiles(
-      roles.map(role => ({
-        role,
-        fullName: user?.fullName,
-        profileData: user,
-        isMock: false,
-      })),
-    );
-  }, [user]);
-
-  useEffect(() => {
-    if (visible) {
-      scale.value = withSpring(1, { damping: 15, stiffness: 150 });
-      loadAvailableRoles();
-    } else {
-      scale.value = 0.9;
-    }
-  }, [loadAvailableRoles, scale, visible]);
+    // Map user.roles to format expected by list
+    const rolesList = user.roles.map(r => ({
+      role: r,
+      fullName: user?.fullName || 'User',
+      isMock: false
+    }));
+    setAvailableProfiles(rolesList);
+  };
 
   const handleRoleSelect = async (item) => {
     setLoading(true);
     try {
-      await dispatch(switchRole({
-        role: item.role,
-        profileData: item.profileData,
-        phoneNumber: user?.phoneNumber,
-        countryCode: user?.countryCode
-      })).unwrap();
+      await dispatch(switchActiveRole(item.role)).unwrap();
       onClose();
     } catch (e) {
       console.warn('Role switch failed:', e);

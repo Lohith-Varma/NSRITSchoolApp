@@ -54,6 +54,8 @@ import EditStudentScreen from '../screens/students/EditStudentScreen';
 import StudentDetailsScreen from '../screens/students/StudentDetailsScreen';
 import BulkStudentImportScreen from '../screens/students/BulkStudentImportScreen';
 import TransferStudentScreen from '../screens/students/TransferStudentScreen';
+import NotificationCenterScreen from '../screens/notifications/NotificationCenterScreen';
+import CreateNotificationScreen from '../screens/accountant/CreateNotificationScreen';
 import {renderFeeStackScreens} from './FeeStackScreens';
 
 const Stack = createNativeStackNavigator();
@@ -159,6 +161,8 @@ const MainAdminNavigator = () => (
     <Stack.Screen name="TransferStudent" component={TransferStudentScreen} />
     <Stack.Screen name="RevenueOverview" component={RevenueOverviewScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
+    <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{headerShown: true, title: 'Notifications'}} />
+    <Stack.Screen name="CreateNotification" component={CreateNotificationScreen} options={{headerShown: false}} />
     {renderFeeStackScreens(Stack, {canUpload: true, reports: true})}
   </Stack.Navigator>
 );

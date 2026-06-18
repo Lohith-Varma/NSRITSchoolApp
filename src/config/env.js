@@ -30,5 +30,5 @@ export const dataConnectConfig = {
 };
 
 export const authConfig = {
-  disablePhoneAuthAppVerificationForTesting: true,
+  ENABLE_DEV_OTP_BYPASS: false,
 };

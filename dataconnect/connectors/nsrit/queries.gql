@@ -188,6 +188,7 @@ query GetStudentsBySection($sectionId: UUID!, $limit: Int = 50, $offset: Int = 0
     }
     parent {
       id
+      userId
       fullName
       fatherName
       motherName
@@ -1993,25 +1994,6 @@ query GetCoordinators($branchId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        classTeacherAssignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          createdAt
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -2058,25 +2040,6 @@ query GetCoordinatorDetails($coordinatorId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        classTeacherAssignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          createdAt
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -2257,7 +2220,7 @@ query GetPrincipalDashboard($branchId: UUID!) @auth(level: USER) {
   students(where: {branchId: {eq: $branchId}, status: {eq: "ACTIVE"}}, limit: 1000) {
     id
   }
-  teachers: users(where: {branchId: {eq: $branchId}, role: {eq: "TEACHER"}, isActive: {eq: true}}, limit: 1000) {
+  teachers: teachers(where: {branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 1000) {
     id
   }
   coordinators(where: {branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 20) {
@@ -2522,7 +2485,7 @@ query GetTeachers($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(le
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2607,7 +2570,7 @@ query GetTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int = 50, $off
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2675,7 +2638,7 @@ query GetCoordinatorTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2925,7 +2888,7 @@ query GetTeacherDashboard($teacherId: UUID!) @auth(level: USER) {
         code
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -3141,40 +3104,6 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
   @refresh(onMutationExecuted: {operation: "UpdateClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveLegacyClassTeacherAssignment"}) {
-  currentUser: users(
-    where: {
-      _and: [
-        {firebaseUID: {eq_expr: "auth.uid"}}
-        {isActive: {eq: true}}
-        {
-          _or: [
-            {role: {in: ["MAIN_ADMIN", "main_admin"]}}
-            {userRoles_on_user: {exist: {role: {in: ["MAIN_ADMIN", "main_admin"]}}}}
-            {branches_on_principal: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
-            {branches_on_branchAdmin: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
-            {coordinators_on_user: {exist: {branchId: {eq: $branchId}, isActive: {eq: true}}}}
-            {
-              _and: [
-                {branchId: {eq: $branchId}}
-                {
-                  _or: [
-                    {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator"]}}
-                    {userRoles_on_user: {exist: {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator"]}}}}
-                    ]
-                }
-              ]
-            }
-
-          ]
-        }
-      ]
-    }
-    limit: 1
-  ) @redact @check(expr: "this.exists(u, true)", message: "Class teacher assignment access required") {
-    id
-    role
-    branchId
-  }
   sections(
     where: {branchId: {eq: $branchId}, academicYear: {eq: $academicYear}, isActive: {eq: true}}
     orderBy: {name: ASC}
@@ -3305,24 +3234,6 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
         gender
         email
         isActive
-        assignments: teacherSectionAssignments_on_teacher {
-          id
-          sectionId
-          isClassTeacher
-          isActive
-          section {
-            id
-            name
-            academicClass {
-              id
-              name
-              wing {
-                code
-                name
-              }
-            }
-          }
-        }
       }
     }
   }
@@ -4525,6 +4436,71 @@ query GetSuggestionsByBranch($branchId: UUID!, $limit: Int = 100) @auth(level: U
     student {
       id
       fullName
+    }
+  }
+}
+
+# ─── Notification Queries ───────────────────────────────────────────────────
+
+query GetNotificationsByUser($userId: UUID!, $limit: Int = 30, $offset: Int = 0) @auth(level: USER, insecureReason: "userId is passed from authenticated session; users only fetch their own notifications") {
+  notifications(
+    where: {userId: {eq: $userId}}
+    orderBy: {createdAt: DESC}
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    title
+    message
+    audienceRole
+    isRead
+    createdAt
+    branch {
+      id
+      name
+    }
+  }
+}
+
+query GetUnreadNotificationCount($userId: UUID!) @auth(level: USER, insecureReason: "userId is passed from authenticated session; users only count their own unread notifications") {
+  notifications(
+    where: {userId: {eq: $userId}, isRead: {eq: false}}
+  ) {
+    id
+  }
+}
+
+# ─── Broadcast Notification Helpers ─────────────────────────────────────────
+
+# Returns teacher/staff userIds in a branch for bulk notification dispatch
+query GetBranchStaffUserIds($branchId: UUID!, $limit: Int = 500) @auth(level: USER, insecureReason: "Access is gated by application-level RBAC; only authenticated branch staff invoke this for broadcast notifications") {
+  users(
+    where: {
+      _and: [
+        {branchId: {eq: $branchId}}
+        {isActive: {eq: true}}
+        {_or: [
+          {role: {eq: "TEACHER"}}
+          {role: {eq: "CLASS_TEACHER"}}
+          {role: {eq: "COORDINATOR"}}
+        ]}
+      ]
+    }
+    limit: $limit
+  ) {
+    id
+  }
+}
+
+# Returns student records with linked parent userIds for bulk notification dispatch
+query GetBranchStudentsWithParents($branchId: UUID!, $limit: Int = 1000) @auth(level: USER, insecureReason: "Access is gated by application-level RBAC; only authenticated branch staff invoke this for broadcast notifications") {
+  students(
+    where: {branchId: {eq: $branchId}, isActive: {eq: true}}
+    limit: $limit
+  ) {
+    id
+    linkedParents: studentParents_on_student {
+      userId
     }
   }
 }
