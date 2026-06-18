@@ -362,6 +362,18 @@ export interface CreateNoticeVariables {
   date: DateString;
 }
 
+export interface CreateNotificationData {
+  notification_insert: Notification_Key;
+}
+
+export interface CreateNotificationVariables {
+  userId: UUIDString;
+  branchId: UUIDString;
+  title: string;
+  message: string;
+  audienceRole?: string | null;
+}
+
 export interface CreateParentData {
   userRole_upsert: UserRole_Key;
   parent_insert: Parent_Key;
@@ -1030,6 +1042,31 @@ export interface GetBranchDetailsData {
 
 export interface GetBranchDetailsVariables {
   branchId: UUIDString;
+}
+
+export interface GetBranchStaffUserIdsData {
+  users: ({
+    id: UUIDString;
+  } & User_Key)[];
+}
+
+export interface GetBranchStaffUserIdsVariables {
+  branchId: UUIDString;
+  limit?: number | null;
+}
+
+export interface GetBranchStudentsWithParentsData {
+  students: ({
+    id: UUIDString;
+    linkedParents: ({
+      userId: UUIDString;
+    })[];
+  } & Student_Key)[];
+}
+
+export interface GetBranchStudentsWithParentsVariables {
+  branchId: UUIDString;
+  limit?: number | null;
 }
 
 export interface GetBranchesData {
@@ -2395,6 +2432,27 @@ export interface GetNoticesByBranchVariables {
   offset?: number | null;
 }
 
+export interface GetNotificationsByUserData {
+  notifications: ({
+    id: UUIDString;
+    title: string;
+    message: string;
+    audienceRole?: string | null;
+    isRead: boolean;
+    createdAt: TimestampString;
+    branch?: {
+      id: UUIDString;
+      name: string;
+    } & Branch_Key;
+  } & Notification_Key)[];
+}
+
+export interface GetNotificationsByUserVariables {
+  userId: UUIDString;
+  limit?: number | null;
+  offset?: number | null;
+}
+
 export interface GetPaidStudentsData {
   studentFees: ({
     id: UUIDString;
@@ -3664,6 +3722,7 @@ export interface GetStudentsBySectionData {
     } & Section_Key;
     parent: {
       id: UUIDString;
+      userId?: UUIDString | null;
       fullName: string;
       fatherName?: string | null;
       motherName?: string | null;
@@ -4312,6 +4371,16 @@ export interface GetTimetablesForBranchVariables {
   branchId: UUIDString;
 }
 
+export interface GetUnreadNotificationCountData {
+  notifications: ({
+    id: UUIDString;
+  } & Notification_Key)[];
+}
+
+export interface GetUnreadNotificationCountVariables {
+  userId: UUIDString;
+}
+
 export interface GetUserByPhoneData {
   users: ({
     id: UUIDString;
@@ -4448,6 +4517,22 @@ export interface LinkStudentParentVariables {
   userId: UUIDString;
   relationship: string;
   branchId: UUIDString;
+}
+
+export interface MarkAllNotificationsReadData {
+  notification_updateMany: number;
+}
+
+export interface MarkAllNotificationsReadVariables {
+  userId: UUIDString;
+}
+
+export interface MarkNotificationReadData {
+  notification_update?: Notification_Key | null;
+}
+
+export interface MarkNotificationReadVariables {
+  id: UUIDString;
 }
 
 export interface Notice_Key {
@@ -5756,6 +5841,42 @@ export const respondToSuggestionRef: RespondToSuggestionRef;
 export function respondToSuggestion(vars: RespondToSuggestionVariables): MutationPromise<RespondToSuggestionData, RespondToSuggestionVariables>;
 export function respondToSuggestion(dc: DataConnect, vars: RespondToSuggestionVariables): MutationPromise<RespondToSuggestionData, RespondToSuggestionVariables>;
 
+interface CreateNotificationRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateNotificationVariables): MutationRef<CreateNotificationData, CreateNotificationVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateNotificationVariables): MutationRef<CreateNotificationData, CreateNotificationVariables>;
+  operationName: string;
+}
+export const createNotificationRef: CreateNotificationRef;
+
+export function createNotification(vars: CreateNotificationVariables): MutationPromise<CreateNotificationData, CreateNotificationVariables>;
+export function createNotification(dc: DataConnect, vars: CreateNotificationVariables): MutationPromise<CreateNotificationData, CreateNotificationVariables>;
+
+interface MarkNotificationReadRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: MarkNotificationReadVariables): MutationRef<MarkNotificationReadData, MarkNotificationReadVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: MarkNotificationReadVariables): MutationRef<MarkNotificationReadData, MarkNotificationReadVariables>;
+  operationName: string;
+}
+export const markNotificationReadRef: MarkNotificationReadRef;
+
+export function markNotificationRead(vars: MarkNotificationReadVariables): MutationPromise<MarkNotificationReadData, MarkNotificationReadVariables>;
+export function markNotificationRead(dc: DataConnect, vars: MarkNotificationReadVariables): MutationPromise<MarkNotificationReadData, MarkNotificationReadVariables>;
+
+interface MarkAllNotificationsReadRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: MarkAllNotificationsReadVariables): MutationRef<MarkAllNotificationsReadData, MarkAllNotificationsReadVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: MarkAllNotificationsReadVariables): MutationRef<MarkAllNotificationsReadData, MarkAllNotificationsReadVariables>;
+  operationName: string;
+}
+export const markAllNotificationsReadRef: MarkAllNotificationsReadRef;
+
+export function markAllNotificationsRead(vars: MarkAllNotificationsReadVariables): MutationPromise<MarkAllNotificationsReadData, MarkAllNotificationsReadVariables>;
+export function markAllNotificationsRead(dc: DataConnect, vars: MarkAllNotificationsReadVariables): MutationPromise<MarkAllNotificationsReadData, MarkAllNotificationsReadVariables>;
+
 interface GetCurrentUserRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetCurrentUserVariables): QueryRef<GetCurrentUserData, GetCurrentUserVariables>;
@@ -6847,4 +6968,52 @@ export const getSuggestionsByBranchRef: GetSuggestionsByBranchRef;
 
 export function getSuggestionsByBranch(vars: GetSuggestionsByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetSuggestionsByBranchData, GetSuggestionsByBranchVariables>;
 export function getSuggestionsByBranch(dc: DataConnect, vars: GetSuggestionsByBranchVariables, options?: ExecuteQueryOptions): QueryPromise<GetSuggestionsByBranchData, GetSuggestionsByBranchVariables>;
+
+interface GetNotificationsByUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetNotificationsByUserVariables): QueryRef<GetNotificationsByUserData, GetNotificationsByUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetNotificationsByUserVariables): QueryRef<GetNotificationsByUserData, GetNotificationsByUserVariables>;
+  operationName: string;
+}
+export const getNotificationsByUserRef: GetNotificationsByUserRef;
+
+export function getNotificationsByUser(vars: GetNotificationsByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetNotificationsByUserData, GetNotificationsByUserVariables>;
+export function getNotificationsByUser(dc: DataConnect, vars: GetNotificationsByUserVariables, options?: ExecuteQueryOptions): QueryPromise<GetNotificationsByUserData, GetNotificationsByUserVariables>;
+
+interface GetUnreadNotificationCountRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUnreadNotificationCountVariables): QueryRef<GetUnreadNotificationCountData, GetUnreadNotificationCountVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUnreadNotificationCountVariables): QueryRef<GetUnreadNotificationCountData, GetUnreadNotificationCountVariables>;
+  operationName: string;
+}
+export const getUnreadNotificationCountRef: GetUnreadNotificationCountRef;
+
+export function getUnreadNotificationCount(vars: GetUnreadNotificationCountVariables, options?: ExecuteQueryOptions): QueryPromise<GetUnreadNotificationCountData, GetUnreadNotificationCountVariables>;
+export function getUnreadNotificationCount(dc: DataConnect, vars: GetUnreadNotificationCountVariables, options?: ExecuteQueryOptions): QueryPromise<GetUnreadNotificationCountData, GetUnreadNotificationCountVariables>;
+
+interface GetBranchStaffUserIdsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetBranchStaffUserIdsVariables): QueryRef<GetBranchStaffUserIdsData, GetBranchStaffUserIdsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetBranchStaffUserIdsVariables): QueryRef<GetBranchStaffUserIdsData, GetBranchStaffUserIdsVariables>;
+  operationName: string;
+}
+export const getBranchStaffUserIdsRef: GetBranchStaffUserIdsRef;
+
+export function getBranchStaffUserIds(vars: GetBranchStaffUserIdsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBranchStaffUserIdsData, GetBranchStaffUserIdsVariables>;
+export function getBranchStaffUserIds(dc: DataConnect, vars: GetBranchStaffUserIdsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBranchStaffUserIdsData, GetBranchStaffUserIdsVariables>;
+
+interface GetBranchStudentsWithParentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetBranchStudentsWithParentsVariables): QueryRef<GetBranchStudentsWithParentsData, GetBranchStudentsWithParentsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetBranchStudentsWithParentsVariables): QueryRef<GetBranchStudentsWithParentsData, GetBranchStudentsWithParentsVariables>;
+  operationName: string;
+}
+export const getBranchStudentsWithParentsRef: GetBranchStudentsWithParentsRef;
+
+export function getBranchStudentsWithParents(vars: GetBranchStudentsWithParentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBranchStudentsWithParentsData, GetBranchStudentsWithParentsVariables>;
+export function getBranchStudentsWithParents(dc: DataConnect, vars: GetBranchStudentsWithParentsVariables, options?: ExecuteQueryOptions): QueryPromise<GetBranchStudentsWithParentsData, GetBranchStudentsWithParentsVariables>;
 
