@@ -6940,25 +6940,6 @@ export interface GetCoordinatorsData {
         gender: string;
         email?: string | null;
         isActive: boolean;
-        assignments: ({
-          id: UUIDString;
-          sectionId: UUIDString;
-          isClassTeacher: boolean;
-          isActive: boolean;
-          createdAt: TimestampString;
-          section: {
-            id: UUIDString;
-            name: string;
-            academicClass: {
-              id: UUIDString;
-              name: string;
-              wing: {
-                code: string;
-                name: string;
-              };
-            } & AcademicClass_Key;
-          } & Section_Key;
-        } & TeacherSectionAssignment_Key)[];
       } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key)[];
@@ -7103,25 +7084,6 @@ export interface GetCoordinatorDetailsData {
         gender: string;
         email?: string | null;
         isActive: boolean;
-        assignments: ({
-          id: UUIDString;
-          sectionId: UUIDString;
-          isClassTeacher: boolean;
-          isActive: boolean;
-          createdAt: TimestampString;
-          section: {
-            id: UUIDString;
-            name: string;
-            academicClass: {
-              id: UUIDString;
-              name: string;
-              wing: {
-                code: string;
-                name: string;
-              };
-            } & AcademicClass_Key;
-          } & Section_Key;
-        } & TeacherSectionAssignment_Key)[];
       } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key;
@@ -10681,24 +10643,6 @@ export interface GetClassTeacherAssignmentsData {
         gender: string;
         email?: string | null;
         isActive: boolean;
-        assignments: ({
-          id: UUIDString;
-          sectionId: UUIDString;
-          isClassTeacher: boolean;
-          isActive: boolean;
-          section: {
-            id: UUIDString;
-            name: string;
-            academicClass: {
-              id: UUIDString;
-              name: string;
-              wing: {
-                code: string;
-                name: string;
-              };
-            } & AcademicClass_Key;
-          } & Section_Key;
-        } & TeacherSectionAssignment_Key)[];
       } & Teacher_Key;
     } & User_Key;
   } & Coordinator_Key)[];
