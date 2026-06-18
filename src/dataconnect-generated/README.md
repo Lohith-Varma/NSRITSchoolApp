@@ -6940,7 +6940,7 @@ export interface GetCoordinatorsData {
         gender: string;
         email?: string | null;
         isActive: boolean;
-        classTeacherAssignments: ({
+        assignments: ({
           id: UUIDString;
           sectionId: UUIDString;
           isClassTeacher: boolean;
@@ -7103,7 +7103,7 @@ export interface GetCoordinatorDetailsData {
         gender: string;
         email?: string | null;
         isActive: boolean;
-        classTeacherAssignments: ({
+        assignments: ({
           id: UUIDString;
           sectionId: UUIDString;
           isClassTeacher: boolean;
@@ -7682,7 +7682,7 @@ export interface GetPrincipalDashboardData {
   } & Student_Key)[];
   teachers: ({
     id: UUIDString;
-  } & User_Key)[];
+  } & Teacher_Key)[];
   coordinators: ({
     id: UUIDString;
   } & Coordinator_Key)[];
@@ -8646,7 +8646,7 @@ export interface GetTeachersData {
         status: string;
       } & Subject_Key;
     } & TeacherSubject_Key)[];
-    teacherSectionAssignments_on_teacher: ({
+    assignments: ({
       id: UUIDString;
       sectionId: UUIDString;
       isClassTeacher: boolean;
@@ -8931,7 +8931,7 @@ export interface GetTeachersByWingData {
         status: string;
       } & Subject_Key;
     } & TeacherSubject_Key)[];
-    teacherSectionAssignments_on_teacher: ({
+    assignments: ({
       id: UUIDString;
       sectionId: UUIDString;
       isClassTeacher: boolean;
@@ -9101,7 +9101,7 @@ export interface GetCoordinatorTeachersByWingData {
         status: string;
       } & Subject_Key;
     } & TeacherSubject_Key)[];
-    teacherSectionAssignments_on_teacher: ({
+    assignments: ({
       id: UUIDString;
       sectionId: UUIDString;
       isClassTeacher: boolean;
@@ -9626,7 +9626,7 @@ export interface GetTeacherDashboardData {
         code: string;
       } & Subject_Key;
     } & TeacherSubject_Key)[];
-    teacherSectionAssignments_on_teacher: ({
+    assignments: ({
       id: UUIDString;
       sectionId: UUIDString;
       isClassTeacher: boolean;

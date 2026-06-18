@@ -1994,7 +1994,7 @@ query GetCoordinators($branchId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        classTeacherAssignments: teacherSectionAssignments_on_teacher {
+        assignments: teacherSectionAssignments_on_teacher {
           id
           sectionId
           isClassTeacher
@@ -2059,7 +2059,7 @@ query GetCoordinatorDetails($coordinatorId: UUID!) @auth(level: USER) {
         gender
         email
         isActive
-        classTeacherAssignments: teacherSectionAssignments_on_teacher {
+        assignments: teacherSectionAssignments_on_teacher {
           id
           sectionId
           isClassTeacher
@@ -2258,7 +2258,7 @@ query GetPrincipalDashboard($branchId: UUID!) @auth(level: USER) {
   students(where: {branchId: {eq: $branchId}, status: {eq: "ACTIVE"}}, limit: 1000) {
     id
   }
-  teachers: users(where: {branchId: {eq: $branchId}, role: {eq: "TEACHER"}, isActive: {eq: true}}, limit: 1000) {
+  teachers: teachers(where: {branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 1000) {
     id
   }
   coordinators(where: {branchId: {eq: $branchId}, isActive: {eq: true}}, limit: 20) {
@@ -2523,7 +2523,7 @@ query GetTeachers($branchId: UUID!, $limit: Int = 50, $offset: Int = 0) @auth(le
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2608,7 +2608,7 @@ query GetTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int = 50, $off
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2676,7 +2676,7 @@ query GetCoordinatorTeachersByWing($branchId: UUID!, $wing: String!, $limit: Int
         status
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
@@ -2926,7 +2926,7 @@ query GetTeacherDashboard($teacherId: UUID!) @auth(level: USER) {
         code
       }
     }
-    teacherSectionAssignments_on_teacher {
+    assignments: teacherSectionAssignments_on_teacher {
       id
       sectionId
       isClassTeacher
