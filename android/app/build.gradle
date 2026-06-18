@@ -119,5 +119,11 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
 }
 

@@ -33,7 +33,7 @@ export const SuccessModal = ({ visible, title, message, buttonLabel = 'Continue'
     } else {
       scale.value = 0.9;
     }
-  }, [visible]);
+  }, [scale, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -64,7 +64,7 @@ export const ErrorModal = ({ visible, title, message, buttonLabel = 'Retry', onC
     } else {
       scale.value = 0.9;
     }
-  }, [visible]);
+  }, [scale, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -95,7 +95,7 @@ export const WarningModal = ({ visible, title, message, buttonLabel = 'OK', onCo
     } else {
       scale.value = 0.9;
     }
-  }, [visible]);
+  }, [scale, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -135,7 +135,7 @@ export const ConfirmationModal = ({
     } else {
       scale.value = 0.9;
     }
-  }, [visible]);
+  }, [scale, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

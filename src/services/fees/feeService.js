@@ -385,6 +385,25 @@ export const feeService = {
       return getParentLinkedFeeRecords(access);
     }
 
+    if (isTeacher(access.role)) {
+      if (!access.branchId || !access.sectionId || !access.academicClassId) {
+        return [];
+      }
+
+      const response = await this.getClassStudentsFeeStatus(
+        {
+          branchId: access.branchId,
+          academicClassId: access.academicClassId,
+          sectionId: access.sectionId,
+          academicYear: access.academicYear || currentYear(),
+          limit: access.limit || 500,
+          offset: access.offset || 0,
+        },
+        access,
+      );
+      return response.records || [];
+    }
+
     if (access.studentId) {
       const profile = await this.getStudentFeeProfile(access.studentId, access);
       return profile ? [profile] : [];
@@ -871,7 +890,7 @@ export const feeService = {
     }
 
     const records = await this.getFeeRecords(access);
-    const payments = canViewReports(access.role) ? await this.getPaymentHistory(access) : [];
+    const payments = canViewPaymentTimeline(access.role) ? await this.getPaymentHistory(access) : [];
     return {
       records,
       payments,

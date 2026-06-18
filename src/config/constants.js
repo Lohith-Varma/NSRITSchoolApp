@@ -9,7 +9,7 @@ export const USER_ROLES = {
   CLASS_TEACHER: 'CLASS_TEACHER',
   PARENT: 'PARENT',
   ACCOUNTANT: 'ACCOUNTANT',
-
+  FRONT_DESK: 'FRONT_DESK',
 };
 
 export const STAFF_TYPES = {
@@ -31,7 +31,7 @@ export const ROLE_LABELS = {
   [USER_ROLES.CLASS_TEACHER]: 'Class Teacher',
   [USER_ROLES.PARENT]: 'Parent',
   [USER_ROLES.ACCOUNTANT]: 'Accountant',
-
+  [USER_ROLES.FRONT_DESK]: 'Front Desk',
 };
 
 export const USER_ROLE_PRIORITY = [
@@ -42,6 +42,7 @@ export const USER_ROLE_PRIORITY = [
   USER_ROLES.TEACHER,
   USER_ROLES.CLASS_TEACHER,
   USER_ROLES.ACCOUNTANT,
+  USER_ROLES.FRONT_DESK,
   USER_ROLES.PARENT,
 ];
 
@@ -86,4 +87,5 @@ export const USER_ROLE_ALIASES = {
   CLASS_TEACHER: ['CLASS_TEACHER', 'class_teacher'],
   PARENT: ['PARENT', 'parent'],
   ACCOUNTANT: ['ACCOUNTANT', 'accountant'],
+  FRONT_DESK: ['FRONT_DESK', 'front_desk'],
 };

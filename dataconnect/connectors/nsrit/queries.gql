@@ -3158,8 +3158,8 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
                 {branchId: {eq: $branchId}}
                 {
                   _or: [
-                    {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator", "TEACHER", "teacher", "CLASS_TEACHER", "class_teacher"]}}
-                    {userRoles_on_user: {exist: {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator", "TEACHER", "teacher", "CLASS_TEACHER", "class_teacher"]}}}}
+                    {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator"]}}
+                    {userRoles_on_user: {exist: {role: {in: ["PRINCIPAL", "principal", "BRANCH_ADMIN", "branch_admin", "COORDINATOR", "coordinator"]}}}}
                     ]
                 }
               ]

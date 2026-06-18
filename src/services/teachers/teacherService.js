@@ -350,6 +350,11 @@ export const teacherService = {
     if (!branchId) {
       return {sections: [], assignments: [], students: [], coordinators: []};
     }
+
+    if (!canManageClassTeacherAssignments(scope?.role)) {
+      return {sections: [], assignments: [], students: [], coordinators: []};
+    }
+
     assertBranchAccess(scope, branchId);
 
     const response = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_CLASS_TEACHER_ASSIGNMENTS, {

@@ -21,6 +21,7 @@ export const useFeeAccess = () => {
       wingId: user?.wingId,
       wing: user?.wing,
       sectionId: user?.sectionId,
+      academicClassId: user?.academicClassId,
       sectionName: user?.sectionName || 'A',
       };
     },

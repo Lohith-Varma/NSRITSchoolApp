@@ -9,7 +9,7 @@ import auth, {
 } from '@react-native-firebase/auth';
 import { Platform } from 'react-native';
 import {STORAGE_KEYS} from '../../config/constants';
-import {authConfig, firebaseConfig, USE_EMULATOR} from '../../config/env';
+import {authConfig, USE_EMULATOR} from '../../config/env';
 
 if (USE_EMULATOR) {
   const host = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
@@ -117,6 +117,7 @@ const normalizeProfile = (profile, fallback = {}) => {
     sectionId: user.sectionId || null,
     parentId: user.parentId || fallback.parentId || null,
     parentProfileId: user.parentProfileId || fallback.parentProfileId || null,
+    academicClassId: user.academicClassId || fallback.academicClassId || null,
     status: user.status || fallback.status || (user.isActive === false ? 'INACTIVE' : 'ACTIVE'),
     isActive: user.isActive ?? true,
   };
@@ -200,12 +201,14 @@ const hydrateRoleProfile = async (profile, preferredRole) => {
     const teacher = await teacherService.getTeacherProfileByUser(profile.id);
     const assignments = teacher?.assignments || teacher?.teacherSectionAssignments_on_teacher || [];
     const classTeacherAssignment = assignments.find(item => item.isClassTeacher && item.isActive !== false);
+    const classTeacherSection = classTeacherAssignment?.section;
     return {
       ...baseProfile,
       teacherId: teacher?.id || null,
       branchId: teacher?.branchId || baseProfile.branchId || null,
       sectionId: role === USER_ROLES.CLASS_TEACHER ? classTeacherAssignment?.sectionId || null : null,
-      sectionName: role === USER_ROLES.CLASS_TEACHER ? classTeacherAssignment?.section?.name || null : null,
+      sectionName: role === USER_ROLES.CLASS_TEACHER ? classTeacherSection?.name || null : null,
+      academicClassId: role === USER_ROLES.CLASS_TEACHER ? classTeacherSection?.academicClass?.id || null : null,
     };
   }
 

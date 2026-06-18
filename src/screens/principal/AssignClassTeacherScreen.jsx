@@ -56,7 +56,7 @@ const AssignClassTeacherScreen = ({route}) => {
   const assignmentsQuery = useQuery({
     queryKey: ['classTeacherAssignments', effectiveBranchId, academicYear, user?.wing || 'ALL'],
     queryFn: () => teacherService.getClassTeacherAssignments({branchId: effectiveBranchId, academicYear}, scope),
-    enabled: Boolean(effectiveBranchId),
+    enabled: Boolean(effectiveBranchId && canModify),
   });
   const classesQuery = useQuery({
     queryKey: ['activeAcademicClasses', effectiveBranchId],

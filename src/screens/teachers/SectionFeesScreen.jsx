@@ -14,7 +14,7 @@ const SectionFeesScreen = () => {
   const access = useFeeAccess();
 
   const {data, error, isLoading} = useQuery({
-    queryKey: ['teacherSectionFeeStatus', access.branchId],
+    queryKey: ['teacherSectionFeeStatus', access.branchId, access.academicClassId, access.sectionId],
     queryFn: () => feeService.getFeeReports(access),
     enabled: Boolean(access.branchId),
   });

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -52,7 +52,7 @@ const OTPVerificationScreen = ({route, navigation}) => {
     transform: [{translateX: shake.value}],
   }));
 
-  const triggerShake = () => {
+  const triggerShake = useCallback(() => {
     shake.value = withSequence(
       withTiming(-8, {duration: 60}),
       withTiming(8, {duration: 60}),
@@ -60,14 +60,14 @@ const OTPVerificationScreen = ({route, navigation}) => {
       withTiming(6, {duration: 50}),
       withTiming(0, {duration: 40}),
     );
-  };
+  }, [shake]);
 
   useEffect(() => {
     if (error && __DEV__) {
       console.log('Firebase verification error:', error);
     }
     if (error) {triggerShake();}
-  }, [error]);
+  }, [error, triggerShake]);
 
   const updateOtp = value => {
     if (error) {dispatch(clearAuthError());}

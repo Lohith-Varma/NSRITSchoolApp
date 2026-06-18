@@ -14,7 +14,6 @@ const config = {
       /[\\/]android[\\/]/,
       /[\\/]ios[\\/]/,
       /[\\/]\.cxx[\\/]/,
-      /[\\/]build[\\/]/,
     ].concat(defaultConfig.resolver.blockList || []),
   },
 };

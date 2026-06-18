@@ -4,8 +4,7 @@ import Animated, {
   useSharedValue, 
   useAnimatedStyle, 
   withSpring, 
-  withTiming, 
-  withDelay 
+  withTiming,
 } from 'react-native-reanimated';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,18 +25,17 @@ export const ToastNotification = ({
       translateY.value = withSpring(insets.top + 12, { damping: 15, stiffness: 120 });
       
       const timer = setTimeout(() => {
-        translateY.value = withTiming(-100, { duration: 250 }, () => {
-          if (onHide) {
-            onHide();
-          }
-        });
+        translateY.value = withTiming(-100, { duration: 250 });
+        if (onHide) {
+          onHide();
+        }
       }, duration);
 
       return () => clearTimeout(timer);
     } else {
       translateY.value = -100;
     }
-  }, [visible, insets.top]);
+  }, [duration, insets.top, onHide, translateY, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],

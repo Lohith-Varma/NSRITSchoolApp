@@ -38,7 +38,7 @@ const TeacherDashboardScreen = ({navigation}) => {
   });
 
   const {data: feeData} = useQuery({
-    queryKey: ['teacherFeeStatus', access.branchId],
+    queryKey: ['teacherFeeStatus', access.branchId, access.academicClassId, access.sectionId],
     queryFn: () => feeService.getFeeReports(access),
     enabled: Boolean(access.branchId),
   });
@@ -410,6 +410,7 @@ const TeacherDashboardScreen = ({navigation}) => {
       profileRoute="TeacherProfile"
       profileParams={{teacherId: user?.teacherId || user?.id}}
     />
+    </>
   );
 };
 
