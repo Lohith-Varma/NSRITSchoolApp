@@ -8,7 +8,6 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import Svg, {Circle, Line, Path} from 'react-native-svg';
 
 const {width: W} = Dimensions.get('window');
 
@@ -19,6 +18,7 @@ const CREAM = '#F7F9FC';
 
 const LOGO_W = W * 0.44;
 const LOGO_H = LOGO_W * 1.62;
+const NETWORK_OFFSET_X = 80;
 
 // Constellation nodes (viewBox coords within SVG width=160 height=90)
 const NODES = [
@@ -41,13 +41,6 @@ const EDGES = [
 
 const nodeMap = Object.fromEntries(NODES.map(n => [n.id, n]));
 
-const AnimatedLine   = Animated.createAnimatedComponent(Line);
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const AnimatedPath   = Animated.createAnimatedComponent(Path);
-
-// Shield path in a 100×120 viewBox
-const SHIELD_PATH = 'M 50 4 L 94 18 L 94 58 Q 94 92 50 116 Q 6 92 6 58 L 6 18 Z';
-
 // ── Letter-by-letter text reveal ──────────────────────────────────────────────
 const AnimatedLetters = ({text, style, startDelay = 0, letterDelay = 55}) => {
   const opacities = useRef(text.split('').map(() => new Animated.Value(0))).current;
@@ -56,13 +49,13 @@ const AnimatedLetters = ({text, style, startDelay = 0, letterDelay = 55}) => {
     Animated.parallel(
       text.split('').map((_, i) =>
         Animated.timing(opacities[i], {
-          toValue: 1, duration: 260,
+          toValue: 1, duration: 180,
           delay: startDelay + i * letterDelay,
           easing: Easing.out(Easing.quad), useNativeDriver: true,
         }),
       ),
     ).start();
-  }, []);
+  }, [letterDelay, opacities, startDelay, text]);
 
   return (
     <View style={styles.lettersRow}>
@@ -80,73 +73,56 @@ const AnimatedLetters = ({text, style, startDelay = 0, letterDelay = 55}) => {
 // Nodes use fixed radius (no animated r) to avoid Android radius=0 crash.
 const TechNetwork = ({progress}) => (
   <View style={styles.svgNetworkWrap} pointerEvents="none">
-    <Svg width={160} height={90} viewBox="80 0 80 90">
-      {EDGES.map(([a, b], i) => {
-        const na  = nodeMap[a];
-        const nb  = nodeMap[b];
-        const t0  = (i / EDGES.length) * 0.7;
-        const t1  = Math.min(t0 + 0.3, 1);
-        const opacity = progress.interpolate({
-          inputRange: [t0, t1], outputRange: [0, 0.55], extrapolate: 'clamp',
-        });
-        return (
-          <AnimatedLine
-            key={`e${i}`}
-            x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
-            stroke={GREEN} strokeWidth="0.9" opacity={opacity}
-          />
-        );
-      })}
+    {EDGES.map(([a, b], i) => {
+      const na = nodeMap[a];
+      const nb = nodeMap[b];
+      const ax = na.x - NETWORK_OFFSET_X;
+      const bx = nb.x - NETWORK_OFFSET_X;
+      const dx = bx - ax;
+      const dy = nb.y - na.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const angle = `${Math.atan2(dy, dx)}rad`;
+      const t0 = (i / EDGES.length) * 0.7;
+      const t1 = Math.min(t0 + 0.3, 1);
+      const opacity = progress.interpolate({
+        inputRange: [t0, t1], outputRange: [0, 0.55], extrapolate: 'clamp',
+      });
+      return (
+        <Animated.View
+          key={`e${i}`}
+          style={[
+            styles.networkEdge,
+            {left: ax, opacity, top: na.y, transform: [{rotate: angle}], width: length},
+          ]}
+        />
+      );
+    })}
 
-      {NODES.map((node, i) => {
-        const t0  = (i / NODES.length) * 0.65;
-        const t1  = Math.min(t0 + 0.25, 1);
-        const opacity = progress.interpolate({
-          inputRange: [t0, t1], outputRange: [0, 1], extrapolate: 'clamp',
-        });
-        const radius = i % 3 === 0 ? 3.5 : 2.2;
-        return (
-          <AnimatedCircle
-            key={node.id}
-            cx={node.x} cy={node.y} r={radius}
-            fill={GREEN} opacity={opacity}
-          />
-        );
-      })}
-    </Svg>
+    {NODES.map((node, i) => {
+      const t0 = (i / NODES.length) * 0.65;
+      const t1 = Math.min(t0 + 0.25, 1);
+      const opacity = progress.interpolate({
+        inputRange: [t0, t1], outputRange: [0, 1], extrapolate: 'clamp',
+      });
+      const size = i % 3 === 0 ? 7 : 4.4;
+      return (
+        <Animated.View
+          key={node.id}
+          style={[
+            styles.networkNode,
+            {
+              height: size,
+              left: node.x - NETWORK_OFFSET_X - size / 2,
+              opacity,
+              top: node.y - size / 2,
+              width: size,
+            },
+          ]}
+        />
+      );
+    })}
   </View>
 );
-
-// ── Shield glow overlay ───────────────────────────────────────────────────────
-// Three concentric strokes (solid + soft + bloom) animated by glowProgress.
-// pulseAnim drives stroke-width oscillation.
-const ShieldGlow = ({glowProgress, pulseAnim}) => {
-  const innerOp = glowProgress.interpolate({
-    inputRange: [0, 0.5, 1], outputRange: [0, 0.85, 0.6],
-  });
-  const midOp = glowProgress.interpolate({
-    inputRange: [0, 0.5, 1], outputRange: [0, 0.18, 0.1],
-  });
-  const outerOp = glowProgress.interpolate({
-    inputRange: [0, 0.6, 1], outputRange: [0, 0.07, 0.04],
-  });
-  const sw = pulseAnim.interpolate({
-    inputRange: [0, 1], outputRange: [1.5, 3.0],
-  });
-
-  return (
-    <View style={styles.svgShieldWrap} pointerEvents="none">
-      <Svg width={LOGO_W} height={LOGO_H * 0.82} viewBox="0 0 100 120">
-        <AnimatedPath d={SHIELD_PATH} fill="none" stroke={GREEN}
-          strokeWidth={sw} strokeOpacity={innerOp} strokeLinejoin="round" />
-        <AnimatedPath d={SHIELD_PATH} fill="none" stroke={GREEN}
-          strokeWidth="6" strokeOpacity={midOp} strokeLinejoin="round" />
-        <AnimatedPath d={SHIELD_PATH} fill="none" stroke={GREEN}
-          strokeWidth="10" strokeOpacity={outerOp} strokeLinejoin="round" />
-      </Svg>
-    </View>
-  );
-};
 
 // ── SplashScreen ──────────────────────────────────────────────────────────────
 const SplashScreen = ({onFinish}) => {
@@ -161,16 +137,12 @@ const SplashScreen = ({onFinish}) => {
   // Phase 3 — tech network
   const netProgress = useRef(new Animated.Value(0)).current;
 
-  // Phase 4 — shield glow
-  const glowProgress = useRef(new Animated.Value(0)).current;
-  const pulseAnim    = useRef(new Animated.Value(0)).current;
-
-  // Phase 5 — text reveal
+  // Phase 4 — text reveal
   const [showTitle,    setShowTitle]    = useState(false);
   const [showSubtitle, setShowSubtitle] = useState(false);
   const subtitleOp   = useRef(new Animated.Value(0)).current;
 
-  // Phase 6 — tagline + system
+  // Phase 5 — tagline + system
   const [showTagline, setShowTagline] = useState(false);
   const taglineOp    = useRef(new Animated.Value(0)).current;
   const dividerScale = useRef(new Animated.Value(0)).current;
@@ -182,68 +154,66 @@ const SplashScreen = ({onFinish}) => {
   useEffect(() => {
     // Phase 1 — 0ms
     Animated.timing(bgAnim, {
-      toValue: 1, duration: 700,
+      toValue: 1, duration: 250,
       easing: Easing.out(Easing.quad), useNativeDriver: false,
     }).start();
 
-    // Phase 2 — 600ms
+    // Phase 2 — 80ms
     setTimeout(() => {
       Animated.parallel([
-        Animated.spring(logoScale,  {toValue: 1, tension: 42, friction: 7, useNativeDriver: true}),
-        Animated.timing(logoOpacity, {toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true}),
-        Animated.timing(logoTransY,  {toValue: 0, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true}),
+        Animated.spring(logoScale,  {toValue: 1, tension: 70, friction: 8, useNativeDriver: true}),
+        Animated.timing(logoOpacity, {toValue: 1, duration: 360, easing: Easing.out(Easing.cubic), useNativeDriver: true}),
+        Animated.timing(logoTransY,  {toValue: 0, duration: 360, easing: Easing.out(Easing.cubic), useNativeDriver: true}),
       ]).start();
-    }, 600);
+    }, 80);
 
-    // Phase 3 — 1400ms
+    // Phase 3 — 320ms
     setTimeout(() => {
       Animated.timing(netProgress, {
-        toValue: 1, duration: 1100,
+        toValue: 1, duration: 500,
         easing: Easing.out(Easing.quad), useNativeDriver: false,
       }).start();
-    }, 1400);
+    }, 320);
 
-    // Phase 4 — 2300ms
-    setTimeout(() => {
-      Animated.timing(glowProgress, {
-        toValue: 1, duration: 900,
-        easing: Easing.inOut(Easing.quad), useNativeDriver: false,
-      }).start();
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {toValue: 1, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: false}),
-          Animated.timing(pulseAnim, {toValue: 0, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: false}),
-        ]),
-      ).start();
-    }, 2300);
-
-    // Phase 5 — 3200ms school name, 3800ms badge
-    setTimeout(() => setShowTitle(true), 3200);
+    // Phase 4 — 520ms school name, 820ms badge
+    setTimeout(() => setShowTitle(true), 520);
     setTimeout(() => {
       setShowSubtitle(true);
-      Animated.timing(subtitleOp, {toValue: 1, duration: 450, useNativeDriver: true}).start();
-    }, 3800);
+      Animated.timing(subtitleOp, {toValue: 1, duration: 220, useNativeDriver: true}).start();
+    }, 820);
 
-    // Phase 6 — 4200ms tagline, 4900ms system text
+    // Phase 5 — 1000ms tagline, 1180ms system text
     setTimeout(() => {
       setShowTagline(true);
       Animated.parallel([
-        Animated.timing(taglineOp,    {toValue: 1, duration: 500, useNativeDriver: true}),
-        Animated.timing(dividerScale, {toValue: 1, duration: 500, easing: Easing.out(Easing.quad), useNativeDriver: true}),
+        Animated.timing(taglineOp,    {toValue: 1, duration: 240, useNativeDriver: true}),
+        Animated.timing(dividerScale, {toValue: 1, duration: 240, easing: Easing.out(Easing.quad), useNativeDriver: true}),
       ]).start();
-    }, 4200);
+    }, 1000);
     setTimeout(() => {
-      Animated.timing(systemOp, {toValue: 1, duration: 500, useNativeDriver: true}).start();
-    }, 4900);
+      Animated.timing(systemOp, {toValue: 1, duration: 220, useNativeDriver: true}).start();
+    }, 1180);
 
-    // Exit — 5600ms
+    // Exit — 1800ms
     setTimeout(() => {
       Animated.timing(screenOp, {
-        toValue: 0, duration: 550,
+        toValue: 0, duration: 250,
         easing: Easing.in(Easing.quad), useNativeDriver: true,
       }).start(() => onFinish?.());
-    }, 5600);
-  }, []);
+    }, 1800);
+  }, [
+    bgAnim,
+    dividerScale,
+    logoOpacity,
+    logoScale,
+    logoTransY,
+    netProgress,
+    onFinish,
+    screenOp,
+    subtitleOp,
+    systemOp,
+    taglineOp,
+  ]);
 
   const bgColor = bgAnim.interpolate({inputRange: [0, 1], outputRange: [WHITE, CREAM]});
 
@@ -268,53 +238,60 @@ const SplashScreen = ({onFinish}) => {
             ]}>
             <Image source={require('../assets/logo.png')} style={styles.logo} resizeMode="contain" />
             <TechNetwork progress={netProgress} />
-            <ShieldGlow glowProgress={glowProgress} pulseAnim={pulseAnim} />
           </Animated.View>
         </View>
 
-        {/* School name — letter-by-letter */}
-        {showTitle && (
-          <View style={styles.titleSection}>
-            <AnimatedLetters text="NADIMPALLI SATYANARAYANA RAJU" style={styles.schoolName} startDelay={0} letterDelay={38} />
-            <View style={styles.dividerRow}>
-              <View style={styles.dot} />
-              <Animated.View style={[styles.dividerLine, {transform: [{scaleX: dividerScale}]}]} />
-              <View style={styles.dot} />
-            </View>
-            <AnimatedLetters text="INTERNATIONAL TECHNO SCHOOL" style={styles.subName} startDelay={120} letterDelay={30} />
+        <View style={styles.textStack}>
+          {/* School name — letter-by-letter */}
+          <View style={styles.titleSlot}>
+            {showTitle && (
+              <View style={styles.titleSection}>
+                <AnimatedLetters text="NADIMPALLI SATYANARAYANA RAJU" style={styles.schoolName} startDelay={0} letterDelay={12} />
+                <View style={styles.dividerRow}>
+                  <View style={styles.dot} />
+                  <Animated.View style={[styles.dividerLine, {transform: [{scaleX: dividerScale}]}]} />
+                  <View style={styles.dot} />
+                </View>
+                <AnimatedLetters text="INTERNATIONAL TECHNO SCHOOL" style={styles.subName} startDelay={40} letterDelay={10} />
+              </View>
+            )}
           </View>
-        )}
 
-        {/* NSRIT Connect badge */}
-        {showSubtitle && (
-          <Animated.View style={[styles.connectBadge, {opacity: subtitleOp}]}>
-            <View style={styles.connectAccent} />
-            <Animated.Text style={styles.connectText}>NSRIT Connect</Animated.Text>
-            <View style={styles.connectAccent} />
+          {/* NSRIT Connect badge */}
+          <View style={styles.connectSlot}>
+            {showSubtitle && (
+              <Animated.View style={[styles.connectBadge, {opacity: subtitleOp}]}>
+                <View style={styles.connectAccent} />
+                <Animated.Text style={styles.connectText}>NSRIT Connect</Animated.Text>
+                <View style={styles.connectAccent} />
+              </Animated.View>
+            )}
+          </View>
+
+          {/* Motto + tagline */}
+          <View style={styles.mottoSlot}>
+            {showTagline && (
+              <Animated.View style={[styles.mottoSection, {opacity: taglineOp}]}>
+                <Animated.Text style={styles.motto}>UNITY  •  LEARNING  •  GROWTH</Animated.Text>
+                <View style={styles.sanskritRow}>
+                  <View style={styles.dot} />
+                  <Animated.View style={[styles.dividerLineHalf, {transform: [{scaleX: dividerScale}]}]} />
+                  <Animated.Text style={styles.sanskrit}>ज्ञानं परमं बलम्</Animated.Text>
+                  <Animated.View style={[styles.dividerLineHalf, {transform: [{scaleX: dividerScale}]}]} />
+                  <View style={styles.dot} />
+                </View>
+                <Animated.Text style={styles.tagline}>Knowledge is the supreme strength</Animated.Text>
+              </Animated.View>
+            )}
+          </View>
+
+          {/* System label */}
+          <Animated.View style={[styles.systemBadge, {opacity: systemOp}]}>
+            <View style={styles.systemDot} />
+            <Animated.Text style={styles.systemText}>Smart School Management System</Animated.Text>
+            <View style={styles.systemDot} />
           </Animated.View>
-        )}
-
-        {/* Motto + tagline */}
-        {showTagline && (
-          <Animated.View style={[styles.mottoSection, {opacity: taglineOp}]}>
-            <Animated.Text style={styles.motto}>UNITY  •  LEARNING  •  GROWTH</Animated.Text>
-            <View style={styles.sanskritRow}>
-              <View style={styles.dot} />
-              <Animated.View style={[styles.dividerLineHalf, {transform: [{scaleX: dividerScale}]}]} />
-              <Animated.Text style={styles.sanskrit}>ज्ञानं परमं बलम्</Animated.Text>
-              <Animated.View style={[styles.dividerLineHalf, {transform: [{scaleX: dividerScale}]}]} />
-              <View style={styles.dot} />
-            </View>
-            <Animated.Text style={styles.tagline}>Knowledge is the supreme strength</Animated.Text>
-          </Animated.View>
-        )}
-
-        {/* System label */}
-        <Animated.View style={[styles.systemBadge, {opacity: systemOp}]}>
-          <View style={styles.systemDot} />
-          <Animated.Text style={styles.systemText}>Smart School Management System</Animated.Text>
-          <View style={styles.systemDot} />
-        </Animated.View>
+        </View>
       </View>
 
       {/* Bottom strip */}
@@ -341,55 +318,65 @@ const styles = StyleSheet.create({
     alignItems: 'center', flex: 1, justifyContent: 'center',
     paddingHorizontal: 24, paddingBottom: 48,
   },
-  logoContainer: {alignItems: 'center', justifyContent: 'center', marginBottom: 8},
+  logoContainer: {alignItems: 'center', justifyContent: 'center', marginBottom: 2},
   logoWrap: {alignItems: 'center', justifyContent: 'center', position: 'relative'},
   logo: {width: LOGO_W, height: LOGO_H},
-  svgNetworkWrap: {left: LOGO_W * 0.44, position: 'absolute', top: -8},
-  svgShieldWrap: {
-    bottom: LOGO_H * 0.02, left: 0, position: 'absolute',
-    right: 0, alignItems: 'center',
+  svgNetworkWrap: {height: 90, left: LOGO_W * 0.44, position: 'absolute', top: -8, width: 80},
+  networkEdge: {
+    backgroundColor: GREEN,
+    height: 1,
+    position: 'absolute',
   },
-  titleSection: {alignItems: 'center', marginTop: 20, width: '100%'},
+  networkNode: {
+    backgroundColor: GREEN,
+    borderRadius: 4,
+    position: 'absolute',
+  },
+  textStack: {alignItems: 'center', width: '100%'},
+  titleSlot: {alignItems: 'center', height: W < 360 ? 56 : 62, justifyContent: 'flex-start', width: '100%'},
+  connectSlot: {alignItems: 'center', height: 28, justifyContent: 'flex-start', width: '100%'},
+  mottoSlot: {alignItems: 'center', height: W < 360 ? 46 : 50, justifyContent: 'flex-start', width: '100%'},
+  titleSection: {alignItems: 'center', marginTop: 8, width: '100%'},
   lettersRow: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'},
   schoolName: {
     color: NAVY, fontFamily: 'serif',
-    fontSize: W < 360 ? 16 : 19, fontWeight: '900', letterSpacing: 0.6,
+    fontSize: W < 360 ? 14 : 17, fontWeight: '900', letterSpacing: 0.4,
   },
   subName: {
-    color: NAVY, fontSize: W < 360 ? 10 : 12,
-    fontWeight: '700', letterSpacing: 2.2, textAlign: 'center',
+    color: NAVY, fontSize: W < 360 ? 9 : 10.5,
+    fontWeight: '700', letterSpacing: 1.5, textAlign: 'center',
   },
   dividerRow: {
     alignItems: 'center', flexDirection: 'row',
-    marginVertical: 10, width: '90%',
+    marginVertical: 5, width: '84%',
   },
-  dot: {backgroundColor: GREEN, borderRadius: 4, height: 7, width: 7},
+  dot: {backgroundColor: GREEN, borderRadius: 3, height: 5, width: 5},
   dividerLine: {
-    backgroundColor: NAVY, flex: 1, height: 1, marginHorizontal: 8, opacity: 0.4,
+    backgroundColor: NAVY, flex: 1, height: 1, marginHorizontal: 6, opacity: 0.35,
   },
   dividerLineHalf: {
-    backgroundColor: NAVY, flex: 1, height: 1, marginHorizontal: 8, opacity: 0.35,
+    backgroundColor: NAVY, flex: 1, height: 1, marginHorizontal: 6, opacity: 0.32,
   },
-  connectBadge: {alignItems: 'center', flexDirection: 'row', gap: 10, marginTop: 14},
-  connectAccent: {backgroundColor: GREEN, borderRadius: 1, height: 2, width: 22},
-  connectText: {color: GREEN, fontSize: 22, fontWeight: '900', letterSpacing: 1.5},
-  mottoSection: {alignItems: 'center', marginTop: 16, width: '100%'},
+  connectBadge: {alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 3},
+  connectAccent: {backgroundColor: GREEN, borderRadius: 1, height: 2, width: 18},
+  connectText: {color: GREEN, fontSize: 18, fontWeight: '900', letterSpacing: 1},
+  mottoSection: {alignItems: 'center', marginTop: 4, width: '100%'},
   motto: {
-    color: GREEN, fontSize: W < 360 ? 10 : 11.5,
-    fontWeight: '800', letterSpacing: 2.8, textAlign: 'center',
+    color: GREEN, fontSize: W < 360 ? 9 : 10,
+    fontWeight: '800', letterSpacing: 1.8, textAlign: 'center',
   },
   sanskritRow: {
     alignItems: 'center', flexDirection: 'row',
-    marginTop: 12, marginBottom: 8, width: '90%',
+    marginTop: 5, marginBottom: 4, width: '84%',
   },
   sanskrit: {
-    color: NAVY, fontSize: 16, fontWeight: '700',
-    marginHorizontal: 8, textAlign: 'center',
+    color: NAVY, fontSize: W < 360 ? 12 : 13, fontWeight: '700',
+    marginHorizontal: 6, textAlign: 'center',
   },
-  tagline: {color: GREEN, fontStyle: 'italic', fontSize: 12, fontWeight: '600'},
-  systemBadge: {alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 22},
+  tagline: {color: GREEN, fontStyle: 'italic', fontSize: W < 360 ? 10 : 11, fontWeight: '600'},
+  systemBadge: {alignItems: 'center', flexDirection: 'row', gap: 6, marginTop: 8},
   systemDot: {backgroundColor: NAVY, borderRadius: 3, height: 5, opacity: 0.35, width: 5},
-  systemText: {color: NAVY, fontSize: 11, fontWeight: '600', letterSpacing: 0.8, opacity: 0.6},
+  systemText: {color: NAVY, fontSize: 10, fontWeight: '600', letterSpacing: 0.5, opacity: 0.6},
   bottomStrip: {alignItems: 'center', paddingBottom: 32},
   bottomBar: {backgroundColor: GREEN, borderRadius: 2, height: 3, opacity: 0.35, width: 48},
 });

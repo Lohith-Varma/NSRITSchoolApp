@@ -1,9 +1,38 @@
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 import Toast from 'react-native-toast-message';
 import {formatCurrency} from '../formatters/currency';
 import {formatDateForDisplay} from '../helpers/dateHelpers';
+
+let createPdfFromHtml;
+
+const getPdfGenerator = () => {
+  if (createPdfFromHtml) {
+    return createPdfFromHtml;
+  }
+
+  try {
+    const htmlToPdf = require('react-native-html-to-pdf');
+    if (htmlToPdf) {
+      createPdfFromHtml =
+        htmlToPdf.generatePDF ||
+        htmlToPdf.default?.generatePDF ||
+        htmlToPdf.default?.convert ||
+        htmlToPdf.convert;
+    }
+  } catch (error) {
+    throw new Error(
+      'PDF receipt sharing is not available in this app build. Rebuild and reinstall the app so the native HtmlToPdf module is included.',
+    );
+  }
+
+  if (typeof createPdfFromHtml !== 'function') {
+    throw new Error(
+      'PDF receipt sharing is not available in this app build. Rebuild and reinstall the app so the native HtmlToPdf module is included.',
+    );
+  }
+
+  return createPdfFromHtml;
+};
 
 // Helper to convert numbers to words in Indian numbering system
 function numberToWords(num) {
@@ -435,7 +464,8 @@ export const generateAndShareReceipt = async (payment) => {
       directory: 'Documents',
     };
 
-    const file = await RNHTMLtoPDF.convert(options);
+    const generatePDF = getPdfGenerator();
+    const file = await generatePDF(options);
     const pdfPath = file.filePath;
 
     // Use react-native-share to share the PDF

@@ -180,7 +180,7 @@ const OTPVerificationScreen = ({route, navigation}) => {
       withTiming(-4, {duration: 45}),
       withTiming(0, {duration: 40}),
     );
-  };
+  }, [shake]);
 
   useEffect(() => {
     if (error) {

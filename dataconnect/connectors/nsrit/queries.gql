@@ -3104,6 +3104,29 @@ query GetClassTeacherAssignments($branchId: UUID!, $academicYear: Int!, $limit: 
   @refresh(onMutationExecuted: {operation: "UpdateClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveClassTeacherAssignment"})
   @refresh(onMutationExecuted: {operation: "RemoveLegacyClassTeacherAssignment"}) {
+  currentUser: users(
+    where: {
+      _and: [
+        {firebaseUID: {eq_expr: "auth.uid"}}
+        {isActive: {eq: true}}
+        {
+          _or: [
+            {branchId: {eq: $branchId}}
+            {role: {in: ["MAIN_ADMIN", "main_admin"]}}
+            {userRoles_on_user: {exist: {role: {in: ["MAIN_ADMIN", "main_admin"]}}}}
+            {branches_on_principal: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
+            {branches_on_branchAdmin: {exist: {id: {eq: $branchId}, isActive: {eq: true}}}}
+            {coordinators_on_user: {exist: {branchId: {eq: $branchId}, isActive: {eq: true}}}}
+          ]
+        }
+      ]
+    }
+    limit: 1
+  ) @redact @check(expr: "this.exists(u, true)", message: "Class teacher assignment access required") {
+    id
+    role
+    branchId
+  }
   sections(
     where: {branchId: {eq: $branchId}, academicYear: {eq: $academicYear}, isActive: {eq: true}}
     orderBy: {name: ASC}
