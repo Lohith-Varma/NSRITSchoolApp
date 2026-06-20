@@ -1,7 +1,9 @@
 import Share from 'react-native-share';
 import Toast from 'react-native-toast-message';
+import RNFS from 'react-native-fs';
 import {formatCurrency} from '../formatters/currency';
 import {formatDateForDisplay} from '../helpers/dateHelpers';
+import {logoBase64} from './logoBase64';
 
 let createPdfFromHtml;
 
@@ -351,19 +353,12 @@ export const generateAndShareReceipt = async (payment) => {
           <div>
             <div class="header">
               <div class="header-logo">
-                <svg viewBox="0 0 100 100" width="70" height="70">
-                  <path d="M 50,5 L 85,25 L 85,65 L 50,85 L 15,65 L 15,25 Z" fill="none" stroke="#0f5132" stroke-width="3"/>
-                  <path d="M 50,12 L 78,28 L 78,60 L 50,76 L 22,60 L 22,28 Z" fill="#0c2340" opacity="0.1"/>
-                  <path d="M 25,35 L 50,22 L 75,35 L 50,48 Z" fill="#0f5132"/>
-                  <path d="M 75,35 L 75,60" fill="none" stroke="#0f5132" stroke-width="2"/>
-                  <path d="M 50,48 L 50,80" fill="none" stroke="#198754" stroke-width="2"/>
-                  <circle cx="50" cy="40" r="8" fill="#fff" stroke="#0c2340" stroke-width="2"/>
-                </svg>
+                <img src="${logoBase64}" width="70" height="70" alt="Logo" style="object-fit: contain;" />
               </div>
               
               <div class="header-center">
                 <div class="school-name">NADIMPALLI SATYANARAYANA RAJU</div>
-                <div class="school-sub">INTERNATIONAL TECHNO SCHOOL</div>
+                <div class="school-sub">ENGLISH MEDIUM SCHOOL</div>
                 <div class="motto-bar">UNITY • LEARNING • GROWTH</div>
                 <div class="motto-sanskrit">ज्ञानं परमं बलम्</div>
                 <div class="motto-translation">Knowledge is the supreme strength</div>
@@ -425,10 +420,7 @@ export const generateAndShareReceipt = async (payment) => {
                 <span class="sig-label">Received by:</span>
                 <span class="sig-value">${receivedBy}</span>
               </div>
-              <div class="sig-row" style="margin-top: 10px;">
-                <span class="sig-label">Signature:</span>
-                <span class="sig-value"></span>
-              </div>
+             
             </div>
 
             <div class="address-row">
@@ -460,18 +452,25 @@ export const generateAndShareReceipt = async (payment) => {
 
     const options = {
       html: htmlContent,
-      fileName: `Receipt_${receiptNo}`,
-      directory: 'Documents',
+      fileName: `TempReceipt_${receiptNo}`,
     };
 
     const generatePDF = getPdfGenerator();
     const file = await generatePDF(options);
-    const pdfPath = file.filePath;
+    const tempPath = file.filePath;
+
+    // Move the file to a clean name in the cache directory so that it falls under
+    // the paths allowed by react-native-share's default FileProvider configuration.
+    const cleanPath = `${RNFS.CachesDirectoryPath}/Receipt_${receiptNo}.pdf`;
+    if (await RNFS.exists(cleanPath)) {
+      await RNFS.unlink(cleanPath);
+    }
+    await RNFS.moveFile(tempPath, cleanPath);
 
     // Use react-native-share to share the PDF
     await Share.open({
       title: `Fee Receipt - ${receiptNo}`,
-      url: `file://${pdfPath}`,
+      url: `file://${cleanPath}`,
       type: 'application/pdf',
       failOnCancel: false,
     });
