@@ -23,7 +23,6 @@ const blankForm = {
   fatherName: '', fatherMobile: '',
   motherName: '', motherMobile: '',
   guardianName: '', guardianMobile: '',
-  parentPhoneNumber: '',
   photoUrl: '', aadhaarNumber: '', bloodGroup: '',
   address: '', city: '', state: '', pincode: '', emergencyContact: '',
   transportRequired: false, countryCode: '+91',
@@ -176,7 +175,6 @@ const AddStudentScreen = ({navigation}) => {
         <InputRow icon="phone-outline" label="Mother Mobile" keyboardType="phone-pad" value={form.motherMobile} onChangeText={v => updateField('motherMobile', v)} />
         <InputRow icon="account-outline" label="Guardian Name" value={form.guardianName} onChangeText={v => updateField('guardianName', v)} />
         <InputRow icon="phone-outline" label="Guardian Mobile" keyboardType="phone-pad" value={form.guardianMobile} onChangeText={v => updateField('guardianMobile', v)} />
-        <InputRow icon="phone-outline" label="Default Parent Mobile Number *" keyboardType="phone-pad" value={form.parentPhoneNumber} onChangeText={v => updateField('parentPhoneNumber', v)} />
       </Animated.View>
 
       <Animated.View entering={FadeInDown.delay(120).duration(260).springify()} style={styles.formCard}>

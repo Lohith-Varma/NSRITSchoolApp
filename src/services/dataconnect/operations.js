@@ -1,4 +1,4 @@
-﻿export const DATA_CONNECT_QUERIES = {
+export const DATA_CONNECT_QUERIES = {
   GET_CURRENT_USER: 'GetCurrentUser',
   GET_USER_BY_PHONE: 'GetUserByPhone',
   GET_USER_ROLES: 'GetUserRoles',
@@ -116,6 +116,7 @@ export const DATA_CONNECT_MUTATIONS = {
   ADD_PARENT_ROLE: 'AddParentRole',
   SWITCH_ROLE: 'SwitchRole',
   LINK_STUDENT_PARENT: 'LinkStudentParent',
+  LINK_PARENT_USER: 'LinkParentUser',
   CREATE_PARENT: 'CreateParent',
   CREATE_PARENT_WITHOUT_USER: 'CreateParentWithoutUser',
   CREATE_STUDENT: 'CreateStudent',

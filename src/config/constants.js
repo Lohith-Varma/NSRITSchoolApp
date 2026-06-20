@@ -51,6 +51,7 @@ export const STORAGE_KEYS = {
   AUTH_USER: 'auth.user',
   MAIN_ADMIN_BRANCH_CONTEXT: 'mainAdmin.branchContext',
   OTP_VERIFICATION_ID: 'auth.otpVerificationId',
+  ACTIVE_CHILD_ID: 'parent.activeChildId',
 };
 
 export const ATTENDANCE_STATUS = {

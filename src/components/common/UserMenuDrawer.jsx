@@ -14,8 +14,9 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useDispatch, useSelector} from 'react-redux';
-import {logoutUser, switchUser} from '../../store/slices/authSlice';
+import {logoutUser, switchUser, switchActiveRole} from '../../store/slices/authSlice';
 import {ROLE_LABELS} from '../../config/constants';
+import Toast from 'react-native-toast-message';
 import {colors, radius, shadows, spacing} from '../../theme';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -308,6 +309,76 @@ const UserMenuDrawer = ({
                   disabled={!settingsRoute}
                   badge={!settingsRoute ? 'SOON' : undefined}
                 />
+
+                {/* Section: Roles Switcher */}
+                {user?.roles && user.roles.length > 1 ? (
+                  <>
+                    <View style={styles.sectionGap} />
+                    <Text style={styles.sectionLabel}>SWITCH ACTIVE ROLE</Text>
+                    {user.roles.map(r => {
+                      const rKey = String(r || '').toUpperCase();
+                      const isCurrent = rKey === String(role || '').toUpperCase();
+                      const rConfig = ROLE_CONFIG[rKey] || {color: colors.primary, icon: 'account-outline'};
+                      const rLabel = ROLE_LABELS[rKey] || r;
+                      return (
+                        <React.Fragment key={r}>
+                          <Pressable
+                            onPress={async () => {
+                              if (isCurrent) return;
+                              try {
+                                onClose();
+                                Toast.show({
+                                  type: 'info',
+                                  text1: 'Switching role...',
+                                  text2: `Switching to ${rLabel}`,
+                                  position: 'bottom',
+                                });
+                                await dispatch(switchActiveRole(r)).unwrap();
+                                Toast.show({
+                                  type: 'success',
+                                  text1: 'Role switched successfully',
+                                  text2: `Active role: ${rLabel}`,
+                                  position: 'bottom',
+                                });
+                              } catch (err) {
+                                Toast.show({
+                                  type: 'error',
+                                  text1: 'Role Switch Failed',
+                                  text2: err.message || 'Could not switch role',
+                                  position: 'bottom',
+                                });
+                              }
+                            }}
+                            style={({pressed}) => [
+                              styles.roleItem,
+                              isCurrent && styles.activeRoleItem,
+                              pressed && {opacity: 0.8},
+                            ]}>
+                            <MaterialCommunityIcons
+                              name={rConfig.icon}
+                              size={18}
+                              color={isCurrent ? colors.primary : colors.textSoft}
+                            />
+                            <View style={styles.roleTextWrap}>
+                              <Text style={[styles.roleItemLabel, isCurrent && styles.activeRoleItemLabel]}>
+                                {rLabel}
+                              </Text>
+                              {isCurrent && <Text style={styles.currentIndicator}>Active</Text>}
+                            </View>
+                            {isCurrent && (
+                              <MaterialCommunityIcons
+                                name="check-circle"
+                                size={18}
+                                color={colors.primary}
+                              />
+                            )}
+                          </Pressable>
+                          <View style={styles.rowDivider} />
+                        </React.Fragment>
+                      );
+                    })}
+                  </>
+                ) : null}
 
                 {/* Section 2: Session */}
                 <View style={styles.sectionGap} />
@@ -647,6 +718,41 @@ const styles = StyleSheet.create({
   },
   footerDot: {borderRadius: radius.pill, height: 5, width: 5},
   footerText: {color: colors.textSoft, fontSize: 10, fontWeight: '600'},
+  roleItem: {
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 12,
+  },
+  activeRoleItem: {
+    backgroundColor: `${colors.primary}06`,
+  },
+  roleTextWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  roleItemLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textSoft,
+  },
+  activeRoleItemLabel: {
+    color: colors.primary,
+  },
+  currentIndicator: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.sm,
+    color: colors.primary,
+    fontSize: 9,
+    fontWeight: '800',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    textTransform: 'uppercase',
+  },
 });
 
 export default UserMenuDrawer;

@@ -125,31 +125,81 @@ export const parentService = {
       branchId: payload.branchId,
       phoneNumber: payload.phoneNumber,
     });
-    if (existingParent?.userId) {
-      if (existingParent.userId) {
-        await this.addParentRole({
-          userId: existingParent.userId,
-          branchId: payload.branchId,
-        });
-      }
-      console.log('[StudentCreate] Existing parent linked:', {
-        parentId: existingParent.id,
-        phoneNumber: payload.phoneNumber,
-      });
-      return existingParent;
-    }
-    if (existingParent && !existingParent.userId) {
-      console.log('[StudentCreate] Existing parent profile has no user link; creating a user-backed parent:', {
-        parentId: existingParent.id,
-        phoneNumber: payload.phoneNumber,
-      });
-    }
 
     const existingUserResponse = await dataConnectClient.query(DATA_CONNECT_QUERIES.GET_USER_BY_PHONE, {
       phoneNumber: payload.phoneNumber,
     });
     const existingUser = existingUserResponse.users?.[0];
 
+    // If parent profile already exists:
+    if (existingParent) {
+      // 1. If it already has a linked user:
+      if (existingParent.userId) {
+        await this.addParentRole({
+          userId: existingParent.userId,
+          branchId: payload.branchId,
+        });
+        console.log('[StudentCreate] Existing parent linked:', {
+          parentId: existingParent.id,
+          phoneNumber: payload.phoneNumber,
+        });
+        return existingParent;
+      }
+
+      // 2. If it exists but has no user link:
+      if (existingUser) {
+        // Link parent profile to existing user and assign role
+        await this.addParentRole({
+          userId: existingUser.id,
+          branchId: payload.branchId,
+        });
+        await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.LINK_PARENT_USER, {
+          parentId: existingParent.id,
+          userId: existingUser.id,
+        });
+        console.log('[StudentCreate] Linked existing parent to user:', {
+          parentId: existingParent.id,
+          userId: existingUser.id,
+        });
+        return {
+          ...existingParent,
+          userId: existingUser.id,
+        };
+      }
+
+      // 3. If parent exists, has no user link, and no user exists by phone:
+      const newFirebaseUID = payload.firebaseUID || buildPendingFirebaseUID({
+        branchId: payload.branchId,
+        phoneNumber: payload.phoneNumber,
+      });
+      const userResp = await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.CREATE_USER, {
+        firebaseUID: newFirebaseUID,
+        fullName: payload.fullName,
+        countryCode: payload.countryCode || '+91',
+        phoneNumber: payload.phoneNumber,
+        role: 'PARENT',
+        branchId: payload.branchId,
+      });
+      const newUserId = userResp.user_insert?.id || userResp.user_insert;
+      await this.addParentRole({
+        userId: newUserId,
+        branchId: payload.branchId,
+      });
+      await dataConnectClient.mutate(DATA_CONNECT_MUTATIONS.LINK_PARENT_USER, {
+        parentId: existingParent.id,
+        userId: newUserId,
+      });
+      console.log('[StudentCreate] Created user for existing parent:', {
+        parentId: existingParent.id,
+        userId: newUserId,
+      });
+      return {
+        ...existingParent,
+        userId: newUserId,
+      };
+    }
+
+    // If parent profile does not exist:
     if (existingUser && !hasParentRole(existingUser)) {
       await this.addParentRole({
         userId: existingUser.id,
@@ -183,15 +233,16 @@ export const parentService = {
         });
 
     const parentId = response.parent_insert?.id || response.parent_insert;
+    const finalUserId = response.user_insert?.id || existingUser?.id || payload.userId || null;
     console.log('[StudentCreate] Parent created:', {
       parentId,
-      userId: response.user_insert?.id || existingUser?.id || null,
+      userId: finalUserId,
       phoneNumber: payload.phoneNumber,
     });
 
     return {
       id: parentId,
-      userId: response.user_insert?.id || existingUser?.id || payload.userId || null,
+      userId: finalUserId,
       ...mutationPayload,
       isActive: true,
     };

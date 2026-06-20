@@ -21,7 +21,6 @@ export const validateStudentPayload = payload => {
   const parentPhones = [
     payload.fatherMobile,
     payload.fatherPhoneNumber,
-    payload.parentPhoneNumber,
     payload.motherMobile,
     payload.motherPhoneNumber,
     payload.guardianMobile,

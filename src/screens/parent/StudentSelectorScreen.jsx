@@ -8,6 +8,8 @@ import {useQuery} from '@tanstack/react-query';
 import {EmptyState, SkeletonLoader} from '../../components';
 import parentService from '../../services/parents/parentService';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
+import {storage} from '../../services/storage/mmkvStorage';
+import {STORAGE_KEYS} from '../../config/constants';
 
 const getInitials = name =>
   name
@@ -74,7 +76,10 @@ const StudentSelectorScreen = ({navigation}) => {
           <ChildCard
             child={item}
             index={index}
-            onPress={() => navigation.navigate('Attendance', {studentId: item.id})}
+            onPress={() => {
+              storage.set(STORAGE_KEYS.ACTIVE_CHILD_ID, item.id);
+              navigation.navigate('Home');
+            }}
           />
         )}
         ListEmptyComponent={

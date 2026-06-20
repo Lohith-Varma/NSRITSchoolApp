@@ -237,6 +237,20 @@ exports.switchRole = function switchRole(dcOrVars, vars) {
 }
 ;
 
+const linkParentUserRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'LinkParentUser', inputVars);
+}
+linkParentUserRef.operationName = 'LinkParentUser';
+exports.linkParentUserRef = linkParentUserRef;
+
+exports.linkParentUser = function linkParentUser(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(linkParentUserRef(dcInstance, inputVars));
+}
+;
+
 const linkStudentParentRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();

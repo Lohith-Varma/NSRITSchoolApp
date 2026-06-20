@@ -1,4 +1,4 @@
-﻿mutation CreateBranch(
+mutation CreateBranch(
   $name: String!
   $branchCode: String!
   $address: String
@@ -442,6 +442,13 @@ mutation SwitchRole($userId: UUID!, $oldRole: String!, $newRole: String!) @auth(
       role
     }
   }
+  user_update(
+    id: $userId
+    data: {
+      role: $newRole
+      updatedAt_expr: "request.time"
+    }
+  )
   auditLog_insert(
     data: {
       user: {id: $userId}
@@ -458,6 +465,17 @@ mutation SwitchRole($userId: UUID!, $oldRole: String!, $newRole: String!) @auth(
     }
   )
 }
+
+mutation LinkParentUser($parentId: UUID!, $userId: UUID!) @auth(level: USER) {
+  parent_update(
+    id: $parentId
+    data: {
+      user: {id: $userId}
+      updatedAt_expr: "request.time"
+    }
+  )
+}
+
 
 mutation LinkStudentParent(
   $studentId: UUID!

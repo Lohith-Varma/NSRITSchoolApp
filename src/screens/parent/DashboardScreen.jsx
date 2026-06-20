@@ -16,6 +16,8 @@ import parentService from '../../services/parents/parentService';
 import {formatCurrency} from '../../utils/formatters/currency';
 import {colors, radius, shadows, spacing, typography} from '../../theme';
 import UserMenuDrawer from '../../components/common/UserMenuDrawer';
+import {storage} from '../../services/storage/mmkvStorage';
+import {STORAGE_KEYS} from '../../config/constants';
 
 // Quick action pill for the action strip
 const QuickAction = ({icon, label, onPress, color = colors.primary, delay = 0}) => (
@@ -46,6 +48,19 @@ const DashboardScreen = ({navigation}) => {
   const user = useSelector(state => state.auth.user);
   const [menuOpen, setMenuOpen] = useState(false);
   const parentId = user?.parentId;
+  const [selectedChildId, setSelectedChildId] = useState(() => {
+    return storage.getString(STORAGE_KEYS.ACTIVE_CHILD_ID) || null;
+  });
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const persistedId = storage.getString(STORAGE_KEYS.ACTIVE_CHILD_ID);
+      if (persistedId) {
+        setSelectedChildId(persistedId);
+      }
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const {data, error, isLoading} = useQuery({
     queryKey: ['parentDashboard', parentId],
@@ -54,9 +69,14 @@ const DashboardScreen = ({navigation}) => {
   });
 
   const children = data?.children || [];
-  const selectedChild = data?.selectedChild;
+  const selectedChild = children.find(c => c.id === selectedChildId) || children[0] || null;
   const attendancePct = selectedChild?.attendanceSummary?.percentage || 0;
   const totalDue = data?.totalDue || 0;
+
+  const handleSelectChild = childId => {
+    setSelectedChildId(childId);
+    storage.set(STORAGE_KEYS.ACTIVE_CHILD_ID, childId);
+  };
 
   const getGreeting = () => {
     const h = new Date().getHours();
@@ -97,6 +117,45 @@ const DashboardScreen = ({navigation}) => {
           {new Date().toLocaleDateString('en-IN', {weekday: 'long', day: 'numeric', month: 'long'})}
         </Text>
       </Animated.View>
+
+      {/* ── Children Selector (Horizontal strip) ── */}
+      {children.length > 1 ? (
+        <Animated.View
+          entering={FadeInDown.delay(40).duration(280).springify()}
+          style={styles.childSelectorContainer}>
+          <Text style={styles.childSelectorLabel}>Linked Children</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.childSelectorScroll}>
+            {children.map(child => {
+              const isSelected = child.id === selectedChild?.id;
+              return (
+                <Pressable
+                  key={child.id}
+                  onPress={() => handleSelectChild(child.id)}
+                  style={[
+                    styles.childPill,
+                    isSelected && styles.childPillActive,
+                  ]}>
+                  <MaterialCommunityIcons
+                    name="account-school-outline"
+                    size={14}
+                    color={isSelected ? colors.white : colors.textSoft}
+                  />
+                  <Text
+                    style={[
+                      styles.childPillText,
+                      isSelected && styles.childPillTextActive,
+                    ]}>
+                    {child.fullName}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Animated.View>
+      ) : null}
 
       {/* ── Hero child card with attendance ring ── */}
       {selectedChild ? (
@@ -621,6 +680,43 @@ const styles = StyleSheet.create({
   feeClearText: {
     ...typography.captionBold,
     color: colors.success,
+  },
+  childSelectorContainer: {
+    marginBottom: spacing.md,
+  },
+  childSelectorLabel: {
+    ...typography.overline,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+    textTransform: 'uppercase',
+  },
+  childSelectorScroll: {
+    gap: spacing.sm,
+    paddingVertical: 4,
+  },
+  childPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    ...shadows.soft,
+  },
+  childPillActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  childPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  childPillTextActive: {
+    color: colors.white,
   },
 });
 
