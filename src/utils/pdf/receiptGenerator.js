@@ -357,7 +357,7 @@ export const generateAndShareReceipt = async (payment) => {
               </div>
               
               <div class="header-center">
-                <div class="school-name">NADIMPALLI SATYANARAYANA RAJU</div>
+                <div class="school-name">NSRIT  </div>
                 <div class="school-sub">ENGLISH MEDIUM SCHOOL</div>
                 <div class="motto-bar">UNITY • LEARNING • GROWTH</div>
                 <div class="motto-sanskrit">ज्ञानं परमं बलम्</div>
